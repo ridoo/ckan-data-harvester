@@ -1,0 +1,22 @@
+﻿Stations_id,von_datum,bis_datum,Stationshoehe,geoBreite,geoLaenge,Stationsname,Bundesland
+867,19510101,20151205,345,50.3067,10.9680,Lautertal-Oberlauter,Bayern
+880,19550101,20151205,69,51.7760,14.3168,Cottbus,Brandenburg
+888,19910101,19961231,269,50.8149,12.3821,Crimmitschau,Sachsen
+891,19510101,20151205,5,53.8713,8.7058,Cuxhaven,Niedersachsen
+940,19510101,19701231,518,48.9167,11.4500,Denkendorf,Bayern
+953,19510101,20151205,481,49.7619,7.0541,Deuselbach,Rheinland-Pfalz
+954,20000501,20151205,0,54.1667,7.4500,UFS Deutsche Bucht,Hamburg
+963,19940101,20151205,39,52.5881,8.3424,Diepholz,Niedersachsen
+979,20040901,20151205,314,50.7364,8.2672,Dillenburg,Hessen
+983,20061201,20151205,419,48.5562,10.5599,Dillingen/Donau-Fristingen,Bayern
+1000,19580101,19970831,3,54.1442,11.8454,Bad Heiligendamm Doberan,Mecklenburg-Vorpommern
+1001,19540101,20151205,97,51.6451,13.5747,Doberlug-Kirchhain,Brandenburg
+1032,19510101,19601231,120,51.5120,7.5345,Dortmund,Nordrhein-Westfalen
+1048,19740801,20151205,227,51.1280,13.7543,Dresden-Klotzsche,Sachsen
+1050,19990701,20151205,114,51.0221,13.8470,Dresden-Hosterwitz,Sachsen
+1078,19710101,20151205,37,51.2960,6.7686,Düsseldorf,Nordrhein-Westfalen
+1079,19590101,19960731,37,51.1998,6.7574,Düsseldorf-Südfriedhof,Nordrhein-Westfalen
+1172,19510101,19890430,123,51.8189,9.8871,Einbeck,Niedersachsen
+1173,19900901,20000331,105,51.7979,9.9171,Einbeck-Salzderhelden,Niedersachsen
+1197,19510101,20151205,460,48.9895,10.1312,Ellwangen-Rindelbach,Baden-Württemberg
+1200,20070207,20151205,3,54.0691,9.0106,Elpersbüttel,Schleswig-Holstein

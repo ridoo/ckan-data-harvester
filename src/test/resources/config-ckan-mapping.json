@@ -1,0 +1,25 @@
+{
+	"resultTime": 
+	[
+		"datetime"
+	],
+
+	"longitude": 
+	[
+		"longitude",
+		"lon"
+	],
+
+	"latitude": 
+	[
+		"latitude",
+		"lat"
+	],
+	"stationId": [
+		"station_id"
+	],
+	"stationName": [
+		"station_name",
+		"sensor_name"
+	]
+}
