@@ -28,6 +28,8 @@
 package org.n52.series.ckan.beans;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.vividsolutions.jts.geom.Geometry;
+
 import java.util.Date;
 import java.util.Objects;
 import java.util.Set;
@@ -98,6 +100,14 @@ public class ResourceField {
     public String getFieldType() {
         return parseMissingToEmptyString(node, CkanConstants.MemberProperty.FIELD_TYPE, CkanConstants.MemberProperty.FIELDTYPE);
     }
+    
+    public String getFieldRole() {
+        return parseMissingToEmptyString(node, CkanConstants.MemberProperty.FIELD_ROLE);
+    }
+    
+    public boolean hasFieldRole() {
+        return !getFieldRole().isEmpty();
+    }
 
     public boolean isField(String knownFieldId) {
         return getFieldId().equalsIgnoreCase(knownFieldId);
@@ -161,8 +171,15 @@ public class ResourceField {
             return fieldType.equalsIgnoreCase("String")
                     || fieldType.equalsIgnoreCase("text");
         }
+        if (clazz == Geometry.class) {
+            return fieldType.equalsIgnoreCase("Geometry")
+                    || fieldType.equalsIgnoreCase("WKT_Geometry")
+                    || fieldType.equalsIgnoreCase("GeoJson_Geometry");
+        }
         return false;
     }
+    
+    
 
     @Override
     public int hashCode() {

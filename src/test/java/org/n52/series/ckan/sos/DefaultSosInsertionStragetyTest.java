@@ -133,6 +133,17 @@ public class DefaultSosInsertionStragetyTest {
         Assert.assertTrue("expected: " + instant2.getValue().toString()
                 + ", actual: " + dateTime2, instant2.getValue().equals(dateTime2));
     }
+    
+    @Test
+    public void dateInMillis() {
+        ResourceField field = new ResourceFieldTypeSeam("my-test-id", "Date");
+        DefaultSosInsertionStrategy strategy = new DefaultSosInsertionStrategySeam();
+        DateTime dt = new DateTime();
+        TimeInstant instant = new TimeInstant(dt);
+        TimeInstant instant2 = (TimeInstant) strategy.parseTime(field, Long.toString(dt.getMillis()));
+        Assert.assertTrue("expected: " + instant2.getValue().getMillis()
+                + ", actual: " + instant.getValue().getMillis(), instant2.equals(instant));
+    }
 
     public void parseGeoJson() {
         DefaultSosInsertionStrategy strategy = new DefaultSosInsertionStrategySeam();
@@ -224,6 +235,33 @@ public class DefaultSosInsertionStragetyTest {
                 return true;
             }
             return super.isField(name);
+        }
+
+    }
+    
+    class ResourceFieldTypeSeam extends ResourceField {
+
+        private String fieldType;
+
+        public ResourceFieldTypeSeam(String id) {
+            super(id);
+        }
+        
+        public ResourceFieldTypeSeam(String id, String fieldType) {
+            super(id);
+            this.fieldType = fieldType;
+        }
+
+        public ResourceFieldTypeSeam(JsonNode node, int index) {
+            super(node, index);
+        }
+
+        @Override
+        public String getFieldType() {
+            if (fieldType != null && !fieldType.isEmpty()) {
+                return fieldType;
+            }
+            return super.getFieldType();
         }
 
     }

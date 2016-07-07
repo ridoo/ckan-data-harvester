@@ -75,6 +75,7 @@ public interface CkanConstants {
         @Deprecated
         public static final String FIELDTYPE = "fieldType";
         public static final String NO_DATA = "no_data";
+        public static final String FIELD_ROLE = "field_role";
     }
 
     public interface KnownFieldId {
@@ -88,6 +89,19 @@ public interface CkanConstants {
         public static final String LAST_DATE = "bis_datum";
 
         public static final String RESULT_TIME = "MESS_DATUM";
+        public static final String LOCATION = "location";
+        public static final String VALID_TIME_START = "valid_time_start";
+        public static final String VALID_TIME_END = "valid_time_end";
+    }
+    
+    public interface KnownFieldRole {
+        public static final String LATITUDE = "latitude";
+        public static final String LONGITUDE = "longitude";
+        public static final String HEIGHT = "height";
+        public static final String TIMESTAMP = "timestamp";
+        public static final String VALID_TIME_START = "valid_time_start";
+        public static final String VALID_TIME_END = "valid_time_end";
+        // ???
         public static final String LOCATION = "location";
     }
 

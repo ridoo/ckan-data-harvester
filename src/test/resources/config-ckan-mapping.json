@@ -21,5 +21,11 @@
 	"stationName": [
 		"station_name",
 		"sensor_name"
+	],
+	"validTimeStart": [
+		"validTimeStart"
+	],
+	"validTimeEnd": [
+		"validTimeEnd"
 	]
 }

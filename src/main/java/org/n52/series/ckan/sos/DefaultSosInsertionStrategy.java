@@ -28,6 +28,7 @@
 package org.n52.series.ckan.sos;
 
 import java.io.IOException;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -67,6 +68,7 @@ import org.n52.sos.ext.deleteobservation.DeleteObservationRequest;
 import org.n52.sos.ogc.OGCConstants;
 import org.n52.sos.ogc.gml.AbstractFeature;
 import org.n52.sos.ogc.gml.time.Time;
+import org.n52.sos.ogc.gml.time.Time.TimeIndeterminateValue;
 import org.n52.sos.ogc.gml.time.TimeInstant;
 import org.n52.sos.ogc.gml.time.TimePeriod;
 import org.n52.sos.ogc.om.AbstractPhenomenon;
@@ -581,6 +583,8 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
             OmObservationConstellation constellation, Phenomenon phenomenon) {
         SingleObservationValue<?> value = null;
         Time time = null;
+        TimeInstant validStart = null;
+        TimeInstant validEnd = null;
 
         OmObservation omObservation = new OmObservation();
         omObservation.setObservationConstellation(constellation);
@@ -604,7 +608,7 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
                         omObservation.setIdentifier(observationEntry.getKey().getKeyId() + "_" + phenomenonId);
                     }
                 } else if (field.isField(CkanConstants.KnownFieldId.RESULT_TIME) || field.isField(mappingConfig.getResultTime())) {
-                    time = parsePhenomenonTime(field, cells.getValue());
+                    time = parseTime(field, cells.getValue());
                 } else if (field.isField(CkanConstants.KnownFieldId.LOCATION) || field.isField(mappingConfig.getLocation())) {
                     if (field.getFieldType().equalsIgnoreCase("JsonObject")) {
                         geom = parseGeoJsonLocation(cells.getValue());
@@ -617,7 +621,12 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
                     pointBuilder.setLongitude(cells.getValue());
                 } else  if (field.isField(CkanConstants.KnownFieldId.ALTITUDE) || field.isField(mappingConfig.getAltitude())) {
                     pointBuilder.setAltitude(cells.getValue());
-                }
+                } else if (field.isField(CkanConstants.KnownFieldId.VALID_TIME_START) || field.isField(mappingConfig.getValidTimeStart())) {
+                    validStart = parseTime(field, cells.getValue());
+                } else if (field.isField(CkanConstants.KnownFieldId.VALID_TIME_END) || field.isField(mappingConfig.getValidTimeEnd())) {
+                    validEnd = parseTime(field, cells.getValue());
+                } 
+                
             }
         }
         // TODO feature geometry vs samplingGeometry, how to identify mobile sensor???
@@ -632,6 +641,18 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
                 setFeatureGeometry((SamplingFeature)constellation.getFeatureOfInterest(), geom);
             }
         }
+        if (validStart != null || validEnd != null) {
+            TimePeriod validTime = null;
+            if (validStart != null && validEnd == null) {
+                validTime = new TimePeriod(validStart, new TimeInstant(TimeIndeterminateValue.unknown));
+            } else if (validStart == null && validEnd != null) {
+                validTime = new TimePeriod(new TimeInstant(TimeIndeterminateValue.unknown), validEnd);
+            } else {
+                validTime = new TimePeriod(validStart, validEnd);
+            }
+            omObservation.setValidTime(validTime);
+        }
+        
         // TODO remove value == null if this works out for NO_DATA
         if (value == null || time == null) {
             LOGGER.debug("ignore observation having no value/phenomenonTime.");
@@ -652,9 +673,18 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
         return null;
     }
 
-    protected Time parsePhenomenonTime(ResourceField field, String dateValue) {
-        String dateFormat = parseDateFormat(field);
-        return parseDateValue(dateValue, dateFormat);
+    @Deprecated
+    protected TimeInstant parsePhenomenonTime(ResourceField field, String dateValue) {
+        return parseTime(field, dateValue);
+    }
+
+    protected TimeInstant parseTime(ResourceField field, String dateValue) {
+        if (field.isOfType(Date.class)) {
+            return new TimeInstant(new Date(Long.parseLong(dateValue)));
+        } else {
+            String dateFormat = parseDateFormat(field);
+            return (TimeInstant)parseDateValue(dateValue, dateFormat);
+        }
     }
 
     protected String parseDateFormat(ResourceField field) {
@@ -668,7 +698,7 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
         return null;
     }
 
-    protected Time parseDateValue(String dateValue, String dateFormat) {
+    protected TimeInstant parseDateValue(String dateValue, String dateFormat) {
         try {
             TimeInstant timeInstant = new TimeInstant();
             if (!hasOffsetInfo(dateValue)) {

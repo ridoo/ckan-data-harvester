@@ -39,6 +39,8 @@ public class MappingConfig {
     private Set<String> stationId;
     private Set<String> stationName;
     private Set<String> location;
+    private Set<String> validTimeStart;
+    private Set<String> validTimeEnd;
 
     public Set<String> getResultTime() {
         return resultTime;
@@ -134,6 +136,30 @@ public class MappingConfig {
 
     public boolean isSetLocation() {
         return getLocation() != null && !getLocation().isEmpty();
+    }
+
+    public Set<String> getValidTimeStart() {
+        return validTimeStart;
+    }
+
+    public void setValidTimeStart(Set<String> validTimeStart) {
+        this.validTimeStart = validTimeStart;
+    }
+    
+    public boolean isSetValidTimeStart() {
+        return getValidTimeStart() != null && !getValidTimeStart().isEmpty();
+    }
+
+    public Set<String> getValidTimeEnd() {
+        return validTimeEnd;
+    }
+
+    public void setValidTimeEnd(Set<String> validTimeEnd) {
+        this.validTimeEnd = validTimeEnd;
+    }
+    
+    public boolean isSetValidTimeEnd() {
+        return getValidTimeEnd() != null && !getValidTimeEnd().isEmpty();
     }
 
 }
