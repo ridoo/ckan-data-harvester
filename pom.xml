@@ -15,11 +15,16 @@
     <url>http://52north.org/communities/sensorweb/</url>
 
     <properties>
-        <slf4j.version>1.7.12</slf4j.version>
+    
+        <!-- disabled during development -->
+        <enforcer.skip>true</enforcer.skip>
+    
+        <slf4j.version>1.7.2</slf4j.version>
         <logback.version>1.1.3</logback.version>
         <hamcrest.version>1.3</hamcrest.version>
 
         <jackan.version>0.4.2</jackan.version>
+        <jackson.version>2.3.3</jackson.version>
         <sos.version>4.4.0-SNAPSHOT</sos.version>
         <series.api.version>2.0.0-SNAPSHOT</series.api.version>
 
@@ -42,6 +47,11 @@
             <version>${series.api.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
         <dependency>
             <groupId>eu.trentorise.opendata</groupId>
             <artifactId>jackan</artifactId>
@@ -69,6 +79,11 @@
             <version>4.3.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.n52.sensorweb.sos</groupId>
+            <artifactId>api</artifactId>
+            <version>${sos.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.n52.sensorweb.sos</groupId>
             <artifactId>hibernate-datasource-postgres</artifactId>
