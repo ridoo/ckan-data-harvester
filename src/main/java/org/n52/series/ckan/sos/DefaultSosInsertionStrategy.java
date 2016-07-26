@@ -1,14 +1,14 @@
-/**
- * Copyright (C) 2013-2016 52°North Initiative for Geospatial Open Source
+/*
+ * Copyright (C) 2015-2016 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License version 2 as publishedby the Free
- * Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
  *
- * If the program is linked with libraries which are licensed under one of the
- * following licenses, the combination of the program with the linked library is
- * not considered a "derivative work" of the program:
+ * If the program is linked with libraries which are licensed under one of
+ * the following licenses, the combination of the program with the linked
+ * library is not considered a "derivative work" of the program:
  *
  *     - Apache License, version 2.0
  *     - Apache Software License, version 1.0
@@ -16,19 +16,19 @@
  *     - Mozilla Public License, versions 1.0, 1.1 and 2.0
  *     - Common Development and Distribution License (CDDL), version 1.0
  *
- * Therefore the distribution of the program linked with libraries licensed under
- * the aforementioned licenses, is permitted by the copyright holders if the
- * distribution is compliant with both the GNU General Public License version 2
- * and the aforementioned licenses.
+ * Therefore the distribution of the program linked with libraries licensed
+ * under the aforementioned licenses, is permitted by the copyright holders
+ * if the distribution is compliant with both the GNU General Public License
+ * version 2 and the aforementioned licenses.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
  */
 package org.n52.series.ckan.sos;
 
 import java.io.IOException;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -60,9 +60,9 @@ import org.n52.series.ckan.util.GeometryBuilder;
 import org.n52.sos.ds.hibernate.InsertObservationDAO;
 import org.n52.sos.ds.hibernate.InsertSensorDAO;
 import org.n52.sos.encode.SensorMLEncoderv101;
-import org.n52.sos.exception.ows.concrete.DateTimeException;
 import org.n52.sos.exception.ows.concrete.DateTimeParseException;
 import org.n52.sos.exception.ows.concrete.InvalidSridException;
+import org.n52.sos.ext.deleteobservation.DeleteObservationConstants;
 import org.n52.sos.ext.deleteobservation.DeleteObservationDAO;
 import org.n52.sos.ext.deleteobservation.DeleteObservationRequest;
 import org.n52.sos.ogc.OGCConstants;
@@ -214,8 +214,9 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
                         LOGGER.debug("start deleting existing observation data before updating data.");
                         for (String observationIdentifier : reference.getObservationIdentifiers()) {
                             try {
-                                DeleteObservationRequest doRequest = new DeleteObservationRequest();
-                                doRequest.setObservationIdentifier(observationIdentifier);
+                                String namespace = DeleteObservationConstants.NS_SOSDO_1_0;
+                                DeleteObservationRequest doRequest = new DeleteObservationRequest(namespace);
+                                doRequest.addObservationIdentifier(observationIdentifier);
                                 deleteObservationDao.deleteObservation(doRequest);
                                 count++;
                             } catch (OwsExceptionReport e) {
@@ -625,8 +626,8 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
                     validStart = parseTime(field, cells.getValue());
                 } else if (field.isField(CkanConstants.KnownFieldId.VALID_TIME_END) || field.isField(mappingConfig.getValidTimeEnd())) {
                     validEnd = parseTime(field, cells.getValue());
-                } 
-                
+                }
+
             }
         }
         // TODO feature geometry vs samplingGeometry, how to identify mobile sensor???
@@ -652,7 +653,7 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
             }
             omObservation.setValidTime(validTime);
         }
-        
+
         // TODO remove value == null if this works out for NO_DATA
         if (value == null || time == null) {
             LOGGER.debug("ignore observation having no value/phenomenonTime.");
