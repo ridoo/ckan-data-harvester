@@ -12,4 +12,10 @@
         <version>2.7.0</version>
         <license>The Apache Software License, Version 2.0</license>
     </artifact>
+<!--     <artifact> -->
+<!--         <groupId>org.n52.sensorweb.sos</groupId> -->
+<!--         <artifactId>do-hibernate</artifactId> -->
+<!--         <version>4.4.0-SNAPSHOT</version> -->
+<!--         <license>GPLv2</license> -->
+<!--     </artifact> -->
 </license-lookup>
