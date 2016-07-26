@@ -8,6 +8,7 @@ This project includes:
   52°North SOS - Abstract SensorML Coding Module under GPLv2
   52°North SOS - AQD 1.0 API Operator under GPLv2
   52°North SOS - Cache under GPLv2
+  52°North SOS - Extension Delete Observation - Hibernate DAO under GPLv2
   52°North SOS - Extension Delete Observation - Operation under GPLv2
   52°North SOS - Hibernate Common under GPLv2
   52°North SOS - Hibernate Common Datasource under GPLv2
@@ -121,7 +122,6 @@ This project includes:
   OGC WaterML DR schema (spec. v2.0) under The Apache Software License, Version 2.0
   OGC WaterML schema (spec. v2.0) under The Apache Software License, Version 2.0
   Open GIS Interfaces under GNU Lesser General Public License (LGPL) version 2.1
-  org.n52.sensorweb.sos:do-hibernate under GPLv2
   Postgis JDBC Driver under GNU Lesser General Public License
   PostgreSQL JDBC Driver - JDBC 4.2 under The PostgreSQL License
   Quartz Enterprise Job Scheduler under Apache 2.0

@@ -15,7 +15,6 @@
     <url>http://52north.org/communities/sensorweb/</url>
 
     <properties>
-    
         <!-- disabled during development -->
         <enforcer.skip>true</enforcer.skip>
     
