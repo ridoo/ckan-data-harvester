@@ -31,15 +31,17 @@ package org.n52.series.ckan.sos;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.n52.series.ckan.beans.CsvObservationsCollection;
 import org.n52.series.ckan.cache.InMemoryCkanDataCache;
-import org.n52.series.ckan.da.CkanMappingConfigLoader;
+import org.n52.series.ckan.da.CkanMappingConfig;
 import org.n52.series.ckan.util.FileBasedCkanHarvestingService;
 import org.n52.sos.ds.hibernate.GetObservationDAO;
+import org.n52.sos.ds.hibernate.H2Configuration;
 import org.n52.sos.ds.hibernate.HibernateTestCase;
 import org.n52.sos.ogc.om.OmObservation;
 import org.n52.sos.ogc.ows.OwsExceptionReport;
@@ -73,9 +75,15 @@ public class FileBasedDefaultSosInsertionStrategyTest extends HibernateTestCase 
         ckanDataCache = service.getCkanDataCache();
     }
 
+     @AfterClass
+     public static void tearDown() {
+         H2Configuration.truncate();
+     }
+
     @Test
     public void parseSensorsFromObservationCollection() throws OwsExceptionReport {
-        insertionStrategy = new DefaultSosInsertionStrategy().setMappingConfiguration(new CkanMappingConfigLoader().readConfig("/config-ckan-mapping.json"));
+        CkanMappingConfig config = CkanMappingConfig.Loader.loadConfig();
+        insertionStrategy = new DefaultSosInsertionStrategy().setMappingConfiguration(config);
         for (InMemoryCkanDataCache.Entry<CkanDataset, CsvObservationsCollection> data : ckanDataCache.getCollections()) {
             insertionStrategy.insertOrUpdate(data.getDataset(), data.getData());
         }

@@ -29,10 +29,10 @@
 package org.n52.series.ckan.sos;
 
 import org.n52.series.ckan.cache.CkanDataSink;
-import org.n52.series.ckan.da.MappingConfig;
+import org.n52.series.ckan.da.CkanMappingConfig;
 
 public interface SosInsertionStrategy extends CkanDataSink {
 
-    CkanDataSink setMappingConfiguration(MappingConfig mappingConfig);
+    CkanDataSink setMappingConfiguration(CkanMappingConfig mappingConfig);
 
 }

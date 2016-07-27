@@ -29,13 +29,15 @@
 package org.n52.series.ckan.da;
 
 import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertThat;
+
 import org.junit.Test;
 
 public class CkanMappingConfigLoaderTest {
 
     @Test
     public void parseConfiguration() {
-        MappingConfig mapConf = new CkanMappingConfigLoader().readConfig("/config-ckan-mapping.json");
+        CkanMappingConfig mapConf = CkanMappingConfig.Loader.loadConfig("config-ckan-mapping.json");
         assertTrue(mapConf.isSetResultTime());
         assertTrue(mapConf.isSetLatitude());
         assertTrue(mapConf.isSetLongitude());
@@ -47,8 +49,14 @@ public class CkanMappingConfigLoaderTest {
     }
 
     @Test
+    public void when_arbitraryConfigFileName_then_readConfig() {
+         CkanMappingConfig config = CkanMappingConfig.Loader.loadConfig("some-ckan-config.json");
+         assertTrue(config.getCrs().contains("9999"));
+    }
+
+    @Test
     public void useDefaultFile() {
-        MappingConfig mapConf = new CkanMappingConfigLoader().readConfig(null);
+        CkanMappingConfig mapConf = CkanMappingConfig.Loader.loadConfig((String)null);
         assertTrue(mapConf.isSetResultTime());
         assertTrue(mapConf.isSetLatitude());
         assertTrue(mapConf.isSetLongitude());

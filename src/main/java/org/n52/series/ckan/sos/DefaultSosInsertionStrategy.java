@@ -52,7 +52,7 @@ import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.beans.ResourceMember;
 import org.n52.series.ckan.beans.SchemaDescriptor;
 import org.n52.series.ckan.da.CkanConstants;
-import org.n52.series.ckan.da.MappingConfig;
+import org.n52.series.ckan.da.CkanMappingConfig;
 import org.n52.series.ckan.table.DataTable;
 import org.n52.series.ckan.table.ResourceKey;
 import org.n52.series.ckan.table.ResourceTable;
@@ -115,7 +115,7 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultSosInsertionStrategy.class);
 
-    private MappingConfig mappingConfig;
+    private CkanMappingConfig mappingConfig;
 
     private final InsertSensorDAO insertSensorDao;
 
@@ -166,7 +166,7 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
     }
 
     @Override
-    public DefaultSosInsertionStrategy setMappingConfiguration(MappingConfig mappingConfig) {
+    public DefaultSosInsertionStrategy setMappingConfiguration(CkanMappingConfig mappingConfig) {
         this.mappingConfig = mappingConfig;
         return this;
     }

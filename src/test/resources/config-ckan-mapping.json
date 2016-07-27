@@ -1,17 +1,15 @@
 {
-	"resultTime": 
-	[
+    "default" : [
+        "default"
+    ],
+	"resultTime": [
 		"datetime"
 	],
-
-	"longitude": 
-	[
+	"longitude": [
 		"longitude",
 		"lon"
 	],
-
-	"latitude": 
-	[
+	"latitude": [
 		"latitude",
 		"lat"
 	],
@@ -23,9 +21,17 @@
 		"sensor_name"
 	],
 	"validTimeStart": [
-		"validTimeStart"
 	],
 	"validTimeEnd": [
-		"validTimeEnd"
-	]
+	],
+    "geometry": [
+        "location",
+        "wkt_geometry",
+        "geojson_geometry",
+        "geojson",
+        "jsonObject"
+    ],
+    "field_type": [
+        "fieldType"
+    ]
 }

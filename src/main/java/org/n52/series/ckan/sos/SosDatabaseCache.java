@@ -28,10 +28,11 @@
  */
 package org.n52.series.ckan.sos;
 
-import eu.trentorise.opendata.jackan.model.CkanDataset;
 import org.n52.series.ckan.beans.CsvObservationsCollection;
 import org.n52.series.ckan.cache.CkanDataSink;
-import org.n52.series.ckan.da.CkanMappingConfigLoader;
+import org.n52.series.ckan.da.CkanMappingConfig;
+
+import eu.trentorise.opendata.jackan.model.CkanDataset;
 
 public class SosDatabaseCache implements CkanDataSink {
 
@@ -46,7 +47,7 @@ public class SosDatabaseCache implements CkanDataSink {
                 .withReferenceCache(ckanSosReferenceCache)
                 .withData(csvObservationsCollection);
 
-        factory.createInsertionStrategy().setMappingConfiguration(new CkanMappingConfigLoader().readConfig(configFile))
+        factory.createInsertionStrategy().setMappingConfiguration(CkanMappingConfig.Loader.loadConfig(configFile))
                 .insertOrUpdate(dataset, csvObservationsCollection);
 
         // TODO decoupled deletion strategy?
