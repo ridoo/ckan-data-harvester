@@ -8,7 +8,8 @@
         <version>2</version>
     </parent>
 
-    <artifactId>ckan-proxy</artifactId>
+    <groupId>org.n52.sensorweb.ckan</groupId>
+    <artifactId>data-harvester</artifactId>
     <packaging>jar</packaging>
     <name>RESTful Sensor Web API - CKAN</name>
     <description>REST SPI Implementation for CKAN data.</description>
