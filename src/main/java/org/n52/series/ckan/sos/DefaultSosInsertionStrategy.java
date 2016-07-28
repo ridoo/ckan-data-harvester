@@ -43,9 +43,6 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.ISODateTimeFormat;
-import org.n52.io.geojson.GeoJSONDecoder;
-import org.n52.io.geojson.GeoJSONException;
-import org.n52.io.geojson.JSONUtils;
 import org.n52.series.ckan.beans.CsvObservationsCollection;
 import org.n52.series.ckan.beans.DataFile;
 import org.n52.series.ckan.beans.ResourceField;
@@ -125,7 +122,6 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
 
     private final CkanSosReferenceCache ckanSosReferencingCache;
 
-    private final GeoJSONDecoder geoJsonDecoder = new GeoJSONDecoder();
 
     DefaultSosInsertionStrategy() {
         this(null);
@@ -317,21 +313,20 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
     }
 
     AbstractFeature createFeatureRelation(String organizationName, Map<ResourceField, String> platform) {
-        final GeometryBuilder pointBuilder = GeometryBuilder.create();
+        final GeometryBuilder geometryBuilder = GeometryBuilder.create();
         final SamplingFeature feature = new SamplingFeature(null);
         for (Map.Entry<ResourceField, String> fieldEntry : platform.entrySet()) {
             ResourceField field = fieldEntry.getKey();
             if (field.isField(CkanConstants.KnownFieldId.CRS) || field.isField(mappingConfig.getCrs())) {
-                pointBuilder.withCrs(fieldEntry.getValue());
+                geometryBuilder.withCrs(fieldEntry.getValue());
             }
             if (field.isField(CkanConstants.KnownFieldId.LATITUDE) || field.isField(mappingConfig.getLatitude())) {
-                pointBuilder.setLatitude(fieldEntry.getValue());
+                geometryBuilder.setLatitude(fieldEntry.getValue());
             }
             if (field.isField(CkanConstants.KnownFieldId.LONGITUDE) || field.isField(mappingConfig.getLongitude())) {
-                pointBuilder.setLongitude(fieldEntry.getValue());
+                geometryBuilder.setLongitude(fieldEntry.getValue());
             }
             if (field.isField(CkanConstants.KnownFieldId.ALTITUDE) || field.isField(mappingConfig.getAltitude())) {
-                pointBuilder.setAltitude(fieldEntry.getValue());
             }
             if (field.isField(CkanConstants.KnownFieldId.STATION_ID) || field.isField(mappingConfig.getStationId())) {
                 String identifier = fieldEntry.getValue();
@@ -346,12 +341,12 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
             }
             if (field.isField(CkanConstants.KnownFieldId.LOCATION) || field.isField(mappingConfig.getLocation())) {
                 if (field.getFieldType().equalsIgnoreCase("JsonObject")) {
-                    setFeatureGeometry(feature, parseGeoJsonLocation(fieldEntry.getValue()));
+                    setFeatureGeometry(feature, geometryBuilder.fromGeoJson(fieldEntry.getValue()));
                 }
             }
         }
         if (pointBuilder.hasCoordinates()) {
-            setFeatureGeometry(feature, pointBuilder.getPoint());
+            setFeatureGeometry(feature, geometryBuilder.getPoint());
         }
         feature.setFeatureType(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_POINT);
         // return new SwesFeatureRelationship("samplingPoint", feature);
@@ -663,20 +658,6 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
             omObservation.setValue(value);
             return omObservation;
         }
-    }
-
-    protected Geometry parseGeoJsonLocation(String value) {
-        try {
-            return geoJsonDecoder.decodeGeometry(JSONUtils.loadString(value.replace("'", "\"")));
-        } catch (GeoJSONException e) {
-            LOGGER.error("Location value is not a JSON object. Value: {}", value);
-        }
-        return null;
-    }
-
-    @Deprecated
-    protected TimeInstant parsePhenomenonTime(ResourceField field, String dateValue) {
-        return parseTime(field, dateValue);
     }
 
     protected TimeInstant parseTime(ResourceField field, String dateValue) {

@@ -28,9 +28,16 @@
  */
 package org.n52.series.ckan.util;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
+
+import java.io.IOException;
+
 import org.n52.io.crs.CRSUtils;
+import org.n52.io.geojson.GeoJSONDecoder;
+import org.n52.io.geojson.GeoJSONException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 import org.slf4j.Logger;
@@ -44,6 +51,10 @@ public class GeometryBuilder {
 
     private final CRSUtils utils = CRSUtils.createEpsgStrictAxisOrder();
 
+    private final GeoJSONDecoder geoJsonDecoder = new GeoJSONDecoder();
+
+    private ObjectMapper om = new ObjectMapper();
+
     private String crs = "EPSG:4326";
 
     private Double longitude;
@@ -54,6 +65,23 @@ public class GeometryBuilder {
 
     public static GeometryBuilder create() {
         return new GeometryBuilder();
+    }
+
+    public GeometryBuilder withObjectMapper(ObjectMapper om) {
+        this.om = om == null
+                ? this.om
+                : om;
+        return this;
+    }
+
+    public Geometry fromGeoJson(String json) {
+        try {
+            JsonNode jsonNode = new ObjectMapper().readTree(json.replace("'", "\""));
+            return geoJsonDecoder.decodeGeometry(jsonNode);
+        } catch (IOException | GeoJSONException e) {
+            LOGGER.error("Location value is not a JSON object. Value: {}", json);
+        }
+        return null;
     }
 
     public GeometryBuilder withCrs(String crs) {
