@@ -28,18 +28,22 @@
  */
 package org.n52.series.ckan.beans;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import eu.trentorise.opendata.jackan.model.CkanDataset;
+import static org.n52.series.ckan.util.JsonUtil.parseMissingToNegativeInt;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import org.n52.series.ckan.da.CkanConstants;
+import org.n52.series.ckan.da.CkanMapping;
 import org.n52.series.ckan.util.JsonUtil;
-import static org.n52.series.ckan.util.JsonUtil.parseMissingToEmptyString;
-import static org.n52.series.ckan.util.JsonUtil.parseMissingToNegativeInt;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import eu.trentorise.opendata.jackan.model.CkanDataset;
 
 public class SchemaDescriptor {
 
@@ -47,20 +51,36 @@ public class SchemaDescriptor {
 
     private final CkanDataset dataset;
 
+    private CkanMapping ckanMapping;
+
     private final List<ResourceMember> members;
 
     public SchemaDescriptor(CkanDataset dataset, JsonNode node) {
         this.node = node;
         this.dataset = dataset;
-        members = parseMemberDescriptions();
+        this.ckanMapping = CkanMapping.loadCkanMapping();
+        this.members = parseMemberDescriptions();
+    }
+
+    public SchemaDescriptor withCkanMapping(CkanMapping propertyIdMapping) {
+        this.ckanMapping = propertyIdMapping;
+        return this;
+    }
+
+    private String getStringValueOf(String field) {
+        return JsonUtil.parseMissingToEmptyString(node, ckanMapping.getMappings(field));
     }
 
     public String getVersion() {
-        return JsonUtil.parseMissingToEmptyString(node, CkanConstants.SchemaDescriptor.VERSION);
+        return getStringValueOf(CkanConstants.SchemaDescriptor.VERSION);
     }
 
     public String getDescription() {
-        return JsonUtil.parseMissingToEmptyString(node, CkanConstants.SchemaDescriptor.DESCRIPTION);
+        return getStringValueOf(CkanConstants.SchemaDescriptor.DESCRIPTION);
+    }
+
+    public String getSchemaDescriptionType() {
+        return getStringValueOf(CkanConstants.SchemaDescriptor.RESOURCE_TYPE);
     }
 
     public JsonNode getNode() {
@@ -73,10 +93,6 @@ public class SchemaDescriptor {
 
     public List<ResourceMember> getMembers() {
         return Collections.unmodifiableList(members);
-    }
-
-    public String getSchemaDescriptionType() {
-        return JsonUtil.parseMissingToEmptyString(node, CkanConstants.SchemaDescriptor.RESOURCE_TYPE);
     }
 
     public boolean hasDescription() {
@@ -97,11 +113,11 @@ public class SchemaDescriptor {
         final Iterator<JsonNode> iter = membersNode.elements();
         while (iter.hasNext()) {
             JsonNode memberNode = iter.next();
-            for (String id : JsonUtil.parseMissingToEmptyArray(memberNode, CkanConstants.MemberProperty.RESOURCE_NAME, CkanConstants.MemberProperty.RESOURCEID)) {
+            for (String id : JsonUtil.parseMissingToEmptyArray(memberNode, ckanMapping.getMappings(CkanConstants.MemberProperty.RESOURCE_NAME))) {
                 ResourceMember member = new ResourceMember();
                 member.setId(id); // TODO missing ids will cause conflicts/inconsistencies
-                member.setResourceType(parseMissingToEmptyString(memberNode, CkanConstants.MemberProperty.RESOURCE_TYPE, CkanConstants.MemberProperty.RESOURCETYPE));
-                final int headerRows = parseMissingToNegativeInt(memberNode, CkanConstants.MemberProperty.HEADER_ROWS);
+                member.setResourceType(getStringValueOf(CkanConstants.MemberProperty.RESOURCE_TYPE));
+                final int headerRows = parseMissingToNegativeInt(memberNode, ckanMapping.getMappings(CkanConstants.MemberProperty.HEADER_ROWS));
                 member.setHeaderRows(headerRows < 0 ? 1 : headerRows); // assume 1 header row by default
                 member.setResourceFields(parseResourceFields(member, memberNode));
                 resourceMembers.add(member);
@@ -117,9 +133,9 @@ public class SchemaDescriptor {
         int index = 0;
         while (iter.hasNext()) {
             JsonNode fieldNode = iter.next();
-            ResourceField resourceField = new ResourceField(fieldNode, index);
-            resourceField.setQualifier(qualifier);
-            fields.add(resourceField);
+            fields.add(new ResourceField(fieldNode, index)
+                       .withCkanMapping(ckanMapping)
+                       .withQualifier(qualifier));
             index++;
         }
         return fields;

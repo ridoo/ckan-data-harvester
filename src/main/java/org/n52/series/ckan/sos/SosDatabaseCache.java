@@ -30,15 +30,12 @@ package org.n52.series.ckan.sos;
 
 import org.n52.series.ckan.beans.CsvObservationsCollection;
 import org.n52.series.ckan.cache.CkanDataSink;
-import org.n52.series.ckan.da.CkanMappingConfig;
 
 import eu.trentorise.opendata.jackan.model.CkanDataset;
 
 public class SosDatabaseCache implements CkanDataSink {
 
     private CkanSosReferenceCache ckanSosReferenceCache;
-
-    private String configFile;
 
     @Override
     public void insertOrUpdate(CkanDataset dataset, CsvObservationsCollection csvObservationsCollection) {
@@ -47,7 +44,7 @@ public class SosDatabaseCache implements CkanDataSink {
                 .withReferenceCache(ckanSosReferenceCache)
                 .withData(csvObservationsCollection);
 
-        factory.createInsertionStrategy().setMappingConfiguration(CkanMappingConfig.Loader.loadConfig(configFile))
+        factory.createInsertionStrategy()
                 .insertOrUpdate(dataset, csvObservationsCollection);
 
         // TODO decoupled deletion strategy?
@@ -59,14 +56,6 @@ public class SosDatabaseCache implements CkanDataSink {
 
     public void setCkanSosReferenceCache(CkanSosReferenceCache ckanSosReferenceCache) {
         this.ckanSosReferenceCache = ckanSosReferenceCache;
-    }
-
-    public String getConfigFile() {
-        return configFile;
-    }
-
-    public void setConfigFile(String configFile) {
-        this.configFile = configFile;
     }
 
 }

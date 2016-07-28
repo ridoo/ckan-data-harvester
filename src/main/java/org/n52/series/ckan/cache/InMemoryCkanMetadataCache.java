@@ -28,19 +28,24 @@
  */
 package org.n52.series.ckan.cache;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.trentorise.opendata.jackan.model.CkanDataset;
-import eu.trentorise.opendata.jackan.model.CkanPair;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+
 import org.n52.series.ckan.beans.SchemaDescriptor;
 import org.n52.series.ckan.da.CkanConstants;
+import org.n52.series.ckan.da.CkanMapping;
 import org.n52.series.ckan.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import eu.trentorise.opendata.jackan.model.CkanDataset;
+import eu.trentorise.opendata.jackan.model.CkanPair;
 
 public class InMemoryCkanMetadataCache implements CkanMetadataCache {
 
@@ -50,8 +55,15 @@ public class InMemoryCkanMetadataCache implements CkanMetadataCache {
 
     private final Map<String, CkanDataset> datasets;
 
+    private CkanMapping ckanMapping;
+
     public InMemoryCkanMetadataCache() {
+        this(null);
+    }
+
+    public InMemoryCkanMetadataCache(String fieldIdMappingConfig) {
         this.datasets = new HashMap<>();
+        this.ckanMapping = CkanMapping.loadCkanMapping();
     }
 
     protected void putAll(Map<String, CkanDataset> datasets) {
@@ -141,12 +153,16 @@ public class InMemoryCkanMetadataCache implements CkanMetadataCache {
     private SchemaDescriptor getSchemaDescriptor(CkanDataset dataset) {
         if (dataset != null && dataset.getExtras() != null) {
             for (CkanPair extras : dataset.getExtras()) {
-                if (extras.getKey().equalsIgnoreCase(CkanConstants.SchemaDescriptor.SCHEMA_DESCRIPTOR)) {
+                if (CkanConstants.SchemaDescriptor.SCHEMA_DESCRIPTOR.equalsIgnoreCase(extras.getKey())) {
                     try {
                         JsonNode schemaDescriptionNode = om.readTree(extras.getValue());
-                        String resourceType = JsonUtil.parseMissingToEmptyString(schemaDescriptionNode, CkanConstants.SchemaDescriptor.RESOURCE_TYPE);
-                        if (resourceType.equalsIgnoreCase(CkanConstants.ResourceType.CSV_OBSERVATIONS_COLLECTION)) {
-                            return new SchemaDescriptor(dataset, schemaDescriptionNode);
+                        Set<String> types = ckanMapping.getMappings(CkanConstants.SchemaDescriptor.RESOURCE_TYPE);
+                        String resourceType = JsonUtil.parseMissingToEmptyString(schemaDescriptionNode, types);
+
+                        // TODO schema descriptor factory here when more types appear
+                        if (CkanConstants.ResourceType.CSV_OBSERVATIONS_COLLECTION.equalsIgnoreCase(resourceType)) {
+                            return new SchemaDescriptor(dataset, schemaDescriptionNode)
+                                    .withCkanMapping(ckanMapping);
                         }
                     } catch (IOException e) {
                          LOGGER.error("Could not read schema_descriptor: {}", extras.getValue(), e);

@@ -28,18 +28,20 @@
  */
 package org.n52.series.ckan.table;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.beans.ResourceMember;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 
 public class DataTable {
 
@@ -52,21 +54,13 @@ public class DataTable {
     private final List<ResourceMember> joinedMembers;
 
     protected DataTable(ResourceMember resourceMember) {
-        this(HashBasedTable.create(), resourceMember);
+        this(HashBasedTable.<ResourceKey,ResourceField,String>create(), resourceMember);
     }
 
-    private DataTable(DataTable table, ResourceMember resourceMember) {
-        this(table.copy(), resourceMember);
-    }
-
-    private DataTable(Table table, ResourceMember resourceMember) {
+    private DataTable(Table<ResourceKey,ResourceField,String> table, ResourceMember resourceMember) {
         this.table = table;
         this.resourceMember = resourceMember;
         this.joinedMembers = new ArrayList<>();
-    }
-
-    private Table<ResourceKey,ResourceField,String> copy() {
-        return HashBasedTable.create(table);
     }
 
     public Table<ResourceKey,ResourceField,String> getTable() {
@@ -126,8 +120,8 @@ public class DataTable {
                     final Map<ResourceField, String> toJoinRow = other.table.row(otherKey);
                     for (Map.Entry<ResourceField, String> otherValue : toJoinRow.entrySet()) {
                         final ResourceField rightField = otherValue.getKey();
-                        ResourceField joinedField = ResourceField.copy(rightField);
-                        joinedField.setQualifier(otherKey.getMember());
+                        ResourceField joinedField = ResourceField.copy(rightField)
+                                .withQualifier(otherKey.getMember());
                         outputTable.table.put(newKey, joinedField, otherValue.getValue());
                     }
 

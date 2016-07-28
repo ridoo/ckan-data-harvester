@@ -49,7 +49,6 @@ import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.beans.ResourceMember;
 import org.n52.series.ckan.beans.SchemaDescriptor;
 import org.n52.series.ckan.da.CkanConstants;
-import org.n52.series.ckan.da.CkanMappingConfig;
 import org.n52.series.ckan.table.DataTable;
 import org.n52.series.ckan.table.ResourceKey;
 import org.n52.series.ckan.table.ResourceTable;
@@ -112,8 +111,6 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultSosInsertionStrategy.class);
 
-    private CkanMappingConfig mappingConfig;
-
     private final InsertSensorDAO insertSensorDao;
 
     private final InsertObservationDAO insertObservationDao;
@@ -121,7 +118,6 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
     private final DeleteObservationDAO deleteObservationDao;
 
     private final CkanSosReferenceCache ckanSosReferencingCache;
-
 
     DefaultSosInsertionStrategy() {
         this(null);
@@ -159,12 +155,6 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
         } catch (OwsExceptionReport e) {
             LOGGER.warn("Error while reloading SOS Capabilities cache", e);
         }
-    }
-
-    @Override
-    public DefaultSosInsertionStrategy setMappingConfiguration(CkanMappingConfig mappingConfig) {
-        this.mappingConfig = mappingConfig;
-        return this;
     }
 
     private static class SensorInsertion {
@@ -317,35 +307,35 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
         final SamplingFeature feature = new SamplingFeature(null);
         for (Map.Entry<ResourceField, String> fieldEntry : platform.entrySet()) {
             ResourceField field = fieldEntry.getKey();
-            if (field.isField(CkanConstants.KnownFieldId.CRS) || field.isField(mappingConfig.getCrs())) {
+            if (field.isField(CkanConstants.KnownFieldId.CRS)) {
                 geometryBuilder.withCrs(fieldEntry.getValue());
             }
-            if (field.isField(CkanConstants.KnownFieldId.LATITUDE) || field.isField(mappingConfig.getLatitude())) {
+            if (field.isField(CkanConstants.KnownFieldId.LATITUDE)) {
                 geometryBuilder.setLatitude(fieldEntry.getValue());
             }
-            if (field.isField(CkanConstants.KnownFieldId.LONGITUDE) || field.isField(mappingConfig.getLongitude())) {
+            if (field.isField(CkanConstants.KnownFieldId.LONGITUDE)) {
                 geometryBuilder.setLongitude(fieldEntry.getValue());
             }
-            if (field.isField(CkanConstants.KnownFieldId.ALTITUDE) || field.isField(mappingConfig.getAltitude())) {
+            if (field.isField(CkanConstants.KnownFieldId.ALTITUDE)) {
+                geometryBuilder.setAltitude(fieldEntry.getValue());
             }
-            if (field.isField(CkanConstants.KnownFieldId.STATION_ID) || field.isField(mappingConfig.getStationId())) {
+            if (field.isField(CkanConstants.KnownFieldId.STATION_ID)) {
                 String identifier = fieldEntry.getValue();
                 if (field.isOfType(Integer.class)) {
                     identifier = Integer.toString(Integer.parseInt(identifier));
                 }
                 feature.setIdentifier(organizationName + "-" + identifier);
             }
-            if (field.isField(CkanConstants.KnownFieldId.STATION_NAME)
-                    || field.isField(mappingConfig.getStationName())) {
+            if (field.isField(CkanConstants.KnownFieldId.STATION_NAME)) {
                 feature.addName(fieldEntry.getValue());
             }
-            if (field.isField(CkanConstants.KnownFieldId.LOCATION) || field.isField(mappingConfig.getLocation())) {
+            if (field.isField(CkanConstants.KnownFieldId.LOCATION)) {
                 if (field.getFieldType().equalsIgnoreCase("JsonObject")) {
                     setFeatureGeometry(feature, geometryBuilder.fromGeoJson(fieldEntry.getValue()));
                 }
             }
         }
-        if (pointBuilder.hasCoordinates()) {
+        if (geometryBuilder.hasCoordinates()) {
             setFeatureGeometry(feature, geometryBuilder.getPoint());
         }
         feature.setFeatureType(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_POINT);
@@ -603,24 +593,25 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
                         value = createQuantityObservationValue(field, cells.getValue());
                         omObservation.setIdentifier(observationEntry.getKey().getKeyId() + "_" + phenomenonId);
                     }
-                } else if (field.isField(CkanConstants.KnownFieldId.RESULT_TIME) || field.isField(mappingConfig.getResultTime())) {
-                    time = parseTime(field, cells.getValue());
-                } else if (field.isField(CkanConstants.KnownFieldId.LOCATION) || field.isField(mappingConfig.getLocation())) {
-                    if (field.getFieldType().equalsIgnoreCase("JsonObject")) {
-                        geom = parseGeoJsonLocation(cells.getValue());
+                } else if (field.isField(CkanConstants.KnownFieldId.RESULT_TIME)) {
+                    time = parseTimestamp(field, cells.getValue());
+                } else if (field.isField(CkanConstants.KnownFieldId.LOCATION)) {
+                    if (field.isOfType(Geometry.class)) {
+                        geom = GeometryBuilder.create()
+                                .fromGeoJson(cells.getValue());
                     }
-                } else if (field.isField(CkanConstants.KnownFieldId.CRS) || field.isField(mappingConfig.getCrs())) {
+                } else if (field.isField(CkanConstants.KnownFieldId.CRS)) {
                     pointBuilder.withCrs(cells.getValue());
-                } else if (field.isField(CkanConstants.KnownFieldId.LATITUDE) || field.isField(mappingConfig.getLatitude())) {
+                } else if (field.isField(CkanConstants.KnownFieldId.LATITUDE)) {
                     pointBuilder.setLatitude(cells.getValue());
-                } else if (field.isField(CkanConstants.KnownFieldId.LONGITUDE) || field.isField(mappingConfig.getLongitude())) {
+                } else if (field.isField(CkanConstants.KnownFieldId.LONGITUDE)) {
                     pointBuilder.setLongitude(cells.getValue());
-                } else  if (field.isField(CkanConstants.KnownFieldId.ALTITUDE) || field.isField(mappingConfig.getAltitude())) {
+                } else  if (field.isField(CkanConstants.KnownFieldId.ALTITUDE)) {
                     pointBuilder.setAltitude(cells.getValue());
-                } else if (field.isField(CkanConstants.KnownFieldId.VALID_TIME_START) || field.isField(mappingConfig.getValidTimeStart())) {
-                    validStart = parseTime(field, cells.getValue());
-                } else if (field.isField(CkanConstants.KnownFieldId.VALID_TIME_END) || field.isField(mappingConfig.getValidTimeEnd())) {
-                    validEnd = parseTime(field, cells.getValue());
+                } else if (field.isField(CkanConstants.KnownFieldId.VALID_TIME_START)) {
+                    validStart = parseTimestamp(field, cells.getValue());
+                } else if (field.isField(CkanConstants.KnownFieldId.VALID_TIME_END)) {
+                    validEnd = parseTimestamp(field, cells.getValue());
                 }
 
             }
@@ -660,17 +651,14 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
         }
     }
 
-    protected TimeInstant parseTime(ResourceField field, String dateValue) {
-        if (field.isOfType(Date.class)) {
-            return new TimeInstant(new Date(Long.parseLong(dateValue)));
-        } else {
-            String dateFormat = parseDateFormat(field);
-            return (TimeInstant)parseDateValue(dateValue, dateFormat);
-        }
+    protected TimeInstant parseTimestamp(ResourceField field, String dateValue) {
+        return !hasDateFormat(field)
+                ? new TimeInstant(new Date(Long.parseLong(dateValue)))
+                : parseDateValue(dateValue, parseDateFormat(field));
     }
 
     protected String parseDateFormat(ResourceField field) {
-        if (field.hasProperty(CkanConstants.KnownFieldProperty.DATE_FORMAT)) {
+        if (hasDateFormat(field)) {
             String format = field.getOther(CkanConstants.KnownFieldProperty.DATE_FORMAT);
             format = (!format.endsWith("Z") && !format.endsWith("z"))
                         ? format + "Z"
@@ -678,6 +666,10 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
             return format.replace("DD", "dd").replace("hh", "HH"); // XXX hack to fix wrong format
         }
         return null;
+    }
+
+    private boolean hasDateFormat(ResourceField field) {
+        return field.hasProperty(CkanConstants.KnownFieldProperty.DATE_FORMAT);
     }
 
     protected TimeInstant parseDateValue(String dateValue, String dateFormat) {
