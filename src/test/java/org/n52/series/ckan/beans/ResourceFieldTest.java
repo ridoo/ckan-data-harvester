@@ -28,32 +28,66 @@
  */
 package org.n52.series.ckan.beans;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.n52.series.ckan.da.CkanMapping;
 
 public class ResourceFieldTest {
 
+    private ResourceFieldCreator fieldCreator;
+
+    private CkanMapping ckanMapping;
+
+    @Before
+    public void setUp() {
+        this.fieldCreator = new ResourceFieldCreator();
+        this.ckanMapping = new CkanMapping();
+        List<String> mappings = Arrays.asList(new String[]{"FIELD_IDENTIFIER", "ANOTHER_IDENTIFIER"});
+        this.ckanMapping.addMapping("testField", new HashSet<>(mappings));
+    }
+
+    @Test
+    public void when_checkingFieldType_then_fieldRecognizesMappings() {
+        ResourceField testField = fieldCreator
+                .withCkanMapping(ckanMapping)
+                .createSimple("testField");
+        assertThat(testField.isField("FIELD_IDENTIFIER"), is(true));
+    }
+
     @Test
     public void testEqualityUsingId() {
-        ResourceField first = new ResourceField("test42");
-        MatcherAssert.assertThat(first.equals(new ResourceField("test42")), CoreMatchers.is(true));
+        ResourceField first = fieldCreator.createSimple("test42");
+        MatcherAssert.assertThat(first.equals(fieldCreator.createSimple("test42")), CoreMatchers.is(true));
     }
 
     @Test
     public void testIdEqualityIgnoringCase() {
-        ResourceField first = new ResourceField("test42");
-        MatcherAssert.assertThat(first.equals(new ResourceField("Test42")), CoreMatchers.is(true));
+        ResourceField first = fieldCreator.createSimple("test42");
+        MatcherAssert.assertThat(first.equals(fieldCreator.createSimple("Test42")), CoreMatchers.is(true));
     }
 
     @Test
-    public void testEqualValues() throws IOException {
-        String intFieldJson = "{ \"field_id\": \"Stations_id\", \"short_name\": \"station ID\", \"long_name\": \"Station identifier\", \"description\": \"The Identifier for the station declared by the German weather service (DWD)\", \"field_type\": \"Integer\" }";
-        ObjectMapper om = new ObjectMapper();
-        ResourceField intField = new ResourceField(om.readTree(intFieldJson), 0);
+    public void testEqualValues() {
+        String json = ""
+                + "{" +
+                "    \"field_id\": \"Stations_id\"," +
+                "    \"short_name\": \"station ID\"," +
+                "    \"long_name\": \"Station identifier\"," +
+                "    \"description\": \"The Identifier for the station declared by the German weather service (DWD)\"," +
+                "    \"field_type\": \"Integer\"" +
+                "}";
+        ResourceField intField = fieldCreator.createFull(json);
         Assert.assertTrue(intField.equalsValues("100", "0100"));
     }
+
 }

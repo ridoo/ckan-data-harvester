@@ -29,42 +29,47 @@
 package org.n52.series.ckan.da;
 
 import static junit.framework.TestCase.assertTrue;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
-public class CkanMappingConfigLoaderTest {
+public class CkanMappingTest {
 
     @Test
-    public void parseConfiguration() {
-        CkanMappingConfig mapConf = CkanMappingConfig.Loader.loadConfig("config-ckan-mapping.json");
-        assertTrue(mapConf.isSetResultTime());
-        assertTrue(mapConf.isSetLatitude());
-        assertTrue(mapConf.isSetLongitude());
-        assertTrue(mapConf.getResultTime().contains("datetime"));
-        assertTrue(mapConf.getLatitude().contains("latitude"));
-        assertTrue(mapConf.getLatitude().contains("lat"));
-        assertTrue(mapConf.getLongitude().contains("longitude"));
-        assertTrue(mapConf.getLongitude().contains("lon"));
+    public void when_parsingIdMappings_then_idMappingsNotEmpty() {
+        CkanMapping mappings = CkanMapping.loadCkanMapping("config-ckan-mapping.json");
+        assertTrue(mappings.hasMapping("resultTime", "datetime"));
+        assertTrue(mappings.hasMapping("latitude", "latitude"));
+        assertTrue(mappings.hasMapping("latitude", "lat"));
+        assertTrue(mappings.hasMapping("longitude", "longitude"));
+        assertTrue(mappings.hasMapping("longitude", "lon"));
+        assertTrue(mappings.hasMappings("longitude"));
     }
 
     @Test
     public void when_arbitraryConfigFileName_then_readConfig() {
-         CkanMappingConfig config = CkanMappingConfig.Loader.loadConfig("some-ckan-config.json");
-         assertTrue(config.getCrs().contains("9999"));
+         CkanMapping ckanMappin = CkanMapping.loadCkanMapping("some-ckan-config.json");
+         assertTrue(ckanMappin.hasMapping("crs", "9999"));
     }
 
     @Test
-    public void useDefaultFile() {
-        CkanMappingConfig mapConf = CkanMappingConfig.Loader.loadConfig((String)null);
-        assertTrue(mapConf.isSetResultTime());
-        assertTrue(mapConf.isSetLatitude());
-        assertTrue(mapConf.isSetLongitude());
-        assertTrue(mapConf.getResultTime().contains("datetime"));
-        assertTrue(mapConf.getLatitude().contains("latitude"));
-        assertTrue(mapConf.getLatitude().contains("lat"));
-        assertTrue(mapConf.getLongitude().contains("longitude"));
-        assertTrue(mapConf.getLongitude().contains("lon"));
+    public void when_retrieveMappings_then_nameIsIncluded() {
+         CkanMapping ckanMappin = CkanMapping.loadCkanMapping("some-ckan-config.json");
+         assertTrue(ckanMappin.hasMapping("crs", "crs"));
+    }
+
+    @Test
+    public void when_noMappings_then_onlyNameIsIncluded() {
+         CkanMapping ckanMappin = CkanMapping.loadCkanMapping("some-ckan-config.json");
+         assertThat(ckanMappin.getMappings("does-not-exist").size(), is(1));
+         assertTrue(ckanMappin.hasMapping("does-not-exist", "does-not-exist"));
+    }
+
+    @Test
+    public void when_parsingDefault_then_idMappingsNotEmpty() {
+        CkanMapping mappings = CkanMapping.loadCkanMapping();
+        assertTrue(mappings.hasMapping("default", "default"));
     }
 
 }

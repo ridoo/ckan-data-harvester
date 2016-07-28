@@ -38,7 +38,6 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.n52.series.ckan.beans.CsvObservationsCollection;
 import org.n52.series.ckan.cache.InMemoryCkanDataCache;
-import org.n52.series.ckan.da.CkanMappingConfig;
 import org.n52.series.ckan.util.FileBasedCkanHarvestingService;
 import org.n52.sos.ds.hibernate.GetObservationDAO;
 import org.n52.sos.ds.hibernate.H2Configuration;
@@ -82,8 +81,7 @@ public class FileBasedDefaultSosInsertionStrategyTest extends HibernateTestCase 
 
     @Test
     public void parseSensorsFromObservationCollection() throws OwsExceptionReport {
-        CkanMappingConfig config = CkanMappingConfig.Loader.loadConfig();
-        insertionStrategy = new DefaultSosInsertionStrategy().setMappingConfiguration(config);
+        insertionStrategy = new DefaultSosInsertionStrategy();
         for (InMemoryCkanDataCache.Entry<CkanDataset, CsvObservationsCollection> data : ckanDataCache.getCollections()) {
             insertionStrategy.insertOrUpdate(data.getDataset(), data.getData());
         }

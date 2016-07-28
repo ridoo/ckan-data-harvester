@@ -28,6 +28,8 @@
  */
 package org.n52.series.ckan.sos;
 
+import java.io.IOException;
+
 import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
 import javax.measure.unit.UnitFormat;
@@ -37,23 +39,39 @@ import org.hamcrest.MatcherAssert;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.n52.io.geojson.JSONUtils;
 import org.n52.series.ckan.beans.ResourceField;
+import org.n52.series.ckan.beans.ResourceFieldCreator;
 import org.n52.series.ckan.da.CkanConstants;
 import org.n52.sos.ogc.gml.time.TimeInstant;
 import org.n52.sos.ogc.om.SingleObservationValue;
 import org.n52.sos.ogc.om.values.QuantityValue;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.vividsolutions.jts.geom.Geometry;
 
 public class DefaultSosInsertionStragetyTest {
 
+    private static final String TEST_DATE_TEMPLATE = "{ "
+            + "\"field_id\": \"%s\","
+            + "\"date_format\": \"%s\","
+            + "\"field_type\": \"Date\""
+            + " }";
+    private ResourceFieldCreator fieldCreator;
+
+    @Before
+    public void setUp() {
+        this.fieldCreator = new ResourceFieldCreator();
+    }
+
     @Test
     public void testAddZuluWhenDateFormatMissesOffsetInfo() {
-        ResourceField field = new ResourceFieldSeam("my-test-id", "YYYYMMDDhh");
+        ResourceField field = fieldCreator.createFull(TEST_DATE_TEMPLATE, "my-test-id", "YYYYMMDDhh");
         DefaultSosInsertionStrategy strategy = new DefaultSosInsertionStrategySeam();
         String format = strategy.parseDateFormat(field);
         MatcherAssert.assertThat(format, CoreMatchers.is("YYYYMMddHHZ"));
@@ -61,7 +79,7 @@ public class DefaultSosInsertionStragetyTest {
 
     @Test
     public void testDateFormatWithOffsetInfo() {
-        ResourceField field = new ResourceFieldSeam("my-test-id", "YYYY-MM-dd'T'HH:mm:ssz");
+        ResourceField field = fieldCreator.createFull(TEST_DATE_TEMPLATE, "my-test-id", "YYYY-MM-dd'T'HH:mm:ssz");
         DefaultSosInsertionStrategy strategy = new DefaultSosInsertionStrategySeam();
         String format = strategy.parseDateFormat(field);
         MatcherAssert.assertThat(format, CoreMatchers.is("YYYY-MM-dd'T'HH:mm:ssz"));
@@ -69,7 +87,7 @@ public class DefaultSosInsertionStragetyTest {
 
     @Test
     public void testParsingPhenomenonTime() {
-        ResourceField field = new ResourceFieldSeam("my-test-id", "YYYYMMDDhh");
+        ResourceField field = fieldCreator.createFull(TEST_DATE_TEMPLATE, "my-test-id", "YYYYMMDDhh");
         DefaultSosInsertionStrategy strategy = new DefaultSosInsertionStrategySeam();
         String format = strategy.parseDateFormat(field);
 
@@ -82,7 +100,7 @@ public class DefaultSosInsertionStragetyTest {
 
     @Test
     public void iso8601FormatValueHavingOffset() {
-        ResourceField field = new ResourceFieldSeam("my-test-id", "YYYY-MM-DD'T'hh:mm:ss");
+        ResourceField field = fieldCreator.createFull(TEST_DATE_TEMPLATE, "my-test-id", "YYYY-MM-DD'T'hh:mm:ss");
         DefaultSosInsertionStrategy strategy = new DefaultSosInsertionStrategySeam();
         String format = strategy.parseDateFormat(field);
 
@@ -94,7 +112,7 @@ public class DefaultSosInsertionStragetyTest {
 
     @Test
     public void iso8601FormatValueNotHavingOffset() {
-        ResourceField field = new ResourceFieldSeam("my-test-id", "YYYY-MM-DD'T'hh:mm:ss");
+        ResourceField field = fieldCreator.createFull(TEST_DATE_TEMPLATE, "my-test-id", "YYYY-MM-DD'T'hh:mm:ss");
         DefaultSosInsertionStrategy strategy = new DefaultSosInsertionStrategySeam();
         String format = strategy.parseDateFormat(field);
 
@@ -106,7 +124,7 @@ public class DefaultSosInsertionStragetyTest {
 
     @Test
     public void iso8601FormatMissingDateFormatDefinition() {
-        ResourceField field = new ResourceFieldSeam("my-test-id");
+        ResourceField field = fieldCreator.createSimple("my-test-id");
         DefaultSosInsertionStrategy strategy = new DefaultSosInsertionStrategySeam();
         String format = strategy.parseDateFormat(field);
 
@@ -118,7 +136,7 @@ public class DefaultSosInsertionStragetyTest {
 
     // @Test
     public void iso8601FormatWihtoutFractionValueWithFraction() {
-        ResourceField field = new ResourceFieldSeam("my-test-id", "YYYY-MM-dd'T'HH:mm:ssz");
+        ResourceField field = fieldCreator.createFull(TEST_DATE_TEMPLATE, "my-test-id", "YYYY-MM-dd'T'HH:mm:ssz");
         DefaultSosInsertionStrategy strategy = new DefaultSosInsertionStrategySeam();
         String format = strategy.parseDateFormat(field);
         Assert.assertNull(strategy.parseDateValue("2016-02-16T07:55:54.188+01:00", format));
@@ -126,7 +144,7 @@ public class DefaultSosInsertionStragetyTest {
 
     @Test
     public void iso8601FormatFraction() {
-        ResourceField field = new ResourceFieldSeam("my-test-id", "YYYY-MM-dd'T'HH:mm:ss.SSSZ");
+        ResourceField field = fieldCreator.createFull(TEST_DATE_TEMPLATE, "my-test-id", "YYYY-MM-dd'T'HH:mm:ss.SSSZ");
         DefaultSosInsertionStrategy strategy = new DefaultSosInsertionStrategySeam();
         String format = strategy.parseDateFormat(field);
         TimeInstant instant2 = (TimeInstant) strategy.parseDateValue("2016-02-16T08:03:54.609+01:00", format);
@@ -137,19 +155,19 @@ public class DefaultSosInsertionStragetyTest {
 
     @Test
     public void dateInMillis() {
-        ResourceField field = new ResourceFieldTypeSeam("my-test-id", "Date");
+//        ResourceField field = new ResourceFieldTypeSeam("my-test-id", "Date");
+        ResourceField field = fieldCreator.createSimple("my-test-id");
+
+        // XXX parseTime only relevant for valid_time_start/end ?! but not available in
+        // current schema descriptors at all! Clear, how to handle millis in resource
+        // fields .. perhaps considering a 'millis' keyword in date_format
+
         DefaultSosInsertionStrategy strategy = new DefaultSosInsertionStrategySeam();
         DateTime dt = new DateTime();
         TimeInstant instant = new TimeInstant(dt);
-        TimeInstant instant2 = (TimeInstant) strategy.parseTime(field, Long.toString(dt.getMillis()));
+        TimeInstant instant2 = strategy.parseTimestamp(field, Long.toString(dt.getMillis()));
         Assert.assertTrue("expected: " + instant2.getValue().getMillis()
                 + ", actual: " + instant.getValue().getMillis(), instant2.equals(instant));
-    }
-
-    public void parseGeoJson() {
-        DefaultSosInsertionStrategy strategy = new DefaultSosInsertionStrategySeam();
-        Assert.assertThat(strategy.parseGeoJsonLocation("{'coordinates':[52.52,13.41],'type':'Point'}"),CoreMatchers.instanceOf(Geometry.class));
-        Assert.assertThat(strategy.parseGeoJsonLocation("{\"coordinates\":[52.52,13.41],\"type\":\"Point\"}"),CoreMatchers.instanceOf(Geometry.class));
     }
 
 //    @Test
@@ -185,10 +203,14 @@ public class DefaultSosInsertionStragetyTest {
     @Test
     public void parseStringTypeObservationValue() {
         DefaultSosInsertionStrategy strategy = new DefaultSosInsertionStrategySeam();
-        ResourceField field = new ResourceFieldSeam(
-                JSONUtils.loadString(
-                        "{ \"field_id\" : \"value\", \"short_name\" : \"value\", \"long_name\" : \"value\", \"phenomenon\" : \"temperature\", \"uom\" : \"°K\", \"field_type\" : \"String\" }"),
-                1);
+        ResourceField field = new ResourceFieldCreator()
+                .createFull("{"
+                        + " \"field_id\" : \"value\", "
+                        + " \"short_name\" : \"value\", "
+                        + " \"long_name\" : \"value\","
+                        + " \"phenomenon\" : \"temperature\","
+                        + " \"uom\" : \"°K\","
+                        + " \"field_type\" : \"String\" }");
         SingleObservationValue<Double> value = strategy.createQuantityObservationValue(field, "25.0");
         Assert.assertThat(value.getValue(), CoreMatchers.instanceOf(QuantityValue.class));
         Assert.assertThat(value.getValue().getValue(), CoreMatchers.is(25.0));
@@ -201,69 +223,4 @@ public class DefaultSosInsertionStragetyTest {
         }
     }
 
-    class ResourceFieldSeam extends ResourceField {
-
-        private String dateformat;
-
-
-        public ResourceFieldSeam(String id) {
-            super(id);
-        }
-
-
-        public ResourceFieldSeam(String id, String format) {
-            super(id);
-            this.dateformat = format;
-        }
-
-        public ResourceFieldSeam(JsonNode node, int index) {
-            super(node, index);
-        }
-
-        @Override
-        public String getOther(String name) {
-            if (name.equalsIgnoreCase(CkanConstants.KnownFieldProperty.DATE_FORMAT)) {
-                return dateformat;
-            }
-            else {
-                return super.getOther(name);
-            }
-         }
-
-        @Override
-        public boolean hasProperty(String name) {
-            if (name.equalsIgnoreCase(CkanConstants.KnownFieldProperty.DATE_FORMAT) && !Strings.isNullOrEmpty(dateformat)) {
-                return true;
-            }
-            return super.isField(name);
-        }
-
-    }
-
-    class ResourceFieldTypeSeam extends ResourceField {
-
-        private String fieldType;
-
-        public ResourceFieldTypeSeam(String id) {
-            super(id);
-        }
-
-        public ResourceFieldTypeSeam(String id, String fieldType) {
-            super(id);
-            this.fieldType = fieldType;
-        }
-
-        public ResourceFieldTypeSeam(JsonNode node, int index) {
-            super(node, index);
-        }
-
-        @Override
-        public String getFieldType() {
-            if (fieldType != null && !fieldType.isEmpty()) {
-                return fieldType;
-            }
-            return super.getFieldType();
-        }
-
-    }
 }
