@@ -75,4 +75,12 @@ public class DescriptionFile {
 
     }
 
+    @Override
+    public String toString() {
+        return "DescriptionFile [schemaDescription=" + schemaDescription + ", datasetname=" + dataset.getName() + ", file=" + file.getAbsolutePath()
+                + "]";
+    }
+
+
+
 }

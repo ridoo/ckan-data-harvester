@@ -92,7 +92,6 @@ public class JsonUtil {
                 field = getNodeWithName(alternateFieldName, node);
                 field = tryLowerCasedIfMissing(field, alternateFieldName, node);
                 if ( !field.isMissingNode()) {
-                    LOGGER.debug("found node with deprecated property '{}'", alternateFieldName);
                     break;
                 }
             }

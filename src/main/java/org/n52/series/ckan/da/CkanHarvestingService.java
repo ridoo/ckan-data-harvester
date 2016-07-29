@@ -96,6 +96,7 @@ public class CkanHarvestingService {
             SearchResults<CkanDataset> datasets = ckanClient.searchDatasets(query, limit, offset);
             for (CkanDataset dataset : datasets.getResults()) {
                 metadataCache.insertOrUpdate(dataset);
+                LOGGER.debug("Inserted dataset '{}'", dataset.getName());
             }
             lastSize = datasets.getCount();
         }
