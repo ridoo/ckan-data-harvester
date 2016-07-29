@@ -40,12 +40,16 @@ import java.util.Map;
 import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.da.CkanMapping;
 import org.n52.series.ckan.util.JsonUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import eu.trentorise.opendata.jackan.model.CkanDataset;
 
 public class SchemaDescriptor {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(SchemaDescriptor.class);
 
     private final JsonNode node;
 
@@ -102,7 +106,12 @@ public class SchemaDescriptor {
     public Map<ResourceMember, DataFile> relateWithDataFiles(Map<String, DataFile> csvContents) {
         Map<ResourceMember, DataFile> memberRelations = new HashMap<>();
         for (ResourceMember member : members) {
-            memberRelations.put(member, csvContents.get(member.getId()));
+            DataFile dataFile = csvContents.get(member.getId());
+            if (dataFile == null) {
+                LOGGER.info("Ignoring member '{}' has missing datafile (was null)", member);
+            } else {
+                memberRelations.put(member, dataFile);
+            }
         }
         return memberRelations;
     }

@@ -175,21 +175,26 @@ public class CkanHarvestingService {
         Path datasetDownloadFolder = getDatasetDownloadFolder(dataset);
         for (CkanResource resource : dataset.getResources()) {
             if (resourceIds.contains(resource.getId())) {
-                DataFile datafile = downloadCsvFile(resource, datasetDownloadFolder);
-                csvFiles.put(resource.getId(), datafile);
+                try {
+                    DataFile datafile = downloadCsvFile(resource, datasetDownloadFolder);
+                    csvFiles.put(resource.getId(), datafile);
+                    LOGGER.debug("Downloaded data: {}.", datafile);
+                } catch (IOException e) {
+                    String url = resource.getUrl();
+                    LOGGER.error("Could not download resource from {}.", url, e);
+                }
             }
         }
         return csvFiles;
     }
 
-    protected DataFile downloadCsvFile(CkanResource resource, Path datasetDownloadFolder) {
+    protected DataFile downloadCsvFile(CkanResource resource, Path datasetDownloadFolder) throws IOException {
         final String resourceName = resource.getId() + ".csv";
         File file = datasetDownloadFolder.resolve(resourceName).toFile();
 
         // TODO download only when newer
-
+        
         downloadToFile(resource.getUrl(), file);
-        LOGGER.debug("Downloaded data to {}.", file.getAbsolutePath());
         return new DataFile(resource, file);
     }
 
@@ -204,13 +209,9 @@ public class CkanHarvestingService {
         return resourceDownloadBaseFolder.resolve(dataset.getName());
     }
 
-    private void downloadToFile(String url, File file) {
-        try {
-            String csvContent = resourceClient.downloadTextResource(url);
-            FileUtils.writeStringToFile(file, csvContent, CkanConstants.DEFAULT_CHARSET);
-        } catch (IOException e) {
-            LOGGER.error("Could not download resource from {}.", url, e);
-        }
+    private void downloadToFile(String url, File file) throws IOException {
+        String csvContent = resourceClient.downloadTextResource(url);
+        FileUtils.writeStringToFile(file, csvContent, CkanConstants.DEFAULT_CHARSET);
     }
 
     public String getResourceDownloadBaseFolder() throws URISyntaxException {
