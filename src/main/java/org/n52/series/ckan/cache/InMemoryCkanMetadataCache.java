@@ -161,8 +161,7 @@ public class InMemoryCkanMetadataCache implements CkanMetadataCache {
 
                         // TODO schema descriptor factory here when more types appear
                         if (CkanConstants.ResourceType.CSV_OBSERVATIONS_COLLECTION.equalsIgnoreCase(resourceType)) {
-                            return new SchemaDescriptor(dataset, schemaDescriptionNode)
-                                    .withCkanMapping(ckanMapping);
+                            return new SchemaDescriptor(dataset, schemaDescriptionNode, ckanMapping);
                         }
                     } catch (IOException e) {
                          LOGGER.error("Could not read schema_descriptor: {}", extras.getValue(), e);

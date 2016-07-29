@@ -122,6 +122,8 @@ public class CkanHarvestingService {
                 String datasetId = dataset.getId();
                 List<String> resourceIds = getResourceIds(description.getSchemaDescription());
                 Map<String, DataFile> csvContents = downloadCsvFiles(dataset, resourceIds);
+                
+                LOGGER.debug("downloaded data files for '{}': {}", dataset.getName(), csvContents.keySet());
 
                 // TODO check when to delete or update resource
 
@@ -137,7 +139,7 @@ public class CkanHarvestingService {
         saveToFile("dataset.json", dataset, JsonUtil.getCkanObjectMapper().writeValueAsString(dataset));
         SchemaDescriptor schemaDescription = metadataCache.getSchemaDescription(dataset.getId());
         File file = saveToFile("schema_descriptor.json", dataset, schemaDescription.getNode());
-        LOGGER.debug("Downloaded resource description to {}.", file.getAbsolutePath());
+        LOGGER.trace("Downloaded resource description to {}.", file.getAbsolutePath());
         return new DescriptionFile(dataset, file, schemaDescription);
     }
 
@@ -178,7 +180,6 @@ public class CkanHarvestingService {
                 try {
                     DataFile datafile = downloadCsvFile(resource, datasetDownloadFolder);
                     csvFiles.put(resource.getId(), datafile);
-                    LOGGER.debug("Downloaded data: {}.", datafile);
                 } catch (IOException e) {
                     String url = resource.getUrl();
                     LOGGER.error("Could not download resource from {}.", url, e);

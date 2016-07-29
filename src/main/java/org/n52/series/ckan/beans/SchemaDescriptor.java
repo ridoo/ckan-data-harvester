@@ -60,15 +60,16 @@ public class SchemaDescriptor {
     private final List<ResourceMember> members;
 
     public SchemaDescriptor(CkanDataset dataset, JsonNode node) {
-        this.node = node;
-        this.dataset = dataset;
-        this.ckanMapping = CkanMapping.loadCkanMapping();
-        this.members = parseMemberDescriptions();
+        this(dataset, node, CkanMapping.loadCkanMapping());
     }
 
-    public SchemaDescriptor withCkanMapping(CkanMapping propertyIdMapping) {
-        this.ckanMapping = propertyIdMapping;
-        return this;
+    public SchemaDescriptor(CkanDataset dataset, JsonNode node, CkanMapping ckanMapping) {
+        this.node = node;
+        this.dataset = dataset;
+        this.ckanMapping = ckanMapping == null
+                ? CkanMapping.loadCkanMapping()
+                : ckanMapping;
+        this.members = parseMemberDescriptions();
     }
 
     private String getStringValueOf(JsonNode jsonNode, String field) {
@@ -142,8 +143,7 @@ public class SchemaDescriptor {
         int index = 0;
         while (iter.hasNext()) {
             JsonNode fieldNode = iter.next();
-            fields.add(new ResourceField(fieldNode, index)
-                       .withCkanMapping(ckanMapping)
+            fields.add(new ResourceField(fieldNode, index, ckanMapping)
                        .withQualifier(qualifier));
             index++;
         }

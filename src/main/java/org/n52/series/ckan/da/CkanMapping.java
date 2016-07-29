@@ -142,7 +142,7 @@ public class CkanMapping {
 
         private InputStream createStreamFrom(String configFile) throws FileNotFoundException {
             if (Strings.isNullOrEmpty(configFile)) {
-                LOGGER.info("No config file given! Loading default config.");
+                LOGGER.trace("No config file given! Loading default config.");
                 return new FileInputStream(getConfigFile(DEFAULT_CKAN_MAPPING_FILE));
             }
             File file = getConfigFile(configFile);

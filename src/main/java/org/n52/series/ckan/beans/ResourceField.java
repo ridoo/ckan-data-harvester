@@ -44,8 +44,7 @@ public class ResourceField {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceField.class);
 
     public static ResourceField copy(ResourceField field) {
-        return new ResourceField(field.node, field.index)
-                .withCkanMapping(field.ckanMapping);
+        return new ResourceField(field.node, field.index, field.ckanMapping);
     }
 
     private final String fieldId;
@@ -59,15 +58,16 @@ public class ResourceField {
     private CkanMapping ckanMapping;
 
     public ResourceField(JsonNode node, int index) {
+        this(node, index, CkanMapping.loadCkanMapping());
+    }
+    
+    public ResourceField(JsonNode node, int index, CkanMapping ckanMapping) {
         this.node = node;
         this.index = index;
-        this.ckanMapping = CkanMapping.loadCkanMapping();
+        this.ckanMapping = ckanMapping == null
+                ? CkanMapping.loadCkanMapping()
+                : ckanMapping;
         this.fieldId = getValueOfField(CkanConstants.MemberProperty.FIELD_ID);
-    }
-
-    public ResourceField withCkanMapping(CkanMapping propertyIdMapping) {
-        this.ckanMapping = propertyIdMapping;
-        return this;
     }
 
     public ResourceField withQualifier(ResourceMember qualifier) {

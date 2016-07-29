@@ -32,10 +32,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
