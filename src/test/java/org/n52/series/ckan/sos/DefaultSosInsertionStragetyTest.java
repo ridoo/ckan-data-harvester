@@ -28,8 +28,6 @@
  */
 package org.n52.series.ckan.sos;
 
-import java.io.IOException;
-
 import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
 import javax.measure.unit.UnitFormat;
@@ -41,19 +39,11 @@ import org.joda.time.DateTimeZone;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.n52.io.geojson.JSONUtils;
 import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.beans.ResourceFieldCreator;
-import org.n52.series.ckan.da.CkanConstants;
 import org.n52.sos.ogc.gml.time.TimeInstant;
 import org.n52.sos.ogc.om.SingleObservationValue;
 import org.n52.sos.ogc.om.values.QuantityValue;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Strings;
-import com.vividsolutions.jts.geom.Geometry;
 
 public class DefaultSosInsertionStragetyTest {
 
@@ -68,7 +58,7 @@ public class DefaultSosInsertionStragetyTest {
     public void setUp() {
         this.fieldCreator = new ResourceFieldCreator();
     }
-
+    
     @Test
     public void testAddZuluWhenDateFormatMissesOffsetInfo() {
         ResourceField field = fieldCreator.createFull(TEST_DATE_TEMPLATE, "my-test-id", "YYYYMMDDhh");

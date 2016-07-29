@@ -31,7 +31,7 @@ package org.n52.series.ckan.sos;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -74,8 +74,8 @@ public class FileBasedDefaultSosInsertionStrategyTest extends HibernateTestCase 
         ckanDataCache = service.getCkanDataCache();
     }
 
-     @AfterClass
-     public static void tearDown() {
+     @After
+     public void tearDown() {
          H2Configuration.truncate();
      }
 
