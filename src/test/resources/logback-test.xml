@@ -10,12 +10,10 @@
 		</encoder>
 	</appender>
 
-	<logger name="org.n52" level="WARN" />
-	<logger name="org.n52.series" level="DEBUG" />
-	<logger name="org.apache" level="WARN" />
-    <logger name="org.springframework" level="WARN" />
+    <logger name="org.n52" level="DEBUG" />
+    <logger name="eu.trentorise.opendata.jackan" level="WARN" />
 
-	<root level="INFO">
+	<root level="WARN">
 		<appender-ref ref="STDOUT" />
 	</root>
 </configuration>
