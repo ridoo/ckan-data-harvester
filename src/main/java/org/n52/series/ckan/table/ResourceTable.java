@@ -88,7 +88,7 @@ public class ResourceTable extends DataTable {
                     resourceMember.getId(), lineNbr, columnHeaders.size(),
                     (System.currentTimeMillis() - start)/1000d);
             logMemory();
-        } catch (IOException e) {
+        } catch (Throwable e) { // RuntimeExceptions in csvParser#getNextRecord()
             LOGGER.error("could not read data from {}", filePath, e);
         }
     }
