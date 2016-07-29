@@ -28,27 +28,25 @@
  */
 package org.n52.series.ckan.beans;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.vividsolutions.jts.geom.Geometry;
+import static org.n52.series.ckan.util.JsonUtil.parseMissingToEmptyString;
 
-import java.util.Date;
 import java.util.Objects;
-import java.util.Set;
 
 import org.n52.series.ckan.da.CkanConstants;
-import static org.n52.series.ckan.util.JsonUtil.parseMissingToEmptyString;
+import org.n52.series.ckan.da.CkanMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 public class ResourceField {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceField.class);
 
     public static ResourceField copy(ResourceField field) {
-        return new ResourceField(field.node, field.index);
+        return new ResourceField(field.node, field.index)
+                .withCkanMapping(field.ckanMapping);
     }
-
-    private ResourceMember qualifier;
 
     private final String fieldId;
 
@@ -56,18 +54,25 @@ public class ResourceField {
 
     private final int index;
 
-    protected ResourceField(String fieldId) {
-        // just for testing
-        this.fieldId = fieldId.toLowerCase();
-        node = null;
-        index = -1;
-    }
+    private ResourceMember qualifier;
+
+    private CkanMapping ckanMapping;
 
     public ResourceField(JsonNode node, int index) {
         this.node = node;
         this.index = index;
-        String id = parseMissingToEmptyString(node, CkanConstants.MemberProperty.FIELD_ID);
-        this.fieldId = id.toLowerCase();
+        this.ckanMapping = CkanMapping.loadCkanMapping();
+        this.fieldId = getValueOfField(CkanConstants.MemberProperty.FIELD_ID);
+    }
+
+    public ResourceField withCkanMapping(CkanMapping propertyIdMapping) {
+        this.ckanMapping = propertyIdMapping;
+        return this;
+    }
+
+    public ResourceField withQualifier(ResourceMember qualifier) {
+        this.qualifier = qualifier;
+        return this;
     }
 
     public String getFieldId() {
@@ -87,42 +92,31 @@ public class ResourceField {
     }
 
     public String getShortName() {
-        return parseMissingToEmptyString(node, CkanConstants.MemberProperty.SHORT_NAME, CkanConstants.MemberProperty.FIELD_SHORTNAME);
+        return getValueOfField(CkanConstants.MemberProperty.SHORT_NAME);
     }
 
     public String getLongName() {
-        return parseMissingToEmptyString(node, CkanConstants.MemberProperty.MEMBER_FIELD_LONG_NAME, CkanConstants.MemberProperty.FIELD_LONGNAME);
+        return getValueOfField(CkanConstants.MemberProperty.MEMBER_FIELD_LONG_NAME);
     }
 
     public String getDescription() {
-        return parseMissingToEmptyString(node, CkanConstants.MemberProperty.FIELD_DESCRIPTION);
+        return getValueOfField(CkanConstants.MemberProperty.FIELD_DESCRIPTION);
     }
 
     public String getFieldType() {
-        return parseMissingToEmptyString(node, CkanConstants.MemberProperty.FIELD_TYPE, CkanConstants.MemberProperty.FIELDTYPE);
+        return getValueOfField(CkanConstants.MemberProperty.FIELD_TYPE);
     }
 
     public String getFieldRole() {
-        return parseMissingToEmptyString(node, CkanConstants.MemberProperty.FIELD_ROLE);
+        return getValueOfField(CkanConstants.MemberProperty.FIELD_ROLE);
     }
 
     public boolean hasFieldRole() {
         return !getFieldRole().isEmpty();
     }
 
-    public boolean isField(String knownFieldId) {
-        return getFieldId().equalsIgnoreCase(knownFieldId);
-    }
-
-    public boolean isField(Set<String> knownFieldIds) {
-        if (knownFieldIds != null) {
-            for (String fieldId : knownFieldIds) {
-                if (isField(fieldId)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+    public boolean isField(String fieldId) {
+        return ckanMapping.hasMapping(getFieldId(), fieldId);
     }
 
     public boolean hasProperty(String property) {
@@ -151,36 +145,17 @@ public class ResourceField {
 
     public boolean isOfType(Class<?> clazz) {
         final String fieldType = getFieldType();
-        if (clazz == Integer.class) {
-            return fieldType.equalsIgnoreCase("Integer")
-                    || fieldType.equalsIgnoreCase("int");
-        }
-        if (clazz == Boolean.class) {
-            return fieldType.equalsIgnoreCase("Boolean")
-                    || fieldType.equalsIgnoreCase("bool");
-        }
-        if (clazz == Date.class) {
-            return fieldType.equalsIgnoreCase("date")
-                    || fieldType.equalsIgnoreCase("datum");
-        }
-        if (clazz == Double.class) {
-            return fieldType.equalsIgnoreCase("float")
-                    || fieldType.equalsIgnoreCase("double")
-                    || fieldType.equalsIgnoreCase("decimal");
-        }
-        if (clazz == String.class) {
-            return fieldType.equalsIgnoreCase("String")
-                    || fieldType.equalsIgnoreCase("text");
-        }
-        if (clazz == Geometry.class) {
-            return fieldType.equalsIgnoreCase("Geometry")
-                    || fieldType.equalsIgnoreCase("WKT_Geometry")
-                    || fieldType.equalsIgnoreCase("GeoJson_Geometry");
-        }
-        return false;
+        String ofType = clazz.getSimpleName().toLowerCase();
+        return isOfType(fieldType, ofType);
     }
 
+    public boolean isOfType(final String fieldType, String ofType) {
+        return ckanMapping.hasMapping(ofType, fieldType);
+    }
 
+    private String getValueOfField(String fieldName) {
+        return parseMissingToEmptyString(node, ckanMapping.getMappings(fieldName));
+    }
 
     @Override
     public int hashCode() {
@@ -196,7 +171,7 @@ public class ResourceField {
             return false;
         }
         final ResourceField other = (ResourceField) obj;
-        if (!Objects.equals(this.fieldId, other.fieldId)) {
+        if (!Objects.equals(this.fieldId.toLowerCase(), other.fieldId.toLowerCase())) {
             return false;
         }
         return true;

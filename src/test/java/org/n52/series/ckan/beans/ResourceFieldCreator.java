@@ -28,59 +28,45 @@
  */
 package org.n52.series.ckan.beans;
 
-import eu.trentorise.opendata.jackan.model.CkanDataset;
-import java.io.File;
-import java.sql.Timestamp;
-import org.joda.time.DateTime;
+import static org.junit.Assert.fail;
 
-public class DescriptionFile {
+import java.io.IOException;
+import java.util.IllegalFormatException;
 
-    private final SchemaDescriptor schemaDescription;
+import org.n52.series.ckan.da.CkanMapping;
 
-    private final CkanDataset dataset;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-    private final File file;
+public class ResourceFieldCreator {
 
-    public DescriptionFile(CkanDataset dataset, File file, SchemaDescriptor node) {
-        this.schemaDescription = node;
-        this.dataset = dataset;
-        this.file = file;
+    private CkanMapping ckanMapping;
+
+    public ResourceFieldCreator() {
+        this.ckanMapping = CkanMapping.loadCkanMapping();
     }
 
-    public CkanDataset getDataset() {
-        return dataset;
+    public ResourceFieldCreator withCkanMapping(CkanMapping ckanMapping) {
+        this.ckanMapping = ckanMapping;
+        return this;
     }
 
-    public File getFile() {
-        return file;
+    public ResourceField createSimple(String id) {
+        return createFull("{ \"field_id\": \"%s\", \"field_type\": \"string\" }", id);
     }
 
-    public SchemaDescriptor getSchemaDescription() {
-        return schemaDescription;
-    }
-
-    public DateTime getLastModified() {
-        return new DateTime(dataset.getMetadataModified());
-    }
-
-    public boolean isNewerThan(CkanDataset dataset) {
-        if (dataset == null) {
-            return false;
+    public ResourceField createFull(String json, Object... args) {
+        try {
+            json = String.format(json, args);
+            JsonNode node = new ObjectMapper().readTree(json);
+            return new ResourceField(node, 0)
+                    .withCkanMapping(ckanMapping);
+        } catch (IllegalFormatException | IOException e) {
+            e.printStackTrace();
+            fail("Could not create field!");
+            return null;
         }
-        Timestamp probablyNewer = dataset.getMetadataModified();
-        Timestamp current = this.dataset.getMetadataModified();
-        return this.dataset.getId().equals(dataset.getId())
-                ? current.after(probablyNewer)
-                : false;
 
     }
-
-    @Override
-    public String toString() {
-        return "DescriptionFile [schemaDescription=" + schemaDescription + ", datasetname=" + dataset.getName() + ", file=" + file.getAbsolutePath()
-                + "]";
-    }
-
-
 
 }

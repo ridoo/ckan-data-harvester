@@ -8,7 +8,8 @@
         <version>2</version>
     </parent>
 
-    <artifactId>ckan-proxy</artifactId>
+    <groupId>org.n52.sensorweb.ckan</groupId>
+    <artifactId>data-harvester</artifactId>
     <packaging>jar</packaging>
     <name>RESTful Sensor Web API - CKAN</name>
     <description>REST SPI Implementation for CKAN data.</description>
@@ -22,7 +23,7 @@
         <logback.version>1.1.3</logback.version>
         <hamcrest.version>1.3</hamcrest.version>
 
-        <jackan.version>0.4.2</jackan.version>
+        <jackan.version>0.4.3-SNAPSHOT</jackan.version>
         <jackson.version>2.3.3</jackson.version>
         <sos.version>4.4.0-SNAPSHOT</sos.version>
         <series.api.version>2.0.0-SNAPSHOT</series.api.version>
@@ -39,12 +40,35 @@
             <groupId>org.n52.series-api</groupId>
             <artifactId>io</artifactId>
             <version>${series.api.version}</version>
+            
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.apache.xmlbeans</groupId>
+            <artifactId>xmlbeans</artifactId>
+            <version>2.6.0</version>
         </dependency>
         <dependency>
-            <groupId>org.n52.series-api</groupId>
-            <artifactId>rest</artifactId>
-            <version>${series.api.version}</version>
+            <groupId>com.vividsolutions</groupId>
+            <artifactId>jts</artifactId>
+            <version>1.13</version>
         </dependency>
+<!--         <dependency> -->
+<!--             <groupId>org.geotools</groupId> -->
+<!--             <artifactId>gt-opengis</artifactId> -->
+<!--             <version>14.0</version> -->
+<!--         </dependency> -->
+<!--         <dependency> -->
+<!--             <groupId>org.springframework</groupId> -->
+<!--             <artifactId>spring-core</artifactId> -->
+<!--             <version>4.2.2-RELEASE</version> -->
+<!--         </dependency> -->
 
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -60,6 +84,11 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
             <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>2.8.2</version>
         </dependency>
 
         <!-- <dependency>
@@ -85,21 +114,6 @@
         </dependency>
         <dependency>
             <groupId>org.n52.sensorweb.sos</groupId>
-            <artifactId>hibernate-datasource-postgres</artifactId>
-            <version>${sos.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.n52.sensorweb.sos</groupId>
-            <artifactId>hibernate-session-factory</artifactId>
-            <version>${sos.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.n52.sensorweb.sos</groupId>
-            <artifactId>hibernate-common</artifactId>
-            <version>${sos.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.n52.sensorweb.sos</groupId>
             <artifactId>hibernate-dao</artifactId>
             <version>${sos.version}</version>
         </dependency>
@@ -115,16 +129,6 @@
         </dependency>
         <dependency>
             <groupId>org.n52.sensorweb.sos</groupId>
-            <artifactId>hibernate-feature</artifactId>
-            <version>${sos.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.n52.sensorweb.sos</groupId>
-            <artifactId>hibernate-datasource-common</artifactId>
-            <version>${sos.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.n52.sensorweb.sos</groupId>
             <artifactId>coding-sensorML-v101</artifactId>
             <version>${sos.version}</version>
         </dependency>
@@ -133,6 +137,12 @@
             <artifactId>hibernate-h2</artifactId>
             <version>${sos.version}</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.mockito</groupId>
+                    <artifactId>mockito-all</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -141,9 +151,11 @@
             <version>${slf4j.version}</version>
         </dependency>
         <dependency>
+            <!-- drop-in replacement for JCL -->
             <groupId>org.slf4j</groupId>
-            <artifactId>jul-to-slf4j</artifactId>
+            <artifactId>jcl-over-slf4j</artifactId>
             <version>${slf4j.version}</version>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -152,15 +164,21 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-core</artifactId>
+            <version>${hamcrest.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-all</artifactId>
             <version>${hamcrest.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -516,11 +534,6 @@
             <snapshots><enabled>true</enabled></snapshots>
             <releases><enabled>false</enabled></releases>
             <url>https://52north.org/maven/repo/snapshots/</url>
-        </repository>
-        <repository>
-            <id>geotools</id>
-            <name>Open Source Geospatial Foundation Repository</name>
-            <url>http://download.osgeo.org/webdav/geotools/</url>
         </repository>
         
         <!-- <repository>

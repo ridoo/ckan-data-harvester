@@ -28,13 +28,8 @@
  */
 package org.n52.series.ckan.sos;
 
-import java.util.Map;
-
 import org.n52.series.ckan.beans.CsvObservationsCollection;
-import org.n52.series.ckan.beans.DataFile;
 import org.n52.series.ckan.beans.DescriptionFile;
-import org.n52.series.ckan.beans.ResourceMember;
-import org.n52.series.ckan.da.CkanConstants;
 
 public class SosStrategyFactory {
 
@@ -52,8 +47,6 @@ public class SosStrategyFactory {
 
 
     public SosInsertionStrategy createInsertionStrategy() {
-        Map<ResourceMember, DataFile> platformData = getDataOfType(CkanConstants.ResourceType.PLATFORMS);
-        Map<ResourceMember, DataFile> observationData = getDataOfType(CkanConstants.ResourceType.OBSERVATIONS);
 
         // depending on dataCollection structure we might have to choose a different insertion strategy
         // TODO add analytic methods to CsvObservationCollection to decide which strategy will fit
@@ -64,10 +57,6 @@ public class SosStrategyFactory {
         return ckanSosReferencingCache == null
                 ? new DefaultSosInsertionStrategy()
                 : new DefaultSosInsertionStrategy(ckanSosReferencingCache);
-    }
-
-    private Map<ResourceMember, DataFile> getDataOfType(String type) {
-        return dataCollection.getDataCollectionsOfType(type);
     }
 
     public SosStrategyFactory withData(CsvObservationsCollection dataCollection) {

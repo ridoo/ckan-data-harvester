@@ -11,12 +11,9 @@ This project includes:
   52°North SOS - Extension Delete Observation - Hibernate DAO under GPLv2
   52°North SOS - Extension Delete Observation - Operation under GPLv2
   52°North SOS - Hibernate Common under GPLv2
-  52°North SOS - Hibernate Common Datasource under GPLv2
   52°North SOS - Hibernate DAOs under GPLv2
-  52°North SOS - Hibernate Feature Query DAO under GPLv2
   52°North SOS - Hibernate H2 under GPLv2
   52°North SOS - Hibernate Mappings under GPLv2
-  52°North SOS - Hibernate Postgres/PostGIS Datasource under GPLv2
   52°North SOS - Hibernate Session Factory under GPLv2
   52°North SOS - SensorML 101 Request Coding under GPLv2
   52°North SOS - SOS API Module under GPLv2
@@ -32,7 +29,6 @@ This project includes:
   Apache Commons Logging under The Apache Software License, Version 2.0
   Apache FOP under The Apache Software License, Version 2.0
   Apache XML Graphics Commons under The Apache Software License, Version 2.0
-  API interfaces under GNU Lesser General Public License (LGPL) version 2.1
   Avalon Framework API under The Apache Software License, Version 2.0
   Avalon Framework Implementation under The Apache Software License, Version 2.0
   Batik animation engine under The Apache Software License, Version 2.0
@@ -59,10 +55,8 @@ This project includes:
   Core Hibernate O/RM functionality under GNU Lesser General Public License
   dom4j under DOM4J license, http://dom4j.sourceforge.net/dom4j-1.6.1/license.html (BSD style)
   EJML under The Apache Software License, Version 2.0
-  EPSG Authority Service using HSQL database under GNU Lesser General Public License (LGPL) version 2.1
   FindBugs-Annotations under GNU Lesser Public License
   FindBugs-jsr305 under The Apache Software License, Version 2.0
-  GeoDB Core under BSD style, https://github.com/jdeolive/geodb/blob/master/LICENSE.txt
   Guava: Google Core Libraries for Java under The Apache Software License, Version 2.0
   H2 Database Engine under The H2 License, Version 1.0
   Hamcrest All under New BSD License
@@ -81,6 +75,7 @@ This project includes:
   Java implementation of GeographicLib under The MIT License(MIT)
   Java Persistence API, Version 2.1 under Eclipse Public License (EPL), Version 1.0 or Eclipse Distribution License (EDL), Version 1.0
   Java Transaction API under Common Development and Distribution License or GNU General Public License, Version 2 with the Classpath Exception
+  java3d:vecmath under GPL 2.0 license w/ CPE
   Javassist under MPL 1.1 or LGPL 2.1 or Apache License 2.0
   javolution under BSD license
   JBoss Logging 3 under Apache License, version 2.0
@@ -88,7 +83,7 @@ This project includes:
   JCL 1.1.1 implemented over SLF4J under MIT License
   JCommon under GNU Lesser General Public Licence
   JFreeChart under GNU Lesser General Public Licence
-  jgridshift under GNU Lesser General Public License, version 2.0 (LGPLv2)
+  jgridshift:jgridshift under GNU Lesser General Public License, version 2.0 (LGPLv2)
   Joda-Time under Apache 2
   jscience under The Apache Software License, Version 2.0
   jsr-275 under BSD License
@@ -99,7 +94,6 @@ This project includes:
   Logback Classic Module under Eclipse Public License - v 1.0 or GNU Lesser General Public License
   Logback Core Module under Eclipse Public License - v 1.0 or GNU Lesser General Public License
   mchange-commons-java library under GNU Lesser General Public License, Version 2.1 or Eclipse Public License, Version 1.0
-  Metadata under GNU Lesser General Public License (LGPL) version 2.1
   Mockito under The MIT License
   net.sourceforge.hatbox:hatbox under GNU Lesser General Public License (LGPL) version 2.1
   OASIS WS-N specification schemas - including WS-BrokeredNotification (v1.3) under The Apache Software License, Version 2.0
@@ -121,15 +115,16 @@ This project includes:
   OGC SWES schema (spec. v2.0) under The Apache Software License, Version 2.0
   OGC WaterML DR schema (spec. v2.0) under The Apache Software License, Version 2.0
   OGC WaterML schema (spec. v2.0) under The Apache Software License, Version 2.0
-  Open GIS Interfaces under GNU Lesser General Public License (LGPL) version 2.1
-  Postgis JDBC Driver under GNU Lesser General Public License
-  PostgreSQL JDBC Driver - JDBC 4.2 under The PostgreSQL License
+  org.geotools:gt-api under GNU Lesser General Public License (LGPL) version 2.1
+  org.geotools:gt-epsg-hsql under GNU Lesser General Public License (LGPL) version 2.1
+  org.geotools:gt-metadata under GNU Lesser General Public License (LGPL) version 2.1
+  org.geotools:gt-opengis under GNU Lesser General Public License (LGPL) version 2.1
+  org.geotools:gt-referencing under GNU Lesser General Public License (LGPL) version 2.1
+  org.opengeo:geodb under BSD style, https://github.com/jdeolive/geodb/blob/master/LICENSE.txt
   Quartz Enterprise Job Scheduler under Apache 2.0
-  Referencing services under GNU Lesser General Public License (LGPL) version 2.1
   Reflections under WTFPL
   RESTful Sensor Web API - CKAN under The Apache Software License, Version 2.0
   Series REST API - IO module under GNU General Public License, Version 2.0
-  Series REST API - REST module under GNU General Public License, Version 2.0
   servlet-api under CDDL 1.1 or GPL2 w/ CPE
   SLF4J API Module under MIT License
   Spring AOP under The Apache Software License, Version 2.0
@@ -138,14 +133,11 @@ This project includes:
   Spring Context Support under The Apache Software License, Version 2.0
   Spring Core under The Apache Software License, Version 2.0
   Spring Expression Language (SpEL) under The Apache Software License, Version 2.0
-  Spring Web under The Apache Software License, Version 2.0
-  Spring Web MVC under The Apache Software License, Version 2.0
   SQLite JDBC under The Apache Software License, Version 2.0
   StAX API under The Apache Software License, Version 2.0
   Tod Commons under Apache License, Version 2.0
   Tod Commons Jackson under Apache License, Version 2.0
   TraceProv under Apache License, Version 2.0
-  vecmath under GPL 2.0 license w/ CPE
   W3C WS-Addressing specification schemas (v1.0) under The Apache Software License, Version 2.0
   W3C xlink schema (spec. v1.1.0) under The Apache Software License, Version 2.0
   xalan under The Apache Software License, Version 2.0

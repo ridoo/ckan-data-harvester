@@ -26,35 +26,45 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
-package org.n52.series.ckan.da;
 
-import java.io.IOException;
-import java.io.InputStream;
+package org.n52.series.ckan.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.hamcrest.CoreMatchers;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Strings;
+import com.vividsolutions.jts.geom.Geometry;
 
-public class CkanMappingConfigLoader {
+public class GeometryBuilderTest {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(CkanMappingConfigLoader.class);
-    private final static String DEFAULT_CONFIG_FILE = "/config-ckan-mapping.json";
+    private GeometryBuilder builder;
 
-    public MappingConfig readConfig(String configFile) {
-        if (Strings.isNullOrEmpty(configFile)) {
-            configFile = DEFAULT_CONFIG_FILE;
-            LOGGER.warn("Config file path is empty, use default file {}.", DEFAULT_CONFIG_FILE);
-        }
-        try (InputStream taskConfig = getClass().getResourceAsStream(configFile)) {
-            ObjectMapper om = new ObjectMapper();
-            return om.readValue(taskConfig, MappingConfig.class);
-        }
-        catch (IOException e) {
-            LOGGER.error("Could not load {}. Using empty config.", configFile, e);
-            return new MappingConfig();
-        }
+    @Before
+    public void setUp() {
+        this.builder = new GeometryBuilder();
     }
 
+    @Test
+    public void when_geoJsonPoint_then_returnGeometry() {
+        Assert.assertThat(builder.fromGeoJson("{'coordinates':[52.52,13.41],'type':'Point'}"),
+                          CoreMatchers.instanceOf(Geometry.class));
+    }
+
+    @Test
+    public void when_geoJsonLPolygon_then_returnGeometry() {
+        Assert.assertThat(builder.fromGeoJson(""
+                + "{\r\n" +
+                "    \"type\": \"Polygon\",\r\n" +
+                "    \"coordinates\": [\r\n" +
+                "        [\r\n" +
+                "            [100.0, 0.0],\r\n" +
+                "            [101.0, 0.0],\r\n" +
+                "            [101.0, 1.0],\r\n" +
+                "            [100.0, 1.0],\r\n" +
+                "            [100.0, 0.0]\r\n" +
+                "        ]\r\n" +
+                "    ]\r\n" +
+                "}"), CoreMatchers.instanceOf(Geometry.class));
+    }
 }

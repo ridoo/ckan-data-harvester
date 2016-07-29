@@ -28,14 +28,19 @@
  */
 package org.n52.series.ckan.util;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.trentorise.opendata.jackan.CkanClient;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.MissingNode;
+
+import eu.trentorise.opendata.jackan.CkanClient;
 
 public class JsonUtil {
 
@@ -55,22 +60,22 @@ public class JsonUtil {
         return new ObjectMapper();
     }
 
-    public static String parseMissingToEmptyString(JsonNode node, String fieldName, String... alternateFieldNames) {
-        JsonNode field = findField(node, fieldName, alternateFieldNames);
+    public static String parseMissingToEmptyString(JsonNode node, Set<String> alternateFieldNames) {
+        JsonNode field = findField(node, alternateFieldNames);
         return !field.isMissingNode()
                 ? field.asText()
                 : "";
     }
 
-    public static int parseMissingToNegativeInt(JsonNode node, String fieldName, String... alternateFieldNames) {
-        JsonNode field = findField(node, fieldName, alternateFieldNames);
+    public static int parseMissingToNegativeInt(JsonNode node, Set<String> alternateFieldNames) {
+        JsonNode field = findField(node, alternateFieldNames);
         return !field.isMissingNode()
                 ? field.asInt()
                 : -1;
     }
-    public static List<String> parseMissingToEmptyArray(JsonNode node, String fieldName, String... alternateFieldNames) {
+    public static List<String> parseMissingToEmptyArray(JsonNode node, Set<String> alternateFieldNames) {
         List<String> values = new ArrayList<>();
-        JsonNode field = findField(node, fieldName, alternateFieldNames);
+        JsonNode field = findField(node, alternateFieldNames);
         if ( !field.isMissingNode() && field.isArray()) {
             final Iterator<JsonNode> iter = field.iterator();
             while (iter.hasNext()) {
@@ -80,15 +85,13 @@ public class JsonUtil {
         return values;
     }
 
-    private static JsonNode findField(JsonNode node, String fieldName, String... alternateFieldNames) {
-        JsonNode field = getNodeWithName(fieldName, node);
-        field = tryLowerCasedIfMissing(field, fieldName, node);
-        if (field.isMissingNode() && alternateFieldNames != null) {
+    private static JsonNode findField(JsonNode node, Set<String> alternateFieldNames) {
+        JsonNode field = MissingNode.getInstance();
+        if (alternateFieldNames != null) {
             for (String alternateFieldName : alternateFieldNames) {
                 field = getNodeWithName(alternateFieldName, node);
                 field = tryLowerCasedIfMissing(field, alternateFieldName, node);
                 if ( !field.isMissingNode()) {
-                    LOGGER.debug("found node with deprecated property '{}'", alternateFieldName);
                     break;
                 }
             }

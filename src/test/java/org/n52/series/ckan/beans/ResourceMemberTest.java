@@ -28,19 +28,22 @@
  */
 package org.n52.series.ckan.beans;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.trentorise.opendata.jackan.model.CkanDataset;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
+
 import org.hamcrest.Matchers;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.n52.series.ckan.da.CkanConstants;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import eu.trentorise.opendata.jackan.model.CkanDataset;
 
 public class ResourceMemberTest {
 
@@ -53,7 +56,7 @@ public class ResourceMemberTest {
         ObjectMapper om = new ObjectMapper();
         final JsonNode node = om.readTree(getClass().getResource(SCHEMA_DESCRIPTOR));
         descriptor = new SchemaDescriptor(new CkanDataset(), node);
-        Assert.assertThat(descriptor.getSchemaDescriptionType(), Matchers.is(CkanConstants.ResourceType.CSV_OBSERVATIONS_COLLECTION));
+        assertThat(descriptor.getSchemaDescriptionType(), Matchers.is(CkanConstants.ResourceType.CSV_OBSERVATIONS_COLLECTION));
     }
 
     @Test
@@ -62,6 +65,6 @@ public class ResourceMemberTest {
         ResourceMember platformDescription = members.get(0);
         ResourceMember observationDescription = members.get(1);
         Set<ResourceField> joinableFields = platformDescription.getJoinableFields(observationDescription);
-        MatcherAssert.assertThat(joinableFields.size(), CoreMatchers.is(6));
+        assertThat(joinableFields.size(), is(6));
     }
 }

@@ -54,6 +54,14 @@ public class SerializingCkanCache extends InMemoryCkanMetadataCache implements C
 
     private String metadataCacheFile;
 
+    public SerializingCkanCache() {
+        super();
+    }
+
+    public SerializingCkanCache(String ckanMappingFile) {
+        super(ckanMappingFile);
+    }
+
     @PostConstruct
     public void init() {
         final File cacheFile = new File(metadataCacheFile);

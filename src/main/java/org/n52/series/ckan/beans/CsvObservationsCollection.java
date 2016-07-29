@@ -35,6 +35,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.n52.series.ckan.da.CkanConstants;
 
 public class CsvObservationsCollection {
@@ -81,18 +82,23 @@ public class CsvObservationsCollection {
     }
 
     public Map<ResourceMember, DataFile> getObservationDataCollections() {
-        return getDataCollectionsOfType(CkanConstants.ResourceType.OBSERVATIONS);
+        return getDataCollectionsOfType(getMappingsFor(CkanConstants.ResourceType.OBSERVATIONS));
     }
 
     public Map<ResourceMember, DataFile> getPlatformDataCollections() {
-        return getDataCollectionsOfType(CkanConstants.ResourceType.PLATFORMS);
+        return getDataCollectionsOfType(getMappingsFor(CkanConstants.ResourceType.PLATFORMS));
     }
 
-    public Map<ResourceMember, DataFile> getDataCollectionsOfType(String type) {
+    private Set<String> getMappingsFor(String name) {
+        SchemaDescriptor descriptor = schemaDescriptor.getSchemaDescription();
+        return descriptor.getCkanMapping().getMappings(name);
+    }
+
+    public Map<ResourceMember, DataFile> getDataCollectionsOfType(Set<String> types) {
         Map<ResourceMember, DataFile> typedCollection = new HashMap<>();
         for (Map.Entry<ResourceMember, DataFile> entry : dataCollection.entrySet()) {
             ResourceMember member = entry.getKey();
-            if (member.getResourceType().equalsIgnoreCase(type)) {
+            if (types.contains(member.getResourceType())) {
                 typedCollection.put(member, entry.getValue());
             }
         }

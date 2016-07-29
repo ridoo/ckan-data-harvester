@@ -30,15 +30,24 @@ package org.n52.series.ckan.table;
 
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
+import org.junit.Before;
 import org.junit.Test;
 import org.n52.series.ckan.beans.ResourceField;
+import org.n52.series.ckan.beans.ResourceFieldCreator;
 
 public class JoinIndexTest {
 
+    private ResourceFieldCreator fieldCreator;
+
+    @Before
+    public void setUp() {
+        this.fieldCreator = new ResourceFieldCreator();
+    }
+
     @Test
     public void testEqualityUsingId() {
-        final ResourceField first = new ResourceFieldSeam("test42");
-        final ResourceFieldSeam second = new ResourceFieldSeam("test42");
+        final ResourceField first = fieldCreator.createSimple("test42");
+        final ResourceField second = fieldCreator.createSimple("test42");
         JoinIndex index1 = new JoinIndex(first, "42");
         JoinIndex index2 = new JoinIndex(second, "42");
 
@@ -47,8 +56,8 @@ public class JoinIndexTest {
 
     @Test
     public void testEqualityIgnoringCase() {
-        final ResourceField first = new ResourceFieldSeam("test42");
-        final ResourceFieldSeam second = new ResourceFieldSeam("Test42");
+        final ResourceField first = fieldCreator.createSimple("test42");
+        final ResourceField second = fieldCreator.createSimple("Test42");
 
         JoinIndex index1 = new JoinIndex(first, "42");
         JoinIndex index2 = new JoinIndex(second, "42");
@@ -59,8 +68,8 @@ public class JoinIndexTest {
 
     @Test
     public void shouldFailTestingEqualityWithDifferentValue() {
-        final ResourceField first = new ResourceFieldSeam("test42");
-        final ResourceFieldSeam second = new ResourceFieldSeam("Test42");
+        final ResourceField first = fieldCreator.createSimple("test42");
+        final ResourceField second = fieldCreator.createSimple("Test42");
 
         JoinIndex index1 = new JoinIndex(first, "42");
         JoinIndex index2 = new JoinIndex(second, "10");
@@ -68,10 +77,4 @@ public class JoinIndexTest {
         MatcherAssert.assertThat(index1.equals(index2), CoreMatchers.is(false));
     }
 
-    private static class ResourceFieldSeam extends ResourceField {
-
-        public ResourceFieldSeam(String fieldId) {
-            super(fieldId);
-        }
-    }
 }

@@ -28,22 +28,28 @@
  */
 package org.n52.series.ckan.util;
 
-import eu.trentorise.opendata.jackan.CkanClient;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
+
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
-import org.junit.Ignore;
-import org.junit.Test;
 import org.n52.series.ckan.cache.InMemoryCkanDataCache;
 import org.n52.series.ckan.cache.InMemoryCkanMetadataCache;
 import org.n52.series.ckan.da.CkanHarvestingService;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
-@Ignore("to download current test data, run this test (requires remote access). After downloading, the resources can be found in the test-classes fodler.")
+import eu.trentorise.opendata.jackan.CkanClient;
+
 public class DownloadCkanTestResources {
 
-    @Test
-    public void downloadCurrentTestDataFromCkan() throws URISyntaxException, IOException {
+    public static void main(String[] args) throws URISyntaxException, IOException {
+        
+//        redirectJulToSlf4JLogging();
+//        System.out.println(System.setProperty("javax.net.debug", "all"));
+        
         InMemoryCkanMetadataCache ckanMetadataCache = new InMemoryCkanMetadataCache();
         InMemoryCkanDataCache ckanDataCache = new InMemoryCkanDataCache();
 
@@ -51,7 +57,7 @@ public class DownloadCkanTestResources {
         ckanHarvester.setCkanClient(new CkanClient("https://ckan.colabis.de"));
         ckanHarvester.setResourceClient(new ResourceClient());
 
-        String baseFolder = getClass().getResource("/files").toString();
+        String baseFolder = DownloadCkanTestResources.class.getResource("/files").toString();
         ckanHarvester.setResourceDownloadBaseFolder(baseFolder + "/dwd");
         ckanHarvester.setMetadataCache(ckanMetadataCache);
         ckanHarvester.setDataCache(ckanDataCache);
@@ -59,5 +65,11 @@ public class DownloadCkanTestResources {
         MatcherAssert.assertThat(ckanMetadataCache.size(), CoreMatchers.is(0));
         ckanHarvester.harvestDatasets();
         ckanHarvester.harvestResources();
+    }
+
+    private static void redirectJulToSlf4JLogging() {
+        // http://stackoverflow.com/questions/9117030/jul-to-slf4j-bridge
+        SLF4JBridgeHandler.install();
+        Logger.getLogger("eu.trentorise.opendata.jackan").setLevel(Level.FINEST);
     }
 }

@@ -54,42 +54,38 @@ public interface CkanConstants {
     }
 
     public interface MemberProperty {
-
         public static final String RESOURCE_NAME = "resource_name";
-        @Deprecated
-        public static final String RESOURCEID = "resourceId";
         public static final String RESOURCE_TYPE = "resource_type";
-        @Deprecated
-        public static final String RESOURCETYPE = "resourcetype";
         public static final String HEADER_ROWS = "headerrows";
         public static final String FIELD_ID = "field_id";
-        @Deprecated
-        public static final String FIELDID = "fieldId";
         public static final String SHORT_NAME = "short_name";
-        @Deprecated
-        public static final String FIELD_SHORTNAME = "shortName";
         public static final String MEMBER_FIELD_LONG_NAME = "long_name";
-        @Deprecated
-        public static final String FIELD_LONGNAME = "longName";
         public static final String FIELD_DESCRIPTION = "description";
         public static final String FIELD_TYPE = "field_type";
-        @Deprecated
-        public static final String FIELDTYPE = "fieldType";
         public static final String NO_DATA = "no_data";
         public static final String FIELD_ROLE = "field_role";
     }
 
-    public interface KnownFieldId {
-        public static final String STATION_ID = "Stations_id";
-        public static final String CRS = "crs";
-        public static final String LATITUDE = "geoBreite";
-        public static final String LONGITUDE = "geoLaenge";
-        public static final String ALTITUDE = "Stationshoehe";
-        public static final String STATION_NAME = "Stationsname";
-        public static final String FIRST_DATE = "von_datum";
-        public static final String LAST_DATE = "bis_datum";
+    public interface DataType {
+        public static final String INTEGER = "Integer";
+        public static final String BOOLEAN = "Boolean";
+        public static final String GEOMETRY = "Geometry";
+        public static final String DOUBLE = "Double";
+        public static final String STRING = "String";
+        public static final String DATE = "Date";
+    }
 
-        public static final String RESULT_TIME = "MESS_DATUM";
+    public interface KnownFieldId {
+        public static final String STATION_ID = "station_id";
+        public static final String CRS = "crs";
+        public static final String LATITUDE = "latitude";
+        public static final String LONGITUDE = "longitude";
+        public static final String ALTITUDE = "altitude";
+        public static final String STATION_NAME = "station_name";
+        public static final String FIRST_DATE = "first_date";
+        public static final String LAST_DATE = "last_date";
+
+        public static final String RESULT_TIME = "result_time";
         public static final String LOCATION = "location";
         public static final String VALID_TIME_START = "valid_time_start";
         public static final String VALID_TIME_END = "valid_time_end";
@@ -102,7 +98,6 @@ public interface CkanConstants {
         public static final String TIMESTAMP = "timestamp";
         public static final String VALID_TIME_START = "valid_time_start";
         public static final String VALID_TIME_END = "valid_time_end";
-        // ???
         public static final String LOCATION = "location";
     }
 
