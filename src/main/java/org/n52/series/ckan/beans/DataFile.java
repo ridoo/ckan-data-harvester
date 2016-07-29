@@ -36,26 +36,31 @@ import org.n52.series.ckan.da.CkanConstants;
 
 public class DataFile {
 
-    private Charset encoding = CkanConstants.DEFAULT_CHARSET;
+    private final Charset encoding;
 
     private final CkanResource resource;
 
+    private final String format;
+
     private final File file;
 
-    public DataFile(CkanResource resource, File file) {
+    public DataFile(CkanResource resource, String format, File file) {
+        this(resource, format, file, null);
+    }
+
+    public DataFile(CkanResource resource, String format, File file, String encoding) {
         if (resource == null) {
             throw new NullPointerException("resource is null.");
         }
         if (file == null) {
             throw new NullPointerException("file is null.");
         }
+        this.format = format;
+        this.encoding = encoding == null
+                ? CkanConstants.DEFAULT_CHARSET
+                : Charset.forName(encoding);
         this.resource = resource;
         this.file = file;
-    }
-
-    public DataFile(CkanResource resource, File file, String encoding) {
-        this(resource, file);
-        this.encoding = Charset.forName(encoding);
     }
 
     public Charset getEncoding() {
@@ -64,6 +69,10 @@ public class DataFile {
 
     public CkanResource getResource() {
         return resource;
+    }
+
+    public String getFormat() {
+        return format;
     }
 
     public File getFile() {

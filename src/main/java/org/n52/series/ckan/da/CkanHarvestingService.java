@@ -121,14 +121,14 @@ public class CkanHarvestingService {
 
                 String datasetId = dataset.getId();
                 List<String> resourceIds = getResourceIds(description.getSchemaDescription());
-                Map<String, DataFile> csvContents = downloadCsvFiles(dataset, resourceIds);
+                Map<String, DataFile> dataFiles = downloadFiles(dataset, resourceIds);
                 
-                LOGGER.debug("downloaded data files for '{}': {}", dataset.getName(), csvContents.keySet());
+                LOGGER.debug("downloaded data files for '{}': {}", dataset.getName(), dataFiles.keySet());
 
                 // TODO check when to delete or update resource
 
                 dataCache.insertOrUpdate(dataset,
-                        new CsvObservationsCollection(datasetId, description, csvContents));
+                        new CsvObservationsCollection(datasetId, description, dataFiles));
                 observationCollectionCount++;
             }
         }
@@ -172,31 +172,34 @@ public class CkanHarvestingService {
         return resourceIds;
     }
 
-    private Map<String, DataFile> downloadCsvFiles(CkanDataset dataset, List<String> resourceIds) {
-        Map<String, DataFile> csvFiles = new HashMap<>();
+    private Map<String, DataFile> downloadFiles(CkanDataset dataset, List<String> resourceIds) {
+        Map<String, DataFile> files = new HashMap<>();
         Path datasetDownloadFolder = getDatasetDownloadFolder(dataset);
         for (CkanResource resource : dataset.getResources()) {
             if (resourceIds.contains(resource.getId())) {
                 try {
-                    DataFile datafile = downloadCsvFile(resource, datasetDownloadFolder);
-                    csvFiles.put(resource.getId(), datafile);
+                    DataFile datafile = downloadFile(resource, datasetDownloadFolder);
+                    files.put(resource.getId(), datafile);
                 } catch (IOException e) {
                     String url = resource.getUrl();
                     LOGGER.error("Could not download resource from {}.", url, e);
                 }
             }
         }
-        return csvFiles;
+        return files;
     }
 
-    protected DataFile downloadCsvFile(CkanResource resource, Path datasetDownloadFolder) throws IOException {
-        final String resourceName = resource.getId() + ".csv";
+    protected DataFile downloadFile(CkanResource resource, Path datasetDownloadFolder) throws IOException {
+        String format = resource.getFormat() != null
+                ? resource.getFormat().toLowerCase()
+                : ".csv"; // XXX as default ok?
+        final String resourceName = resource.getId() + "." + format;
         File file = datasetDownloadFolder.resolve(resourceName).toFile();
 
         // TODO download only when newer
         
         downloadToFile(resource.getUrl(), file);
-        return new DataFile(resource, file);
+        return new DataFile(resource, format, file);
     }
 
     private String extractFileName(CkanResource resource) {

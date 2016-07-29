@@ -98,15 +98,16 @@ public class FileBasedCkanHarvester extends CkanHarvestingService {
     }
 
     @Override
-    protected DataFile downloadCsvFile(CkanResource resource, Path datasetDownloadFolder) throws IOException {
+    protected DataFile downloadFile(CkanResource resource, Path datasetDownloadFolder) throws IOException {
         File folder = getSourceDataFolder();
         File[] dataFolders = folder.listFiles();
         String id = resource.getId();
+        String format = resource.getFormat();
         for (File file : dataFolders) {
             if (file.isDirectory()) {
-                Path datapath = file.toPath().resolve(id + ".csv");
+                Path datapath = file.toPath().resolve(id + "." + format);
                 if (datapath.toFile().exists()) {
-                    return new DataFile(resource, datapath.toFile());
+                    return new DataFile(resource, format, datapath.toFile());
                 }
             }
         }
