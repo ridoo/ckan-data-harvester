@@ -31,7 +31,6 @@ package org.n52.series.ckan.util;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.logging.Level;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import org.hamcrest.CoreMatchers;

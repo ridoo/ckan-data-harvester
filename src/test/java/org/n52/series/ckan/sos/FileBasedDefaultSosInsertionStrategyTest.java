@@ -80,6 +80,9 @@ public class FileBasedDefaultSosInsertionStrategyTest extends HibernateTestCase 
          H2Configuration.truncate();
      }
 
+     // XXX avoid loading ALL data into database
+     // TODO instead, create data loaders for each file set (and reduce it to a minimum to keep tests fast)
+     
     @Test
     public void parseSensorsFromObservationCollection() throws OwsExceptionReport {
         insertionStrategy = new DefaultSosInsertionStrategy();
