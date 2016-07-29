@@ -30,7 +30,6 @@ package org.n52.series.ckan.beans;
 
 import static org.n52.series.ckan.util.JsonUtil.parseMissingToEmptyString;
 
-import java.util.Date;
 import java.util.Objects;
 
 import org.n52.series.ckan.da.CkanConstants;
@@ -39,7 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.vividsolutions.jts.geom.Geometry;
 
 public class ResourceField {
 
@@ -147,25 +145,12 @@ public class ResourceField {
 
     public boolean isOfType(Class<?> clazz) {
         final String fieldType = getFieldType();
-        if (clazz == Integer.class) {
-            return ckanMapping.hasMapping(CkanConstants.DataType.INTEGER, fieldType);
-        }
-        if (clazz == Boolean.class) {
-            return ckanMapping.hasMapping(CkanConstants.DataType.BOOLEAN, fieldType);
-        }
-        if (clazz == Date.class) {
-            return ckanMapping.hasMapping(CkanConstants.DataType.DATE, fieldType);
-        }
-        if (clazz == Double.class) {
-            return ckanMapping.hasMapping(CkanConstants.DataType.DOUBLE, fieldType);
-        }
-        if (clazz == String.class) {
-            return ckanMapping.hasMapping(CkanConstants.DataType.STRING, fieldType);
-        }
-        if (clazz == Geometry.class) {
-            return ckanMapping.hasMapping(CkanConstants.DataType.GEOMETRY, fieldType);
-        }
-        return false;
+        String ofType = clazz.getSimpleName().toLowerCase();
+        return isOfType(fieldType, ofType);
+    }
+
+    public boolean isOfType(final String fieldType, String ofType) {
+        return ckanMapping.hasMapping(ofType, fieldType);
     }
 
     private String getValueOfField(String fieldName) {

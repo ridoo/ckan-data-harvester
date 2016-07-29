@@ -51,6 +51,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 
 public class CkanMapping {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(CkanMapping.class);
 
     private Map<String, Set<String>> mappingsByName;
 
@@ -68,6 +70,7 @@ public class CkanMapping {
 
     public Set<String> getMappings(String name) {
         if ( !mappingsByName.containsKey(name)) {
+            LOGGER.debug("No mapping for name '{}'", name);
             return Collections.singleton(name);
         }
         else {

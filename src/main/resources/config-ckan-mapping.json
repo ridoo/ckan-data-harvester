@@ -1,4 +1,8 @@
 {
+    "platforms": [
+        "platform"
+    ],
+    "observations": [],
 	"result_time": [
 		"datetime",
 		"MESS_DATUM"
@@ -14,6 +18,7 @@
 	   "zeitstempel",
 	   "unixtime"
 	],
+	"headerrows": [],
 	"date_format": [],
 	"valid_time_start": [],
 	"valid_time_end": [],
@@ -25,8 +30,8 @@
 		"stationName",
 		"sensor_name"
 	],
-	"shortName": [
-		"short_name"
+	"short_name": [
+		"shortName"
 	],
 	"long_name": [
 		"longName"
@@ -43,10 +48,10 @@
 	"resource_type": [
 		"resourcetype"
 	],
-	"Integer": [
+	"integer": [
 		"int"
 	],
-	"Boolean": [
+	"boolean": [
 		"bool",
 		"truefalse"
 	],

@@ -67,20 +67,20 @@ public class SchemaDescriptor {
         return this;
     }
 
-    private String getStringValueOf(String field) {
-        return JsonUtil.parseMissingToEmptyString(node, ckanMapping.getMappings(field));
+    private String getStringValueOf(JsonNode jsonNode, String field) {
+        return JsonUtil.parseMissingToEmptyString(jsonNode, ckanMapping.getMappings(field));
     }
 
     public String getVersion() {
-        return getStringValueOf(CkanConstants.SchemaDescriptor.VERSION);
+        return getStringValueOf(node, CkanConstants.SchemaDescriptor.VERSION);
     }
 
     public String getDescription() {
-        return getStringValueOf(CkanConstants.SchemaDescriptor.DESCRIPTION);
+        return getStringValueOf(node, CkanConstants.SchemaDescriptor.DESCRIPTION);
     }
 
     public String getSchemaDescriptionType() {
-        return getStringValueOf(CkanConstants.SchemaDescriptor.RESOURCE_TYPE);
+        return getStringValueOf(node, CkanConstants.SchemaDescriptor.RESOURCE_TYPE);
     }
 
     public JsonNode getNode() {
@@ -116,7 +116,7 @@ public class SchemaDescriptor {
             for (String id : JsonUtil.parseMissingToEmptyArray(memberNode, ckanMapping.getMappings(CkanConstants.MemberProperty.RESOURCE_NAME))) {
                 ResourceMember member = new ResourceMember();
                 member.setId(id); // TODO missing ids will cause conflicts/inconsistencies
-                member.setResourceType(getStringValueOf(CkanConstants.MemberProperty.RESOURCE_TYPE));
+                member.setResourceType(getStringValueOf(memberNode, CkanConstants.MemberProperty.RESOURCE_TYPE));
                 final int headerRows = parseMissingToNegativeInt(memberNode, ckanMapping.getMappings(CkanConstants.MemberProperty.HEADER_ROWS));
                 member.setHeaderRows(headerRows < 0 ? 1 : headerRows); // assume 1 header row by default
                 member.setResourceFields(parseResourceFields(member, memberNode));
@@ -139,6 +139,10 @@ public class SchemaDescriptor {
             index++;
         }
         return fields;
+    }
+
+    public CkanMapping getCkanMapping() {
+        return ckanMapping;
     }
 
 
