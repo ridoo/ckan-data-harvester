@@ -137,6 +137,12 @@
             <artifactId>hibernate-h2</artifactId>
             <version>${sos.version}</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.mockito</groupId>
+                    <artifactId>mockito-all</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

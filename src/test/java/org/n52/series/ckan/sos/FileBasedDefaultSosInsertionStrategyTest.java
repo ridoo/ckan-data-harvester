@@ -30,8 +30,12 @@ package org.n52.series.ckan.sos;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -93,8 +97,10 @@ public class FileBasedDefaultSosInsertionStrategyTest extends HibernateTestCase 
         getObsReq.setService(SosConstants.SOS);
         getObsReq.setVersion(Sos2Constants.SERVICEVERSION);
         GetObservationResponse getObsResponse = getObsDAO.getObservation(getObsReq);
-        assertThat(getObsResponse.getObservationCollection().isEmpty(), is(false));
-        for (OmObservation obs : getObsResponse.getObservationCollection()) {
+        List<OmObservation> observationCollection = getObsResponse.getObservationCollection();
+        assertThat(observationCollection, is(notNullValue()));
+        assertThat(observationCollection, is(not(empty())));
+        for (OmObservation obs : observationCollection) {
             LOGGER.info(obs.getObservationConstellation().toString());
         }
     }
