@@ -45,6 +45,10 @@ public class ResourceMember {
 
     private List<ResourceField> resourceFields;
 
+    public ResourceMember() {
+        this.resourceFields = new ArrayList<>();
+    }
+
     public String getId() {
         return id;
     }
@@ -70,7 +74,9 @@ public class ResourceMember {
     }
 
     public List<ResourceField> getResourceFields() {
-        return Collections.unmodifiableList(resourceFields);
+        return resourceFields != null
+                ? Collections.unmodifiableList(resourceFields)
+                : Collections.<ResourceField>emptyList();
     }
 
     public ResourceField getField(String fieldId) {
@@ -120,22 +126,29 @@ public class ResourceMember {
         Set<ResourceField> joinFields = new HashSet<>();
         for (ResourceField otherField : other.resourceFields) {
             if (resourceFields.contains(otherField)) {
-                joinFields.add(otherField);
+                joinFields.add(ResourceField.copy(otherField));
             }
         }
-        return joinFields;
+        return Collections.unmodifiableSet(joinFields);
     }
 
     public Set<ResourceField> getJoinableFields(ResourceMember other) {
         if ( !isJoinable(other)) {
             return Collections.<ResourceField>emptySet();
         }
-        // TODO remove actial join column(s)?!
-        Set<ResourceField> fields = new HashSet<>(other.resourceFields);
+        Set<ResourceField> fields = new HashSet<>();
+        for (ResourceField possibleJoinColumn : other.resourceFields) {
+            if (resourceFields.contains(possibleJoinColumn)) {
+                fields.add(ResourceField.copy(possibleJoinColumn));
+            }
+        }
         return Collections.unmodifiableSet(fields);
     }
 
-    private boolean isJoinable(ResourceMember other) {
+    public boolean isJoinable(ResourceMember other) {
+        if ( !isValid(this) || !isValid(other)) {
+            return false;
+        }
         if (this == other || resourceType.equalsIgnoreCase(other.resourceType)) {
             return false;
         }
@@ -147,8 +160,14 @@ public class ResourceMember {
         return false;
     }
 
+    private boolean isValid(ResourceMember member) {
+        return !(member == null || member.resourceType == null);
+    }
+
     public void setResourceFields(List<ResourceField> resourceFields) {
-        this.resourceFields = resourceFields;
+        this.resourceFields = resourceFields == null
+                ? this.resourceFields
+                : resourceFields;
     }
 
     @Override

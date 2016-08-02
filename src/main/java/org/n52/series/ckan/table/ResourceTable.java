@@ -50,18 +50,34 @@ public class ResourceTable extends DataTable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceTable.class);
 
-    private final DataFile dataFile;
+    private DataFile dataFile;
 
     public static interface InvalidRowCountHandler {
         // TODO
+    }
+
+    public ResourceTable() {
+        this(new ResourceMember(), new DataFile());
     }
 
     public ResourceTable(ResourceMember resourceMember, DataFile dataFile) {
         super(resourceMember);
         this.dataFile = dataFile;
     }
+    
+    public DataFile getDataFile() {
+        return dataFile;
+    }
+
+    public void setDataFile(DataFile dataFile) {
+        this.dataFile = dataFile;
+    }
 
     public void readIntoMemory() {
+        if (dataFile == null) {
+            return;
+        }
+        table.clear();
         String ckanResourceName = dataFile.getResource().getName();
         LOGGER.debug("Load data file '{}': {}", ckanResourceName, dataFile.toString());
         try (CSVParser csvParser = createCsvParser(dataFile)) {

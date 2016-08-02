@@ -7,6 +7,7 @@
         "default"
     ],
     "result_time": [
+        "resultTime",
         "datetime",
         "MESS_DATUM"
     ],

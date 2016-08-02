@@ -38,40 +38,58 @@ import java.util.Set;
 
 import org.n52.series.ckan.da.CkanConstants;
 
+import eu.trentorise.opendata.jackan.model.CkanDataset;
+
 public class CsvObservationsCollection {
 
-    private final String datasetId;
+    private final CkanDataset dataset;
 
     private final Map<ResourceMember, DataFile> dataCollection;
 
     private final DescriptionFile schemaDescriptor;
-
-    public CsvObservationsCollection(String datasetId, DescriptionFile description, Map<String, DataFile> csvContents) {
-        this.datasetId = datasetId;
-        SchemaDescriptor descriptor = description.getSchemaDescription();
-        this.dataCollection = descriptor.relateWithDataFiles(csvContents);
-        this.schemaDescriptor = description;
+    
+    public CsvObservationsCollection() {
+        this(null, null, null);
     }
 
-    public String getDatasetId() {
-        return datasetId;
+    public CsvObservationsCollection(CkanDataset dataset, DescriptionFile description, Map<String, DataFile> csvContents) {
+        this.dataset = dataset == null
+                ? new CkanDataset()
+                : dataset;
+        this.schemaDescriptor = description == null
+                ? new DescriptionFile()
+                : description;
+        SchemaDescriptor descriptor = description.getSchemaDescription();
+        this.dataCollection = descriptor.relateWithDataFiles(csvContents);
+    }
+
+    public CkanDataset getDataset() {
+        return dataset;
     }
 
     public String getDescription() {
-        return schemaDescriptor.getSchemaDescription().getDescription();
+        return schemaDescriptor != null
+                ? schemaDescriptor.getSchemaDescription().getDescription()
+                : null;
     }
 
     public DescriptionFile getSchemaDescriptor() {
         return schemaDescriptor;
     }
+    
+    public DataFile getDataFile(ResourceMember resourceMember) {
+        return getDataCollection().get(resourceMember);
+    }
 
     public Map<ResourceMember, DataFile> getDataCollection() {
-        return Collections.unmodifiableMap(dataCollection);
+        return dataCollection != null
+                ? Collections.unmodifiableMap(dataCollection)
+                : Collections.<ResourceMember, DataFile>emptyMap();
     }
 
     public Map<ResourceMember, DataFile> getMetadataCollection() {
         Map<ResourceMember, DataFile> typedCollection = new HashMap<>();
-        for (Map.Entry<ResourceMember, DataFile> entry : dataCollection.entrySet()) {
+        for (Map.Entry<ResourceMember, DataFile> entry : getDataCollection().entrySet()) {
             ResourceMember member = entry.getKey();
             final String resourceType = member.getResourceType();
             if ( !resourceType.equalsIgnoreCase(CkanConstants.ResourceType.OBSERVATIONS)) {
@@ -80,7 +98,7 @@ public class CsvObservationsCollection {
         }
         return typedCollection;
     }
-
+    
     public Map<ResourceMember, DataFile> getObservationDataCollections() {
         return getDataCollectionsOfType(getMappingsFor(CkanConstants.ResourceType.OBSERVATIONS));
     }

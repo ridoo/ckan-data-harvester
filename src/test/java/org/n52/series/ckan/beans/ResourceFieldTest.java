@@ -57,11 +57,56 @@ public class ResourceFieldTest {
     }
 
     @Test
+    public void when_simpleCreation_then_noExceptions() {
+        new ResourceField();
+    }
+
+    @Test
+    public void when_simpleCreation_then_noExceptionsOnSetter() {
+        new ResourceField().setQualifier(new ResourceMember());
+    }
+
+    @Test
+    public void when_simpleCreation_then_negativeIndex() {
+        Assert.assertTrue(new ResourceField().getIndex() < 0);
+    }
+
+    @Test
+    public void when_simpleCreation_then_falseOnIsFieldEmptyString() {
+        Assert.assertFalse(new ResourceField().isField(""));
+    }
+
+    @Test
+    public void when_simpleCreation_then_falseOnIsField() {
+        Assert.assertFalse(new ResourceField().isField("field_id"));
+    }
+
+    @Test
+    public void when_simpleCreation_then_falseOnIsProperty() {
+        Assert.assertFalse(new ResourceField().hasProperty("field_type"));
+    }
+
+    @Test
+    public void when_simpleCreation_then_falseOnIsOfType() {
+        Assert.assertFalse(new ResourceField().isOfType("string"));
+    }
+
+    @Test
+    public void when_simpleCreation_then_falseOnIsOfTypeEmptyString() {
+        Assert.assertFalse(new ResourceField().isOfType(""));
+    }
+
+    @Test
+    public void when_simpleCreation_then_falseOnIsOfTypeClass() {
+        Assert.assertFalse(new ResourceField().isOfType(Double.class));
+    }
+
+    @Test
     public void when_checkingFieldType_then_fieldRecognizesMappings() {
         ResourceField testField = fieldCreator
                 .withCkanMapping(ckanMapping)
                 .createSimple("testField");
-        assertThat(testField.isField("FIELD_IDENTIFIER"), is(true));
+        assertThat(testField.isField("field_identifier"), is(true));
     }
 
     @Test

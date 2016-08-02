@@ -49,7 +49,8 @@ public class JsonUtilTest {
             + "{" +
             "    \"property\": \"value\"," +
             "    \"list\": [\"item1\", \"item2\"]," +
-            "    \"lowercased\": \"value\"," +
+            "    \"uppercased\": \"value\"," +
+            "    \"key\": \"VALUE\"," +
             "    \"wkt_geometry\": \"POINT(7.2 51)\"" +
             "}";
     private ObjectMapper om;
@@ -63,14 +64,14 @@ public class JsonUtilTest {
     public void when_parseMissingTextNode_then_returnEmptyString() throws IOException {
         JsonNode node = om.readTree(TEST_TEMPLATE);
         Set<String> properties = Collections.singleton("missing");
-        assertThat(JsonUtil.parseMissingToEmptyString(node, properties), is(""));
+        assertThat(JsonUtil.parseToLowerCase(node, properties), is(""));
     }
 
     @Test
     public void when_parseAvailableTextNode_then_returnValue() throws IOException {
         JsonNode node = om.readTree(TEST_TEMPLATE);
         Set<String> properties = Collections.singleton("property");
-        assertThat(JsonUtil.parseMissingToEmptyString(node, properties), is("value"));
+        assertThat(JsonUtil.parseToLowerCase(node, properties), is("value"));
     }
 
     @Test
@@ -90,15 +91,23 @@ public class JsonUtilTest {
     @Test
     public void when_parseLowerCasedNodeWithUpperCasedName_then_returnValue() throws IOException {
         JsonNode node = om.readTree(TEST_TEMPLATE);
-        Set<String> properties = Collections.singleton("LOWERCASED");
-        assertThat(JsonUtil.parseMissingToEmptyString(node, properties), is("value"));
+        Set<String> properties = Collections.singleton("UPPERCASED");
+        assertThat(JsonUtil.parseToLowerCase(node, properties), is("value"));
     }
 
+    @Test
+    public void when_nodeContainsUpperCasedValue_then_findAlsoViaLowerCased() throws IOException {
+        JsonNode node = om.readTree(TEST_TEMPLATE);
+        Set<String> properties = Collections.singleton("key");
+        assertThat(JsonUtil.parseToLowerCase(node, properties), is("value"));
+    }
+
+    
     @Test
     public void when_parseWithAlternateProperties_then_findValue() throws IOException {
         JsonNode node = om.readTree(TEST_TEMPLATE);
         CkanMapping ckanMapping = CkanMapping.loadCkanMapping();
         Set<String> alternateNames = ckanMapping.getMappings("geometry");
-        assertThat(JsonUtil.parseMissingToEmptyString(node, alternateNames), is("POINT(7.2 51)"));
+        assertThat(JsonUtil.parseToLowerCase(node, alternateNames), is("point(7.2 51)"));
     }
 }

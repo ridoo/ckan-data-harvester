@@ -26,12 +26,15 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.beans;
 
-import eu.trentorise.opendata.jackan.model.CkanDataset;
 import java.io.File;
 import java.sql.Timestamp;
+
 import org.joda.time.DateTime;
+
+import eu.trentorise.opendata.jackan.model.CkanDataset;
 
 public class DescriptionFile {
 
@@ -41,9 +44,17 @@ public class DescriptionFile {
 
     private final File file;
 
-    public DescriptionFile(CkanDataset dataset, File file, SchemaDescriptor node) {
-        this.schemaDescription = node;
-        this.dataset = dataset;
+    public DescriptionFile() {
+        this(null, null, null);
+    }
+    
+    public DescriptionFile(CkanDataset dataset, File file, SchemaDescriptor schemaDescriptor) {
+        this.schemaDescription = schemaDescriptor == null
+                ? new SchemaDescriptor()
+                : schemaDescriptor;
+        this.dataset = dataset == null
+                ? new CkanDataset()
+                : dataset;
         this.file = file;
     }
 
@@ -70,17 +81,19 @@ public class DescriptionFile {
         Timestamp probablyNewer = dataset.getMetadataModified();
         Timestamp current = this.dataset.getMetadataModified();
         return this.dataset.getId().equals(dataset.getId())
-                ? current.after(probablyNewer)
-                : false;
+            ? current.after(probablyNewer)
+            : false;
 
     }
 
     @Override
     public String toString() {
-        return "DescriptionFile [schemaDescription=" + schemaDescription + ", datasetname=" + dataset.getName() + ", file=" + file.getAbsolutePath()
+        String filePath = file != null
+                ? file.getAbsolutePath()
+                : "null";
+        return "DescriptionFile [schemaDescription=" + schemaDescription + ", datasetname=" + dataset.getName()
+                + ", file=" + filePath
                 + "]";
     }
-
-
 
 }

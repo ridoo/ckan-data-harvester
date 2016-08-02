@@ -44,6 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.MissingNode;
 
 import eu.trentorise.opendata.jackan.model.CkanDataset;
 
@@ -58,14 +59,22 @@ public class SchemaDescriptor {
     private CkanMapping ckanMapping;
 
     private final List<ResourceMember> members;
+    
+    public SchemaDescriptor() {
+        this(null, null);
+    }
 
     public SchemaDescriptor(CkanDataset dataset, JsonNode node) {
         this(dataset, node, CkanMapping.loadCkanMapping());
     }
 
     public SchemaDescriptor(CkanDataset dataset, JsonNode node, CkanMapping ckanMapping) {
-        this.node = node;
-        this.dataset = dataset;
+        this.node = node == null
+                ? MissingNode.getInstance()
+                : node;
+        this.dataset = dataset == null
+                ? new CkanDataset()
+                : dataset;
         this.ckanMapping = ckanMapping == null
                 ? CkanMapping.loadCkanMapping()
                 : ckanMapping;
@@ -73,7 +82,7 @@ public class SchemaDescriptor {
     }
 
     private String getStringValueOf(JsonNode jsonNode, String field) {
-        return JsonUtil.parseMissingToEmptyString(jsonNode, ckanMapping.getMappings(field));
+        return JsonUtil.parseToLowerCase(jsonNode, ckanMapping.getMappings(field));
     }
 
     public String getVersion() {
@@ -100,12 +109,12 @@ public class SchemaDescriptor {
         return Collections.unmodifiableList(members);
     }
 
-    public boolean hasDescription() {
-        return !node.isMissingNode();
-    }
-
     public Map<ResourceMember, DataFile> relateWithDataFiles(Map<String, DataFile> csvContents) {
         Map<ResourceMember, DataFile> memberRelations = new HashMap<>();
+        if (csvContents == null) {
+            return memberRelations;
+        }
+        
         for (ResourceMember member : members) {
             DataFile dataFile = csvContents.get(member.getId());
             if (dataFile == null) {
@@ -119,7 +128,8 @@ public class SchemaDescriptor {
 
     private List<ResourceMember> parseMemberDescriptions() {
         List<ResourceMember> resourceMembers = new ArrayList<>();
-        final JsonNode membersNode = node.findValue("members");
+//        final JsonNode membersNode = node.findValue("members");
+        final JsonNode membersNode = node.at("/members");
         final Iterator<JsonNode> iter = membersNode.elements();
         while (iter.hasNext()) {
             JsonNode memberNode = iter.next();

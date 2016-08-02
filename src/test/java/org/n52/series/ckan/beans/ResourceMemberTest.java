@@ -29,6 +29,7 @@
 package org.n52.series.ckan.beans;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 
 import java.io.IOException;
@@ -56,7 +57,29 @@ public class ResourceMemberTest {
         ObjectMapper om = new ObjectMapper();
         final JsonNode node = om.readTree(getClass().getResource(SCHEMA_DESCRIPTOR));
         descriptor = new SchemaDescriptor(new CkanDataset(), node);
-        assertThat(descriptor.getSchemaDescriptionType(), Matchers.is(CkanConstants.ResourceType.CSV_OBSERVATIONS_COLLECTION));
+        String expectedType = CkanConstants.ResourceType.CSV_OBSERVATIONS_COLLECTION;
+        assertThat(descriptor.getSchemaDescriptionType(), Matchers.is(expectedType));
+    }
+
+    @Test
+    public void when_simpleCreation_then_noExceptions() {
+        new ResourceMember();
+    }
+
+    @Test
+    public void when_simpleCreation_then_falseOnContainsField() {
+        assertThat(new ResourceMember().containsField("field_id"), is(false));
+    }
+
+    @Test
+    public void when_simpleCreation_then_emptyColumnHeaders() {
+        assertThat(new ResourceMember().getColumnHeaders(), is(empty()));
+    }
+
+    @Test
+    public void when_simpleCreation_then_emptyJoinableFields() {
+        ResourceMember member = new ResourceMember();
+        assertThat(new ResourceMember().getJoinableFields(member), is(empty()));
     }
 
     @Test
@@ -65,6 +88,7 @@ public class ResourceMemberTest {
         ResourceMember platformDescription = members.get(0);
         ResourceMember observationDescription = members.get(1);
         Set<ResourceField> joinableFields = platformDescription.getJoinableFields(observationDescription);
-        assertThat(joinableFields.size(), is(6));
+        assertThat(joinableFields.size(), is(1));
+        assertThat(joinableFields.iterator().next().getFieldId(), is("stations_id"));
     }
 }
