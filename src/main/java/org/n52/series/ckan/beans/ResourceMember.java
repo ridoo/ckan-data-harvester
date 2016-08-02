@@ -149,7 +149,7 @@ public class ResourceMember {
         if ( !isValid(this) || !isValid(other)) {
             return false;
         }
-        if (this == other || resourceType.equalsIgnoreCase(other.resourceType)) {
+        if (this == other || isOfSameType(other)) {
             return false;
         }
         for (ResourceField otherField : other.resourceFields) {
@@ -158,6 +158,20 @@ public class ResourceMember {
             }
         }
         return false;
+    }
+    
+    public boolean isExtensible(ResourceMember other) {
+        if ( !isValid(this) || !isValid(other)) {
+            return false;
+        }
+        if (this == other || !isOfSameType(other)) {
+            return false;
+        }
+        return getColumnHeaders().equals(other.getColumnHeaders());
+    }
+
+    private boolean isOfSameType(ResourceMember other) {
+        return resourceType.equalsIgnoreCase(other.resourceType);
     }
 
     private boolean isValid(ResourceMember member) {

@@ -102,7 +102,7 @@ public class JsonUtilTest {
         assertThat(JsonUtil.parseToLowerCase(node, properties), is("value"));
     }
 
-    
+
     @Test
     public void when_parseWithAlternateProperties_then_findValue() throws IOException {
         JsonNode node = om.readTree(TEST_TEMPLATE);

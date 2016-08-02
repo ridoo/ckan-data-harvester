@@ -47,7 +47,7 @@ public class DescriptionFile {
     public DescriptionFile() {
         this(null, null, null);
     }
-    
+
     public DescriptionFile(CkanDataset dataset, File file, SchemaDescriptor schemaDescriptor) {
         this.schemaDescription = schemaDescriptor == null
                 ? new SchemaDescriptor()

@@ -64,7 +64,7 @@ public class ResourceTable extends DataTable {
         super(resourceMember);
         this.dataFile = dataFile;
     }
-    
+
     public DataFile getDataFile() {
         return dataFile;
     }
@@ -117,7 +117,7 @@ public class ResourceTable extends DataTable {
                         + "Set LOG level to TRACE to log each.", ignoredCount);
             }
 
-            LOGGER.debug("Resource data '{}' loaded into memory (#{} lines a #{} columns), took {}s",
+            LOGGER.debug("Resource data '{}' loaded into memory (#{} rows and #{} columns), took {}s",
                     resourceMember.getId(), lineNbr, columnHeaders.size(),
                     (System.currentTimeMillis() - start)/1000d);
             logMemory();

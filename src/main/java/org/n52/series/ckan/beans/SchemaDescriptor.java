@@ -59,7 +59,7 @@ public class SchemaDescriptor {
     private CkanMapping ckanMapping;
 
     private final List<ResourceMember> members;
-    
+
     public SchemaDescriptor() {
         this(null, null);
     }
@@ -114,7 +114,7 @@ public class SchemaDescriptor {
         if (csvContents == null) {
             return memberRelations;
         }
-        
+
         for (ResourceMember member : members) {
             DataFile dataFile = csvContents.get(member.getId());
             if (dataFile == null) {

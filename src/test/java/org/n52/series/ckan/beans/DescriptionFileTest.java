@@ -35,7 +35,7 @@ import org.joda.time.DateTime;
 import org.junit.Test;
 
 public class DescriptionFileTest {
-    
+
     @Test
     public void when_simpleCreation_then_noExceptions() {
         new DescriptionFile();
