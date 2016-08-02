@@ -28,7 +28,7 @@
  */
 package org.n52.series.ckan.beans;
 
-import static org.n52.series.ckan.util.JsonUtil.parseMissingToEmptyString;
+import static org.n52.series.ckan.util.JsonUtil.parseToLowerCase;
 
 import java.util.Objects;
 
@@ -38,14 +38,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.MissingNode;
 
 public class ResourceField {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceField.class);
 
     public static ResourceField copy(ResourceField field) {
-        return new ResourceField(field.node, field.index)
-                .withCkanMapping(field.ckanMapping);
+        return new ResourceField(field.node, field.index, field.ckanMapping);
     }
 
     private final String fieldId;
@@ -58,16 +58,23 @@ public class ResourceField {
 
     private CkanMapping ckanMapping;
 
-    public ResourceField(JsonNode node, int index) {
-        this.node = node;
-        this.index = index;
-        this.ckanMapping = CkanMapping.loadCkanMapping();
-        this.fieldId = getValueOfField(CkanConstants.MemberProperty.FIELD_ID);
+    public ResourceField() {
+        this(MissingNode.getInstance(), -1);
     }
 
-    public ResourceField withCkanMapping(CkanMapping propertyIdMapping) {
-        this.ckanMapping = propertyIdMapping;
-        return this;
+    public ResourceField(JsonNode node, int index) {
+        this(node, index, CkanMapping.loadCkanMapping());
+    }
+
+    public ResourceField(JsonNode node, int index, CkanMapping ckanMapping) {
+        this.index = index;
+        this.node = node == null
+                ? MissingNode.getInstance()
+                : node;
+        this.ckanMapping = ckanMapping == null
+                ? CkanMapping.loadCkanMapping()
+                : ckanMapping;
+        this.fieldId = getValueOfField(CkanConstants.MemberProperty.FIELD_ID);
     }
 
     public ResourceField withQualifier(ResourceMember qualifier) {
@@ -116,6 +123,9 @@ public class ResourceField {
     }
 
     public boolean isField(String fieldId) {
+        if (node.isMissingNode()) {
+            return false;
+        }
         return ckanMapping.hasMapping(getFieldId(), fieldId);
     }
 
@@ -144,17 +154,19 @@ public class ResourceField {
     }
 
     public boolean isOfType(Class<?> clazz) {
-        final String fieldType = getFieldType();
-        String ofType = clazz.getSimpleName().toLowerCase();
-        return isOfType(fieldType, ofType);
+        return isOfType(clazz.getSimpleName());
     }
 
-    public boolean isOfType(final String fieldType, String ofType) {
-        return ckanMapping.hasMapping(ofType, fieldType);
+    public boolean isOfType(String ofType) {
+        if (node.isMissingNode()) {
+            return false;
+        }
+        final String fieldType = getFieldType();
+        return ckanMapping.hasMapping(ofType.toLowerCase(), fieldType.toLowerCase());
     }
 
     private String getValueOfField(String fieldName) {
-        return parseMissingToEmptyString(node, ckanMapping.getMappings(fieldName));
+        return parseToLowerCase(node, ckanMapping.getMappings(fieldName));
     }
 
     @Override

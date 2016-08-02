@@ -31,7 +31,6 @@ package org.n52.series.ckan.util;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.logging.Level;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import org.hamcrest.CoreMatchers;
@@ -46,10 +45,10 @@ import eu.trentorise.opendata.jackan.CkanClient;
 public class DownloadCkanTestResources {
 
     public static void main(String[] args) throws URISyntaxException, IOException {
-        
+
 //        redirectJulToSlf4JLogging();
 //        System.out.println(System.setProperty("javax.net.debug", "all"));
-        
+
         InMemoryCkanMetadataCache ckanMetadataCache = new InMemoryCkanMetadataCache();
         InMemoryCkanDataCache ckanDataCache = new InMemoryCkanDataCache();
 

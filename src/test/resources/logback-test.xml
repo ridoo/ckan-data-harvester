@@ -10,8 +10,10 @@
 		</encoder>
 	</appender>
 
-    <logger name="org.n52" level="DEBUG" />
+    <logger name="org.n52.sos" level="ERROR" />
+    <logger name="org.n52.series" level="DEBUG" />
     <logger name="eu.trentorise.opendata.jackan" level="WARN" />
+    <logger name="org.hibernate" level="ERROR" />
 
 	<root level="WARN">
 		<appender-ref ref="STDOUT" />

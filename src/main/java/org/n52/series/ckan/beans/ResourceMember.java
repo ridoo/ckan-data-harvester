@@ -45,6 +45,16 @@ public class ResourceMember {
 
     private List<ResourceField> resourceFields;
 
+    public ResourceMember() {
+        this(null, null);
+    }
+
+    public ResourceMember(String id, String resourceType) {
+        this.id = id;
+        this.resourceType = resourceType;
+        this.resourceFields = new ArrayList<>();
+    }
+
     public String getId() {
         return id;
     }
@@ -70,7 +80,9 @@ public class ResourceMember {
     }
 
     public List<ResourceField> getResourceFields() {
-        return Collections.unmodifiableList(resourceFields);
+        return resourceFields != null
+                ? Collections.unmodifiableList(resourceFields)
+                : Collections.<ResourceField>emptyList();
     }
 
     public ResourceField getField(String fieldId) {
@@ -113,30 +125,24 @@ public class ResourceMember {
         return fieldIds;
     }
 
-    public Set<ResourceField> getJoinFields(ResourceMember other) {
-        if ( !isJoinable(other)) {
-            return Collections.<ResourceField>emptySet();
-        }
-        Set<ResourceField> joinFields = new HashSet<>();
-        for (ResourceField otherField : other.resourceFields) {
-            if (resourceFields.contains(otherField)) {
-                joinFields.add(otherField);
-            }
-        }
-        return joinFields;
-    }
-
     public Set<ResourceField> getJoinableFields(ResourceMember other) {
         if ( !isJoinable(other)) {
             return Collections.<ResourceField>emptySet();
         }
-        // TODO remove actial join column(s)?!
-        Set<ResourceField> fields = new HashSet<>(other.resourceFields);
+        Set<ResourceField> fields = new HashSet<>();
+        for (ResourceField possibleJoinColumn : other.resourceFields) {
+            if (resourceFields.contains(possibleJoinColumn)) {
+                fields.add(ResourceField.copy(possibleJoinColumn));
+            }
+        }
         return Collections.unmodifiableSet(fields);
     }
 
-    private boolean isJoinable(ResourceMember other) {
-        if (this == other || resourceType.equalsIgnoreCase(other.resourceType)) {
+    public boolean isJoinable(ResourceMember other) {
+        if ( !isValid(this) || !isValid(other)) {
+            return false;
+        }
+        if (this == other || isOfSameType(other)) {
             return false;
         }
         for (ResourceField otherField : other.resourceFields) {
@@ -146,9 +152,29 @@ public class ResourceMember {
         }
         return false;
     }
+    
+    public boolean isExtensible(ResourceMember other) {
+        if ( !isValid(this) || !isValid(other)) {
+            return false;
+        }
+        if (this == other || !isOfSameType(other)) {
+            return false;
+        }
+        return getColumnHeaders().equals(other.getColumnHeaders());
+    }
+
+    private boolean isOfSameType(ResourceMember other) {
+        return resourceType.equalsIgnoreCase(other.resourceType);
+    }
+
+    private boolean isValid(ResourceMember member) {
+        return !(member == null || member.resourceType == null);
+    }
 
     public void setResourceFields(List<ResourceField> resourceFields) {
-        this.resourceFields = resourceFields;
+        this.resourceFields = resourceFields == null
+                ? this.resourceFields
+                : resourceFields;
     }
 
     @Override

@@ -26,45 +26,113 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.beans;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Set;
 
 import org.hamcrest.Matchers;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.n52.series.ckan.da.CkanConstants;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import eu.trentorise.opendata.jackan.model.CkanDataset;
+import org.n52.series.ckan.table.ResourceTestHelper;
 
 public class ResourceMemberTest {
 
-    private static final String SCHEMA_DESCRIPTOR = "/files/dwd/temperature-dwd/schema_descriptor.json";
+    private static final String DWD_TEMPERATUR_DATASET_ID = "eab53bfe-fce7-4fd8-8325-a0fe5cdb23c8";
 
-    private SchemaDescriptor descriptor;
+    private static final String PLATFORM_DATA_ID_1 = "8f0637bc-c15e-4f74-b7d8-bfc4ed2ac2f9";
+
+    private static final String OBSERVATION_DATA_ID_1 = "2cbb2409-5591-40a9-a60b-544ebb809fb8";
+
+    private static final String OBSERVATION_DATA_ID_2 = "515aa961-a0a2-4e4b-9dcc-a57998e19b39";
+    
+    @Rule
+    public TemporaryFolder testFolder = new TemporaryFolder();
+
+    private ResourceTestHelper resourceHelper;
 
     @Before
-    public void setUp() throws IOException {
-        ObjectMapper om = new ObjectMapper();
-        final JsonNode node = om.readTree(getClass().getResource(SCHEMA_DESCRIPTOR));
-        descriptor = new SchemaDescriptor(new CkanDataset(), node);
-        assertThat(descriptor.getSchemaDescriptionType(), Matchers.is(CkanConstants.ResourceType.CSV_OBSERVATIONS_COLLECTION));
+    public void setUp() throws URISyntaxException, IOException {
+        resourceHelper = new ResourceTestHelper(testFolder);
+    }
+
+    @Test
+    public void when_trivialCreation_then_noExceptions() {
+        new ResourceMember();
+    }
+
+    @Test
+    public void when_trivialCreation_then_falseOnContainsField() {
+        assertThat(new ResourceMember().containsField("field_id"), is(false));
+    }
+
+    @Test
+    public void when_trivialCreation_then_emptyColumnHeaders() {
+        assertThat(new ResourceMember().getColumnHeaders(), is(empty()));
+    }
+
+    @Test
+    public void when_havingTwoTrivials_then_notJoinable() {
+        assertThat(new ResourceMember().isJoinable(new ResourceMember()), is(false));
+    }
+
+    @Test
+    public void when_trivialCreation_then_emptyJoinableFields() {
+        ResourceMember member = new ResourceMember();
+        assertThat(new ResourceMember().getJoinableFields(member), is(empty()));
+    }
+
+    @Test
+    public void when_gettingSchemaDescriptor_resourceTypeIsCsvObservationCollection() {
+        String expectedType = CkanConstants.ResourceType.CSV_OBSERVATIONS_COLLECTION;
+        SchemaDescriptor schemaDescriptor = resourceHelper.getSchemaDescriptor(DWD_TEMPERATUR_DATASET_ID);
+        assertThat(schemaDescriptor.getSchemaDescriptionType(), Matchers.is(expectedType));
+    }
+    
+    @Test
+    public void when_sameResourceTypeAndColumns_then_isExtensible() {
+        ResourceMember obs1 = getObservationResource(OBSERVATION_DATA_ID_1);
+        ResourceMember obs2 = getObservationResource(OBSERVATION_DATA_ID_2);
+        assertThat(obs1.isExtensible(obs2), is(true));
+    }
+    
+    @Test
+    public void when_differentResourceType_then_isNotExtensible() {
+        ResourceMember obs1 = getPlatformResource(PLATFORM_DATA_ID_1);
+        ResourceMember obs2 = getObservationResource(OBSERVATION_DATA_ID_2);
+        assertThat(obs1.isExtensible(obs2), is(false));
     }
 
     @Test
     public void findJoinableFields() {
-        List<ResourceMember> members = descriptor.getMembers();
+        SchemaDescriptor schemaDescriptor = resourceHelper.getSchemaDescriptor(DWD_TEMPERATUR_DATASET_ID);
+        List<ResourceMember> members = schemaDescriptor.getMembers();
+        
         ResourceMember platformDescription = members.get(0);
         ResourceMember observationDescription = members.get(1);
         Set<ResourceField> joinableFields = platformDescription.getJoinableFields(observationDescription);
-        assertThat(joinableFields.size(), is(6));
+        assertThat(joinableFields.size(), is(1));
+        assertThat(joinableFields.iterator().next().getFieldId(), is("stations_id"));
     }
+    
+    private ResourceMember getObservationResource(String resourceId) {
+        ResourceMember resourceMember = new ResourceMember(resourceId, "observations");
+        return resourceHelper.getResourceMember(DWD_TEMPERATUR_DATASET_ID, resourceMember);
+    }
+    
+    private ResourceMember getPlatformResource(String resourceId) {
+        ResourceMember resourceMember = new ResourceMember(resourceId, "platforms");
+        return resourceHelper.getResourceMember(DWD_TEMPERATUR_DATASET_ID, resourceMember);
+    }
+
 }

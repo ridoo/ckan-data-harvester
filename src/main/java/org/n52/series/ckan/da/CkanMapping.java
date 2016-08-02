@@ -39,6 +39,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -51,7 +52,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 
 public class CkanMapping {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CkanMapping.class);
 
     private Map<String, Set<String>> mappingsByName;
@@ -88,8 +89,17 @@ public class CkanMapping {
     @JsonAnySetter
     public void addMapping(String name, Set<String> mappings) {
         if (name != null) {
-            this.mappingsByName.put(name, mappings);
+            Set<String> lowerCasedMappings = toLowerCase(mappings);
+            this.mappingsByName.put(name.toLowerCase(), lowerCasedMappings);
         }
+    }
+
+    private Set<String> toLowerCase(Set<String> mappings) {
+        HashSet<String> lowerCased = new HashSet<>();
+        for (String mapping : mappings) {
+            lowerCased.add(mapping.toLowerCase());
+        }
+        return lowerCased;
     }
 
     public static CkanMapping loadCkanMapping() {
@@ -142,7 +152,7 @@ public class CkanMapping {
 
         private InputStream createStreamFrom(String configFile) throws FileNotFoundException {
             if (Strings.isNullOrEmpty(configFile)) {
-                LOGGER.info("No config file given! Loading default config.");
+                LOGGER.trace("No config file given! Loading default config.");
                 return new FileInputStream(getConfigFile(DEFAULT_CKAN_MAPPING_FILE));
             }
             File file = getConfigFile(configFile);

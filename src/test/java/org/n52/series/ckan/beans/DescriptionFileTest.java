@@ -37,6 +37,11 @@ import org.junit.Test;
 public class DescriptionFileTest {
 
     @Test
+    public void when_simpleCreation_then_noExceptions() {
+        new DescriptionFile();
+    }
+
+    @Test
     public void shouldReturnCorrectLastModifiedDate() {
         CkanDataset dataset = new CkanDataset();
         long currentTimeMillis = System.currentTimeMillis();

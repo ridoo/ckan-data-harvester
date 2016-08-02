@@ -28,12 +28,12 @@
  */
 package org.n52.series.ckan.sos;
 
-import org.n52.series.ckan.beans.CsvObservationsCollection;
+import org.n52.series.ckan.beans.DataCollection;
 import org.n52.series.ckan.beans.DescriptionFile;
 
 public class SosStrategyFactory {
 
-    private CsvObservationsCollection dataCollection;
+    private DataCollection dataCollection;
 
     private CkanSosReferenceCache ckanSosReferencingCache;
 
@@ -59,7 +59,7 @@ public class SosStrategyFactory {
                 : new DefaultSosInsertionStrategy(ckanSosReferencingCache);
     }
 
-    public SosStrategyFactory withData(CsvObservationsCollection dataCollection) {
+    public SosStrategyFactory withData(DataCollection dataCollection) {
         this.dataCollection = dataCollection;
         return this;
     }

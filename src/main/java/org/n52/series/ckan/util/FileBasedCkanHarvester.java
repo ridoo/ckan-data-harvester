@@ -29,20 +29,19 @@
 
 package org.n52.series.ckan.util;
 
-import eu.trentorise.opendata.jackan.model.CkanDataset;
-import eu.trentorise.opendata.jackan.model.CkanResource;
-
-import static org.junit.Assert.fail;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.n52.series.ckan.beans.DataFile;
 import org.n52.series.ckan.da.CkanHarvestingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import eu.trentorise.opendata.jackan.model.CkanDataset;
+import eu.trentorise.opendata.jackan.model.CkanResource;
 
 public class FileBasedCkanHarvester extends CkanHarvestingService {
 
@@ -84,7 +83,7 @@ public class FileBasedCkanHarvester extends CkanHarvestingService {
 
     private File getSourceDataFolder() {
         String baseFolder = TEST_FILES_BASE_PATH + "/" + contextPath;
-        LOGGER.debug("Source Data Folder: {}", baseFolder);
+        LOGGER.trace("Source Data Folder: {}", baseFolder);
         return new File(getClass().getResource(baseFolder).getFile());
     }
 
@@ -99,20 +98,21 @@ public class FileBasedCkanHarvester extends CkanHarvestingService {
     }
 
     @Override
-    protected DataFile downloadCsvFile(CkanResource resource, Path datasetDownloadFolder) throws IOException {
+    protected DataFile downloadFile(CkanResource resource, Path datasetDownloadFolder) throws IOException {
         File folder = getSourceDataFolder();
         File[] dataFolders = folder.listFiles();
         String id = resource.getId();
+        String format = resource.getFormat();
         for (File file : dataFolders) {
             if (file.isDirectory()) {
-                Path datapath = file.toPath().resolve(id + ".csv");
+                Path datapath = file.toPath().resolve(id + "." + format);
                 if (datapath.toFile().exists()) {
-                    return new DataFile(resource, datapath.toFile());
+                    return new DataFile(resource, format, datapath.toFile());
                 }
             }
         }
         String name = resource.getName();
-        throw new IOException("no data file found for resource '" + name + "' and id'" + id + "'.");
+        throw new IOException("no data file found for resource '" + name + "' and id '" + id + "'.");
     }
 
 }

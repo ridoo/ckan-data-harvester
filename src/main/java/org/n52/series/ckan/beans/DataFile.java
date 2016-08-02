@@ -28,34 +28,41 @@
  */
 package org.n52.series.ckan.beans;
 
-import eu.trentorise.opendata.jackan.model.CkanResource;
 import java.io.File;
 import java.nio.charset.Charset;
+
 import org.joda.time.DateTime;
 import org.n52.series.ckan.da.CkanConstants;
 
+import eu.trentorise.opendata.jackan.model.CkanResource;
+
 public class DataFile {
 
-    private Charset encoding = CkanConstants.DEFAULT_CHARSET;
+    private final Charset encoding;
 
     private final CkanResource resource;
 
+    private final String format;
+
     private final File file;
 
-    public DataFile(CkanResource resource, File file) {
-        if (resource == null) {
-            throw new NullPointerException("resource is null.");
-        }
-        if (file == null) {
-            throw new NullPointerException("file is null.");
-        }
-        this.resource = resource;
-        this.file = file;
+    public DataFile() {
+        this(new CkanResource(), "", null);
     }
 
-    public DataFile(CkanResource resource, File file, String encoding) {
-        this(resource, file);
-        this.encoding = Charset.forName(encoding);
+    public DataFile(CkanResource resource, String format, File file) {
+        this(resource, format, file, null);
+    }
+
+    public DataFile(CkanResource resource, String format, File file, String encoding) {
+        this.encoding = encoding == null
+                ? CkanConstants.DEFAULT_CHARSET
+                : Charset.forName(encoding);
+        this.resource = resource == null
+                ? new CkanResource()
+                : resource;
+        this.format = format;
+        this.file = file;
     }
 
     public Charset getEncoding() {
@@ -64,6 +71,10 @@ public class DataFile {
 
     public CkanResource getResource() {
         return resource;
+    }
+
+    public String getFormat() {
+        return format;
     }
 
     public File getFile() {
@@ -78,9 +89,21 @@ public class DataFile {
         if (resource == null) {
             return false;
         }
-        DateTime probablyNewer = DateTime.parse(resource.getLastModified());
-        DateTime current = DateTime.parse(this.resource.getLastModified());
-        return this.resource.getId().equals(resource.getId())
+
+        String otherId = resource.getId();
+        String thisId = this.resource.getId();
+        String otherLastModified = resource.getLastModified();
+        String thisLastModified = this.resource.getLastModified();
+        if (otherId == null || otherLastModified == null) {
+            return true;
+        }
+        if (thisId == null || otherLastModified == null) {
+            return false;
+        }
+
+        DateTime probablyNewer = DateTime.parse(otherLastModified);
+        DateTime current = DateTime.parse(thisLastModified);
+        return thisId.equals(otherId)
                 ? current.isAfter(probablyNewer)
                 : false;
 
@@ -89,11 +112,14 @@ public class DataFile {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
+        String filePath = file != null
+                ? file.getAbsolutePath()
+                : "null";
         sb.append("resourceId: ")
                 .append(resource.getId())
                 .append(", ")
                 .append("DataFile [file: ")
-                .append(file.getAbsolutePath())
+                .append(filePath)
                 .append(", ")
                 .append(" encoding: ")
                 .append(encoding.toString());

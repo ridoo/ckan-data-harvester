@@ -28,24 +28,22 @@
  */
 package org.n52.series.ckan.sos;
 
-import org.n52.series.ckan.beans.CsvObservationsCollection;
+import org.n52.series.ckan.beans.DataCollection;
 import org.n52.series.ckan.cache.CkanDataSink;
-
-import eu.trentorise.opendata.jackan.model.CkanDataset;
 
 public class SosDatabaseCache implements CkanDataSink {
 
     private CkanSosReferenceCache ckanSosReferenceCache;
 
     @Override
-    public void insertOrUpdate(CkanDataset dataset, CsvObservationsCollection csvObservationsCollection) {
+    public void insertOrUpdate(DataCollection dataCollection) {
         SosStrategyFactory factory = SosStrategyFactory.create()
                 // TODO add what might help to get the right strategy
                 .withReferenceCache(ckanSosReferenceCache)
-                .withData(csvObservationsCollection);
+                .withData(dataCollection);
 
         factory.createInsertionStrategy()
-                .insertOrUpdate(dataset, csvObservationsCollection);
+                .insertOrUpdate(dataCollection);
 
         // TODO decoupled deletion strategy?
     }

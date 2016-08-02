@@ -59,8 +59,7 @@ public class ResourceFieldCreator {
         try {
             json = String.format(json, args);
             JsonNode node = new ObjectMapper().readTree(json);
-            return new ResourceField(node, 0)
-                    .withCkanMapping(ckanMapping);
+            return new ResourceField(node, 0, ckanMapping);
         } catch (IllegalFormatException | IOException e) {
             e.printStackTrace();
             fail("Could not create field!");

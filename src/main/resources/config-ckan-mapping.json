@@ -63,6 +63,10 @@
 		"float",
 		"decimal"
 	],
+	"float": [
+        "double",
+        "decimal"
+    ],
 	"string": [
 		"text",
 		"varchar",
