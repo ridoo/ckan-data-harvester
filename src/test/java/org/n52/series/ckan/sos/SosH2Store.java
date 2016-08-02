@@ -26,20 +26,16 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.sos;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 import org.n52.series.ckan.beans.CsvObservationsCollection;
 import org.n52.series.ckan.cache.InMemoryCkanDataCache;
-import org.n52.series.ckan.util.FileBasedCkanHarvestingService;
+import org.n52.series.ckan.cache.InMemoryCkanDataCache.Entry;
 import org.n52.sos.ds.hibernate.GetObservationDAO;
 import org.n52.sos.ds.hibernate.H2Configuration;
 import org.n52.sos.ds.hibernate.HibernateTestCase;
@@ -49,50 +45,30 @@ import org.n52.sos.ogc.sos.Sos2Constants;
 import org.n52.sos.ogc.sos.SosConstants;
 import org.n52.sos.request.GetObservationRequest;
 import org.n52.sos.response.GetObservationResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import eu.trentorise.opendata.jackan.model.CkanDataset;
 
-public class FileBasedDefaultSosInsertionStrategyTest extends HibernateTestCase {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileBasedDefaultSosInsertionStrategyTest.class);
-
-    @Rule
-    public TemporaryFolder testFolder = new TemporaryFolder();
-
-    private FileBasedCkanHarvestingService service;
-
-    private DefaultSosInsertionStrategy insertionStrategy;
+public class SosH2Store extends HibernateTestCase {
 
     private InMemoryCkanDataCache ckanDataCache;
 
-    private GetObservationDAO getObsDAO = new GetObservationDAO();
-
-    @Before
-    public void setUp() throws IOException, URISyntaxException {
-        service = new FileBasedCkanHarvestingService(testFolder.getRoot());
-        ckanDataCache = service.getCkanDataCache();
+    public SosH2Store(InMemoryCkanDataCache ckanDataCache) throws IOException, URISyntaxException {
+        this.ckanDataCache = ckanDataCache;
+        H2Configuration.assertInitialized();
     }
 
-     @After
-     public void tearDown() {
-         H2Configuration.truncate();
-     }
+    // TODO test via data loaders for each file set (reduce each to a minimum to keep tests fast)
+    // TODO think of refactoring how strategy works to run tests fast
+    // TODO think of making this an integration test
 
-     // XXX avoid loading ALL data into database
-     // TODO instead, create data loaders for each file set (and reduce it to a minimum to keep tests fast)
-     
-    @Test
-    public void parseSensorsFromObservationCollection() throws OwsExceptionReport {
-        insertionStrategy = new DefaultSosInsertionStrategy();
-        for (InMemoryCkanDataCache.Entry<CkanDataset, CsvObservationsCollection> data : ckanDataCache.getCollections()) {
-            insertionStrategy.insertOrUpdate(data.getDataset(), data.getData());
-        }
-        checkObservations();
+    void insertDatasetViaStrategy(String datasetId, SosInsertionStrategy insertionStrategy)
+            throws OwsExceptionReport {
+        Entry<CkanDataset, CsvObservationsCollection> collection = ckanDataCache.getCollection(datasetId);
+        insertionStrategy.insertOrUpdate(collection.getDataset(), collection.getData());
     }
 
-    private void checkObservations() throws OwsExceptionReport {
+    void assertObservationsAvailable() throws OwsExceptionReport {
+        GetObservationDAO getObsDAO = new GetObservationDAO();
         GetObservationRequest getObsReq = new GetObservationRequest();
         getObsReq.setService(SosConstants.SOS);
         getObsReq.setVersion(Sos2Constants.SERVICEVERSION);
@@ -100,9 +76,6 @@ public class FileBasedDefaultSosInsertionStrategyTest extends HibernateTestCase 
         List<OmObservation> observationCollection = getObsResponse.getObservationCollection();
         assertThat(observationCollection, is(notNullValue()));
         assertThat(observationCollection, is(not(empty())));
-        for (OmObservation obs : observationCollection) {
-            LOGGER.info(obs.getObservationConstellation().toString());
-        }
     }
 
 }
