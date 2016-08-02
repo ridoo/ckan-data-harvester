@@ -30,6 +30,7 @@ package org.n52.series.ckan.da;
 
 import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
@@ -39,12 +40,9 @@ public class CkanMappingTest {
     @Test
     public void when_parsingIdMappings_then_idMappingsNotEmpty() {
         CkanMapping mappings = CkanMapping.loadCkanMapping("config-ckan-mapping.json");
-        assertTrue(mappings.hasMapping("resultTime", "datetime"));
-        assertTrue(mappings.hasMapping("latitude", "latitude"));
-        assertTrue(mappings.hasMapping("latitude", "lat"));
-        assertTrue(mappings.hasMapping("longitude", "longitude"));
-        assertTrue(mappings.hasMapping("longitude", "lon"));
-        assertTrue(mappings.hasMappings("longitude"));
+        assertThat(mappings.getMappings("result_time"), containsInAnyOrder("resulttime", "result_time", "datetime", "mess_datum"));
+        assertThat(mappings.getMappings("latitude"), containsInAnyOrder("geobreite", "latitude", "lat"));
+        assertThat(mappings.getMappings("longitude"), containsInAnyOrder("geolaenge", "longitude", "lon"));
     }
 
     @Test

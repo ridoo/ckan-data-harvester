@@ -39,6 +39,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -88,8 +89,17 @@ public class CkanMapping {
     @JsonAnySetter
     public void addMapping(String name, Set<String> mappings) {
         if (name != null) {
-            this.mappingsByName.put(name, mappings);
+            Set<String> lowerCasedMappings = toLowerCase(mappings);
+            this.mappingsByName.put(name.toLowerCase(), lowerCasedMappings);
         }
+    }
+
+    private Set<String> toLowerCase(Set<String> mappings) {
+        HashSet<String> lowerCased = new HashSet<>();
+        for (String mapping : mappings) {
+            lowerCased.add(mapping.toLowerCase());
+        }
+        return lowerCased;
     }
 
     public static CkanMapping loadCkanMapping() {
