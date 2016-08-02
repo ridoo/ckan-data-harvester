@@ -41,7 +41,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.n52.series.ckan.beans.CsvObservationsCollection;
+import org.n52.series.ckan.beans.DataCollection;
 import org.n52.series.ckan.beans.DataFile;
 import org.n52.series.ckan.beans.DescriptionFile;
 import org.n52.series.ckan.beans.SchemaDescriptor;
@@ -129,7 +129,7 @@ public class CkanHarvestingService {
 
                 // TODO check when to delete or update resource
 
-                dataCache.insertOrUpdate(new CsvObservationsCollection(dataset, description, dataFiles));
+                dataCache.insertOrUpdate(new DataCollection(dataset, description, dataFiles));
                 observationCollectionCount++;
             }
         }

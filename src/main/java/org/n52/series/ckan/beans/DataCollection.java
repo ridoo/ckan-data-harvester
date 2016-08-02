@@ -41,7 +41,7 @@ import org.n52.series.ckan.da.CkanConstants;
 
 import eu.trentorise.opendata.jackan.model.CkanDataset;
 
-public class CsvObservationsCollection {
+public class DataCollection {
 
     private final CkanDataset dataset;
 
@@ -49,11 +49,11 @@ public class CsvObservationsCollection {
 
     private final DescriptionFile schemaDescriptor;
 
-    public CsvObservationsCollection() {
+    public DataCollection() {
         this(null, null, null);
     }
 
-    public CsvObservationsCollection(CkanDataset dataset, DescriptionFile description, Map<String, DataFile> csvContents) {
+    public DataCollection(CkanDataset dataset, DescriptionFile description, Map<String, DataFile> csvContents) {
         this.dataset = dataset == null
                 ? new CkanDataset()
                 : dataset;

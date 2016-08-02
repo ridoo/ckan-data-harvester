@@ -28,11 +28,10 @@
  */
 package org.n52.series.ckan.cache;
 
-import org.n52.series.ckan.beans.CsvObservationsCollection;
+import org.n52.series.ckan.beans.DataCollection;
 
 public interface CkanDataSink {
 
-    public void insertOrUpdate(CsvObservationsCollection csvObservationsCollection);
+    public void insertOrUpdate(DataCollection dataCollection);
 
-    //public Iterable<InMemoryCkanDataCache.Entry<CkanDataset, CsvObservationsCollection>> getCollections();
 }

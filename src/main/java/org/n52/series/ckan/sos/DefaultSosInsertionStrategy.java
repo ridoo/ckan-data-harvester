@@ -43,7 +43,7 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.ISODateTimeFormat;
-import org.n52.series.ckan.beans.CsvObservationsCollection;
+import org.n52.series.ckan.beans.DataCollection;
 import org.n52.series.ckan.beans.DataFile;
 import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.beans.ResourceMember;
@@ -136,20 +136,20 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
     }
 
     @Override
-    public void insertOrUpdate(CsvObservationsCollection csvObservationsCollection) {
-        Map<ResourceMember, DataFile> platformDataCollections = csvObservationsCollection.getPlatformDataCollections();
-        SchemaDescriptor schemaDescription = csvObservationsCollection.getSchemaDescriptor().getSchemaDescription();
+    public void insertOrUpdate(DataCollection dataCollection) {
+        Map<ResourceMember, DataFile> platformDataCollections = dataCollection.getPlatformDataCollections();
+        SchemaDescriptor schemaDescription = dataCollection.getSchemaDescriptor().getSchemaDescription();
         boolean dataInsertedUpdated = false;
 
         // TODO join all tables together, don't care what type the collection is
         // Think of the join index when joining two observation tables !! (if of same type, then do not join but just add rows?!)
 
-        CkanDataset dataset = csvObservationsCollection.getDataset();
+        CkanDataset dataset = dataCollection.getDataset();
         LOGGER.debug("insertOrUpdate dataset '{}'", dataset.getName());
         for (Map.Entry<ResourceMember, DataFile> platformEntry : platformDataCollections.entrySet()) {
             ResourceTable platformTable = new ResourceTable(platformEntry.getKey(), platformEntry.getValue());
             platformTable.readIntoMemory();
-            if (insertOrUpdateData(dataset.getOrganization().getName(), platformTable, schemaDescription, csvObservationsCollection)) {
+            if (insertOrUpdateData(dataset.getOrganization().getName(), platformTable, schemaDescription, dataCollection)) {
                 dataInsertedUpdated = true;
             }
         }
@@ -185,11 +185,10 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
     }
 
     boolean insertOrUpdateData(String organizationName, ResourceTable platformTable, SchemaDescriptor schemaDescription,
-            CsvObservationsCollection csvObservationsCollection) {
+            DataCollection dataCollection) {
         boolean observationsInserted = false;
         final List<Phenomenon> phenomena = parseObservableProperties(platformTable, schemaDescription);
-        Map<ResourceMember, DataFile> observationCollections =
-                csvObservationsCollection.getObservationDataCollections();
+        Map<ResourceMember, DataFile> observationCollections = dataCollection.getObservationDataCollections();
 
         for (Map.Entry<ResourceMember, DataFile> observationEntry : observationCollections.entrySet()) {
             final DataFile dataFile = observationEntry.getValue();

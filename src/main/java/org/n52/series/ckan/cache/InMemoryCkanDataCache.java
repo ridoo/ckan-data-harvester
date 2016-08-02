@@ -33,29 +33,29 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.n52.series.ckan.beans.CsvObservationsCollection;
+import org.n52.series.ckan.beans.DataCollection;
 
 import eu.trentorise.opendata.jackan.model.CkanDataset;
 
 public class InMemoryCkanDataCache implements CkanDataSink {
 
-    private final Map<String, CsvObservationsCollection> datasets = new HashMap<>();
+    private final Map<String, DataCollection> datasets = new HashMap<>();
 
     @Override
-    public void insertOrUpdate(CsvObservationsCollection csvObservationsCollection) {
-        CkanDataset dataset = csvObservationsCollection.getDataset();
+    public void insertOrUpdate(DataCollection dataCollection) {
+        CkanDataset dataset = dataCollection.getDataset();
         if (datasets.containsKey(dataset.getId())) {
             // TODO update
         } else {
-            datasets.put(dataset.getId(), csvObservationsCollection);
+            datasets.put(dataset.getId(), dataCollection);
         }
     }
 
-    public Iterable<CsvObservationsCollection> getCollections() {
+    public Iterable<DataCollection> getCollections() {
         return Collections.unmodifiableCollection(datasets.values());
     }
 
-    public CsvObservationsCollection getCollection(String datasetId) {
+    public DataCollection getCollection(String datasetId) {
         return datasets.get(datasetId);
     }
 
