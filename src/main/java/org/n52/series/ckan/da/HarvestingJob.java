@@ -28,13 +28,13 @@
  */
 package org.n52.series.ckan.da;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+
 import org.n52.io.task.ScheduledJob;
 import org.quartz.InterruptableJob;
 import org.quartz.JobBuilder;
@@ -45,13 +45,13 @@ import org.quartz.JobExecutionException;
 import org.quartz.UnableToInterruptJobException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class HarvestingJob extends ScheduledJob implements InterruptableJob {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(HarvestingJob.class);
 
-    @Autowired
     private CkanHarvestingService harvestingService;
 
     private String configFile;

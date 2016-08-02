@@ -59,21 +59,31 @@
             <artifactId>jts</artifactId>
             <version>1.13</version>
         </dependency>
-<!--         <dependency> -->
-<!--             <groupId>org.geotools</groupId> -->
-<!--             <artifactId>gt-opengis</artifactId> -->
-<!--             <version>14.0</version> -->
-<!--         </dependency> -->
-<!--         <dependency> -->
-<!--             <groupId>org.springframework</groupId> -->
-<!--             <artifactId>spring-core</artifactId> -->
-<!--             <version>4.2.2-RELEASE</version> -->
-<!--         </dependency> -->
 
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>15.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.trentorise.opendata</groupId>
+            <artifactId>traceprov</artifactId>
+            <version>0.3.0</version>
         </dependency>
         <dependency>
             <groupId>eu.trentorise.opendata</groupId>
@@ -90,23 +100,17 @@
             <artifactId>joda-time</artifactId>
             <version>2.8.2</version>
         </dependency>
-
-        <!-- <dependency>
-            <groupId>edu.ucar</groupId>
-            <artifactId>udunits</artifactId>
-            <version>4.6.3</version>
-            </dependency> -->
-        <!-- <dependency>
-            <groupId>tec.uom</groupId>
-            <artifactId>uom-se</artifactId>
-            <version>0.8</version>
-            </dependency> -->
         <dependency>
-            <groupId>org.jscience</groupId>
-            <artifactId>jscience</artifactId>
-            <version>4.3.1</version>
+            <groupId>org.quartz-scheduler</groupId>
+            <artifactId>quartz</artifactId>
+            <version>2.1.7</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-opengis</artifactId>
+            <version>14.0</version>
+        </dependency>
+        
         <dependency>
             <groupId>org.n52.sensorweb.sos</groupId>
             <artifactId>api</artifactId>
@@ -520,33 +524,18 @@
 
 
     <repositories>
-
         <repository>
             <id>n52-releases</id>
             <name>52n Releases</name>
-            <snapshots><enabled>false</enabled></snapshots>
-            <releases><enabled>true</enabled></releases>
             <url>https://52north.org/maven/repo/releases/</url>
         </repository>
         <repository>
-            <id>n52-snapshots</id>
-            <name>52n Snapshots</name>
-            <snapshots><enabled>true</enabled></snapshots>
-            <releases><enabled>false</enabled></releases>
-            <url>https://52north.org/maven/repo/snapshots/</url>
+            <id>geotools</id>
+            <name>Open Source Geospatial Foundation Repository</name>
+            <url>http://download.osgeo.org/webdav/geotools/</url>
+            <!--<url>https://boundless.artifactoryonline.com/boundless/main</url> -->
+            <!--<url>http://repo.boundlessgeo.com/main/</url> -->
         </repository>
-        
-        <!-- <repository>
-            <id>unidata-releases</id>
-            <name>Unidata Releases</name>
-            <url>https://artifacts.unidata.ucar.edu/content/repositories/unidata-releases/</url>
-            <releases>
-            <enabled>true</enabled>
-            </releases>
-            <snapshots>
-            <enabled>false</enabled>
-            </snapshots>
-            </repository> -->
     </repositories>
 </project>
 

@@ -11,7 +11,7 @@
 	</appender>
 
     <logger name="org.n52.sos" level="ERROR" />
-    <logger name="org.n52.series" level="DEBUG" />
+    <logger name="org.n52.series" level="WARN" />
     <logger name="eu.trentorise.opendata.jackan" level="WARN" />
     <logger name="org.hibernate" level="ERROR" />
 

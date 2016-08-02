@@ -31,10 +31,6 @@ package org.n52.series.ckan.sos;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import javax.measure.unit.SI;
-import javax.measure.unit.Unit;
-import javax.measure.unit.UnitFormat;
-
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.joda.time.DateTime;
@@ -172,36 +168,6 @@ public class DefaultSosInsertionStragetyTest {
                 + ", actual: " + instant.getValue().getMillis(), instant2.equals(instant));
     }
 
-//    @Test
-    public void parseDegreeCelsiusToUnit() throws Exception {
-        final UnitFormat ucum = UnitFormat.getUCUMInstance();
-        // using udunits
-//        DefaultSosInsertionStrategy strategy = new DefaultSosInsertionStrategySeam();
-//        Unit uom = strategy.parseUom("degree Celsius");
-//        Assert.assertTrue(SI.DEGREE_CELSIUS.equals(uom));
-        // using uom-ri
-        //final Object unit = UnitFormat.getInstance().parseObject("degree celsius");
-        ucum.alias(SI.CELSIUS, "degree_celsius");
-        SI.CELSIUS.toString();
-        final Unit unit = (Unit) ucum.parseObject("degree_celsius");
-        Assert.assertThat(unit.toString(), CoreMatchers.is("°C"));
-//        System.out.println(ucum.format(ucum.parseObject("degree_celsius")));
-    }
-
-    @Test
-    public void parseDecimalDegreeToUnit() throws Exception {
-        DefaultSosInsertionStrategy strategy = new DefaultSosInsertionStrategySeam();
-
-        // using udunits
-//        Unit uom = strategy.parseUom("decimal degrees");
-//        Assert.assertTrue(SI.DEGREE_CELSIUS.equals(uom));
-//        final StandardUnitFormat format = StandardUnitFormat.instance();
-//        final Unit unit = format.parse("arc degrees");
-//
-        // TODO
-
-    }
-
     @Test
     public void parseStringTypeObservationValue() {
         DefaultSosInsertionStrategy strategy = new DefaultSosInsertionStrategySeam();
@@ -221,7 +187,7 @@ public class DefaultSosInsertionStragetyTest {
     }
 
     @Test
-    @Ignore("currently failing on data insertion")
+//    @Ignore("currently failing on data insertion")
     public void when_insertingWindDWDDatasets_then_getObservationNotEmpty() throws OwsExceptionReport, IOException, URISyntaxException {
         FileBasedCkanHarvestingService service = new FileBasedCkanHarvestingService(testFolder.getRoot());
         SosH2Store sosStore = new SosH2Store(service.getCkanDataCache());

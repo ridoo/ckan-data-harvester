@@ -73,7 +73,7 @@ public class DataTable {
     public ResourceMember getResourceMember() {
         return resourceMember;
     }
-    
+
     public DataTable extendWith(DataTable other) {
         if (resourceMember == null || resourceMember.getId() == null) {
             return other; // ignore trivial instance
@@ -87,7 +87,7 @@ public class DataTable {
         extendTable(other, outputTable);
         return outputTable;
     }
-    
+
     private void extendTable(DataTable other, DataTable outputTable) {
         LOGGER.debug("extending table {} (#{} rows) with table {} (#{} rows)",
                      resourceMember.getId(), rowSize(),

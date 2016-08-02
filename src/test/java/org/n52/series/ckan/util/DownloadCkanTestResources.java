@@ -30,24 +30,18 @@ package org.n52.series.ckan.util;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.n52.series.ckan.cache.InMemoryCkanDataCache;
 import org.n52.series.ckan.cache.InMemoryCkanMetadataCache;
 import org.n52.series.ckan.da.CkanHarvestingService;
-import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import eu.trentorise.opendata.jackan.CkanClient;
 
 public class DownloadCkanTestResources {
 
     public static void main(String[] args) throws URISyntaxException, IOException {
-
-//        redirectJulToSlf4JLogging();
-//        System.out.println(System.setProperty("javax.net.debug", "all"));
 
         InMemoryCkanMetadataCache ckanMetadataCache = new InMemoryCkanMetadataCache();
         InMemoryCkanDataCache ckanDataCache = new InMemoryCkanDataCache();
@@ -66,9 +60,4 @@ public class DownloadCkanTestResources {
         ckanHarvester.harvestResources();
     }
 
-    private static void redirectJulToSlf4JLogging() {
-        // http://stackoverflow.com/questions/9117030/jul-to-slf4j-bridge
-        SLF4JBridgeHandler.install();
-        Logger.getLogger("eu.trentorise.opendata.jackan").setLevel(Level.FINEST);
-    }
 }
