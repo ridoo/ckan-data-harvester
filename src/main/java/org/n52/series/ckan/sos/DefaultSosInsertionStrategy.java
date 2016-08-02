@@ -140,11 +140,10 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
         Map<ResourceMember, DataFile> platformDataCollections = csvObservationsCollection.getPlatformDataCollections();
         SchemaDescriptor schemaDescription = csvObservationsCollection.getSchemaDescriptor().getSchemaDescription();
         boolean dataInsertedUpdated = false;
-        
-        
+
         // TODO join all tables together, don't care what type the collection is
         // Think of the join index when joining two observation tables !! (if of same type, then do not join but just add rows?!)
-        
+
         LOGGER.debug("insertOrUpdate dataset '{}'", dataset.getName());
         for (Map.Entry<ResourceMember, DataFile> platformEntry : platformDataCollections.entrySet()) {
             ResourceTable platformTable = new ResourceTable(platformEntry.getKey(), platformEntry.getValue());
@@ -265,7 +264,7 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
                         }
                     }
                 }
-                
+
                 LOGGER.debug("Inserted #{} sensors: {}", sensorInsertions.size(), sensorInsertions);
 
                 for (Map.Entry<String, SensorInsertion> sensorEntries : sensorInsertions.entrySet()) {

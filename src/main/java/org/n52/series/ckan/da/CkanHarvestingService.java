@@ -122,7 +122,7 @@ public class CkanHarvestingService {
                 String datasetId = dataset.getId();
                 List<String> resourceIds = getResourceIds(description.getSchemaDescription());
                 Map<String, DataFile> dataFiles = downloadFiles(dataset, resourceIds);
-                
+
                 LOGGER.debug("downloaded data files for '{}': {}", dataset.getName(), dataFiles.keySet());
 
                 // TODO check when to delete or update resource
@@ -197,7 +197,7 @@ public class CkanHarvestingService {
         File file = datasetDownloadFolder.resolve(resourceName).toFile();
 
         // TODO download only when newer
-        
+
         downloadToFile(resource.getUrl(), file);
         return new DataFile(resource, format, file);
     }

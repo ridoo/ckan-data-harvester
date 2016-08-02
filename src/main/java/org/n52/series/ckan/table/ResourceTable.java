@@ -51,9 +51,9 @@ public class ResourceTable extends DataTable {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceTable.class);
 
     private final DataFile dataFile;
-    
+
     public static interface InvalidRowCountHandler {
-        
+        // TODO
     }
 
     public ResourceTable(ResourceMember resourceMember, DataFile dataFile) {
@@ -68,7 +68,7 @@ public class ResourceTable extends DataTable {
             long start = System.currentTimeMillis();
             Iterator<CSVRecord> iterator = csvParser.iterator();
             List<String> columnHeaders = resourceMember.getColumnHeaders();
-            
+
             for (int i = 0 ; i < resourceMember.getHeaderRows() ; i++) {
                 iterator.next(); // skip
             }
@@ -81,7 +81,7 @@ public class ResourceTable extends DataTable {
                 if ( !line.isConsistent()) {
 
                     // TODO choose csv parsing strategy
-                    
+
                     LOGGER.trace("headers: {}", Arrays.toString(columnHeaders.toArray()));
                     LOGGER.trace("ignore line: #columnheaders != #csvValues");
                     LOGGER.trace("line: {}", line);
@@ -95,12 +95,12 @@ public class ResourceTable extends DataTable {
                     table.put(id, field, value);
                 }
             }
-            
+
             if (ignoredCount > 0) {
                 LOGGER.debug("#{} ignored rows as not matching rowheader. "
                         + "Set LOG level to TRACE to log each.", ignoredCount);
             }
-            
+
             LOGGER.debug("Resource data '{}' loaded into memory (#{} lines a #{} columns), took {}s",
                     resourceMember.getId(), lineNbr, columnHeaders.size(),
                     (System.currentTimeMillis() - start)/1000d);

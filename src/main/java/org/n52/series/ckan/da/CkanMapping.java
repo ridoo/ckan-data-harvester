@@ -51,7 +51,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 
 public class CkanMapping {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CkanMapping.class);
 
     private Map<String, Set<String>> mappingsByName;

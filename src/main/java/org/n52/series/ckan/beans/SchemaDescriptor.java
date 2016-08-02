@@ -48,7 +48,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import eu.trentorise.opendata.jackan.model.CkanDataset;
 
 public class SchemaDescriptor {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SchemaDescriptor.class);
 
     private final JsonNode node;
