@@ -46,6 +46,12 @@ public class ResourceMember {
     private List<ResourceField> resourceFields;
 
     public ResourceMember() {
+        this(null, null);
+    }
+
+    public ResourceMember(String id, String resourceType) {
+        this.id = id;
+        this.resourceType = resourceType;
         this.resourceFields = new ArrayList<>();
     }
 
@@ -117,19 +123,6 @@ public class ResourceMember {
             fieldIds.add(field.getFieldId());
         }
         return fieldIds;
-    }
-
-    public Set<ResourceField> getJoinFields(ResourceMember other) {
-        if ( !isJoinable(other)) {
-            return Collections.<ResourceField>emptySet();
-        }
-        Set<ResourceField> joinFields = new HashSet<>();
-        for (ResourceField otherField : other.resourceFields) {
-            if (resourceFields.contains(otherField)) {
-                joinFields.add(ResourceField.copy(otherField));
-            }
-        }
-        return Collections.unmodifiableSet(joinFields);
     }
 
     public Set<ResourceField> getJoinableFields(ResourceMember other) {

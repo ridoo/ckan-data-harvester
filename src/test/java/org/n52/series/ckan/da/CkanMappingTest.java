@@ -29,8 +29,8 @@
 package org.n52.series.ckan.da;
 
 import static junit.framework.TestCase.assertTrue;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
@@ -40,9 +40,9 @@ public class CkanMappingTest {
     @Test
     public void when_parsingIdMappings_then_idMappingsNotEmpty() {
         CkanMapping mappings = CkanMapping.loadCkanMapping("config-ckan-mapping.json");
-        assertThat(mappings.getMappings("result_time"), containsInAnyOrder("resulttime", "result_time", "datetime", "mess_datum"));
-        assertThat(mappings.getMappings("latitude"), containsInAnyOrder("geobreite", "latitude", "lat"));
-        assertThat(mappings.getMappings("longitude"), containsInAnyOrder("geolaenge", "longitude", "lon"));
+        assertThat(mappings.getMappings("result_time"), contains("resulttime", "result_time", "datetime", "mess_datum"));
+        assertThat(mappings.getMappings("latitude"), contains("geobreite", "latitude", "lat"));
+        assertThat(mappings.getMappings("longitude"), contains("geolaenge", "longitude", "lon"));
     }
 
     @Test
@@ -60,7 +60,7 @@ public class CkanMappingTest {
     @Test
     public void when_noMappings_then_onlyNameIsIncluded() {
          CkanMapping ckanMappin = CkanMapping.loadCkanMapping("some-ckan-config.json");
-         assertThat(ckanMappin.getMappings("does-not-exist").size(), is(1));
+         assertThat(ckanMappin.getMappings("does-not-exist"), hasSize(1));
          assertTrue(ckanMappin.hasMapping("does-not-exist", "does-not-exist"));
     }
 
