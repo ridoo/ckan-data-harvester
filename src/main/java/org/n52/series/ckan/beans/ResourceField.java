@@ -60,7 +60,7 @@ public class ResourceField {
     public ResourceField(JsonNode node, int index) {
         this(node, index, CkanMapping.loadCkanMapping());
     }
-    
+
     public ResourceField(JsonNode node, int index, CkanMapping ckanMapping) {
         this.node = node;
         this.index = index;
@@ -144,7 +144,7 @@ public class ResourceField {
     }
 
     public boolean isOfType(Class<?> clazz) {
-        final String fieldType = getFieldType();
+        final String fieldType = getFieldType().toLowerCase();
         String ofType = clazz.getSimpleName().toLowerCase();
         return isOfType(fieldType, ofType);
     }
