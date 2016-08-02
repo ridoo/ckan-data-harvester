@@ -28,8 +28,10 @@
  */
 package org.n52.series.ckan.cache;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.n52.series.ckan.beans.CsvObservationsCollection;
 
@@ -53,7 +55,15 @@ public class InMemoryCkanDataCache implements CkanDataSink {
     }
 
     public Iterable<Entry<CkanDataset, CsvObservationsCollection>> getCollections() {
-        return datasets.values();
+        return Collections.unmodifiableCollection(datasets.values());
+    }
+
+    public Entry<CkanDataset, CsvObservationsCollection> getCollection(String datasetId) {
+        return datasets.get(datasetId);
+    }
+    
+    public Set<String> getCollectionIds() {
+        return datasets.keySet();
     }
 
     public class Entry<M,D> {
