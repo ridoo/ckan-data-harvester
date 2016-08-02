@@ -28,15 +28,6 @@
  */
 package org.n52.series.ckan.da;
 
-import org.n52.series.ckan.cache.CkanMetadataCache;
-import com.fasterxml.jackson.databind.JsonNode;
-import org.n52.series.ckan.util.ResourceClient;
-import eu.trentorise.opendata.jackan.CkanClient;
-import eu.trentorise.opendata.jackan.CkanQuery;
-import eu.trentorise.opendata.jackan.SearchResults;
-import eu.trentorise.opendata.jackan.model.CkanDataset;
-import eu.trentorise.opendata.jackan.model.CkanResource;
-import eu.trentorise.opendata.traceprov.internal.org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -49,14 +40,26 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import org.n52.series.ckan.beans.CsvObservationsCollection;
 import org.n52.series.ckan.beans.DataFile;
 import org.n52.series.ckan.beans.DescriptionFile;
 import org.n52.series.ckan.beans.SchemaDescriptor;
 import org.n52.series.ckan.cache.CkanDataSink;
+import org.n52.series.ckan.cache.CkanMetadataCache;
 import org.n52.series.ckan.util.JsonUtil;
+import org.n52.series.ckan.util.ResourceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import eu.trentorise.opendata.jackan.CkanClient;
+import eu.trentorise.opendata.jackan.CkanQuery;
+import eu.trentorise.opendata.jackan.SearchResults;
+import eu.trentorise.opendata.jackan.model.CkanDataset;
+import eu.trentorise.opendata.jackan.model.CkanResource;
+import eu.trentorise.opendata.traceprov.internal.org.apache.commons.io.FileUtils;
 
 public class CkanHarvestingService {
 
@@ -119,7 +122,6 @@ public class CkanHarvestingService {
                         dataset.getId(), dataset.getName());
                 DescriptionFile description = getSchemaDescription(dataset);
 
-                String datasetId = dataset.getId();
                 List<String> resourceIds = getResourceIds(description.getSchemaDescription());
                 Map<String, DataFile> dataFiles = downloadFiles(dataset, resourceIds);
 
@@ -127,8 +129,7 @@ public class CkanHarvestingService {
 
                 // TODO check when to delete or update resource
 
-                dataCache.insertOrUpdate(dataset,
-                        new CsvObservationsCollection(datasetId, description, dataFiles));
+                dataCache.insertOrUpdate(new CsvObservationsCollection(dataset, description, dataFiles));
                 observationCollectionCount++;
             }
         }

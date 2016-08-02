@@ -33,9 +33,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import org.n52.series.ckan.beans.CsvObservationsCollection;
 import org.n52.series.ckan.cache.InMemoryCkanDataCache;
-import org.n52.series.ckan.cache.InMemoryCkanDataCache.Entry;
 import org.n52.sos.ds.hibernate.GetObservationDAO;
 import org.n52.sos.ds.hibernate.H2Configuration;
 import org.n52.sos.ds.hibernate.HibernateTestCase;
@@ -45,8 +43,6 @@ import org.n52.sos.ogc.sos.Sos2Constants;
 import org.n52.sos.ogc.sos.SosConstants;
 import org.n52.sos.request.GetObservationRequest;
 import org.n52.sos.response.GetObservationResponse;
-
-import eu.trentorise.opendata.jackan.model.CkanDataset;
 
 public class SosH2Store extends HibernateTestCase {
 
@@ -61,10 +57,8 @@ public class SosH2Store extends HibernateTestCase {
     // TODO think of refactoring how strategy works to run tests fast
     // TODO think of making this an integration test
 
-    void insertDatasetViaStrategy(String datasetId, SosInsertionStrategy insertionStrategy)
-            throws OwsExceptionReport {
-        Entry<CkanDataset, CsvObservationsCollection> collection = ckanDataCache.getCollection(datasetId);
-        insertionStrategy.insertOrUpdate(collection.getDataset(), collection.getData());
+    void insertDatasetViaStrategy(String datasetId, SosInsertionStrategy insertionStrategy) throws OwsExceptionReport {
+        insertionStrategy.insertOrUpdate(ckanDataCache.getCollection(datasetId));
     }
 
     void assertObservationsAvailable() throws OwsExceptionReport {

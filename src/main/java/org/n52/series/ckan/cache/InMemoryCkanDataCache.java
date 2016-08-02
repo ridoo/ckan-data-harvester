@@ -39,58 +39,28 @@ import eu.trentorise.opendata.jackan.model.CkanDataset;
 
 public class InMemoryCkanDataCache implements CkanDataSink {
 
-    private final Map<String, Entry<CkanDataset, CsvObservationsCollection>> datasets = new HashMap<>();
+    private final Map<String, CsvObservationsCollection> datasets = new HashMap<>();
 
     @Override
-    public void insertOrUpdate(CkanDataset dataset, CsvObservationsCollection csvObservationsCollection) {
-        if (dataset == null) {
-            return;
-        }
-
+    public void insertOrUpdate(CsvObservationsCollection csvObservationsCollection) {
+        CkanDataset dataset = csvObservationsCollection.getDataset();
         if (datasets.containsKey(dataset.getId())) {
             // TODO update
         } else {
-            datasets.put(dataset.getId(), new Entry<>(dataset, csvObservationsCollection));
+            datasets.put(dataset.getId(), csvObservationsCollection);
         }
     }
 
-    public Iterable<Entry<CkanDataset, CsvObservationsCollection>> getCollections() {
+    public Iterable<CsvObservationsCollection> getCollections() {
         return Collections.unmodifiableCollection(datasets.values());
     }
 
-    public Entry<CkanDataset, CsvObservationsCollection> getCollection(String datasetId) {
+    public CsvObservationsCollection getCollection(String datasetId) {
         return datasets.get(datasetId);
     }
-    
+
     public Set<String> getCollectionIds() {
         return datasets.keySet();
-    }
-
-    public class Entry<M,D> {
-        private M dataset;
-        private D data;
-
-        public Entry(M dataset, D data) {
-            this.dataset = dataset;
-            this.data = data;
-        }
-
-        public M getDataset() {
-            return dataset;
-        }
-
-        public void setDataset(M dataset) {
-            this.dataset = dataset;
-        }
-
-        public D getData() {
-            return data;
-        }
-
-        public void setData(D data) {
-            this.data = data;
-        }
-
     }
 
 }

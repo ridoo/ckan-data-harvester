@@ -30,11 +30,9 @@ package org.n52.series.ckan.cache;
 
 import org.n52.series.ckan.beans.CsvObservationsCollection;
 
-import eu.trentorise.opendata.jackan.model.CkanDataset;
-
 public interface CkanDataSink {
 
-    public void insertOrUpdate(CkanDataset dataset, CsvObservationsCollection csvObservationsCollection);
+    public void insertOrUpdate(CsvObservationsCollection csvObservationsCollection);
 
     //public Iterable<InMemoryCkanDataCache.Entry<CkanDataset, CsvObservationsCollection>> getCollections();
 }

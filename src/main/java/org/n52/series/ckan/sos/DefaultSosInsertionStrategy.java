@@ -136,7 +136,7 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
     }
 
     @Override
-    public void insertOrUpdate(CkanDataset dataset, CsvObservationsCollection csvObservationsCollection) {
+    public void insertOrUpdate(CsvObservationsCollection csvObservationsCollection) {
         Map<ResourceMember, DataFile> platformDataCollections = csvObservationsCollection.getPlatformDataCollections();
         SchemaDescriptor schemaDescription = csvObservationsCollection.getSchemaDescriptor().getSchemaDescription();
         boolean dataInsertedUpdated = false;
@@ -144,6 +144,7 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
         // TODO join all tables together, don't care what type the collection is
         // Think of the join index when joining two observation tables !! (if of same type, then do not join but just add rows?!)
 
+        CkanDataset dataset = csvObservationsCollection.getDataset();
         LOGGER.debug("insertOrUpdate dataset '{}'", dataset.getName());
         for (Map.Entry<ResourceMember, DataFile> platformEntry : platformDataCollections.entrySet()) {
             ResourceTable platformTable = new ResourceTable(platformEntry.getKey(), platformEntry.getValue());
