@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.n52.series.ckan.da.CkanConstants;
@@ -47,7 +48,7 @@ public class CsvObservationsCollection {
     private final Map<ResourceMember, DataFile> dataCollection;
 
     private final DescriptionFile schemaDescriptor;
-    
+
     public CsvObservationsCollection() {
         this(null, null, null);
     }
@@ -76,9 +77,15 @@ public class CsvObservationsCollection {
     public DescriptionFile getSchemaDescriptor() {
         return schemaDescriptor;
     }
-    
-    public DataFile getDataFile(ResourceMember resourceMember) {
-        return getDataCollection().get(resourceMember);
+
+    public Entry<ResourceMember, DataFile> getDataEntry(ResourceMember resourceMember) {
+        Map<ResourceMember, DataFile> collection = getDataCollection();
+        for (Entry<ResourceMember, DataFile> entry : collection.entrySet()) {
+            if (entry.getKey().equals(resourceMember)) {
+                return entry;
+            }
+        }
+        return null;
     }
 
     public Map<ResourceMember, DataFile> getDataCollection() {
@@ -98,7 +105,7 @@ public class CsvObservationsCollection {
         }
         return typedCollection;
     }
-    
+
     public Map<ResourceMember, DataFile> getObservationDataCollections() {
         return getDataCollectionsOfType(getMappingsFor(CkanConstants.ResourceType.OBSERVATIONS));
     }
