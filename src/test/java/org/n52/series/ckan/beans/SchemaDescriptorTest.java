@@ -26,12 +26,23 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
-package org.n52.series.ckan.cache;
+package org.n52.series.ckan.beans;
 
-import org.n52.series.ckan.beans.DataCollection;
+import static org.hamcrest.Matchers.is;
 
-public interface CkanDataSink {
+import org.hamcrest.MatcherAssert;
+import org.junit.Test;
 
-    public void insertOrUpdate(DataCollection dataCollection);
+public class SchemaDescriptorTest {
 
+    @Test
+    public void when_simpleCreation_then_noExceptions() {
+        new SchemaDescriptor();
+    }
+
+    @Test
+    public void when_relateWithNullDataFiles_then_emptyResult() {
+        SchemaDescriptor trivialDescriptor = new SchemaDescriptor();
+        MatcherAssert.assertThat(trivialDescriptor.relateWithDataFiles(null).size(), is(0));
+    }
 }

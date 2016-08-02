@@ -157,12 +157,11 @@ public class InMemoryCkanMetadataCache implements CkanMetadataCache {
                     try {
                         JsonNode schemaDescriptionNode = om.readTree(extras.getValue());
                         Set<String> types = ckanMapping.getMappings(CkanConstants.SchemaDescriptor.RESOURCE_TYPE);
-                        String resourceType = JsonUtil.parseMissingToEmptyString(schemaDescriptionNode, types);
+                        String resourceType = JsonUtil.parseToLowerCase(schemaDescriptionNode, types);
 
                         // TODO schema descriptor factory here when more types appear
                         if (CkanConstants.ResourceType.CSV_OBSERVATIONS_COLLECTION.equalsIgnoreCase(resourceType)) {
-                            return new SchemaDescriptor(dataset, schemaDescriptionNode)
-                                    .withCkanMapping(ckanMapping);
+                            return new SchemaDescriptor(dataset, schemaDescriptionNode, ckanMapping);
                         }
                     } catch (IOException e) {
                          LOGGER.error("Could not read schema_descriptor: {}", extras.getValue(), e);

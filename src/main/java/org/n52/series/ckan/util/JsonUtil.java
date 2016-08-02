@@ -33,9 +33,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.MissingNode;
@@ -43,8 +40,6 @@ import com.fasterxml.jackson.databind.node.MissingNode;
 import eu.trentorise.opendata.jackan.CkanClient;
 
 public class JsonUtil {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(JsonUtil.class);
 
     private static final ObjectMapper om = new ObjectMapper();
 
@@ -60,11 +55,12 @@ public class JsonUtil {
         return new ObjectMapper();
     }
 
-    public static String parseMissingToEmptyString(JsonNode node, Set<String> alternateFieldNames) {
+    public static String parseToLowerCase(JsonNode node, Set<String> alternateFieldNames) {
         JsonNode field = findField(node, alternateFieldNames);
-        return !field.isMissingNode()
+        String value = !field.isMissingNode()
                 ? field.asText()
                 : "";
+        return value.toLowerCase();
     }
 
     public static int parseMissingToNegativeInt(JsonNode node, Set<String> alternateFieldNames) {
@@ -92,7 +88,6 @@ public class JsonUtil {
                 field = getNodeWithName(alternateFieldName, node);
                 field = tryLowerCasedIfMissing(field, alternateFieldName, node);
                 if ( !field.isMissingNode()) {
-                    LOGGER.debug("found node with deprecated property '{}'", alternateFieldName);
                     break;
                 }
             }

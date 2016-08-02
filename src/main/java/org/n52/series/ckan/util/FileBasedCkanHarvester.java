@@ -26,19 +26,22 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.util;
 
-import eu.trentorise.opendata.jackan.model.CkanDataset;
-import eu.trentorise.opendata.jackan.model.CkanResource;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.n52.series.ckan.beans.DataFile;
 import org.n52.series.ckan.da.CkanHarvestingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import eu.trentorise.opendata.jackan.model.CkanDataset;
+import eu.trentorise.opendata.jackan.model.CkanResource;
 
 public class FileBasedCkanHarvester extends CkanHarvestingService {
 
@@ -56,7 +59,12 @@ public class FileBasedCkanHarvester extends CkanHarvestingService {
     public void harvestDatasets() {
         for (File file : getDatasets()) {
             CkanDataset dataset = parseDatasetTestFile(file);
-            getMetadataCache().insertOrUpdate(dataset);
+            try {
+                getMetadataCache().insertOrUpdate(dataset);
+            }
+            catch (IllegalStateException e) {
+                LOGGER.warn("Inconsistent test data for dataset '{}'");
+            }
         }
     }
 
@@ -75,33 +83,36 @@ public class FileBasedCkanHarvester extends CkanHarvestingService {
 
     private File getSourceDataFolder() {
         String baseFolder = TEST_FILES_BASE_PATH + "/" + contextPath;
-        LOGGER.debug("Source Data Folder: {}", baseFolder);
+        LOGGER.trace("Source Data Folder: {}", baseFolder);
         return new File(getClass().getResource(baseFolder).getFile());
     }
 
     private CkanDataset parseDatasetTestFile(File file) {
         try {
             return JsonUtil.getCkanObjectMapper().readValue(file, CkanDataset.class);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             LOGGER.error("could not read/parse test file", e);
             return new CkanDataset();
         }
     }
 
     @Override
-    protected DataFile downloadCsvFile(CkanResource resource, Path datasetDownloadFolder) {
+    protected DataFile downloadFile(CkanResource resource, Path datasetDownloadFolder) throws IOException {
         File folder = getSourceDataFolder();
         File[] dataFolders = folder.listFiles();
+        String id = resource.getId();
+        String format = resource.getFormat();
         for (File file : dataFolders) {
             if (file.isDirectory()) {
-                Path datapath = file.toPath().resolve(resource.getId() + ".csv");
+                Path datapath = file.toPath().resolve(id + "." + format);
                 if (datapath.toFile().exists()) {
-                    return new DataFile(resource, datapath.toFile());
+                    return new DataFile(resource, format, datapath.toFile());
                 }
             }
         }
-        throw new IllegalStateException("no data file found for resource '" + resource.getId() + "'.");
+        String name = resource.getName();
+        throw new IOException("no data file found for resource '" + name + "' and id '" + id + "'.");
     }
-
 
 }

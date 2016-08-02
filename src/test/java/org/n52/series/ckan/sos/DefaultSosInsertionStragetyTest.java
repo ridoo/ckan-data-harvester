@@ -29,6 +29,7 @@
 package org.n52.series.ckan.sos;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
@@ -40,20 +41,17 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
-import org.n52.io.geojson.JSONUtils;
+import org.junit.rules.TemporaryFolder;
 import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.beans.ResourceFieldCreator;
-import org.n52.series.ckan.da.CkanConstants;
+import org.n52.series.ckan.util.FileBasedCkanHarvestingService;
 import org.n52.sos.ogc.gml.time.TimeInstant;
 import org.n52.sos.ogc.om.SingleObservationValue;
 import org.n52.sos.ogc.om.values.QuantityValue;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Strings;
-import com.vividsolutions.jts.geom.Geometry;
+import org.n52.sos.ogc.ows.OwsExceptionReport;
 
 public class DefaultSosInsertionStragetyTest {
 
@@ -62,6 +60,10 @@ public class DefaultSosInsertionStragetyTest {
             + "\"date_format\": \"%s\","
             + "\"field_type\": \"Date\""
             + " }";
+
+    @Rule
+    public TemporaryFolder testFolder = new TemporaryFolder();
+
     private ResourceFieldCreator fieldCreator;
 
     @Before
@@ -210,11 +212,21 @@ public class DefaultSosInsertionStragetyTest {
                         + " \"long_name\" : \"value\","
                         + " \"phenomenon\" : \"temperature\","
                         + " \"uom\" : \"°K\","
-                        + " \"field_type\" : \"String\" }");
+                        + " \"field_type\" : \"Float\" }");
         SingleObservationValue<Double> value = strategy.createQuantityObservationValue(field, "25.0");
+        Assert.assertNotNull(value);
         Assert.assertThat(value.getValue(), CoreMatchers.instanceOf(QuantityValue.class));
         Assert.assertThat(value.getValue().getValue(), CoreMatchers.is(25.0));
         Assert.assertThat(value.getValue().getUnit(), CoreMatchers.is("°K"));
+    }
+
+    @Test
+    @Ignore("currently failing on data insertion")
+    public void when_insertingWindDWDDatasets_then_getObservationNotEmpty() throws OwsExceptionReport, IOException, URISyntaxException {
+        FileBasedCkanHarvestingService service = new FileBasedCkanHarvestingService(testFolder.getRoot());
+        SosH2Store sosStore = new SosH2Store(service.getCkanDataCache());
+        sosStore.insertDatasetViaStrategy("12c3c8f1-bf44-47e1-b294-b6fc889873fc", new DefaultSosInsertionStrategy());
+        sosStore.assertObservationsAvailable();
     }
 
     class DefaultSosInsertionStrategySeam extends DefaultSosInsertionStrategy {

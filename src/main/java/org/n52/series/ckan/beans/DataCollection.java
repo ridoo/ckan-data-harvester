@@ -34,43 +34,69 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+
 import org.n52.series.ckan.da.CkanConstants;
 
-public class CsvObservationsCollection {
+import eu.trentorise.opendata.jackan.model.CkanDataset;
 
-    private final String datasetId;
+public class DataCollection {
+
+    private final CkanDataset dataset;
 
     private final Map<ResourceMember, DataFile> dataCollection;
 
     private final DescriptionFile schemaDescriptor;
 
-    public CsvObservationsCollection(String datasetId, DescriptionFile description, Map<String, DataFile> csvContents) {
-        this.datasetId = datasetId;
-        SchemaDescriptor descriptor = description.getSchemaDescription();
-        this.dataCollection = descriptor.relateWithDataFiles(csvContents);
-        this.schemaDescriptor = description;
+    public DataCollection() {
+        this(null, null, null);
     }
 
-    public String getDatasetId() {
-        return datasetId;
+    public DataCollection(CkanDataset dataset, DescriptionFile description, Map<String, DataFile> csvContents) {
+        this.dataset = dataset == null
+                ? new CkanDataset()
+                : dataset;
+        this.schemaDescriptor = description == null
+                ? new DescriptionFile()
+                : description;
+        SchemaDescriptor descriptor = description.getSchemaDescription();
+        this.dataCollection = descriptor.relateWithDataFiles(csvContents);
+    }
+
+    public CkanDataset getDataset() {
+        return dataset;
     }
 
     public String getDescription() {
-        return schemaDescriptor.getSchemaDescription().getDescription();
+        return schemaDescriptor != null
+                ? schemaDescriptor.getSchemaDescription().getDescription()
+                : null;
     }
 
     public DescriptionFile getSchemaDescriptor() {
         return schemaDescriptor;
     }
 
+    public Entry<ResourceMember, DataFile> getDataEntry(ResourceMember resourceMember) {
+        Map<ResourceMember, DataFile> collection = getDataCollection();
+        for (Entry<ResourceMember, DataFile> entry : collection.entrySet()) {
+            if (entry.getKey().equals(resourceMember)) {
+                return entry;
+            }
+        }
+        return null;
+    }
+
     public Map<ResourceMember, DataFile> getDataCollection() {
-        return Collections.unmodifiableMap(dataCollection);
+        return dataCollection != null
+                ? Collections.unmodifiableMap(dataCollection)
+                : Collections.<ResourceMember, DataFile>emptyMap();
     }
 
     public Map<ResourceMember, DataFile> getMetadataCollection() {
         Map<ResourceMember, DataFile> typedCollection = new HashMap<>();
-        for (Map.Entry<ResourceMember, DataFile> entry : dataCollection.entrySet()) {
+        for (Map.Entry<ResourceMember, DataFile> entry : getDataCollection().entrySet()) {
             ResourceMember member = entry.getKey();
             final String resourceType = member.getResourceType();
             if ( !resourceType.equalsIgnoreCase(CkanConstants.ResourceType.OBSERVATIONS)) {
@@ -81,18 +107,23 @@ public class CsvObservationsCollection {
     }
 
     public Map<ResourceMember, DataFile> getObservationDataCollections() {
-        return getDataCollectionsOfType(CkanConstants.ResourceType.OBSERVATIONS);
+        return getDataCollectionsOfType(getMappingsFor(CkanConstants.ResourceType.OBSERVATIONS));
     }
 
     public Map<ResourceMember, DataFile> getPlatformDataCollections() {
-        return getDataCollectionsOfType(CkanConstants.ResourceType.PLATFORMS);
+        return getDataCollectionsOfType(getMappingsFor(CkanConstants.ResourceType.PLATFORMS));
     }
 
-    public Map<ResourceMember, DataFile> getDataCollectionsOfType(String type) {
+    private Set<String> getMappingsFor(String name) {
+        SchemaDescriptor descriptor = schemaDescriptor.getSchemaDescription();
+        return descriptor.getCkanMapping().getMappings(name);
+    }
+
+    public Map<ResourceMember, DataFile> getDataCollectionsOfType(Set<String> types) {
         Map<ResourceMember, DataFile> typedCollection = new HashMap<>();
         for (Map.Entry<ResourceMember, DataFile> entry : dataCollection.entrySet()) {
             ResourceMember member = entry.getKey();
-            if (member.getResourceType().equalsIgnoreCase(type)) {
+            if (types.contains(member.getResourceType())) {
                 typedCollection.put(member, entry.getValue());
             }
         }

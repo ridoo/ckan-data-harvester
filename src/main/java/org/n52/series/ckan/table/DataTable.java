@@ -33,7 +33,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.beans.ResourceMember;
@@ -41,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 
 public class DataTable {
@@ -64,22 +64,55 @@ public class DataTable {
     }
 
     public Table<ResourceKey,ResourceField,String> getTable() {
-        return table; // TODO making immutable costs performance, consider delegate with getters returning immutable collections?
+        // TODO making immutable costs performance, consider delegate with getters returning immutable collections?
+        return table == null
+                ? HashBasedTable.<ResourceKey,ResourceField,String>create()
+                : ImmutableTable.<ResourceKey,ResourceField,String>copyOf(table);
     }
 
     public ResourceMember getResourceMember() {
         return resourceMember;
     }
-
-    public DataTable innerJoin(DataTable other, ResourceField... fields) {
-        DataTable outputTable = new DataTable(resourceMember);
-        if ( !isJoinable(other)) {
-            return outputTable;
+    
+    public DataTable extendWith(DataTable other) {
+        if (resourceMember == null || resourceMember.getId() == null) {
+            return other; // ignore trivial instance
         }
 
+        if ( !resourceMember.isExtensible(other.resourceMember)) {
+            return this;
+        }
+
+        DataTable outputTable = new DataTable(resourceMember);
+        extendTable(other, outputTable);
+        return outputTable;
+    }
+    
+    private void extendTable(DataTable other, DataTable outputTable) {
+        LOGGER.debug("extending table {} (#{} rows) with table {} (#{} rows)",
+                     resourceMember.getId(), rowSize(),
+                     other.resourceMember.getId(), other.rowSize());
+        long start = System.currentTimeMillis();
+        outputTable.table.putAll(table);
+        outputTable.table.putAll(other.table);
+        LOGGER.debug("extended table has #{} rows, took {}s",
+                     outputTable.table.rowKeySet().size(),
+                     (System.currentTimeMillis() - start) / 1000d);
+    }
+
+    public DataTable innerJoin(DataTable other, ResourceField... fields) {
+        if (resourceMember == null || resourceMember.getId() == null) {
+            return other; // ignore trivial instance
+        }
+
+        if ( !resourceMember.isJoinable(other.resourceMember)) {
+            return this;
+        }
+
+        DataTable outputTable = new DataTable(resourceMember);
         outputTable.joinedMembers.add(other.resourceMember);
         Collection<ResourceField> joinFields = fields == null || fields.length == 0
-                ? resourceMember.getJoinFields(other.resourceMember)
+                ? resourceMember.getJoinableFields(other.resourceMember)
                 : Arrays.asList(fields);
 
         joinTable(other, outputTable, joinFields);
@@ -87,20 +120,9 @@ public class DataTable {
     }
 
     private void joinTable(DataTable other, DataTable outputTable, Collection<ResourceField> joinFields) {
-        if (joinFields == null || joinFields.isEmpty()) {
-            return;
-        }
-
-        for (ResourceField field : joinFields) {
-            if ( !table.containsColumn(field)
-                    || !other.table.containsColumn(field)) {
-                return;
-            }
-        }
-
         LOGGER.debug("joining table {} (#{} rows) with table {} (#{} rows)",
-                resourceMember.getId(), table.rowKeySet().size(),
-                other.resourceMember.getId(), other.table.rowKeySet().size());
+                resourceMember.getId(), rowSize(),
+                other.resourceMember.getId(), other.rowSize());
         long start = System.currentTimeMillis();
         for (ResourceField field : joinFields) {
             final Map<ResourceKey, String> joinOnIndex = table.column(field);
@@ -108,7 +130,6 @@ public class DataTable {
             for (Map.Entry<ResourceKey, String> joinOnIndexEntry : joinOnIndex.entrySet()) {
                 Map<ResourceKey, String> toJoinIndex = other.table.column(field);
                 for (Map.Entry<ResourceKey, String> toJoinIndexEntry : toJoinIndex.entrySet()) {
-//                    if ( !joinOnIndexEntry.getValue().equalsIgnoreCase(toJoinIndexEntry.getValue())) {
                     if ( !field.equalsValues(joinOnIndexEntry.getValue(), toJoinIndexEntry.getValue())) {
                         continue;
                     }
@@ -138,46 +159,19 @@ public class DataTable {
                 (System.currentTimeMillis() - start) / 1000d);
     }
 
-    /**
-     * Indicates if this instance is joinable with the passed table instance.
-     * Two indicators are used here:
-     * <ul>
-     * <li>Both {@link DataTable#resourceMember} are <b>not</b> of the
-     * same type</li>
-     * <li>both share at least one {@link ResourceField}</li>
-     * </ul>
-     *
-     *
-     * @param other the other table.
-     * @return if this instance is joinable with the passed table instance.
-     */
-    public boolean isJoinable(DataTable other) {
-        ResourceMember otherResourceMember = other.resourceMember;
-        String otherResourceType = otherResourceMember.getResourceType();
-        if (otherResourceType.equalsIgnoreCase(resourceMember.getResourceType())) {
-            LOGGER.debug("Same resourceTypes are not joinable.");
-            return false;
-        }
-
-        Set<ResourceField> joinableFields = resourceMember.getJoinableFields(otherResourceMember);
-        for (ResourceField possibleJoinColumn : other.table.columnKeySet()) {
-            if (joinableFields.contains(possibleJoinColumn)) {
-                return true;
-            }
-        }
-        return false;
+    public int rowSize() {
+        return table.rowKeySet().size();
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         return sb.append("DataTable(")
-                .append("size=")
-                .append(table.rowKeySet().size())
-                .append(" rows, ")
-                .append("resource=")
+                .append("rowSize=")
+                .append(rowSize())
+                .append(", resource=")
                 .append(resourceMember)
-                .append(". Joined resources: [")
+                .append(". Joined resources: [ ")
                 .append(Arrays.toString(joinedMembers.toArray()))
                 .append(" ])")
                 .toString();

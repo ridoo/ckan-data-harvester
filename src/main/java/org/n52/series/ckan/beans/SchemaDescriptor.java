@@ -40,12 +40,17 @@ import java.util.Map;
 import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.da.CkanMapping;
 import org.n52.series.ckan.util.JsonUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.MissingNode;
 
 import eu.trentorise.opendata.jackan.model.CkanDataset;
 
 public class SchemaDescriptor {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SchemaDescriptor.class);
 
     private final JsonNode node;
 
@@ -55,32 +60,41 @@ public class SchemaDescriptor {
 
     private final List<ResourceMember> members;
 
+    public SchemaDescriptor() {
+        this(null, null);
+    }
+
     public SchemaDescriptor(CkanDataset dataset, JsonNode node) {
-        this.node = node;
-        this.dataset = dataset;
-        this.ckanMapping = CkanMapping.loadCkanMapping();
+        this(dataset, node, CkanMapping.loadCkanMapping());
+    }
+
+    public SchemaDescriptor(CkanDataset dataset, JsonNode node, CkanMapping ckanMapping) {
+        this.node = node == null
+                ? MissingNode.getInstance()
+                : node;
+        this.dataset = dataset == null
+                ? new CkanDataset()
+                : dataset;
+        this.ckanMapping = ckanMapping == null
+                ? CkanMapping.loadCkanMapping()
+                : ckanMapping;
         this.members = parseMemberDescriptions();
     }
 
-    public SchemaDescriptor withCkanMapping(CkanMapping propertyIdMapping) {
-        this.ckanMapping = propertyIdMapping;
-        return this;
-    }
-
-    private String getStringValueOf(String field) {
-        return JsonUtil.parseMissingToEmptyString(node, ckanMapping.getMappings(field));
+    private String getStringValueOf(JsonNode jsonNode, String field) {
+        return JsonUtil.parseToLowerCase(jsonNode, ckanMapping.getMappings(field));
     }
 
     public String getVersion() {
-        return getStringValueOf(CkanConstants.SchemaDescriptor.VERSION);
+        return getStringValueOf(node, CkanConstants.SchemaDescriptor.VERSION);
     }
 
     public String getDescription() {
-        return getStringValueOf(CkanConstants.SchemaDescriptor.DESCRIPTION);
+        return getStringValueOf(node, CkanConstants.SchemaDescriptor.DESCRIPTION);
     }
 
     public String getSchemaDescriptionType() {
-        return getStringValueOf(CkanConstants.SchemaDescriptor.RESOURCE_TYPE);
+        return getStringValueOf(node, CkanConstants.SchemaDescriptor.RESOURCE_TYPE);
     }
 
     public JsonNode getNode() {
@@ -95,28 +109,34 @@ public class SchemaDescriptor {
         return Collections.unmodifiableList(members);
     }
 
-    public boolean hasDescription() {
-        return !node.isMissingNode();
-    }
-
     public Map<ResourceMember, DataFile> relateWithDataFiles(Map<String, DataFile> csvContents) {
         Map<ResourceMember, DataFile> memberRelations = new HashMap<>();
+        if (csvContents == null) {
+            return memberRelations;
+        }
+
         for (ResourceMember member : members) {
-            memberRelations.put(member, csvContents.get(member.getId()));
+            DataFile dataFile = csvContents.get(member.getId());
+            if (dataFile == null) {
+                LOGGER.info("Ignoring member '{}' has missing datafile (was null)", member);
+            } else {
+                memberRelations.put(member, dataFile);
+            }
         }
         return memberRelations;
     }
 
     private List<ResourceMember> parseMemberDescriptions() {
         List<ResourceMember> resourceMembers = new ArrayList<>();
-        final JsonNode membersNode = node.findValue("members");
+//        final JsonNode membersNode = node.findValue("members");
+        final JsonNode membersNode = node.at("/members");
         final Iterator<JsonNode> iter = membersNode.elements();
         while (iter.hasNext()) {
             JsonNode memberNode = iter.next();
             for (String id : JsonUtil.parseMissingToEmptyArray(memberNode, ckanMapping.getMappings(CkanConstants.MemberProperty.RESOURCE_NAME))) {
                 ResourceMember member = new ResourceMember();
                 member.setId(id); // TODO missing ids will cause conflicts/inconsistencies
-                member.setResourceType(getStringValueOf(CkanConstants.MemberProperty.RESOURCE_TYPE));
+                member.setResourceType(getStringValueOf(memberNode, CkanConstants.MemberProperty.RESOURCE_TYPE));
                 final int headerRows = parseMissingToNegativeInt(memberNode, ckanMapping.getMappings(CkanConstants.MemberProperty.HEADER_ROWS));
                 member.setHeaderRows(headerRows < 0 ? 1 : headerRows); // assume 1 header row by default
                 member.setResourceFields(parseResourceFields(member, memberNode));
@@ -133,12 +153,15 @@ public class SchemaDescriptor {
         int index = 0;
         while (iter.hasNext()) {
             JsonNode fieldNode = iter.next();
-            fields.add(new ResourceField(fieldNode, index)
-                       .withCkanMapping(ckanMapping)
+            fields.add(new ResourceField(fieldNode, index, ckanMapping)
                        .withQualifier(qualifier));
             index++;
         }
         return fields;
+    }
+
+    public CkanMapping getCkanMapping() {
+        return ckanMapping;
     }
 
 
