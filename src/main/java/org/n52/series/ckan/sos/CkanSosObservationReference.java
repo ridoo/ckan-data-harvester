@@ -33,6 +33,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.n52.sos.ogc.om.OmObservation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -42,10 +44,21 @@ import eu.trentorise.opendata.jackan.model.CkanResource;
 public class CkanSosObservationReference implements Serializable {
 
     private static final long serialVersionUID = 3444072630244881068L;
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(CkanSosObservationReference.class);
 
     private final SerializableCkanResource resource;
 
     private final List<String> observationIdentifiers;
+    
+    public static CkanSosObservationReference create(CkanResource resource) {
+        try {
+            return new CkanSosObservationReference(resource);
+        } catch (JsonProcessingException e) {
+            LOGGER.warn("Could not create SOS reference for resource.", e);
+            return null;
+        }
+    }
 
     public CkanSosObservationReference(CkanResource resource) throws JsonProcessingException {
         this.resource = new SerializableCkanResource(resource);

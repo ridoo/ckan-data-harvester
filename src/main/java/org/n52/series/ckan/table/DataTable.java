@@ -62,7 +62,7 @@ public class DataTable {
         this.resourceMember = resourceMember;
         this.joinedMembers = new ArrayList<>();
     }
-
+    
     public Table<ResourceKey,ResourceField,String> getTable() {
         // TODO making immutable costs performance, consider delegate with getters returning immutable collections?
         return table == null
@@ -89,14 +89,15 @@ public class DataTable {
     }
 
     private void extendTable(DataTable other, DataTable outputTable) {
-        LOGGER.debug("extending table {} (#{} rows) with table {} (#{} rows)",
-                     resourceMember.getId(), rowSize(),
-                     other.resourceMember.getId(), other.rowSize());
+        LOGGER.debug("joining table {} (#{} rows, #{} cols) with table {} (#{} rows, #{} cols)",
+                     resourceMember.getId(), rowSize(), columnSize(),
+                     other.resourceMember.getId(), other.rowSize(), columnSize());
         long start = System.currentTimeMillis();
         outputTable.table.putAll(table);
         outputTable.table.putAll(other.table);
-        LOGGER.debug("extended table has #{} rows, took {}s",
-                     outputTable.table.rowKeySet().size(),
+        LOGGER.debug("extended table has #{} rows and #{} columns, took {}s",
+                     outputTable.rowSize(),
+                     outputTable.columnSize(),
                      (System.currentTimeMillis() - start) / 1000d);
     }
 
@@ -120,9 +121,9 @@ public class DataTable {
     }
 
     private void joinTable(DataTable other, DataTable outputTable, Collection<ResourceField> joinFields) {
-        LOGGER.debug("joining table {} (#{} rows) with table {} (#{} rows)",
-                resourceMember.getId(), rowSize(),
-                other.resourceMember.getId(), other.rowSize());
+        LOGGER.debug("joining table {} (#{} rows, #{} cols) with table {} (#{} rows, #{} cols)",
+                resourceMember.getId(), rowSize(), columnSize(),
+                other.resourceMember.getId(), other.rowSize(), columnSize());
         long start = System.currentTimeMillis();
         for (ResourceField field : joinFields) {
             final Map<ResourceKey, String> joinOnIndex = table.column(field);
@@ -154,21 +155,28 @@ public class DataTable {
                 }
             }
         }
-        LOGGER.debug("joined table has #{} rows, took {}s",
-                outputTable.table.rowKeySet().size(),
+        LOGGER.debug("joined table has #{} rows and #{} columns, took {}s",
+                outputTable.rowSize(),
+                outputTable.columnSize(),
                 (System.currentTimeMillis() - start) / 1000d);
     }
 
     public int rowSize() {
         return table.rowKeySet().size();
     }
+    
+    public int columnSize() {
+        return table.columnKeySet().size();
+    }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         return sb.append("DataTable(")
-                .append("rowSize=")
+                .append("#rows=")
                 .append(rowSize())
+                .append(", #columns=")
+                .append(columnSize())
                 .append(", resource=")
                 .append(resourceMember)
                 .append(". Joined resources: [ ")
