@@ -37,6 +37,7 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -186,7 +187,7 @@ public class DefaultSosInsertionStragetyTest {
     }
 
     @Test
-//    @Ignore("currently failing on data insertion")
+    @Ignore("currently toooooo slooooooooooow for unit testing")
     public void when_insertingWindDWDDatasets_then_getObservationNotEmpty() throws OwsExceptionReport, IOException, URISyntaxException {
         FileBasedCkanHarvestingService service = new FileBasedCkanHarvestingService(testFolder.getRoot());
         SosH2Store sosStore = new SosH2Store(service.getCkanDataCache());

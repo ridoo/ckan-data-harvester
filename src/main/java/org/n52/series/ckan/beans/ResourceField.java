@@ -126,10 +126,11 @@ public class ResourceField {
         if (node.isMissingNode()) {
             return false;
         }
-        return ckanMapping.hasMapping(getFieldId(), fieldId);
+        return ckanMapping.hasMappings(fieldId);
     }
 
     public boolean hasProperty(String property) {
+        // TODO move to JsonUtil and involve ckanMapping
         return !node.at("/" + property).isMissingNode();
     }
 

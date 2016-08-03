@@ -37,12 +37,12 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Ignore("Ignore Jackan Library Sandboxing")
 public class CkanClientTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CkanClientTest.class);
 
     @Test
-    @Ignore
     public void getAllDatasetNames() {
         LOGGER.info("#### all dataset names available");
         CkanClient client = new CkanClient("https://ckan.colabis.de/");
@@ -53,7 +53,6 @@ public class CkanClientTest {
     }
 
     @Test
-    @Ignore
     public void getAllDatasets() {
         LOGGER.info("#### all dataset names available");
         CkanClient client = new CkanClient("https://ckan.colabis.de/");
@@ -68,7 +67,6 @@ public class CkanClientTest {
     }
 
     @Test
-    @Ignore
     public void getAllDatasetsTaggedWithDWD() {
         LOGGER.info("#### first 10 datasets tagged with DWD");
         CkanClient client = new CkanClient("https://ckan.colabis.de/");
