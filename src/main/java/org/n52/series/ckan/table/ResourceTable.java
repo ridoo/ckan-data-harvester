@@ -37,6 +37,8 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -60,6 +62,10 @@ public class ResourceTable extends DataTable {
         this(new ResourceMember(), new DataFile());
     }
 
+    public ResourceTable(Entry<ResourceMember, DataFile> dataEntry) {
+        this(dataEntry.getKey(), dataEntry.getValue());
+    }
+
     public ResourceTable(ResourceMember resourceMember, DataFile dataFile) {
         super(resourceMember);
         this.dataFile = dataFile;
@@ -73,9 +79,9 @@ public class ResourceTable extends DataTable {
         this.dataFile = dataFile;
     }
 
-    public void readIntoMemory() {
+    public ResourceTable readIntoMemory() {
         if (dataFile == null) {
-            return;
+            return this;
         }
         table.clear();
         String ckanResourceName = dataFile.getResource().getName();
@@ -124,6 +130,7 @@ public class ResourceTable extends DataTable {
         } catch (Throwable e) { // RuntimeExceptions in csvParser#getNextRecord()
             LOGGER.error("could not parse csv data: {}", dataFile, e);
         }
+        return this;
     }
 
     private CSVParser createCsvParser(final DataFile dataFile) throws FileNotFoundException, IOException {

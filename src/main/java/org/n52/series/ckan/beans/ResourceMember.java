@@ -152,7 +152,7 @@ public class ResourceMember {
         }
         return false;
     }
-    
+
     public boolean isExtensible(ResourceMember other) {
         if ( !isValid(this) || !isValid(other)) {
             return false;

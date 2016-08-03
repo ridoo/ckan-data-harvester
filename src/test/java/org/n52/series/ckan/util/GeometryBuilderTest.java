@@ -47,13 +47,15 @@ public class GeometryBuilderTest {
 
     @Test
     public void when_geoJsonPoint_then_returnGeometry() {
-        Assert.assertThat(builder.fromGeoJson("{'coordinates':[52.52,13.41],'type':'Point'}"),
+        Assert.assertThat(builder
+                          .withGeoJson("{'coordinates':[52.52,13.41],'type':'Point'}")
+                          .getGeometry(),
                           CoreMatchers.instanceOf(Geometry.class));
     }
 
     @Test
     public void when_geoJsonLPolygon_then_returnGeometry() {
-        Assert.assertThat(builder.fromGeoJson(""
+        Assert.assertThat(builder.withGeoJson(""
                 + "{\r\n" +
                 "    \"type\": \"Polygon\",\r\n" +
                 "    \"coordinates\": [\r\n" +
@@ -65,6 +67,6 @@ public class GeometryBuilderTest {
                 "            [100.0, 0.0]\r\n" +
                 "        ]\r\n" +
                 "    ]\r\n" +
-                "}"), CoreMatchers.instanceOf(Geometry.class));
+                "}").getGeometry(), CoreMatchers.instanceOf(Geometry.class));
     }
 }

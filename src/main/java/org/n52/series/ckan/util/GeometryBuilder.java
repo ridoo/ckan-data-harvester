@@ -28,20 +28,25 @@
  */
 package org.n52.series.ckan.util;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
-
 import java.io.IOException;
 
 import org.n52.io.crs.CRSUtils;
 import org.n52.io.geojson.GeoJSONDecoder;
 import org.n52.io.geojson.GeoJSONException;
+import org.n52.sos.ogc.gml.ReferenceType;
+import org.n52.sos.ogc.om.NamedValue;
+import org.n52.sos.ogc.om.OmConstants;
+import org.n52.sos.ogc.om.features.SfConstants;
+import org.n52.sos.ogc.om.values.GeometryValue;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
 
 public class GeometryBuilder {
 
@@ -63,6 +68,8 @@ public class GeometryBuilder {
 
     private double altitude;
 
+    private Geometry geometry;
+
     public static GeometryBuilder create() {
         return new GeometryBuilder();
     }
@@ -74,14 +81,37 @@ public class GeometryBuilder {
         return this;
     }
 
-    public Geometry fromGeoJson(String json) {
+    public NamedValue<?> createGeometryValue() {
+        final NamedValue<Geometry> namedValue = new NamedValue<>();
+        namedValue.setName(new ReferenceType(OmConstants.PARAM_NAME_SAMPLING_GEOMETRY));
+        namedValue.setValue(new GeometryValue(geometry));
+        return namedValue;
+    }
+
+    public Geometry getGeometry() {
+        if (geometry != null) {
+            return geometry;
+        }
+        if ( !hasCoordinates()) {
+            return null;
+        }
+        final Point lonLatPoint = utils.createPoint(longitude, latitude, altitude, crs);
+        try {
+            return utils.transformInnerToOuter(lonLatPoint, crs);
+        } catch (TransformException | FactoryException e) {
+            LOGGER.error("could not switch axes to conform strictly to {}", crs, e);
+            return lonLatPoint;
+        }
+    }
+
+    public GeometryBuilder withGeoJson(String json) {
         try {
             JsonNode jsonNode = new ObjectMapper().readTree(json.replace("'", "\""));
-            return geoJsonDecoder.decodeGeometry(jsonNode);
+            this.geometry = geoJsonDecoder.decodeGeometry(jsonNode);
         } catch (IOException | GeoJSONException e) {
             LOGGER.error("Location value is not a JSON object. Value: {}", json);
         }
-        return null;
+        return this;
     }
 
     public GeometryBuilder withCrs(String crs) {
@@ -117,17 +147,18 @@ public class GeometryBuilder {
         return longitude != null &&  latitude !=  null;
     }
 
-    public Geometry getPoint() {
-        if (!hasCoordinates()) {
-            return null;
+    public String getFeatureType() {
+        if (geometry.getGeometryType().equalsIgnoreCase("POINT")) {
+            return SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_POINT;
+        } else if (geometry.getGeometryType().equalsIgnoreCase("LINESTRING")) {
+            return SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_CURVE;
+        } else if (geometry.getGeometryType().equalsIgnoreCase("POLYGON")) {
+            return SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_SURFACE;
         }
-        final Point lonLatPoint = utils.createPoint(longitude, latitude, altitude, crs);
-        try {
-            return utils.transformInnerToOuter(lonLatPoint, crs);
-        } catch (TransformException | FactoryException e) {
-            LOGGER.error("could not switch axes to conform strictly to {}", crs, e);
-            return lonLatPoint;
-        }
+
+        // TODO further types?
+
+        return null;
     }
 
 }

@@ -68,6 +68,10 @@ public class DataCollection {
         return dataset;
     }
 
+    public DataFile getDataFile(ResourceMember resourceMember) {
+        return dataCollection.get(resourceMember);
+    }
+
     public String getDescription() {
         return schemaDescriptor != null
                 ? schemaDescriptor.getSchemaDescription().getDescription()
@@ -117,6 +121,18 @@ public class DataCollection {
     private Set<String> getMappingsFor(String name) {
         SchemaDescriptor descriptor = schemaDescriptor.getSchemaDescription();
         return descriptor.getCkanMapping().getMappings(name);
+    }
+
+    public Map<String, List<ResourceMember>> getResourceMembersByType() {
+        Map<String, List<ResourceMember>> resourceMembersByType = new HashMap<>();
+        for (ResourceMember member : dataCollection.keySet()) {
+            String resourceType = member.getResourceType();
+            if ( !resourceMembersByType.containsKey(resourceType)) {
+                resourceMembersByType.put(resourceType, new ArrayList<ResourceMember>());
+            }
+            resourceMembersByType.get(resourceType).add(member);
+        }
+        return resourceMembersByType;
     }
 
     public Map<ResourceMember, DataFile> getDataCollectionsOfType(Set<String> types) {
