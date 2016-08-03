@@ -80,7 +80,7 @@ public class GeometryBuilder {
                 : om;
         return this;
     }
-    
+
     public NamedValue<?> createGeometryValue() {
         final NamedValue<Geometry> namedValue = new NamedValue<>();
         namedValue.setName(new ReferenceType(OmConstants.PARAM_NAME_SAMPLING_GEOMETRY));
@@ -155,9 +155,9 @@ public class GeometryBuilder {
         } else if (geometry.getGeometryType().equalsIgnoreCase("POLYGON")) {
             return SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_SURFACE;
         }
-        
+
         // TODO further types?
-        
+
         return null;
     }
 

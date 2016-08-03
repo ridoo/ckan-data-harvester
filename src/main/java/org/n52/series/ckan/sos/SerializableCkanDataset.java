@@ -36,11 +36,11 @@ import java.util.Objects;
 import org.n52.series.ckan.util.JsonUtil;
 
 public class SerializableCkanDataset implements Serializable {
-    
+
     private static final long serialVersionUID = 830823271754623889L;
-    
+
     private final String ckanDatasetAsJson;
-    
+
     private final String id;
 
     public SerializableCkanDataset(CkanDataset dataset) throws JsonProcessingException {

@@ -62,7 +62,7 @@ public class DataTable {
         this.resourceMember = resourceMember;
         this.joinedMembers = new ArrayList<>();
     }
-    
+
     public Table<ResourceKey,ResourceField,String> getTable() {
         // TODO making immutable costs performance, consider delegate with getters returning immutable collections?
         return table == null
@@ -164,7 +164,7 @@ public class DataTable {
     public int rowSize() {
         return table.rowKeySet().size();
     }
-    
+
     public int columnSize() {
         return table.columnKeySet().size();
     }

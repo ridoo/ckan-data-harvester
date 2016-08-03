@@ -44,13 +44,13 @@ import eu.trentorise.opendata.jackan.model.CkanResource;
 public class CkanSosObservationReference implements Serializable {
 
     private static final long serialVersionUID = 3444072630244881068L;
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CkanSosObservationReference.class);
 
     private final SerializableCkanResource resource;
 
     private final List<String> observationIdentifiers;
-    
+
     public static CkanSosObservationReference create(CkanResource resource) {
         try {
             return new CkanSosObservationReference(resource);

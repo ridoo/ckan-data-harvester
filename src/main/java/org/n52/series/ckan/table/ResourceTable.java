@@ -53,7 +53,7 @@ public class ResourceTable extends DataTable {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceTable.class);
 
     private DataFile dataFile;
-    
+
     public static interface InvalidRowCountHandler {
         // TODO
     }
@@ -61,7 +61,7 @@ public class ResourceTable extends DataTable {
     public ResourceTable() {
         this(new ResourceMember(), new DataFile());
     }
-    
+
     public ResourceTable(Entry<ResourceMember, DataFile> dataEntry) {
         this(dataEntry.getKey(), dataEntry.getValue());
     }

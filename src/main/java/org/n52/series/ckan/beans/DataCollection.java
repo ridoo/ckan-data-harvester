@@ -67,7 +67,7 @@ public class DataCollection {
     public CkanDataset getDataset() {
         return dataset;
     }
-    
+
     public DataFile getDataFile(ResourceMember resourceMember) {
         return dataCollection.get(resourceMember);
     }
@@ -122,7 +122,7 @@ public class DataCollection {
         SchemaDescriptor descriptor = schemaDescriptor.getSchemaDescription();
         return descriptor.getCkanMapping().getMappings(name);
     }
-    
+
     public Map<String, List<ResourceMember>> getResourceMembersByType() {
         Map<String, List<ResourceMember>> resourceMembersByType = new HashMap<>();
         for (ResourceMember member : dataCollection.keySet()) {
