@@ -35,6 +35,7 @@ import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -44,6 +45,7 @@ import org.junit.rules.TemporaryFolder;
 import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.beans.ResourceFieldCreator;
 import org.n52.series.ckan.util.FileBasedCkanHarvestingService;
+import org.n52.sos.config.SettingsManager;
 import org.n52.sos.ogc.gml.time.TimeInstant;
 import org.n52.sos.ogc.om.SingleObservationValue;
 import org.n52.sos.ogc.om.values.QuantityValue;
@@ -193,6 +195,7 @@ public class DefaultSosInsertionStragetyTest {
         SosH2Store sosStore = new SosH2Store(service.getCkanDataCache());
         sosStore.insertDatasetViaStrategy("12c3c8f1-bf44-47e1-b294-b6fc889873fc", new DefaultSosInsertionStrategy());
         sosStore.assertObservationsAvailable();
+        SettingsManager.getInstance().cleanup();
     }
 
     class DefaultSosInsertionStrategySeam extends DefaultSosInsertionStrategy {
