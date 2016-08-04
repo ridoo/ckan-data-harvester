@@ -30,6 +30,7 @@ package org.n52.series.ckan.beans;
 
 import static org.n52.series.ckan.util.JsonUtil.parseToLowerCase;
 
+import java.util.Locale;
 import java.util.Objects;
 
 import org.n52.series.ckan.da.CkanConstants;
@@ -126,7 +127,7 @@ public class ResourceField {
         if (node.isMissingNode()) {
             return false;
         }
-        return ckanMapping.hasMappings(fieldId);
+        return ckanMapping.getMappings(fieldId).contains(getFieldId().toLowerCase(Locale.ROOT));
     }
 
     public boolean hasProperty(String property) {
@@ -163,7 +164,7 @@ public class ResourceField {
             return false;
         }
         final String fieldType = getFieldType();
-        return ckanMapping.hasMapping(ofType.toLowerCase(), fieldType.toLowerCase());
+        return ckanMapping.hasMapping(ofType.toLowerCase(Locale.ROOT), fieldType.toLowerCase(Locale.ROOT));
     }
 
     private String getValueOfField(String fieldName) {
@@ -184,7 +185,7 @@ public class ResourceField {
             return false;
         }
         final ResourceField other = (ResourceField) obj;
-        if (!Objects.equals(this.fieldId.toLowerCase(), other.fieldId.toLowerCase())) {
+        if (!Objects.equals(this.fieldId.toLowerCase(Locale.ROOT), other.fieldId.toLowerCase(Locale.ROOT))) {
             return false;
         }
         return true;

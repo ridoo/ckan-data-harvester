@@ -40,6 +40,7 @@ import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.da.CkanMapping;
 
 public class ResourceFieldTest {
@@ -53,7 +54,8 @@ public class ResourceFieldTest {
         this.fieldCreator = new ResourceFieldCreator();
         this.ckanMapping = new CkanMapping();
         List<String> mappings = Arrays.asList(new String[]{"FIELD_IDENTIFIER", "ANOTHER_IDENTIFIER"});
-        this.ckanMapping.addMapping("field_id", new HashSet<>(mappings));
+        List<String> typeMappings = Arrays.asList(new String[]{"FIELD_TYPE", "ANOTHER_TYPE"});
+        this.ckanMapping.addMapping("field_id", new HashSet<>(mappings)).addMapping("field_type", new HashSet<>(typeMappings));
     }
 
     @Test
@@ -105,8 +107,9 @@ public class ResourceFieldTest {
     public void when_checkingFieldType_then_fieldRecognizesMappings() {
         ResourceField testField = fieldCreator
                 .withCkanMapping(ckanMapping)
-                .createSimple("someId");
-        assertThat(testField.isField("field_id"), is(true));
+                .createSimple("FIELD_IDENTIFIER");
+        assertThat(testField.isField(CkanConstants.MemberProperty.FIELD_ID), is(true));
+        assertThat(testField.isField(CkanConstants.MemberProperty.FIELD_TYPE), is(false));
     }
 
     @Test

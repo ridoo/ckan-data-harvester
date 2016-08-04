@@ -87,11 +87,12 @@ public class CkanMapping {
     }
 
     @JsonAnySetter
-    public void addMapping(String name, Set<String> mappings) {
+    public CkanMapping addMapping(String name, Set<String> mappings) {
         if (name != null) {
             Set<String> lowerCasedMappings = toLowerCase(mappings);
             this.mappingsByName.put(name.toLowerCase(), lowerCasedMappings);
         }
+        return this;
     }
 
     private Set<String> toLowerCase(Set<String> mappings) {
