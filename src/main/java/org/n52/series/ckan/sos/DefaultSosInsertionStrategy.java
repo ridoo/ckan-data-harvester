@@ -548,7 +548,7 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
         StringBuilder procedureId = new StringBuilder();
         procedureId.append(phenomenon.getLabel()).append("_");
         procedureId = feature.isSetName()
-                ?  procedureId.append(feature.getFirstName().getValue()).append("_")
+                ?  procedureId.append(feature.getFirstName().getValue())
                 : procedureId.append(feature.getIdentifier());
         return procedureId.toString();
     }
