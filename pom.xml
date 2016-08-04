@@ -106,6 +106,12 @@
             <artifactId>quartz</artifactId>
             <version>2.1.7</version>
         </dependency>
+        <!-- !!!Required for @Autorwired in HarvestingJob because quartz always creates a new instance of the job which is executed!!!-->
+        <dependency>
+        	<groupId>org.springframework</groupId>
+        	<artifactId>spring-beans</artifactId>
+  			<version>4.2.2.RELEASE</version>
+        </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-opengis</artifactId>
