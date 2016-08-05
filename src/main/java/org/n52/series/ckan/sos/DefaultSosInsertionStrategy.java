@@ -232,9 +232,13 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
 
         @Override
         public String toString() {
-            String featureName = "Feature: '" + feature.getFirstName() + "'";
+            String featureIdentifier = "Feature: '" + feature.getIdentifier() + "'";
             String observationCount = "#" + observations.size();
-            return getClass().getSimpleName() + " [ " + featureName + ", " + observationCount + "]";
+            return getClass().getSimpleName() + " [ " + featureIdentifier + ", " + observationCount + "]";
+        }
+
+        public boolean hasObservations() {
+            return observations != null && !observations.isEmpty();
         }
     }
 
