@@ -148,11 +148,11 @@ public class GeometryBuilder {
     }
 
     public String getFeatureType() {
-        if (geometry.getGeometryType().equalsIgnoreCase("POINT")) {
+        if (getGeometry().getGeometryType().equalsIgnoreCase("POINT")) {
             return SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_POINT;
-        } else if (geometry.getGeometryType().equalsIgnoreCase("LINESTRING")) {
+        } else if (getGeometry().getGeometryType().equalsIgnoreCase("LINESTRING")) {
             return SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_CURVE;
-        } else if (geometry.getGeometryType().equalsIgnoreCase("POLYGON")) {
+        } else if (getGeometry().getGeometryType().equalsIgnoreCase("POLYGON")) {
             return SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_SURFACE;
         }
 
