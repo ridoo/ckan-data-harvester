@@ -55,7 +55,9 @@ public class ResourceFieldTest {
         this.ckanMapping = new CkanMapping();
         List<String> mappings = Arrays.asList(new String[]{"FIELD_IDENTIFIER", "ANOTHER_IDENTIFIER"});
         List<String> typeMappings = Arrays.asList(new String[]{"FIELD_TYPE", "ANOTHER_TYPE"});
-        this.ckanMapping.addMapping("field_id", new HashSet<>(mappings)).addMapping("field_type", new HashSet<>(typeMappings));
+        this.ckanMapping
+            .addMapping("field_id", new HashSet<>(mappings))
+            .addMapping("field_type", new HashSet<>(typeMappings));
     }
 
     @Test
