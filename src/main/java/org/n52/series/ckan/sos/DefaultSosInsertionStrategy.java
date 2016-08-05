@@ -305,7 +305,9 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
             try {
                 long start = System.currentTimeMillis();
                 insertSensorDao.insertSensor(dataInsertion.request);
-                insertObservationDao.insertObservation(dataInsertion.createInsertObservationRequest());
+                if (dataInsertion.hasObservations()) {
+                    insertObservationDao.insertObservation(dataInsertion.createInsertObservationRequest());
+                }
                 LOGGER.debug("Insertion completed in {}s.", (System.currentTimeMillis() - start) / 1000d);
                 dataInserted = true;
 
