@@ -84,7 +84,7 @@ public class ResourceField {
     }
 
     public String getFieldId() {
-        return fieldId;
+        return fieldId.toLowerCase(Locale.ROOT);
     }
 
     public int getIndex() {
@@ -127,7 +127,7 @@ public class ResourceField {
         if (node.isMissingNode()) {
             return false;
         }
-        return ckanMapping.getMappings(fieldId).contains(getFieldId().toLowerCase(Locale.ROOT));
+        return ckanMapping.hasMapping(fieldId, getFieldId());
     }
 
     public boolean hasProperty(String property) {
@@ -185,7 +185,7 @@ public class ResourceField {
             return false;
         }
         final ResourceField other = (ResourceField) obj;
-        if (!Objects.equals(this.fieldId.toLowerCase(Locale.ROOT), other.fieldId.toLowerCase(Locale.ROOT))) {
+        if (!Objects.equals(this.getFieldId(), other.getFieldId())) {
             return false;
         }
         return true;
