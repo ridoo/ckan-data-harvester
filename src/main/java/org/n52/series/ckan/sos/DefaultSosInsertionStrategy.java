@@ -254,7 +254,7 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
             // TODO how and what to create in which order depends on the actual strategy chosen
 
             String orgaName = dataCollection.getDataset().getOrganization().getName();
-            AbstractFeature feature = createSimpleFeature(orgaName, rowEntry.getValue());
+            AbstractFeature feature = createFeatureRelation(createSimpleFeature(orgaName, rowEntry.getValue()), rowEntry.getValue());
             for (Phenomenon phenomenon : phenomena) {
                 String procedureId = createProcedureId(feature, phenomenon);
                 if ( !dataInsertions.containsKey(procedureId)) {
