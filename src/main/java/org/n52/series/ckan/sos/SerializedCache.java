@@ -45,7 +45,7 @@ public class SerializedCache implements CkanSosReferenceCache, Serializable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SerializedCache.class);
 
-	private final Map<SerializableCkanResource, CkanSosObservationReference> observationReferenceCache;
+    private final Map<SerializableCkanResource, CkanSosObservationReference> observationReferenceCache;
 
     private final Map<String, SerializableCkanDataset> datasets;
 

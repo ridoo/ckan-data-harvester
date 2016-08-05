@@ -45,6 +45,7 @@ import org.quartz.JobExecutionException;
 import org.quartz.UnableToInterruptJobException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -52,6 +53,14 @@ public class HarvestingJob extends ScheduledJob implements InterruptableJob {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(HarvestingJob.class);
 
+    /**
+     * Autowired is required because quartz always creates a new instance of the job.
+     *
+     * See Job Instances in the documentation:
+     *
+     * www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/tutorial-lesson-03.html
+     */
+    @Autowired
     private CkanHarvestingService harvestingService;
 
     private String configFile;
