@@ -39,6 +39,8 @@ public class ResourceMember {
 
     private String id;
 
+    private String datasetName;
+
     private int headerRows;
 
     private String resourceType;
@@ -61,6 +63,14 @@ public class ResourceMember {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getDatasetName() {
+        return datasetName;
+    }
+
+    public void setDatasetName(String datasetName) {
+        this.datasetName = datasetName;
     }
 
     public String getResourceType() {
@@ -208,6 +218,8 @@ public class ResourceMember {
         StringBuilder sb = new StringBuilder();
         return sb.append("ResourceMember(")
                 .append("id=").append(id)
+                .append(", datasetName=")
+                .append(datasetName)
                 .append(", resourceType=")
                 .append(resourceType)
                 .append(")")
