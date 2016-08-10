@@ -173,11 +173,12 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
                 if (isUpdateNeeded(resource, dataFile)) {
                     ResourceTable singleDatatable = new ResourceTable(dataCollection.getDataEntry(member));
                     singleDatatable.readIntoMemory();
+                    LOGGER.debug("Extend table with: '{}'", singleDatatable);
                     dataTable = dataTable.extendWith(singleDatatable);
                 }
             }
             String resourceType = membersWithCommonResourceTypes.get(0).getResourceType();
-            LOGGER.debug("Table for type '{}': '{}'", resourceType, dataTable);
+            LOGGER.debug("Fully extended table for resource '{}': '{}'", resourceType, dataTable);
             fullTable = fullTable.innerJoin(dataTable);
         }
         LOGGER.debug("Fully joined table: '{}'", fullTable);
