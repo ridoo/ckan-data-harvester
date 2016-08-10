@@ -255,7 +255,7 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
             // TODO how and what to create in which order depends on the actual strategy chosen
 
             String orgaName = dataCollection.getDataset().getOrganization().getName();
-            AbstractFeature feature = createFeatureRelation(createSimpleFeature(orgaName, rowEntry.getValue()), rowEntry.getValue());
+            AbstractFeature feature = createFeatureRelation(orgaName, rowEntry.getValue());
             for (Phenomenon phenomenon : phenomena) {
                 String procedureId = createProcedureId(feature, phenomenon);
                 if ( !dataInsertions.containsKey(procedureId)) {
@@ -375,10 +375,17 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
         return ids;
     }
 
-    SamplingFeature createFeatureRelation(SamplingFeature feature, Map<ResourceField, String> rowEntry) {
+    SamplingFeature createFeatureRelation(String orgaName, Map<ResourceField, String> rowEntry) {
+        final SamplingFeature feature = new SamplingFeature(null);
         final GeometryBuilder geometryBuilder = GeometryBuilder.create();
         for (Map.Entry<ResourceField, String> fieldEntry : rowEntry.entrySet()) {
             ResourceField field = fieldEntry.getKey();
+            if (field.isField(CkanConstants.KnownFieldId.STATION_ID)) {
+                feature.setIdentifier(orgaName + "-" + fieldEntry.getValue());
+            }
+            if (field.isField(CkanConstants.KnownFieldId.STATION_NAME)) {
+                feature.addName(fieldEntry.getValue());
+            }
             if (field.isField(CkanConstants.KnownFieldId.CRS)) {
                 geometryBuilder.withCrs(fieldEntry.getValue());
             }
@@ -399,24 +406,6 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
         }
         setFeatureGeometry(feature, geometryBuilder.getGeometry());
         feature.setFeatureType(geometryBuilder.getFeatureType());
-        return feature;
-    }
-
-    SamplingFeature createSimpleFeature(String organizationName, Map<ResourceField, String> rowEntry) {
-        final SamplingFeature feature = new SamplingFeature(null);
-        for (Map.Entry<ResourceField, String> fieldEntry : rowEntry.entrySet()) {
-            ResourceField field = fieldEntry.getKey();
-            if (field.isField(CkanConstants.KnownFieldId.STATION_ID)) {
-                String identifier = fieldEntry.getValue();
-                if (field.isOfType(Integer.class)) {
-                    identifier = Integer.toString(Integer.parseInt(identifier));
-                }
-                feature.setIdentifier(organizationName + "-" + identifier);
-            }
-            if (field.isField(CkanConstants.KnownFieldId.STATION_NAME)) {
-                feature.addName(fieldEntry.getValue());
-            }
-        }
         return feature;
     }
 
