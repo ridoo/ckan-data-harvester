@@ -72,7 +72,7 @@
         <property name="metadataCache" ref="serializingCache" />
         <property name="dataCache">
             <bean class="org.n52.series.ckan.sos.SosDatabaseCache">
-                <!--<property name="ckanSosReferenceCache" ref="serializingCache" />-->
+                <property name="ckanSosReferenceCache" ref="serializingCache" />
             </bean>
         </property>
         <property name="resourceClient">
@@ -87,6 +87,8 @@
             </bean>
         </property>
     </bean>
+
+    <!--<bean id="inMemoryCache" class="org.n52.series.ckan.cache.InMemoryCkanMetadataCache" />-->
     <bean id="serializingCache" class="org.n52.series.ckan.sos.SerializingCkanCache"
           init-method="init" destroy-method="shutdown">
         <property name="metadataCacheFile" value="cache/ckan-sos_cache" />
