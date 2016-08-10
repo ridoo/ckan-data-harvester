@@ -61,6 +61,7 @@
                             <artifactId>webapp-bundle</artifactId>
                             <excludes>
                                 <exclude>cache.tmp</exclude>
+                                <exclude>static/client/jsClient</exclude>
                                 <exclude>WEB-INF/classes/logback.xml</exclude>
                             </excludes>
                         </overlay>
