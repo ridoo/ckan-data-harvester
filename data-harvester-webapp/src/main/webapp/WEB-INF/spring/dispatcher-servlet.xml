@@ -46,7 +46,6 @@
     <bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
         <property name="viewResolvers">
             <list>
-                <ref bean="jsonViewResolver" />
             </list>
         </property>
         <property name="defaultViews">
