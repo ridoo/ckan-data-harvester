@@ -56,10 +56,13 @@ public class CkanMapping {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CkanMapping.class);
 
-    private Map<String, Set<String>> mappingsByName;
+    private final Map<String, Set<String>> mappingsByName;
+
+    private final Set<String> unmappedKeys;
 
     public CkanMapping() {
         this.mappingsByName = new HashMap<>();
+        this.unmappedKeys = new HashSet<>();
     }
 
     public boolean hasMappings(String id) {
@@ -72,7 +75,10 @@ public class CkanMapping {
 
     public Set<String> getMappings(String name) {
         if ( !mappingsByName.containsKey(name)) {
-            LOGGER.debug("No mapping for name '{}'", name);
+            if ( !unmappedKeys.contains(name)) {
+                LOGGER.debug("No mapping for name '{}'", name);
+                unmappedKeys.add(name);
+            }
             return Collections.singleton(name);
         }
         else {
@@ -131,7 +137,7 @@ public class CkanMapping {
                 return loadConfig(createStreamFrom(configFile));
             }
             catch (IOException e) {
-                LOGGER.error("Could not load {}. Using empty config.", configFile, e);
+                LOGGER.error("Could not load from '{}'. Using empty config.", configFile, e);
                 return new CkanMapping();
             }
         }
@@ -153,12 +159,12 @@ public class CkanMapping {
         }
 
         private InputStream createStreamFrom(String configFile) throws FileNotFoundException {
-            if (Strings.isNullOrEmpty(configFile)) {
-                LOGGER.trace("No config file given! Loading default config.");
-                return new FileInputStream(getConfigFile(DEFAULT_CKAN_MAPPING_FILE));
-            }
-            File file = getConfigFile(configFile);
-            return createStreamFrom(file);
+            File file = Strings.isNullOrEmpty(configFile)
+                    ? getConfigFile(DEFAULT_CKAN_MAPPING_FILE)
+                    : getConfigFile(configFile);
+            return file.exists()
+                    ? createStreamFrom(file)
+                    : getClass().getResourceAsStream("/" + configFile);
         }
 
         private File getConfigFile(String configFile) {

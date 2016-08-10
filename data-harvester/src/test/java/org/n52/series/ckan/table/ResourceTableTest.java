@@ -84,6 +84,7 @@ public class ResourceTableTest {
         DataTable joined = nonTrivial.innerJoin(new ResourceTable());
         assertThat(nonTrivial.rowSize(), is(joined.rowSize()));
         assertThat(expectedColumns, is(joined.getResourceMember().getColumnHeaders()));
+        assertThat(joined.getResourceMember().getResourceType(), is("observations"));
     }
 
     @Test
@@ -94,6 +95,7 @@ public class ResourceTableTest {
         DataTable joined = new ResourceTable().innerJoin(nonTrivial);
         assertThat(nonTrivial.rowSize(), is(joined.rowSize()));
         assertThat(expectedHeaders, is(joined.getResourceMember().getColumnHeaders()));
+        assertThat(joined.getResourceMember().getResourceType(), is("observations"));
     }
 
     @Test
@@ -101,6 +103,7 @@ public class ResourceTableTest {
         ResourceTable nonTrivial1 = tableHelper.readObservationTable(DWD_TEMPERATUR_DATASET_ID, OBSERVATION_DATA_ID_1);
         ResourceTable nonTrivial2 = tableHelper.readObservationTable(DWD_TEMPERATUR_DATASET_ID, OBSERVATION_DATA_ID_2);
         DataTable output = nonTrivial1.extendWith(nonTrivial2);
+        assertThat(output.getResourceMember().getResourceType(), is("observations"));
 
         ResourceMember member1 = nonTrivial1.getResourceMember();
         ResourceMember member2 = nonTrivial2.getResourceMember();

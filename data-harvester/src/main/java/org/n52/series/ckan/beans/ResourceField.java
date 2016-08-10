@@ -173,7 +173,7 @@ public class ResourceField {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.fieldId, 7);
+        return Objects.hash(this.getFieldId(), 7);
     }
 
     @Override
@@ -193,7 +193,7 @@ public class ResourceField {
 
     @Override
     public String toString() {
-        return "ResourceField{fieldId=" + fieldId + ", qualifier=" + qualifier + ", index=" + index + '}';
+        return "ResourceField{fieldId=" + getFieldId() + ", qualifier=" + getQualifier() + ", index=" + getIndex() + '}';
     }
 
 }

@@ -66,6 +66,7 @@ public class SerializingCkanCache extends InMemoryCkanMetadataCache implements C
     public void init() {
         final File cacheFile = new File(metadataCacheFile);
         final String filePath = cacheFile.getAbsolutePath();
+        LOGGER.debug("Try reading cache from '{}'", filePath);
         mutex.lock();
         try {
             if ( !cacheFile.exists()) {

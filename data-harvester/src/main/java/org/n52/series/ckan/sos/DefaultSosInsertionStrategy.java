@@ -176,8 +176,8 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
                     dataTable = dataTable.extendWith(singleDatatable);
                 }
             }
-            String resourceType = dataTable.getResourceMember().getResourceType();
-            LOGGER.debug("Table of '{}': '{}'", resourceType, dataTable);
+            String resourceType = membersWithCommonResourceTypes.get(0).getResourceType();
+            LOGGER.debug("Table for type '{}': '{}'", resourceType, dataTable);
             fullTable = fullTable.innerJoin(dataTable);
         }
         LOGGER.debug("Fully joined table: '{}'", fullTable);
