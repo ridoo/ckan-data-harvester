@@ -1,5 +1,13 @@
+/data-harvester-webapp/cache/ckan-sos_cache
+/data-harvester-webapp/.classpath
+/data-harvester-webapp/.project
 /.classpath
 /.project
 /.settings
 /target/
 configuration.db
+/data-harvester/target/
+/data-harvester-webapp/target/
+/data-harvester/.settings
+/data-harvester/.classpath
+/data-harvester/.project

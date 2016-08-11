@@ -1,0 +1,13 @@
+General Infos:
+==============
+project = 52North CKAN Data Harvester (${artifactId})
+version = ${project.version}
+builddate = ${git.build.time}
+
+Version Control Infos:
+======================
+repository = ${git.repository}
+path = ${git.branch}
+revision = ${git.commit.id}
+lastCommitMessage = ${git.commit.message.short}
+lastCommitDate = ${git.commit.time}
