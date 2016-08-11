@@ -53,29 +53,26 @@ public interface CkanConstants {
         public static final String OBSERVATIONS = "observations";
     }
 
-    public interface MemberProperty {
+    public interface FieldPropertyName {
         public static final String RESOURCE_NAME = "resource_name";
         public static final String RESOURCE_TYPE = "resource_type";
         public static final String HEADER_ROWS = "headerrows";
         public static final String FIELD_ID = "field_id";
         public static final String SHORT_NAME = "short_name";
-        public static final String MEMBER_FIELD_LONG_NAME = "long_name";
+        public static final String LONG_NAME = "long_name";
         public static final String FIELD_DESCRIPTION = "description";
         public static final String FIELD_TYPE = "field_type";
         public static final String NO_DATA = "no_data";
         public static final String FIELD_ROLE = "field_role";
+        public static final String PHENOMENON = "phenomenon";
+        public static final String UOM = "uom";
+        public static final String CRS = "crs";
+        public static final String DATE_FORMAT = "date_format";
     }
 
-    public interface DataType {
-        public static final String INTEGER = "Integer";
-        public static final String BOOLEAN = "Boolean";
-        public static final String GEOMETRY = "Geometry";
-        public static final String DOUBLE = "Double";
-        public static final String STRING = "String";
-        public static final String DATE = "Date";
-    }
-
-    public interface KnownFieldId {
+    // TODO refactor to only contain ids mapping to ckan-mapping-ids
+    
+    public interface KnownFieldIdValue {
         public static final String STATION_ID = "station_id";
         public static final String CRS = "crs";
         public static final String LATITUDE = "latitude";
@@ -91,7 +88,7 @@ public interface CkanConstants {
         public static final String VALID_TIME_END = "valid_time_end";
     }
 
-    public interface KnownFieldRole {
+    public interface KnownFieldRoleValue {
         public static final String LATITUDE = "latitude";
         public static final String LONGITUDE = "longitude";
         public static final String HEIGHT = "height";
@@ -101,10 +98,13 @@ public interface CkanConstants {
         public static final String LOCATION = "location";
     }
 
-    public interface KnownFieldProperty {
-        public static final String PHENOMENON = "phenomenon";
-        public static final String UOM = "uom";
-        public static final String DATE_FORMAT = "date_format";
+    public interface DataType {
+        public static final String INTEGER = "Integer";
+        public static final String BOOLEAN = "Boolean";
+        public static final String GEOMETRY = "Geometry";
+        public static final String DOUBLE = "Double";
+        public static final String STRING = "String";
+        public static final String DATE = "Date";
     }
 
 }

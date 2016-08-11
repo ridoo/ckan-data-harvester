@@ -133,12 +133,12 @@ public class SchemaDescriptor {
         final Iterator<JsonNode> iter = membersNode.elements();
         while (iter.hasNext()) {
             JsonNode memberNode = iter.next();
-            for (String id : JsonUtil.parseMissingToEmptyArray(memberNode, ckanMapping.getMappings(CkanConstants.MemberProperty.RESOURCE_NAME))) {
+            for (String id : JsonUtil.parseMissingToEmptyArray(memberNode, ckanMapping.getMappings(CkanConstants.FieldPropertyName.RESOURCE_NAME))) {
                 ResourceMember member = new ResourceMember();
                 member.setId(id); // TODO missing ids will cause conflicts/inconsistencies
                 member.setDatasetName(dataset.getName());
-                member.setResourceType(getStringValueOf(memberNode, CkanConstants.MemberProperty.RESOURCE_TYPE));
-                final int headerRows = parseMissingToNegativeInt(memberNode, ckanMapping.getMappings(CkanConstants.MemberProperty.HEADER_ROWS));
+                member.setResourceType(getStringValueOf(memberNode, CkanConstants.FieldPropertyName.RESOURCE_TYPE));
+                final int headerRows = parseMissingToNegativeInt(memberNode, ckanMapping.getMappings(CkanConstants.FieldPropertyName.HEADER_ROWS));
                 member.setHeaderRows(headerRows < 0 ? 1 : headerRows); // assume 1 header row by default
                 member.setResourceFields(parseResourceFields(member, memberNode));
                 resourceMembers.add(member);

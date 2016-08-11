@@ -6,6 +6,9 @@
     "default" : [
         "default"
     ],
+    "value": [
+        "messwert"
+    ],
     "result_time": [
         "resultTime",
         "datetime",

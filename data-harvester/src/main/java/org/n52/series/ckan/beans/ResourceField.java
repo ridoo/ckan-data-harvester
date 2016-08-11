@@ -75,7 +75,7 @@ public class ResourceField {
         this.ckanMapping = ckanMapping == null
                 ? CkanMapping.loadCkanMapping()
                 : ckanMapping;
-        this.fieldId = getValueOfField(CkanConstants.MemberProperty.FIELD_ID);
+        this.fieldId = getValueOfField(CkanConstants.FieldPropertyName.FIELD_ID);
     }
 
     public ResourceField withQualifier(ResourceMember qualifier) {
@@ -100,23 +100,23 @@ public class ResourceField {
     }
 
     public String getShortName() {
-        return getValueOfField(CkanConstants.MemberProperty.SHORT_NAME);
+        return getValueOfField(CkanConstants.FieldPropertyName.SHORT_NAME);
     }
 
     public String getLongName() {
-        return getValueOfField(CkanConstants.MemberProperty.MEMBER_FIELD_LONG_NAME);
+        return getValueOfField(CkanConstants.FieldPropertyName.LONG_NAME);
     }
 
     public String getDescription() {
-        return getValueOfField(CkanConstants.MemberProperty.FIELD_DESCRIPTION);
+        return getValueOfField(CkanConstants.FieldPropertyName.FIELD_DESCRIPTION);
     }
 
     public String getFieldType() {
-        return getValueOfField(CkanConstants.MemberProperty.FIELD_TYPE);
+        return getValueOfField(CkanConstants.FieldPropertyName.FIELD_TYPE);
     }
 
     public String getFieldRole() {
-        return getValueOfField(CkanConstants.MemberProperty.FIELD_ROLE);
+        return getValueOfField(CkanConstants.FieldPropertyName.FIELD_ROLE);
     }
 
     public boolean hasFieldRole() {

@@ -43,7 +43,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.n52.series.ckan.beans.ResourceField;
-import org.n52.series.ckan.beans.ResourceFieldCreator;
+import org.n52.series.ckan.beans.FieldBuilder;
 import org.n52.series.ckan.util.FileBasedCkanHarvestingService;
 import org.n52.sos.config.SettingsManager;
 import org.n52.sos.ogc.gml.time.TimeInstant;
@@ -62,16 +62,16 @@ public class DefaultSosInsertionStragetyTest {
     @Rule
     public TemporaryFolder testFolder = new TemporaryFolder();
 
-    private ResourceFieldCreator fieldCreator;
+    private FieldBuilder fieldCreator;
 
     @Before
     public void setUp() {
-        this.fieldCreator = new ResourceFieldCreator();
+        this.fieldCreator = new FieldBuilder();
     }
 
     @Test
     public void testAddZuluWhenDateFormatMissesOffsetInfo() {
-        ResourceField field = fieldCreator.createFull(TEST_DATE_TEMPLATE, "my-test-id", "YYYYMMDDhh");
+        ResourceField field = fieldCreator.createViaTemplate(TEST_DATE_TEMPLATE, "my-test-id", "YYYYMMDDhh");
         DefaultSosInsertionStrategy strategy = new DefaultSosInsertionStrategySeam();
         String format = strategy.parseDateFormat(field);
         MatcherAssert.assertThat(format, CoreMatchers.is("YYYYMMddHHZ"));
@@ -79,7 +79,7 @@ public class DefaultSosInsertionStragetyTest {
 
     @Test
     public void testDateFormatWithOffsetInfo() {
-        ResourceField field = fieldCreator.createFull(TEST_DATE_TEMPLATE, "my-test-id", "YYYY-MM-dd'T'HH:mm:ssz");
+        ResourceField field = fieldCreator.createViaTemplate(TEST_DATE_TEMPLATE, "my-test-id", "YYYY-MM-dd'T'HH:mm:ssz");
         DefaultSosInsertionStrategy strategy = new DefaultSosInsertionStrategySeam();
         String format = strategy.parseDateFormat(field);
         MatcherAssert.assertThat(format, CoreMatchers.is("YYYY-MM-dd'T'HH:mm:ssz"));
@@ -87,7 +87,7 @@ public class DefaultSosInsertionStragetyTest {
 
     @Test
     public void testParsingPhenomenonTime() {
-        ResourceField field = fieldCreator.createFull(TEST_DATE_TEMPLATE, "my-test-id", "YYYYMMDDhh");
+        ResourceField field = fieldCreator.createViaTemplate(TEST_DATE_TEMPLATE, "my-test-id", "YYYYMMDDhh");
         DefaultSosInsertionStrategy strategy = new DefaultSosInsertionStrategySeam();
         String format = strategy.parseDateFormat(field);
 
@@ -100,7 +100,7 @@ public class DefaultSosInsertionStragetyTest {
 
     @Test
     public void iso8601FormatValueHavingOffset() {
-        ResourceField field = fieldCreator.createFull(TEST_DATE_TEMPLATE, "my-test-id", "YYYY-MM-DD'T'hh:mm:ss");
+        ResourceField field = fieldCreator.createViaTemplate(TEST_DATE_TEMPLATE, "my-test-id", "YYYY-MM-DD'T'hh:mm:ss");
         DefaultSosInsertionStrategy strategy = new DefaultSosInsertionStrategySeam();
         String format = strategy.parseDateFormat(field);
 
@@ -112,7 +112,7 @@ public class DefaultSosInsertionStragetyTest {
 
     @Test
     public void iso8601FormatValueNotHavingOffset() {
-        ResourceField field = fieldCreator.createFull(TEST_DATE_TEMPLATE, "my-test-id", "YYYY-MM-DD'T'hh:mm:ss");
+        ResourceField field = fieldCreator.createViaTemplate(TEST_DATE_TEMPLATE, "my-test-id", "YYYY-MM-DD'T'hh:mm:ss");
         DefaultSosInsertionStrategy strategy = new DefaultSosInsertionStrategySeam();
         String format = strategy.parseDateFormat(field);
 
@@ -136,7 +136,7 @@ public class DefaultSosInsertionStragetyTest {
 
     // @Test
     public void iso8601FormatWihtoutFractionValueWithFraction() {
-        ResourceField field = fieldCreator.createFull(TEST_DATE_TEMPLATE, "my-test-id", "YYYY-MM-dd'T'HH:mm:ssz");
+        ResourceField field = fieldCreator.createViaTemplate(TEST_DATE_TEMPLATE, "my-test-id", "YYYY-MM-dd'T'HH:mm:ssz");
         DefaultSosInsertionStrategy strategy = new DefaultSosInsertionStrategySeam();
         String format = strategy.parseDateFormat(field);
         Assert.assertNull(strategy.parseDateValue("2016-02-16T07:55:54.188+01:00", format));
@@ -144,7 +144,7 @@ public class DefaultSosInsertionStragetyTest {
 
     @Test
     public void iso8601FormatFraction() {
-        ResourceField field = fieldCreator.createFull(TEST_DATE_TEMPLATE, "my-test-id", "YYYY-MM-dd'T'HH:mm:ss.SSSZ");
+        ResourceField field = fieldCreator.createViaTemplate(TEST_DATE_TEMPLATE, "my-test-id", "YYYY-MM-dd'T'HH:mm:ss.SSSZ");
         DefaultSosInsertionStrategy strategy = new DefaultSosInsertionStrategySeam();
         String format = strategy.parseDateFormat(field);
         TimeInstant instant2 = (TimeInstant) strategy.parseDateValue("2016-02-16T08:03:54.609+01:00", format);
@@ -173,8 +173,8 @@ public class DefaultSosInsertionStragetyTest {
     @Test
     public void parseStringTypeObservationValue() {
         DefaultSosInsertionStrategy strategy = new DefaultSosInsertionStrategySeam();
-        ResourceField field = new ResourceFieldCreator()
-                .createFull("{"
+        ResourceField field = new FieldBuilder()
+                .createViaTemplate("{"
                         + " \"field_id\" : \"value\", "
                         + " \"short_name\" : \"value\", "
                         + " \"long_name\" : \"value\","
@@ -193,7 +193,8 @@ public class DefaultSosInsertionStragetyTest {
     public void when_insertingWindDWDDatasets_then_getObservationNotEmpty() throws OwsExceptionReport, IOException, URISyntaxException {
         FileBasedCkanHarvestingService service = new FileBasedCkanHarvestingService(testFolder.getRoot());
         SosH2Store sosStore = new SosH2Store(service.getCkanDataCache());
-        sosStore.insertDatasetViaStrategy("12c3c8f1-bf44-47e1-b294-b6fc889873fc", new DefaultSosInsertionStrategy());
+//        sosStore.insertDatasetViaStrategy("12c3c8f1-bf44-47e1-b294-b6fc889873fc", new DefaultSosInsertionStrategy());
+        sosStore.insertDatasetViaStrategy("fb0f0f57-7a01-4385-9fe1-9fb366a63c4e", new DefaultSosInsertionStrategy());
         sosStore.assertObservationsAvailable();
         SettingsManager.getInstance().cleanup();
     }

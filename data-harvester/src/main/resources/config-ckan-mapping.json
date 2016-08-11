@@ -3,6 +3,9 @@
         "platform"
     ],
     "observations": [],
+    "value": [
+        "messwert"
+    ],
     "result_time": [
         "datetime",
         "MESS_DATUM"

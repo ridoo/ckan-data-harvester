@@ -33,15 +33,15 @@ import org.hamcrest.MatcherAssert;
 import org.junit.Before;
 import org.junit.Test;
 import org.n52.series.ckan.beans.ResourceField;
-import org.n52.series.ckan.beans.ResourceFieldCreator;
+import org.n52.series.ckan.beans.FieldBuilder;
 
 public class JoinIndexTest {
 
-    private ResourceFieldCreator fieldCreator;
+    private FieldBuilder fieldCreator;
 
     @Before
     public void setUp() {
-        this.fieldCreator = new ResourceFieldCreator();
+        this.fieldCreator = new FieldBuilder();
     }
 
     @Test
