@@ -232,9 +232,13 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
 
         @Override
         public String toString() {
-            String featureName = "Feature: '" + feature.getFirstName() + "'";
+            String featureIdentifier = "Feature: '" + feature.getIdentifier() + "'";
             String observationCount = "#" + observations.size();
-            return getClass().getSimpleName() + " [ " + featureName + ", " + observationCount + "]";
+            return getClass().getSimpleName() + " [ " + featureIdentifier + ", " + observationCount + "]";
+        }
+
+        public boolean hasObservations() {
+            return observations != null && !observations.isEmpty();
         }
     }
 
@@ -250,7 +254,7 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
             // TODO how and what to create in which order depends on the actual strategy chosen
 
             String orgaName = dataCollection.getDataset().getOrganization().getName();
-            AbstractFeature feature = createSimpleFeature(orgaName, rowEntry.getValue());
+            AbstractFeature feature = createFeatureRelation(createSimpleFeature(orgaName, rowEntry.getValue()), rowEntry.getValue());
             for (Phenomenon phenomenon : phenomena) {
                 String procedureId = createProcedureId(feature, phenomenon);
                 if ( !dataInsertions.containsKey(procedureId)) {
@@ -301,7 +305,9 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
             try {
                 long start = System.currentTimeMillis();
                 insertSensorDao.insertSensor(dataInsertion.request);
-                insertObservationDao.insertObservation(dataInsertion.createInsertObservationRequest());
+                if (dataInsertion.hasObservations()) {
+                    insertObservationDao.insertObservation(dataInsertion.createInsertObservationRequest());
+                }
                 LOGGER.debug("Insertion completed in {}s.", (System.currentTimeMillis() - start) / 1000d);
                 dataInserted = true;
 
