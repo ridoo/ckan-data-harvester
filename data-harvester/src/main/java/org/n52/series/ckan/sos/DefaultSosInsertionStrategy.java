@@ -196,6 +196,9 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
             CkanDataset dataset = dataCollection.getDataset();
             FeatureBuilder foiBuilder = new FeatureBuilder(dataset);
             AbstractFeature feature = foiBuilder.createFeature(rowEntry.getValue());
+
+            ObservationBuilder observationBuilder = new ObservationBuilder(rowEntry, uomParser);
+
             for (Phenomenon phenomenon : phenomena) {
                 String procedureId = createProcedureId(feature, phenomenon);
                 if ( !dataInsertions.containsKey(procedureId)) {
@@ -230,7 +233,7 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
                 constellation.setOfferings(offerings);
                 constellation.setObservationType(OmConstants.OBS_TYPE_MEASUREMENT);
                 constellation.setProcedure(insertSensorRequest.getProcedureDescription());
-                final SosObservation observation = createObservation(rowEntry, constellation, phenomenon);
+                final SosObservation observation = observationBuilder.createObservation(constellation, phenomenon);
                 if (observation != null) {
                     dataInsertion.addObservation(observation);
                 }
@@ -503,192 +506,6 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
         return metadata;
     }
 
-    private SosObservation createObservation(Map.Entry<ResourceKey, Map<ResourceField, String>> rowEntry,
-                                            OmObservationConstellation constellation,
-                                            Phenomenon phenomenon) {
-        SingleObservationValue< ? > value = null;
-        Time time = null;
-        TimeInstant validStart = null;
-        TimeInstant validEnd = null;
-
-        OmObservation omObservation = new OmObservation();
-        omObservation.setObservationConstellation(constellation);
-        omObservation.setDefaultElementEncoding(CkanConstants.DEFAULT_CHARSET.toString());
-        final GeometryBuilder geometryBuilder = GeometryBuilder.create();
-        for (Map.Entry<ResourceField, String> cells : rowEntry.getValue().entrySet()) {
-
-            ResourceField field = cells.getKey();
-            String resourceType = field.getQualifier().getResourceType();
-            if ( !resourceType.equalsIgnoreCase(CkanConstants.ResourceType.OBSERVATIONS)) {
-                continue;
-            }
-
-            if (field.getIndex() == phenomenon.getFieldIdx()) {
-                String phenomenonId = constellation.getObservableProperty().getIdentifier();
-                omObservation.setIdentifier(rowEntry.getKey().getKeyId() + "_" + phenomenonId);
-                // TODO support NO_DATA
-                if (field.isOfType(CkanConstants.DataType.DOUBLE)) {
-                    value = createQuantityObservationValue(field, cells.getValue());
-                }
-            }
-            else if (field.isField(CkanConstants.KnownFieldIdValue.RESULT_TIME)) {
-                time = parseTimestamp(field, cells.getValue());
-            }
-            else if (field.isField(CkanConstants.KnownFieldIdValue.LOCATION)) {
-                if (field.isOfType(Geometry.class)) {
-                    geometryBuilder.withGeoJson(cells.getValue());
-                }
-            }
-            else if (field.isField(CkanConstants.KnownFieldIdValue.CRS)) {
-                geometryBuilder.withCrs(cells.getValue());
-            }
-            else if (field.isField(CkanConstants.KnownFieldIdValue.LATITUDE)) {
-                geometryBuilder.setLatitude(cells.getValue());
-            }
-            else if (field.isField(CkanConstants.KnownFieldIdValue.LONGITUDE)) {
-                geometryBuilder.setLongitude(cells.getValue());
-            }
-            else if (field.isField(CkanConstants.KnownFieldIdValue.ALTITUDE)) {
-                geometryBuilder.setAltitude(cells.getValue());
-            }
-            else if (field.isField(CkanConstants.KnownFieldIdValue.VALID_TIME_START)) {
-                validStart = parseTimestamp(field, cells.getValue());
-            }
-            else if (field.isField(CkanConstants.KnownFieldIdValue.VALID_TIME_END)) {
-                validEnd = parseTimestamp(field, cells.getValue());
-            }
-        }
-
-        if (validStart != null || validEnd != null) {
-            TimePeriod validTime;
-            if (validStart != null && validEnd == null) {
-                validTime = new TimePeriod(validStart, new TimeInstant(TimeIndeterminateValue.unknown));
-            }
-            else if (validStart == null && validEnd != null) {
-                validTime = new TimePeriod(new TimeInstant(TimeIndeterminateValue.unknown), validEnd);
-            }
-            else {
-                validTime = new TimePeriod(validStart, validEnd);
-            }
-            omObservation.setValidTime(validTime);
-        }
-
-        // TODO support NO_DATA
-        if (time == null) {
-            LOGGER.debug("ignore observation having no phenomenonTime.");
-            return null;
-        }
-        if (value == null) {
-            SingleObservationValue<Geometry> obsValue = new SingleObservationValue<>();
-            obsValue.setValue(geometryBuilder.createGeometryValue());
-            value = obsValue;
-        } else {
-            omObservation.addParameter(geometryBuilder.createNamedValue());
-        }
-        value.setPhenomenonTime(time);
-        omObservation.setValue(value);
-        return new SosObservation(omObservation, OmConstants.OBS_TYPE_MEASUREMENT); // XXX
-    }
-
-    protected TimeInstant parseTimestamp(ResourceField field, String dateValue) {
-        return !hasDateFormat(field)
-            ? new TimeInstant(new Date(Long.parseLong(dateValue)))
-            : parseDateValue(dateValue, parseDateFormat(field));
-    }
-
-    protected String parseDateFormat(ResourceField field) {
-        if (hasDateFormat(field)) {
-            String format = field.getOther(CkanConstants.FieldPropertyName.DATE_FORMAT);
-            format = ( !format.endsWith("Z") && !format.endsWith("z"))
-                ? format + "Z"
-                : format;
-            return format.replace("DD", "dd").replace("hh", "HH"); // XXX hack to fix wrong format
-        }
-        return null;
-    }
-
-    private boolean hasDateFormat(ResourceField field) {
-        return field.hasProperty(CkanConstants.FieldPropertyName.DATE_FORMAT);
-    }
-
-    protected TimeInstant parseDateValue(String dateValue, String dateFormat) {
-        try {
-            TimeInstant timeInstant = new TimeInstant();
-            if ( !hasOffsetInfo(dateValue)) {
-                dateValue += "Z";
-            }
-            DateTime dateTime = parseIsoString2DateTime(dateValue, dateFormat);
-            timeInstant.setValue(dateTime);
-            return timeInstant;
-        }
-        catch (Exception ex) {
-            if (ex instanceof DateTimeParseException) {
-                LOGGER.error("Cannot parse date string {} with format {}", dateValue, dateFormat);
-            }
-            else {
-                LOGGER.error("Cannot parse date string {} with format {}", dateValue, dateFormat, ex);
-            }
-
-            return null;
-        }
-
-    }
-
-    /**
-     * Parses a time String to a Joda Time DateTime object
-     *
-     * @param timeString
-     *        Time String
-     * @param format
-     *        Format of the time string
-     * @return DateTime object
-     * @throws DateTimeParseException
-     *         If an error occurs.
-     */
-    protected DateTime parseIsoString2DateTime(final String timeString, String format) throws DateTimeParseException {
-        if (Strings.isNullOrEmpty(timeString)) {
-            return null;
-        }
-        try {
-            if ( !Strings.isNullOrEmpty(format)) {
-                return DateTime.parse(timeString, DateTimeFormat.forPattern(format));
-            }
-            else if (timeString.contains("+") || Pattern.matches("-\\d", timeString) || timeString.contains("Z")) {
-                return ISODateTimeFormat.dateOptionalTimeParser().withOffsetParsed().parseDateTime(timeString);
-            }
-            else {
-                return ISODateTimeFormat.dateOptionalTimeParser().withZone(DateTimeZone.UTC).parseDateTime(timeString);
-            }
-        }
-        catch (final RuntimeException uoe) {
-            throw new DateTimeParseException(timeString, uoe);
-        }
-    }
-
-    private static boolean hasOffsetInfo(String dateValue) {
-        return dateValue.endsWith("Z")
-                || dateValue.contains("+")
-                || Pattern.matches("-\\d", dateValue);
-    }
-
-    protected SingleObservationValue<Double> createQuantityObservationValue(ResourceField field, String value) {
-        try {
-            SingleObservationValue<Double> obsValue = new SingleObservationValue<>();
-            if (field.isOfType(Integer.class)
-                    || field.isOfType(Float.class)
-                    || field.isOfType(Double.class)
-                    || field.isOfType(String.class)) {
-                QuantityValue quantityValue = new QuantityValue(Double.parseDouble(value));
-                quantityValue.setUnit(uomParser.parse(field));
-                obsValue.setValue(quantityValue);
-                return obsValue;
-            }
-        }
-        catch (Exception e) {
-            LOGGER.error("could not parse value {}", value, e);
-        }
-        return null;
-    }
 
     private AbstractPhenomenon createPhenomenon(Phenomenon phenomenon) {
         return new OmObservableProperty(phenomenon.getId());
