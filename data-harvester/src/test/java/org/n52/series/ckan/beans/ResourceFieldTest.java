@@ -120,8 +120,9 @@ public class ResourceFieldTest {
 
     @Test
     public void testIdEqualityIgnoringCase() {
-        ResourceField first = fieldCreator.createSimple("test42");
-        MatcherAssert.assertThat(first.equals(fieldCreator.createSimple("Test42")), CoreMatchers.is(true));
+        ResourceField expected = fieldCreator.createSimple("Test42");
+        ResourceField actual = fieldCreator.createSimple("test42");
+        MatcherAssert.assertThat(actual, is(expected));
     }
 
     @Test

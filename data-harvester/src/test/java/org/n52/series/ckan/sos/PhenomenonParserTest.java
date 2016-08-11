@@ -56,7 +56,7 @@ public class PhenomenonParserTest {
     @Test
     public void when_passingEmptyList_then_returnEmptyList() {
         final List<ResourceField> emptyList = Collections.emptyList();
-        assertThat(parser.parsePhenomenona(emptyList), is(emptyCollectionOf(Phenomenon.class)));
+        assertThat(parser.parse(emptyList), is(emptyCollectionOf(Phenomenon.class)));
     }
 
     @Test
@@ -65,7 +65,7 @@ public class PhenomenonParserTest {
                 .withFieldId("observationValue")
                 .withUom("°C")
                 .create());
-        List<Phenomenon> actual = parser.parsePhenomenona(fields);
+        List<Phenomenon> actual = parser.parse(fields);
         assertThat(actual, hasSize(1));
         Phenomenon phenomenon = actual.get(0);
         assertThat(phenomenon.getId(), is("observationValue"));
@@ -78,7 +78,7 @@ public class PhenomenonParserTest {
                 .withPhenomenon("temperature")
                 .withUom("°C")
                 .create());
-        assertThat(parser.parsePhenomenona(fields), hasSize(1));
+        assertThat(parser.parse(fields), hasSize(1));
     }
 
     @Test
@@ -94,7 +94,7 @@ public class PhenomenonParserTest {
                    .withPhenomenon("Kelvin")
                    .withUom("K")
                    .create());
-        assertThat(parser.parsePhenomenona(fields), hasSize(2));
+        assertThat(parser.parse(fields), hasSize(2));
     }
 
 

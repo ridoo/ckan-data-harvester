@@ -31,6 +31,7 @@ package org.n52.series.ckan.util;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -55,12 +56,11 @@ public class JsonUtil {
         return new ObjectMapper();
     }
 
-    public static String parseToLowerCase(JsonNode node, Set<String> alternateFieldNames) {
+    public static String parse(JsonNode node, Set<String> alternateFieldNames) {
         JsonNode field = findField(node, alternateFieldNames);
-        String value = !field.isMissingNode()
+        return !field.isMissingNode()
                 ? field.asText()
                 : "";
-        return value.toLowerCase();
     }
 
     public static int parseMissingToNegativeInt(JsonNode node, Set<String> alternateFieldNames) {
@@ -106,7 +106,7 @@ public class JsonUtil {
     }
 
     private static JsonNode getNodeWithLowerCasedName(String fieldName, JsonNode node) {
-        return node.at("/" + fieldName.toLowerCase());
+        return node.at("/" + fieldName.toLowerCase(Locale.ROOT));
     }
 
 

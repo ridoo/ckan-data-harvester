@@ -122,7 +122,7 @@ public class ResourceMemberTest {
         ResourceMember observationDescription = members.get(1);
         Set<ResourceField> joinableFields = platformDescription.getJoinableFields(observationDescription);
         assertThat(joinableFields.size(), is(1));
-        assertThat(joinableFields.iterator().next().getFieldId(), is("stations_id"));
+        assertThat(joinableFields.iterator().next().getFieldId(), is("STATIONS_ID"));
     }
 
     private ResourceMember getObservationResource(String resourceId) {
