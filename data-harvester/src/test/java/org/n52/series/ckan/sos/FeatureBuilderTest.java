@@ -27,7 +27,7 @@ public class FeatureBuilderTest {
             + "}";
 
     private FeatureBuilder featureBuilder;
-    
+
     @Before
     public void setUp() {
         CkanDataset dataset = new CkanDataset("test_dataset");
@@ -43,7 +43,7 @@ public class FeatureBuilderTest {
         String actual = featureBuilder.createFeature(row).getFeatureType();
         MatcherAssert.assertThat(actual, is("http://www.opengis.net/def/nil/OGC/0/unknown"));
     }
-    
+
     @Test
     public void when_rowEntryWithStationId_then_featureHasAppropriateFoiId() {
         Map<ResourceField, String> row = singletonMap(FieldBuilder.aField()
@@ -52,7 +52,7 @@ public class FeatureBuilderTest {
         String actual = featureBuilder.createFeature(row).getIdentifier();
         MatcherAssert.assertThat(actual, is(ORGA_NAME + "-foobar_station"));
     }
-    
+
     @Test
     public void when_rowEntryWithStationName_then_featureHasAppropriateName() {
         Map<ResourceField, String> row = singletonMap(FieldBuilder.aField()
@@ -61,7 +61,7 @@ public class FeatureBuilderTest {
         String actual = featureBuilder.createFeature(row).getFirstName().getValue();
         MatcherAssert.assertThat(actual, is("foobar_station"));
     }
-    
+
     @Test
     public void when_rowEntriesWithLonLatAlt_then_featureHasAppropriateGeometry() {
         Map<ResourceField, String> row = new HashMap<>();
@@ -81,12 +81,12 @@ public class FeatureBuilderTest {
                 .withUom("m")
                 .create(), "10");
         Geometry geometry = featureBuilder.createFeature(row).getGeometry();
-        
+
 //        final String actual = geometry.toText(); // toText() does not respect altitude
         final String actual = new WKTWriter(3).write(geometry);
         MatcherAssert.assertThat(actual, is("POINT (52.7 7.5 10)"));
     }
-    
+
     @Test
     public void when_rowEntriesWithGeoJson_then_featureHasAppropriateGeometry() {
         Map<ResourceField, String> row = singletonMap(FieldBuilder.aField()
@@ -97,7 +97,7 @@ public class FeatureBuilderTest {
         Geometry geometry = featureBuilder.createFeature(row).getGeometry();
         MatcherAssert.assertThat(geometry.toText(), is("POINT (51.05 13.74)"));
     }
-    
+
     @Test
     public void when_rowEntriesWithGeoJsonAsPhenomenon_then_featureHasNoGeometry() {
         Map<ResourceField, String> row = singletonMap(FieldBuilder.aField()
