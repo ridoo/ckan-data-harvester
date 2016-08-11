@@ -109,6 +109,8 @@ import eu.trentorise.opendata.jackan.model.CkanOrganization;
 import eu.trentorise.opendata.jackan.model.CkanResource;
 import eu.trentorise.opendata.jackan.model.CkanTag;
 import org.n52.sos.ogc.om.values.GeometryValue;
+import org.n52.sos.ogc.swes.SwesConstants;
+import org.n52.sos.ogc.swes.SwesFeatureRelationship;
 
 class DefaultSosInsertionStrategy implements SosInsertionStrategy {
 
@@ -235,7 +237,7 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
         @Override
         public String toString() {
             String featureIdentifier = "Feature: '" + feature.getIdentifier() + "'";
-            String observationCount = ", Observations: #" + observations.size();
+            String observationCount = "Observations: #" + observations.size();
             return getClass().getSimpleName() + " [ " + featureIdentifier + ", " + observationCount + "]";
         }
 
@@ -419,7 +421,9 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
 
         final String procedureId = createProcedureId(feature, phenomenon);
         final SosOffering sosOffering = new SosOffering(procedureId);
-        system.setInputs(Collections.<SmlIo< ? >> singletonList(createInput(phenomenon))).setOutputs(Collections.<SmlIo< ? >> singletonList(createOutput(phenomenon))).setKeywords(createKeywordList(feature,
+        system.setInputs(Collections.<SmlIo< ? >> singletonList(createInput(phenomenon)))
+                .setOutputs(Collections.<SmlIo< ? >> singletonList(createOutput(phenomenon)))
+                .setKeywords(createKeywordList(feature,
                                                                                                                                                                                                      phenomenon,
                                                                                                                                                                                                      schemaDescription)).setIdentifications(createIdentificationList(feature,
                                                                                                                                                                                                                                                                      phenomenon)).setClassifications(createClassificationList(feature,
