@@ -165,7 +165,7 @@ public class ResourceField {
             return false;
         }
         final String fieldType = getFieldType();
-        return ckanMapping.hasMapping(ofType.toLowerCase(Locale.ROOT), fieldType.toLowerCase(Locale.ROOT));
+        return ckanMapping.hasMapping(ofType, fieldType);
     }
 
     private String getValueOfField(String fieldName) {
