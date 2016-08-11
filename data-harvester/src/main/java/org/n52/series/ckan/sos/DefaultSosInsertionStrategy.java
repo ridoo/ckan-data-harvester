@@ -34,11 +34,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.joda.time.DateTime;
@@ -49,7 +47,6 @@ import org.n52.series.ckan.beans.DataCollection;
 import org.n52.series.ckan.beans.DataFile;
 import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.beans.ResourceMember;
-import org.n52.series.ckan.beans.SchemaDescriptor;
 import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.table.DataTable;
 import org.n52.series.ckan.table.ResourceKey;
@@ -59,7 +56,6 @@ import org.n52.sos.ds.hibernate.InsertObservationDAO;
 import org.n52.sos.ds.hibernate.InsertSensorDAO;
 import org.n52.sos.encode.SensorMLEncoderv101;
 import org.n52.sos.exception.ows.concrete.DateTimeParseException;
-import org.n52.sos.exception.ows.concrete.InvalidSridException;
 import org.n52.sos.ext.deleteobservation.DeleteObservationConstants;
 import org.n52.sos.ext.deleteobservation.DeleteObservationDAO;
 import org.n52.sos.ext.deleteobservation.DeleteObservationRequest;
@@ -75,8 +71,6 @@ import org.n52.sos.ogc.om.OmObservableProperty;
 import org.n52.sos.ogc.om.OmObservation;
 import org.n52.sos.ogc.om.OmObservationConstellation;
 import org.n52.sos.ogc.om.SingleObservationValue;
-import org.n52.sos.ogc.om.features.SfConstants;
-import org.n52.sos.ogc.om.features.samplingFeatures.SamplingFeature;
 import org.n52.sos.ogc.om.values.QuantityValue;
 import org.n52.sos.ogc.ows.OwsExceptionReport;
 import org.n52.sos.ogc.sensorML.SensorML;
@@ -95,7 +89,6 @@ import org.n52.sos.ogc.swe.SweSimpleDataRecord;
 import org.n52.sos.ogc.swe.simpleType.SweObservableProperty;
 import org.n52.sos.ogc.swe.simpleType.SweQuantity;
 import org.n52.sos.ogc.swe.simpleType.SweText;
-import org.n52.sos.request.InsertObservationRequest;
 import org.n52.sos.request.InsertSensorRequest;
 import org.n52.sos.service.Configurator;
 import org.slf4j.Logger;
@@ -120,6 +113,8 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
     private final DeleteObservationDAO deleteObservationDao;
 
     private final CkanSosReferenceCache ckanSosReferencingCache;
+
+    private UomParser uomParser = new UcumParser();
 
     DefaultSosInsertionStrategy() {
         this(null);
@@ -185,68 +180,12 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
         return fullTable;
     }
 
-    private static class DataInsertion {
-
-        // XXX separate to own type to encapsulate
-
-        private final InsertSensorRequest request;
-
-        private final AbstractFeature feature;
-
-        private final List<OmObservation> observations;
-
-        private CkanSosObservationReference reference;
-
-        DataInsertion(InsertSensorRequest request, AbstractFeature feature) {
-            this.request = request;
-            this.feature = feature;
-            this.observations = new ArrayList<>();
-        }
-
-        InsertObservationRequest createInsertObservationRequest() throws OwsExceptionReport {
-            InsertObservationRequest insertObservationRequest = new InsertObservationRequest();
-            insertObservationRequest.setOfferings(getOfferingIds());
-            insertObservationRequest.setObservation(observations);
-            return insertObservationRequest;
-        }
-
-        boolean hasObservationsReference() {
-            return reference != null;
-        }
-
-        CkanSosObservationReference getObservationsReference() {
-            if (hasObservationsReference()) {
-                for (OmObservation observation : observations) {
-                    reference.addObservationReference(observation);
-                }
-            }
-            return reference;
-        }
-
-        List<String> getOfferingIds() {
-            List<String> ids = new ArrayList<>();
-            for (SosOffering offering : request.getAssignedOfferings()) {
-                ids.add(offering.getIdentifier());
-            }
-            return ids;
-        }
-
-        @Override
-        public String toString() {
-            String featureIdentifier = "Feature: '" + feature.getIdentifier() + "'";
-            String observationCount = ", Observations: #" + observations.size();
-            return getClass().getSimpleName() + " [ " + featureIdentifier + ", " + observationCount + "]";
-        }
-
-        public boolean hasObservations() {
-            return observations != null && !observations.isEmpty();
-        }
-    }
 
     boolean insertOrUpdateData(DataTable dataTable, DataCollection dataCollection) {
         boolean dataInserted = false;
-        SchemaDescriptor schemaDescription = dataCollection.getSchemaDescriptor().getSchemaDescription();
-        final List<Phenomenon> phenomena = parseObservableProperties(dataTable);
+        List<ResourceField> resourceFields = dataTable.getResourceMember().getResourceFields();
+        PhenomenonParser phenomenonParser = new PhenomenonParser(uomParser);
+        final List<Phenomenon> phenomena = phenomenonParser.parse(resourceFields);
 
         LOGGER.debug("Start insertion ...");
         Map<String, DataInsertion> dataInsertions = new HashMap<>();
@@ -254,8 +193,12 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
 
             // TODO how and what to create in which order depends on the actual strategy chosen
 
-            String orgaName = dataCollection.getDataset().getOrganization().getName();
-            AbstractFeature feature = createFeatureRelation(orgaName, rowEntry.getValue());
+            CkanDataset dataset = dataCollection.getDataset();
+            FeatureBuilder foiBuilder = new FeatureBuilder(dataset);
+            AbstractFeature feature = foiBuilder.createFeature(rowEntry.getValue());
+
+            ObservationBuilder observationBuilder = new ObservationBuilder(rowEntry, uomParser);
+
             for (Phenomenon phenomenon : phenomena) {
                 String procedureId = createProcedureId(feature, phenomenon);
                 if ( !dataInsertions.containsKey(procedureId)) {
@@ -265,12 +208,9 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
                                  phenomenon.getUom());
                     InsertSensorRequest insertSensorRequest = prepareSmlInsertSensorRequest(feature,
                                                                                             phenomenon,
-                                                                                            schemaDescription);
+                                                                                            dataset);
                     insertSensorRequest.setObservableProperty(phenomenaToIdList(phenomena));
                     insertSensorRequest.setProcedureDescriptionFormat("http://www.opengis.net/sensorML/1.0.1");
-                    insertSensorRequest.setMetadata(createInsertSensorMetadata());
-
-                    // TODO check mobile/insitu/stationary/remote
 
                     DataInsertion dataInsertion = new DataInsertion(insertSensorRequest, feature);
                     dataInsertions.put(procedureId, dataInsertion);
@@ -279,24 +219,23 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
                         ResourceMember member = rowEntry.getKey().getMember();
                         DataFile dataFile = dataCollection.getDataFile(member);
                         CkanResource resource = dataFile.getResource();
-                        dataInsertion.reference = CkanSosObservationReference.create(resource);
+                        dataInsertion.setReference(CkanSosObservationReference.create(resource));
                     }
 
                 }
 
                 DataInsertion dataInsertion = dataInsertions.get(procedureId);
-                InsertSensorRequest insertSensorRequest = dataInsertion.request;
+                InsertSensorRequest insertSensorRequest = dataInsertion.getRequest();
                 List<String> offerings = dataInsertion.getOfferingIds();
                 OmObservationConstellation constellation = new OmObservationConstellation();
                 constellation.setObservableProperty(createPhenomenon(phenomenon));
-                constellation.setFeatureOfInterest(dataInsertion.feature);
+                constellation.setFeatureOfInterest(dataInsertion.getFeature());
                 constellation.setOfferings(offerings);
                 constellation.setObservationType(OmConstants.OBS_TYPE_MEASUREMENT);
                 constellation.setProcedure(insertSensorRequest.getProcedureDescription());
-                final OmObservation observation = createObservation(rowEntry, constellation, phenomenon);
+                final SosObservation observation = observationBuilder.createObservation(constellation, phenomenon);
                 if (observation != null) {
-                    // TODO refactor getting ckanResource to cache!?
-                    dataInsertion.observations.add(observation);
+                    dataInsertion.addObservation(observation);
                 }
             }
         }
@@ -305,8 +244,15 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
         for (DataInsertion dataInsertion : dataInsertions.values()) {
             try {
                 long start = System.currentTimeMillis();
-                insertSensorDao.insertSensor(dataInsertion.request);
                 if (dataInsertion.hasObservations()) {
+                    InsertSensorRequest insertSensorRequest = dataInsertion.getRequest();
+
+                    // TODO check mobile/insitu/stationary/remote
+                    SosInsertionMetadata metadata = createSosInsertionMetadata(dataInsertion);
+                    insertSensorRequest.setMetadata(metadata);
+
+
+                    insertSensorDao.insertSensor(insertSensorRequest);
                     insertObservationDao.insertObservation(dataInsertion.createInsertObservationRequest());
                 }
                 LOGGER.debug("Insertion completed in {}s.", (System.currentTimeMillis() - start) / 1000d);
@@ -375,99 +321,21 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
         return ids;
     }
 
-    SamplingFeature createFeatureRelation(String orgaName, Map<ResourceField, String> rowEntry) {
-        final SamplingFeature feature = new SamplingFeature(null);
-        final GeometryBuilder geometryBuilder = GeometryBuilder.create();
-        for (Map.Entry<ResourceField, String> fieldEntry : rowEntry.entrySet()) {
-            ResourceField field = fieldEntry.getKey();
-            if (field.isField(CkanConstants.KnownFieldId.STATION_ID)) {
-                feature.setIdentifier(orgaName + "-" + fieldEntry.getValue());
-            }
-            if (field.isField(CkanConstants.KnownFieldId.STATION_NAME)) {
-                feature.addName(fieldEntry.getValue());
-            }
-            if (field.isField(CkanConstants.KnownFieldId.CRS)) {
-                geometryBuilder.withCrs(fieldEntry.getValue());
-            }
-            if (field.isField(CkanConstants.KnownFieldId.LATITUDE)) {
-                geometryBuilder.setLatitude(fieldEntry.getValue());
-            }
-            if (field.isField(CkanConstants.KnownFieldId.LONGITUDE)) {
-                geometryBuilder.setLongitude(fieldEntry.getValue());
-            }
-            if (field.isField(CkanConstants.KnownFieldId.ALTITUDE)) {
-                geometryBuilder.setAltitude(fieldEntry.getValue());
-            }
-            if (field.isField(CkanConstants.KnownFieldId.LOCATION)) {
-                if (field.getFieldType().equalsIgnoreCase("JsonObject")) {
-                    geometryBuilder.withGeoJson(fieldEntry.getValue());
-                }
-            }
-        }
-        setFeatureGeometry(feature, geometryBuilder.getGeometry());
-        feature.setFeatureType(geometryBuilder.getFeatureType());
-        return feature;
-    }
-
-    void setFeatureGeometry(SamplingFeature feature, Geometry geometry) {
-        try {
-            feature.setGeometry(geometry);
-        }
-        catch (InvalidSridException e) {
-            LOGGER.error("could not set feature's geometry.", e);
-        }
-    }
-
-    List<Phenomenon> parseObservableProperties(DataTable dataTable) {
-
-        // TODO evaluate separating observableProperty parsing to schemaDescription
-
-        ResourceMember resourceMember = dataTable.getResourceMember();
-        Set<Phenomenon> observableProperties = new HashSet<>();
-        List<ResourceField> fields = resourceMember.getResourceFields();
-        for (ResourceField field : fields) {
-            if (field.hasProperty(CkanConstants.KnownFieldProperty.PHENOMENON)) {
-                // check for content of fieldId and longName, if not readable phenomenon name use
-                // "phenomenon" field
-                String phenomenonId;
-                if ("value".equalsIgnoreCase(field.getFieldId())) {
-                    phenomenonId = field.getOther(CkanConstants.KnownFieldProperty.PHENOMENON);
-                }
-                else {
-                    phenomenonId = field.getFieldId();
-                }
-                String phenomenonName;
-                if ("value".equalsIgnoreCase(field.getLongName())) {
-                    phenomenonName = field.getOther(CkanConstants.KnownFieldProperty.PHENOMENON);
-                }
-                else {
-                    phenomenonName = field.getFieldId();
-                }
-                observableProperties.add(new Phenomenon(phenomenonId,
-                                                        phenomenonName,
-                                                        field.getIndex(),
-                                                        parseToUcum(field.getOther(CkanConstants.KnownFieldProperty.UOM))));
-            }
-        }
-        return new ArrayList<>(observableProperties);
-    }
-
     private InsertSensorRequest prepareSmlInsertSensorRequest(AbstractFeature feature,
                                                               Phenomenon phenomenon,
-                                                              SchemaDescriptor schemaDescription) {
+                                                              CkanDataset dataset) {
         final InsertSensorRequest insertSensorRequest = new InsertSensorRequest();
         final org.n52.sos.ogc.sensorML.System system = new org.n52.sos.ogc.sensorML.System();
-        system.setDescription(schemaDescription.getDataset().getNotes());
+        system.setDescription(dataset.getNotes());
 
         final String procedureId = createProcedureId(feature, phenomenon);
         final SosOffering sosOffering = new SosOffering(procedureId);
-        system.setInputs(Collections.<SmlIo< ? >> singletonList(createInput(phenomenon))).setOutputs(Collections.<SmlIo< ? >> singletonList(createOutput(phenomenon))).setKeywords(createKeywordList(feature,
-                                                                                                                                                                                                     phenomenon,
-                                                                                                                                                                                                     schemaDescription)).setIdentifications(createIdentificationList(feature,
-                                                                                                                                                                                                                                                                     phenomenon)).setClassifications(createClassificationList(feature,
-                                                                                                                                                                                                                                                                                                                              phenomenon)).addCapabilities(createCapabilities(feature,
-                                                                                                                                                                                                                                                                                                                                                                              phenomenon,
-                                                                                                                                                                                                                                                                                                                                                                              sosOffering))
+        system.setInputs(Collections.<SmlIo< ? >> singletonList(createInput(phenomenon)))
+                .setOutputs(Collections.<SmlIo< ? >> singletonList(createOutput(phenomenon)))
+                .setKeywords(createKeywordList(feature, phenomenon, dataset))
+                .setIdentifications(createIdentificationList(feature, phenomenon))
+                .setClassifications(createClassificationList(feature, phenomenon))
+                .addCapabilities(createCapabilities(feature, phenomenon, sosOffering))
                 // .addContact(createContact(schemaDescription.getDataset())) // TODO
                 // ... // TODO
                 .setValidTime(createValidTimePeriod()).setIdentifier(procedureId);
@@ -502,7 +370,7 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
 
     private List<String> createKeywordList(AbstractFeature feature,
                                            Phenomenon phenomenon,
-                                           SchemaDescriptor schemaDescription) {
+                                           CkanDataset dataset) {
         List<String> keywords = new ArrayList<>();
         keywords.add("CKAN data");
         if (feature.isSetName()) {
@@ -510,7 +378,7 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
         }
         keywords.add(phenomenon.getLabel());
         keywords.add(phenomenon.getId());
-        addDatasetTags(schemaDescription.getDataset(), keywords);
+        addDatasetTags(dataset, keywords);
         return keywords;
     }
 
@@ -631,220 +499,13 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
         return contactList;
     }
 
-    private SosInsertionMetadata createInsertSensorMetadata() {
+    private SosInsertionMetadata createSosInsertionMetadata(DataInsertion dataInsertion) {
         SosInsertionMetadata metadata = new SosInsertionMetadata();
-        metadata.setFeatureOfInterestTypes(Collections.singleton(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_FEATURE));
-        metadata.setObservationTypes(Collections.singleton(OmConstants.OBS_TYPE_MEASUREMENT));
+        metadata.setFeatureOfInterestTypes(dataInsertion.getFeaturesCharacteristics());
+        metadata.setObservationTypes(dataInsertion.getObservationTypes());
         return metadata;
     }
 
-    private OmObservation createObservation(Map.Entry<ResourceKey, Map<ResourceField, String>> rowEntry,
-                                            OmObservationConstellation constellation,
-                                            Phenomenon phenomenon) {
-        SingleObservationValue< ? > value = null;
-        Time time = null;
-        TimeInstant validStart = null;
-        TimeInstant validEnd = null;
-
-        OmObservation omObservation = new OmObservation();
-        omObservation.setObservationConstellation(constellation);
-        omObservation.setDefaultElementEncoding(CkanConstants.DEFAULT_CHARSET.toString());
-        final GeometryBuilder geometryBuilder = GeometryBuilder.create();
-        for (Map.Entry<ResourceField, String> cells : rowEntry.getValue().entrySet()) {
-
-            ResourceField field = cells.getKey();
-            String resourceType = field.getQualifier().getResourceType();
-            if (resourceType.equalsIgnoreCase(CkanConstants.ResourceType.OBSERVATIONS)) {
-                // if (field.hasProperty(CkanConstants.KnownFieldProperty.PHENOMENON)) {
-                if (field.getIndex() == phenomenon.getFieldIdx()) {
-                    // TODO check index vs fieldId comparison
-                    String phenomenonField = field.getFieldId();
-                    String phenomenonId = constellation.getObservableProperty().getIdentifier();
-                    // check equality with "phenomeon" field, because fieldId does not always contain the
-                    // valid phenomenon name
-                    if (phenomenonField.equalsIgnoreCase(phenomenonId)
-                            || phenomenonId.equals(field.getOther(CkanConstants.KnownFieldProperty.PHENOMENON))) {
-                        // TODO value null in case of NO_DATA
-                        value = createQuantityObservationValue(field, cells.getValue());
-                        omObservation.setIdentifier(rowEntry.getKey().getKeyId() + "_" + phenomenonId);
-                    }
-                }
-                else if (field.isField(CkanConstants.KnownFieldId.RESULT_TIME)) {
-                    time = parseTimestamp(field, cells.getValue());
-                }
-                else if (field.isField(CkanConstants.KnownFieldId.LOCATION)) {
-                    if (field.isOfType(Geometry.class)) {
-                        geometryBuilder.withGeoJson(cells.getValue());
-                    }
-                }
-                else if (field.isField(CkanConstants.KnownFieldId.CRS)) {
-                    geometryBuilder.withCrs(cells.getValue());
-                }
-                else if (field.isField(CkanConstants.KnownFieldId.LATITUDE)) {
-                    geometryBuilder.setLatitude(cells.getValue());
-                }
-                else if (field.isField(CkanConstants.KnownFieldId.LONGITUDE)) {
-                    geometryBuilder.setLongitude(cells.getValue());
-                }
-                else if (field.isField(CkanConstants.KnownFieldId.ALTITUDE)) {
-                    geometryBuilder.setAltitude(cells.getValue());
-                }
-                else if (field.isField(CkanConstants.KnownFieldId.VALID_TIME_START)) {
-                    validStart = parseTimestamp(field, cells.getValue());
-                }
-                else if (field.isField(CkanConstants.KnownFieldId.VALID_TIME_END)) {
-                    validEnd = parseTimestamp(field, cells.getValue());
-                }
-
-            }
-        }
-
-        omObservation.addParameter(geometryBuilder.createGeometryValue());
-
-        if (validStart != null || validEnd != null) {
-            TimePeriod validTime = null;
-            if (validStart != null && validEnd == null) {
-                validTime = new TimePeriod(validStart, new TimeInstant(TimeIndeterminateValue.unknown));
-            }
-            else if (validStart == null && validEnd != null) {
-                validTime = new TimePeriod(new TimeInstant(TimeIndeterminateValue.unknown), validEnd);
-            }
-            else {
-                validTime = new TimePeriod(validStart, validEnd);
-            }
-            omObservation.setValidTime(validTime);
-        }
-
-        // TODO remove value == null if this works out for NO_DATA
-        if (value == null || time == null) {
-            LOGGER.debug("ignore observation having no value/phenomenonTime.");
-            return null;
-        }
-        else {
-            value.setPhenomenonTime(time);
-            omObservation.setValue(value);
-            return omObservation;
-        }
-    }
-
-    protected TimeInstant parseTimestamp(ResourceField field, String dateValue) {
-        return !hasDateFormat(field)
-            ? new TimeInstant(new Date(Long.parseLong(dateValue)))
-            : parseDateValue(dateValue, parseDateFormat(field));
-    }
-
-    protected String parseDateFormat(ResourceField field) {
-        if (hasDateFormat(field)) {
-            String format = field.getOther(CkanConstants.KnownFieldProperty.DATE_FORMAT);
-            format = ( !format.endsWith("Z") && !format.endsWith("z"))
-                ? format + "Z"
-                : format;
-            return format.replace("DD", "dd").replace("hh", "HH"); // XXX hack to fix wrong format
-        }
-        return null;
-    }
-
-    private boolean hasDateFormat(ResourceField field) {
-        return field.hasProperty(CkanConstants.KnownFieldProperty.DATE_FORMAT);
-    }
-
-    protected TimeInstant parseDateValue(String dateValue, String dateFormat) {
-        try {
-            TimeInstant timeInstant = new TimeInstant();
-            if ( !hasOffsetInfo(dateValue)) {
-                dateValue += "Z";
-            }
-            DateTime dateTime = parseIsoString2DateTime(dateValue, dateFormat);
-            timeInstant.setValue(dateTime);
-            return timeInstant;
-        }
-        catch (Exception ex) {
-            if (ex instanceof DateTimeParseException) {
-                LOGGER.error("Cannot parse date string {} with format {}", dateValue, dateFormat);
-            }
-            else {
-                LOGGER.error("Cannot parse date string {} with format {}", dateValue, dateFormat, ex);
-            }
-
-            return null;
-        }
-
-    }
-
-    /**
-     * Parses a time String to a Joda Time DateTime object
-     *
-     * @param timeString
-     *        Time String
-     * @param format
-     *        Format of the time string
-     * @return DateTime object
-     * @throws DateTimeParseException
-     *         If an error occurs.
-     */
-    protected DateTime parseIsoString2DateTime(final String timeString, String format) throws DateTimeParseException {
-        if (Strings.isNullOrEmpty(timeString)) {
-            return null;
-        }
-        try {
-            if ( !Strings.isNullOrEmpty(format)) {
-                return DateTime.parse(timeString, DateTimeFormat.forPattern(format));
-            }
-            else if (timeString.contains("+") || Pattern.matches("-\\d", timeString) || timeString.contains("Z")) {
-                return ISODateTimeFormat.dateOptionalTimeParser().withOffsetParsed().parseDateTime(timeString);
-            }
-            else {
-                return ISODateTimeFormat.dateOptionalTimeParser().withZone(DateTimeZone.UTC).parseDateTime(timeString);
-            }
-        }
-        catch (final RuntimeException uoe) {
-            throw new DateTimeParseException(timeString, uoe);
-        }
-    }
-
-    private static boolean hasOffsetInfo(String dateValue) {
-        return dateValue.endsWith("Z")
-                || dateValue.contains("+")
-                || Pattern.matches("-\\d", dateValue);
-    }
-
-    protected SingleObservationValue<Double> createQuantityObservationValue(ResourceField field, String value) {
-        try {
-            SingleObservationValue<Double> obsValue = new SingleObservationValue<>();
-            if (field.isOfType(Integer.class)
-                    || field.isOfType(Float.class)
-                    || field.isOfType(Double.class)
-                    || field.isOfType(String.class)) {
-                QuantityValue quantityValue = new QuantityValue(Double.parseDouble(value));
-                quantityValue.setUnit(parseToUcum(field.getOther(CkanConstants.KnownFieldProperty.UOM)));
-                obsValue.setValue(quantityValue);
-                return obsValue;
-            }
-        }
-        catch (Exception e) {
-            LOGGER.error("could not parse value {}", value, e);
-        }
-        return null;
-    }
-
-    private String parseToUcum(String uom) {
-        final String unit = parseFromAlias(uom);
-        return unit != null
-            ? unit
-            : "";
-    }
-
-    protected String parseFromAlias(String uom) {
-        try {
-            // TODO non valid units from a mapping
-            // return StandardUnitDB.instance().get(uom);
-            return uom;
-        }
-        catch (Exception e) {
-            LOGGER.error("Could not parse UOM '{}' to known UCUM symbol.", uom, e);
-        }
-        return null;
-    }
 
     private AbstractPhenomenon createPhenomenon(Phenomenon phenomenon) {
         return new OmObservableProperty(phenomenon.getId());

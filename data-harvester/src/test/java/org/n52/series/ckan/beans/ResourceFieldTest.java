@@ -28,8 +28,6 @@
  */
 package org.n52.series.ckan.beans;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -40,18 +38,19 @@ import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.da.CkanMapping;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 public class ResourceFieldTest {
 
-    private ResourceFieldCreator fieldCreator;
+    private FieldBuilder fieldCreator;
 
     private CkanMapping ckanMapping;
 
     @Before
     public void setUp() {
-        this.fieldCreator = new ResourceFieldCreator();
+        this.fieldCreator = new FieldBuilder();
         this.ckanMapping = new CkanMapping();
         List<String> mappings = Arrays.asList(new String[]{"IDENTIFIER_A", "IDENTIFIER_B"});
         List<String> typeMappings = Arrays.asList(new String[]{"TYPE_A", "TYPE_B"});
@@ -121,8 +120,9 @@ public class ResourceFieldTest {
 
     @Test
     public void testIdEqualityIgnoringCase() {
-        ResourceField first = fieldCreator.createSimple("test42");
-        MatcherAssert.assertThat(first.equals(fieldCreator.createSimple("Test42")), CoreMatchers.is(true));
+        ResourceField expected = fieldCreator.createSimple("Test42");
+        ResourceField actual = fieldCreator.createSimple("test42");
+        MatcherAssert.assertThat(actual, is(expected));
     }
 
     @Test
@@ -135,7 +135,7 @@ public class ResourceFieldTest {
                 "    \"description\": \"The Identifier for the station declared by the German weather service (DWD)\"," +
                 "    \"field_type\": \"Integer\"" +
                 "}";
-        ResourceField intField = fieldCreator.createFull(json);
+        ResourceField intField = fieldCreator.createViaTemplate(json);
         Assert.assertTrue(intField.equalsValues("100", "0100"));
     }
 

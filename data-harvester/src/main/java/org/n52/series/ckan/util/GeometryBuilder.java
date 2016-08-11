@@ -81,10 +81,14 @@ public class GeometryBuilder {
         return this;
     }
 
-    public NamedValue<?> createGeometryValue() {
+    public GeometryValue createGeometryValue() {
+        return new GeometryValue(getGeometry());
+    }
+
+    public NamedValue<Geometry> createNamedValue() {
         final NamedValue<Geometry> namedValue = new NamedValue<>();
         namedValue.setName(new ReferenceType(OmConstants.PARAM_NAME_SAMPLING_GEOMETRY));
-        namedValue.setValue(new GeometryValue(geometry));
+        namedValue.setValue(new GeometryValue(getGeometry()));
         return namedValue;
     }
 
@@ -109,7 +113,7 @@ public class GeometryBuilder {
             JsonNode jsonNode = new ObjectMapper().readTree(json.replace("'", "\""));
             this.geometry = geoJsonDecoder.decodeGeometry(jsonNode);
         } catch (IOException | GeoJSONException e) {
-            LOGGER.error("Location value is not a JSON object. Value: {}", json);
+            LOGGER.error("Location value is not a JSON object. Value: {}", json, e);
         }
         return this;
     }
@@ -160,7 +164,7 @@ public class GeometryBuilder {
 
         // TODO further types?
 
-        return null;
+        return "http://www.opengis.net/def/nil/OGC/0/unknown";
     }
 
 }

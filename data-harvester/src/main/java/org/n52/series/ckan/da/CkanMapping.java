@@ -75,7 +75,7 @@ public class CkanMapping {
 
     public Set<String> getMappings(String name) {
         String lowerCasedName = name != null
-                ? name.toLowerCase()
+                ? name.toLowerCase(Locale.ROOT)
                 : name;
         if ( !mappingsByName.containsKey(lowerCasedName)) {
             if ( !unmappedKeys.contains(lowerCasedName)) {

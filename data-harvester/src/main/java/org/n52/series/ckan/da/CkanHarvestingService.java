@@ -157,7 +157,7 @@ public class CkanHarvestingService implements ServletContextAware {
         List<String> resourceIds = new ArrayList<>();
         JsonNode descriptionNode = resourceDescription.getNode();
         for (JsonNode node : descriptionNode.at("/members")) {
-            JsonNode resourceId = node.findValue(CkanConstants.MemberProperty.RESOURCE_NAME);
+            JsonNode resourceId = node.findValue(CkanConstants.FieldPropertyName.RESOURCE_NAME);
             if (resourceId.isArray()) {
                 Iterator<JsonNode> iter = resourceId.iterator();
                 while (iter.hasNext()) {

@@ -26,46 +26,11 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
-package org.n52.series.ckan.beans;
+package org.n52.series.ckan.sos;
 
-import static org.junit.Assert.fail;
+import org.n52.series.ckan.beans.ResourceField;
 
-import java.io.IOException;
-import java.util.IllegalFormatException;
+public interface UomParser {
 
-import org.n52.series.ckan.da.CkanMapping;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-public class ResourceFieldCreator {
-
-    private CkanMapping ckanMapping;
-
-    public ResourceFieldCreator() {
-        this.ckanMapping = CkanMapping.loadCkanMapping();
-    }
-
-    public ResourceFieldCreator withCkanMapping(CkanMapping ckanMapping) {
-        this.ckanMapping = ckanMapping;
-        return this;
-    }
-
-    public ResourceField createSimple(String id) {
-        return createFull("{ \"field_id\": \"%s\", \"field_type\": \"string\" }", id);
-    }
-
-    public ResourceField createFull(String json, Object... args) {
-        try {
-            json = String.format(json, args);
-            JsonNode node = new ObjectMapper().readTree(json);
-            return new ResourceField(node, 0, ckanMapping);
-        } catch (IllegalFormatException | IOException e) {
-            e.printStackTrace();
-            fail("Could not create field!");
-            return null;
-        }
-
-    }
-
+    String parse(ResourceField field);
 }
