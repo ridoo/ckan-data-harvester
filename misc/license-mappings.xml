@@ -12,10 +12,10 @@
         <version>2.7.0</version>
         <license>The Apache Software License, Version 2.0</license>
     </artifact>
-<!--     <artifact> -->
-<!--         <groupId>org.n52.sensorweb.sos</groupId> -->
-<!--         <artifactId>do-hibernate</artifactId> -->
-<!--         <version>4.4.0-SNAPSHOT</version> -->
-<!--         <license>GPLv2</license> -->
-<!--     </artifact> -->
+    <artifact>
+        <groupId>net.sourceforge.hatbox</groupId>
+        <artifactId>hatbox</artifactId>
+        <version>1.0.b7</version>
+        <license>GNU Lesser General Public License (LGPL) version 2.1</license>
+    </artifact>
 </license-lookup>

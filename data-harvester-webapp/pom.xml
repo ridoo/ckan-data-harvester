@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.n52.sensorweb.ckan</groupId>
+        <artifactId>ckan-data-harvester</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>data-harvester-webapp</artifactId>
+    <packaging>war</packaging>
+    <name>CKAN Data Harvester Webapp Module</name>
+    <description>Downloads CKAN data to a 52°North SOS database</description>
+    <url>http://52north.org/communities/sensorweb/</url>
+
+    <properties>
+        <enforcer.skip>true</enforcer.skip>
+        <mdep.analyze.skip>true</mdep.analyze.skip>
+
+        <java.compiler.source>1.7</java.compiler.source>
+        <java.compiler.target>1.7</java.compiler.target>
+        <timestamp>${maven.build.timestamp}</timestamp>
+        <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
+        <currentYearDynamic>${maven.build.timestamp}</currentYearDynamic>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    <dependencies>
+        
+        <dependency>
+            <groupId>org.n52.sensorweb.ckan</groupId>
+            <artifactId>data-harvester</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.n52.sensorweb.sos</groupId>
+            <artifactId>webapp-bundle</artifactId>
+            <version>${sos.version}</version>
+            <type>war</type>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        
+        <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <overlays>
+                        <overlay>
+                            <groupId>org.n52.sensorweb.sos</groupId>
+                            <artifactId>webapp-bundle</artifactId>
+                            <excludes>
+                                <exclude>cache.tmp</exclude>
+                                <exclude>static/client/jsClient</exclude>
+                                <exclude>WEB-INF/classes/logback.xml</exclude>
+                            </excludes>
+                        </overlay>
+                    </overlays>
+                    <webResources>
+                        <resource>
+                            <!-- override SOS config if present -->
+                            <directory>src/main/webapp</directory>
+                            <include>configuration.db</include>
+                            <filtering>false</filtering>
+                        </resource>
+                    </webResources>
+                </configuration>
+            </plugin>
+        </plugins>
+        
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.eclipse.jetty</groupId>
+                    <artifactId>jetty-maven-plugin</artifactId>
+                    <version>9.3.7.v20160115</version>
+                    <configuration>
+                        <stopKey>C</stopKey>
+                        <stopPort>34343</stopPort>
+                        <scanIntervalSeconds>0</scanIntervalSeconds>
+                        <reload>manual</reload>
+                        <webAppConfig>
+                            <contextPath>/</contextPath>
+                            <persistTempDirectory>true</persistTempDirectory>
+                            <allowDuplicateFragmentNames>true</allowDuplicateFragmentNames>
+                            <extraClasspath>/target/classes/;../data-harvester/target/classes;${project.build.outputDirectory}</extraClasspath>
+                        </webAppConfig>
+                        <scanTargets>
+                            <scanTarget>/target/classes/</scanTarget>
+                            <scanTarget>../data-harvester/target/classes</scanTarget>
+                            <scanTarget>${project.build.outputDirectory}</scanTarget>
+                        </scanTargets>
+                        <systemProperties>
+                            <systemProperty>
+                                <name>catalina.base</name>
+                                <value>${project.build.directory}</value>
+                            </systemProperty>
+                        </systemProperties>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+</project>
+
