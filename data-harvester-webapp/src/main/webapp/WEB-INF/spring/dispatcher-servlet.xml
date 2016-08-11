@@ -31,6 +31,7 @@
 
     <import resource="api_v1_mvc.xml" />
     <import resource="api_v1_mvc_legacy.xml" />
+    <import resource="spi-impl-dao_tasks.xml" />
 
     <mvc:annotation-driven content-negotiation-manager="contentNegotiationManager" />
 

@@ -32,7 +32,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -60,8 +59,10 @@ import eu.trentorise.opendata.jackan.SearchResults;
 import eu.trentorise.opendata.jackan.model.CkanDataset;
 import eu.trentorise.opendata.jackan.model.CkanResource;
 import eu.trentorise.opendata.traceprov.internal.org.apache.commons.io.FileUtils;
+import javax.servlet.ServletContext;
+import org.springframework.web.context.ServletContextAware;
 
-public class CkanHarvestingService {
+public class CkanHarvestingService implements ServletContextAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CkanHarvestingService.class);
 
@@ -78,11 +79,7 @@ public class CkanHarvestingService {
     private CkanDataSink dataCache;
 
     public CkanHarvestingService() {
-        try {
-            this.resourceDownloadBaseFolder = Paths.get(getClass().getResource("/").toURI());
-        } catch (URISyntaxException e) {
-            LOGGER.error("Could not set download base folder!", e);
-        }
+        this.resourceDownloadBaseFolder = resolveDownloadFolder("");
     }
 
     public void harvestDatasets() {
@@ -219,23 +216,29 @@ public class CkanHarvestingService {
         FileUtils.writeStringToFile(file, csvContent, CkanConstants.DEFAULT_CHARSET);
     }
 
+    @Override
+    public void setServletContext(ServletContext servletContext) {
+        final String realPath = servletContext.getRealPath("/");
+        LOGGER.debug("Download location via servlet context: {}", realPath);
+        resourceDownloadBaseFolder = Paths.get(realPath);
+    }
+
     public String getResourceDownloadBaseFolder() throws URISyntaxException {
         return resourceDownloadBaseFolder.toString();
     }
 
-    public void setResourceDownloadBaseFolder(String resourceDownloadBaseFolder) throws URISyntaxException {
-        if (new URI(resourceDownloadBaseFolder).isAbsolute()) {
-            this.resourceDownloadBaseFolder = Paths.get(new URI(resourceDownloadBaseFolder));
-        } else {
-            try {
-                final URL folder = getClass().getResource("/");
-//                resourceDownloadBaseFolder = resourceDownloadBaseFolder.startsWith("/")
-//                        ? resourceDownloadBaseFolder.substring(1)
-//                        : resourceDownloadBaseFolder;
-                this.resourceDownloadBaseFolder = Paths.get(folder.toURI()).resolve(resourceDownloadBaseFolder);
-            } catch (URISyntaxException e) {
-                LOGGER.error("Could not set download base folder!", e);
-            }
+    public void setResourceDownloadBaseFolder(String downloadFolder) throws URISyntaxException {
+        this.resourceDownloadBaseFolder = new URI(downloadFolder).isAbsolute()
+                ? Paths.get(new URI(downloadFolder))
+                : resolveDownloadFolder(downloadFolder);
+    }
+
+    protected final Path resolveDownloadFolder(String folder) {
+        try {
+            return Paths.get(getClass().getResource("/").toURI()).resolve(folder);
+        }catch (URISyntaxException e) {
+            LOGGER.error("Could not set download base folder!", e);
+            return null;
         }
     }
 

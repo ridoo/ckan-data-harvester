@@ -12,7 +12,6 @@
     <import resource="spi-impl-dao_common.xml"/>
     <import resource="spi-impl-dao_v1_beans.xml"/>
     <import resource="spi-impl-dao_v1_beans_legacy.xml"/>
-    <import resource="spi-impl-dao_tasks.xml" />
 
     <bean class="org.n52.series.db.da.sos.SOSHibernateSessionHolder" destroy-method="shutdown" />
 
