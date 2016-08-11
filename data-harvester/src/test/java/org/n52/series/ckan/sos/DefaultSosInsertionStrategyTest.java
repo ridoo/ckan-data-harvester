@@ -38,7 +38,7 @@ import org.n52.series.ckan.util.FileBasedCkanHarvestingService;
 import org.n52.sos.config.SettingsManager;
 import org.n52.sos.ogc.ows.OwsExceptionReport;
 
-//@Ignore("currently toooooo slooooooooooow for unit testing")
+@Ignore("currently toooooo slooooooooooow for unit testing")
 public class DefaultSosInsertionStrategyTest {
 
     @Rule
