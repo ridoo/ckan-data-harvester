@@ -52,7 +52,7 @@ public class PhenomenonParser {
         this.uomParser = uomParser;
     }
 
-    public List<Phenomenon> parsePhenomenona(Collection<ResourceField> resourceFields) {
+    public List<Phenomenon> parse(Collection<ResourceField> resourceFields) {
         Set<Phenomenon> phenomena = new HashSet<>();
         for (ResourceField field : resourceFields) {
             if (isValueField(field)) {
@@ -82,7 +82,7 @@ public class PhenomenonParser {
             ? field.getOther(CkanConstants.FieldPropertyName.PHENOMENON)
             : field.getFieldId();
     }
-    
+
     private String parsePhenomenonName(ResourceField field) {
         return "value".equalsIgnoreCase(field.getLongName())
             ? field.getOther(CkanConstants.FieldPropertyName.PHENOMENON)
