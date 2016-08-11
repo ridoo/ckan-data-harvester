@@ -28,13 +28,13 @@
  */
 package org.n52.series.ckan.beans;
 
-import static org.n52.series.ckan.util.JsonUtil.parseToLowerCase;
-
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 
 import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.da.CkanMapping;
+import org.n52.series.ckan.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +75,8 @@ public class ResourceField {
         this.ckanMapping = ckanMapping == null
                 ? CkanMapping.loadCkanMapping()
                 : ckanMapping;
-        this.fieldId = getValueOfField(CkanConstants.FieldPropertyName.FIELD_ID);
+        Set<String> alternates = ckanMapping.getMappings(CkanConstants.FieldPropertyName.FIELD_ID);
+        this.fieldId = JsonUtil.parse(node, alternates);
     }
 
     public ResourceField withQualifier(ResourceMember qualifier) {
@@ -84,6 +85,10 @@ public class ResourceField {
     }
 
     public String getFieldId() {
+        return fieldId;
+    }
+
+    public String getLowerCasedFieldId() {
         return fieldId.toLowerCase(Locale.ROOT);
     }
 
@@ -169,7 +174,7 @@ public class ResourceField {
     }
 
     private String getValueOfField(String fieldName) {
-        return parseToLowerCase(node, ckanMapping.getMappings(fieldName));
+        return JsonUtil.parse(node, ckanMapping.getMappings(fieldName));
     }
 
     @Override
@@ -186,7 +191,7 @@ public class ResourceField {
             return false;
         }
         final ResourceField other = (ResourceField) obj;
-        if (!Objects.equals(this.getFieldId(), other.getFieldId())) {
+        if (!Objects.equals(this.getLowerCasedFieldId(), other.getLowerCasedFieldId())) {
             return false;
         }
         return true;

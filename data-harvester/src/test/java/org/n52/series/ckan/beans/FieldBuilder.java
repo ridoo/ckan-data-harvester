@@ -54,13 +54,13 @@ public class FieldBuilder {
     private final Map<String, JsonNode> valuesByField;
 
     private CkanMapping ckanMapping;
-    
+
     private int index;
-    
+
     public FieldBuilder() {
         this(0);
     }
-    
+
     public FieldBuilder(int index) {
         this(null, index);
     }
@@ -73,15 +73,15 @@ public class FieldBuilder {
             this.valuesByField.put("field_id", JSON_FACTORY.textNode(id));
         }
     }
-    
+
     public static FieldBuilder aField() {
         return FieldBuilder.aFieldAt(0);
     }
-    
+
     public static FieldBuilder aFieldAt(int index) {
         return new FieldBuilder(index);
     }
-    
+
     public FieldBuilder withIndex(int index) {
         this.index = index;
         return this;
@@ -91,99 +91,99 @@ public class FieldBuilder {
         this.ckanMapping = ckanMapping;
         return this;
     }
-    
+
     public FieldBuilder withFieldId(String fieldId) {
         return withProperty(CkanConstants.FieldPropertyName.FIELD_ID, fieldId);
     }
-    
+
     public FieldBuilder withFieldType(String fieldType) {
         return withProperty(CkanConstants.FieldPropertyName.FIELD_TYPE, fieldType);
     }
-    
+
     public FieldBuilder withDateFormat(String dataFormat) {
         return withProperty(CkanConstants.FieldPropertyName.DATE_FORMAT, dataFormat);
     }
-    
+
     public FieldBuilder withDescription(String description) {
         return withProperty(CkanConstants.FieldPropertyName.FIELD_DESCRIPTION, description);
     }
-    
+
     public FieldBuilder withRole(String role) {
         return withProperty(CkanConstants.FieldPropertyName.FIELD_ROLE, role);
     }
-    
+
     public FieldBuilder withCrs(String crs) {
         return withProperty(CkanConstants.FieldPropertyName.CRS, crs);
     }
-    
+
     public FieldBuilder withHeaderRows(int headerRows) {
         return withProperty(CkanConstants.FieldPropertyName.HEADER_ROWS, headerRows);
     }
-    
+
     public FieldBuilder withPhenomenon(String phenomenon) {
         return withProperty(CkanConstants.FieldPropertyName.PHENOMENON, phenomenon);
     }
-    
+
     public FieldBuilder withNoData(String noData) {
         return withProperty(CkanConstants.FieldPropertyName.NO_DATA, noData);
     }
-    
+
     public FieldBuilder withLongName(String longName) {
         return withProperty(CkanConstants.FieldPropertyName.LONG_NAME, longName);
     }
-    
+
     public FieldBuilder withShortName(String shortName) {
         return withProperty(CkanConstants.FieldPropertyName.SHORT_NAME, shortName);
     }
-    
+
     public FieldBuilder withResourceName(String resourceName) {
         return withProperty(CkanConstants.FieldPropertyName.RESOURCE_NAME, resourceName);
     }
-    
+
     public FieldBuilder withResourceType(String resourceType) {
         return withProperty(CkanConstants.FieldPropertyName.RESOURCE_TYPE, resourceType);
     }
-    
+
     public FieldBuilder withUom(String uom) {
         return withProperty(CkanConstants.FieldPropertyName.UOM, uom);
     }
-    
-    
+
+
     public FieldBuilder withProperty(String key, JsonNode value) {
         this.valuesByField.put(key, value);
         return this;
     }
-    
+
     public FieldBuilder withProperty(String key, String value) {
         this.valuesByField.put(key, JSON_FACTORY.textNode(value));
         return this;
     }
-    
+
     public FieldBuilder withProperty(String key, int value) {
         this.valuesByField.put(key, JSON_FACTORY.numberNode(value));
         return this;
     }
-    
+
     public FieldBuilder withProperty(String key, double value) {
         this.valuesByField.put(key, JSON_FACTORY.numberNode(value));
         return this;
     }
-    
+
     public FieldBuilder withProperty(String key, float value) {
         this.valuesByField.put(key, JSON_FACTORY.numberNode(value));
         return this;
     }
-    
+
     public FieldBuilder withProperty(String key, boolean value) {
         this.valuesByField.put(key, JSON_FACTORY.booleanNode(value));
         return this;
     }
-    
+
     public FieldBuilder withProperty(String key, Object value) {
         this.valuesByField.put(key, JSON_FACTORY.pojoNode(value));
         return this;
     }
-    
+
     public ResourceField create() {
         ObjectNode field = JSON_FACTORY.objectNode();
         for (Map.Entry<String, JsonNode> property : valuesByField.entrySet()) {

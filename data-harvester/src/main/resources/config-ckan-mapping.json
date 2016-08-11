@@ -6,6 +6,9 @@
     "value": [
         "messwert"
     ],
+    "quality": [
+        "Qualität"
+    ],
     "result_time": [
         "datetime",
         "MESS_DATUM"

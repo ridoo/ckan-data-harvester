@@ -9,6 +9,9 @@
     "value": [
         "messwert"
     ],
+    "quality": [
+        "Qualität"
+    ],
     "result_time": [
         "resultTime",
         "datetime",

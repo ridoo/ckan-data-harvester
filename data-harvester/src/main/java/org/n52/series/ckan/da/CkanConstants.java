@@ -71,7 +71,7 @@ public interface CkanConstants {
     }
 
     // TODO refactor to only contain ids mapping to ckan-mapping-ids
-    
+
     public interface KnownFieldIdValue {
         public static final String STATION_ID = "station_id";
         public static final String CRS = "crs";
@@ -81,11 +81,12 @@ public interface CkanConstants {
         public static final String STATION_NAME = "station_name";
         public static final String FIRST_DATE = "first_date";
         public static final String LAST_DATE = "last_date";
-
         public static final String RESULT_TIME = "result_time";
         public static final String LOCATION = "location";
         public static final String VALID_TIME_START = "valid_time_start";
         public static final String VALID_TIME_END = "valid_time_end";
+        public static final String VALUE = "value";
+        public static final String QUALITY = "quality";
     }
 
     public interface KnownFieldRoleValue {

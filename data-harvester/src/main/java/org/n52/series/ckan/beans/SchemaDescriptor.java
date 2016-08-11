@@ -82,7 +82,7 @@ public class SchemaDescriptor {
     }
 
     private String getStringValueOf(JsonNode jsonNode, String field) {
-        return JsonUtil.parseToLowerCase(jsonNode, ckanMapping.getMappings(field));
+        return JsonUtil.parse(jsonNode, ckanMapping.getMappings(field));
     }
 
     public String getVersion() {
