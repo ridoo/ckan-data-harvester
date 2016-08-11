@@ -31,6 +31,7 @@ package org.n52.series.ckan.sos;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
