@@ -53,8 +53,8 @@ public class ResourceFieldTest {
     public void setUp() {
         this.fieldCreator = new ResourceFieldCreator();
         this.ckanMapping = new CkanMapping();
-        List<String> mappings = Arrays.asList(new String[]{"FIELD_IDENTIFIER", "ANOTHER_IDENTIFIER"});
-        List<String> typeMappings = Arrays.asList(new String[]{"FIELD_TYPE", "ANOTHER_TYPE"});
+        List<String> mappings = Arrays.asList(new String[]{"IDENTIFIER_A", "IDENTIFIER_B"});
+        List<String> typeMappings = Arrays.asList(new String[]{"TYPE_A", "TYPE_B"});
         this.ckanMapping
             .addMapping("field_id", new HashSet<>(mappings))
             .addMapping("field_type", new HashSet<>(typeMappings));
@@ -109,9 +109,8 @@ public class ResourceFieldTest {
     public void when_checkingFieldType_then_fieldRecognizesMappings() {
         ResourceField testField = fieldCreator
                 .withCkanMapping(ckanMapping)
-                .createSimple("FIELD_IDENTIFIER");
-        assertThat(testField.isField(CkanConstants.MemberProperty.FIELD_ID), is(true));
-        assertThat(testField.isField(CkanConstants.MemberProperty.FIELD_TYPE), is(false));
+                .createSimple("IDENTIFIER_A");
+        assertThat(testField.isField("IDENTIFIER_A"), is(true));
     }
 
     @Test

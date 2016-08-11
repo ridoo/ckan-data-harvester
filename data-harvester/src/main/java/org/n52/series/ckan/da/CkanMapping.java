@@ -74,16 +74,19 @@ public class CkanMapping {
     }
 
     public Set<String> getMappings(String name) {
-        if ( !mappingsByName.containsKey(name)) {
-            if ( !unmappedKeys.contains(name)) {
-                LOGGER.debug("No mapping for name '{}'", name);
-                unmappedKeys.add(name);
+        String lowerCasedName = name != null
+                ? name.toLowerCase()
+                : name;
+        if ( !mappingsByName.containsKey(lowerCasedName)) {
+            if ( !unmappedKeys.contains(lowerCasedName)) {
+                LOGGER.debug("No mapping for name '{}' (lowercased)", lowerCasedName);
+                unmappedKeys.add(lowerCasedName);
             }
-            return Collections.singleton(name);
+            return Collections.singleton(lowerCasedName);
         }
         else {
-            Set<String> mappings = mappingsByName.get(name);
-            mappings.add(name); // add self
+            Set<String> mappings = mappingsByName.get(lowerCasedName);
+            mappings.add(lowerCasedName); // add self
             return mappings;
         }
     }

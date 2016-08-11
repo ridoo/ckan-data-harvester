@@ -123,11 +123,12 @@ public class ResourceField {
         return !getFieldRole().isEmpty();
     }
 
-    public boolean isField(String fieldId) {
+    public boolean isField(String field) {
         if (node.isMissingNode()) {
             return false;
         }
-        return ckanMapping.hasMapping(fieldId, getFieldId());
+        final String value = getFieldId();
+        return ckanMapping.hasMapping(field, value);
     }
 
     public boolean hasProperty(String property) {
