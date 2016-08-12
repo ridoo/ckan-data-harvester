@@ -114,7 +114,7 @@ public class DefaultSosInsertionStrategyTest {
     @Test
     public void when_inserting_OpenWeatherMapCoord_dataset_then_getObservationNotEmpty()
             throws OwsExceptionReport, IOException, URISyntaxException {
-        assertDataInsertion("fb0f0f57-7a01-4385-9fe1-9fb366a63c4e"); // obs.procedure == null?
+        assertDataInsertion("fb0f0f57-7a01-4385-9fe1-9fb366a63c4e");
     }
 
     @Test
