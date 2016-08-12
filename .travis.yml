@@ -5,6 +5,7 @@ jdk:
   - oraclejdk8
 # https://github.com/travis-ci/travis-ci/issues/5227#issuecomment-165131913
 before_install:
+  - cat ~/.m2/settings.xml
   - cat /etc/hosts # optionally check the content *before*
   - sudo hostname "$(hostname | cut -c1-63)"
   - sed -e "s/^\\(127\\.0\\.0\\.1.*\\)/\\1 $(hostname | cut -c1-63)/" /etc/hosts | sudo tee /etc/hosts
