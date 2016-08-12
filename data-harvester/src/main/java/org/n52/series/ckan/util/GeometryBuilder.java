@@ -91,13 +91,17 @@ public class GeometryBuilder {
         namedValue.setValue(new GeometryValue(getGeometry()));
         return namedValue;
     }
+    
+    public boolean canBuildGeometry() {
+        return geometry != null || hasCoordinates();
+    }
 
     public Geometry getGeometry() {
+        if ( !canBuildGeometry()) {
+            return null;
+        }
         if (geometry != null) {
             return geometry;
-        }
-        if ( !hasCoordinates()) {
-            return null;
         }
         final Point lonLatPoint = utils.createPoint(longitude, latitude, altitude, crs);
         try {
