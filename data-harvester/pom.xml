@@ -118,6 +118,16 @@
             <groupId>org.geotools</groupId>
             <artifactId>gt-opengis</artifactId>
             <version>14.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.media</groupId>
+                    <artifactId>jai_core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.media</groupId>
+                    <artifactId>jai_codec</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         
         <dependency>
