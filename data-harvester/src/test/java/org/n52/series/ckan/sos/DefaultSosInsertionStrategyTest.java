@@ -123,6 +123,13 @@ public class DefaultSosInsertionStrategyTest {
         assertDataInsertion("a5442a6a-0a84-4326-a5b5-e6288e8fa457");
     }
 
+    @Test
+    @Ignore("fix parsing of mobile sensing data")
+    public void when_inserting_heavyMetalSamples_dataset_then_getObservationNotEmpty()
+            throws OwsExceptionReport, IOException, URISyntaxException {
+        assertDataInsertion("3eb54ee2-6ec5-4ad9-af96-264159008aa7");
+    }
+
     private void assertDataInsertion(String datasetId)
             throws URISyntaxException, IOException, OwsExceptionReport, ConfigurationException {
         FileBasedCkanHarvestingService service = new FileBasedCkanHarvestingService(testFolder.getRoot());
