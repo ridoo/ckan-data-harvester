@@ -95,8 +95,8 @@ public class CkanHarvestingService implements ServletContextAware {
             offset += lastSize > 0 ? lastSize : 0;
             SearchResults<CkanDataset> datasets = ckanClient.searchDatasets(query, limit, offset);
             for (CkanDataset dataset : datasets.getResults()) {
+                LOGGER.debug("Inserting dataset '{}' ...", dataset.getName());
                 metadataCache.insertOrUpdate(dataset);
-                LOGGER.debug("Inserted dataset '{}'", dataset.getName());
             }
             lastSize = datasets.getCount();
         }

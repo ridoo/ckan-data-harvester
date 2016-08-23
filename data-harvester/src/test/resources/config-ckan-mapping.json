@@ -1,4 +1,7 @@
 {
+    "schema_descriptor" : [
+        "resource_descriptor"
+    ],
     "platforms": [
         "platform"
     ],

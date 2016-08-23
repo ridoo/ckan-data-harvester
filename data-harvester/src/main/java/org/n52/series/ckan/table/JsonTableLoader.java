@@ -38,7 +38,7 @@ public class JsonTableLoader extends TableLoader {
 
     @Override
     public void loadData() throws TableLoadException {
-        
+
         // TODO Auto-generated method stub
 
     }
