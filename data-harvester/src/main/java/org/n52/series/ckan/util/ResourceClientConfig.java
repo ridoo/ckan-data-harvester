@@ -30,11 +30,13 @@ package org.n52.series.ckan.util;
 
 public class ResourceClientConfig {
 
-    private int socketTimeout = 5000;
+    private static final int DEFAULT_TIMEOUT = 10000;
 
-    private int connectTimeout = 5000;
+    private int socketTimeout = DEFAULT_TIMEOUT;
 
-    private int connectionRequestTimeout = 5000;
+    private int connectTimeout = DEFAULT_TIMEOUT;
+
+    private int connectionRequestTimeout = DEFAULT_TIMEOUT;
 
     private int maxConnectionPoolSize = 5;
 
