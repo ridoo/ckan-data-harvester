@@ -64,7 +64,6 @@ public class DataTable {
     }
 
     public Table<ResourceKey,ResourceField,String> getTable() {
-        // TODO making immutable costs performance, consider delegate with getters returning immutable collections?
         return table == null
                 ? HashBasedTable.<ResourceKey,ResourceField,String>create()
                 : ImmutableTable.<ResourceKey,ResourceField,String>copyOf(table);
@@ -161,6 +160,10 @@ public class DataTable {
                 (System.currentTimeMillis() - start) / 1000d);
     }
 
+    public void addRow(ResourceKey id, ResourceField field, String value) {
+        table.put(id, field, value);
+    }
+
     public int rowSize() {
         return table.rowKeySet().size();
     }
@@ -183,12 +186,6 @@ public class DataTable {
                 .append(Arrays.toString(joinedMembers.toArray()))
                 .append(" ])")
                 .toString();
-    }
-
-    protected void logMemory() {
-        LOGGER.trace("Max Memory: {} Mb", Runtime.getRuntime().maxMemory() / 1048576);
-        LOGGER.trace("Total Memory: {} Mb", Runtime.getRuntime().totalMemory() / 1048576);
-        LOGGER.trace("Free Memory: {} Mb", Runtime.getRuntime().freeMemory() / 1048576);
     }
 
 }

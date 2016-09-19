@@ -103,13 +103,13 @@ public class InMemoryCkanMetadataCache implements CkanMetadataCache {
     public void insertOrUpdate(CkanDataset dataset) {
         if (dataset != null) {
             if ( !hasSchemaDescriptor(dataset)) {
-                LOGGER.info("Ignore dataset '{}' as it has no ResourceDescription.", dataset.getId());
+                LOGGER.info("Ignore dataset '{}' ('{}') as it has no ResourceDescription.", dataset.getId(), dataset.getName());
             } else {
                 if (containsNewerThan(dataset)) {
-                    LOGGER.info("No data updates for dataset {}.", dataset.getId());
+                    LOGGER.info("No data updates for dataset '{}' ('{}').", dataset.getId(), dataset.getName());
                     return;
                 }
-                LOGGER.info("New data present for dataset {}.", dataset.getId());
+                LOGGER.info("New data present for dataset '{}' ('{}').", dataset.getId(), dataset.getName());
                 datasets.put(dataset.getId(), dataset);
                 // TODO load resource files if newer and
                   // TODO update metadata
@@ -153,14 +153,15 @@ public class InMemoryCkanMetadataCache implements CkanMetadataCache {
     private SchemaDescriptor getSchemaDescriptor(CkanDataset dataset) {
         if (dataset != null && dataset.getExtras() != null) {
             for (CkanPair extras : dataset.getExtras()) {
-                if (CkanConstants.SchemaDescriptor.SCHEMA_DESCRIPTOR.equalsIgnoreCase(extras.getKey())) {
+                if (ckanMapping.hasMapping(CkanConstants.SchemaDescriptor.SCHEMA_DESCRIPTOR, extras.getKey())) {
+//                if (CkanConstants.SchemaDescriptor.SCHEMA_DESCRIPTOR.equalsIgnoreCase(extras.getKey())) {
                     try {
                         JsonNode schemaDescriptionNode = om.readTree(extras.getValue());
                         Set<String> types = ckanMapping.getMappings(CkanConstants.SchemaDescriptor.RESOURCE_TYPE);
                         String resourceType = JsonUtil.parse(schemaDescriptionNode, types);
 
                         // TODO schema descriptor factory here when more types appear
-                        if (CkanConstants.ResourceType.CSV_OBSERVATIONS_COLLECTION.equalsIgnoreCase(resourceType)) {
+                        if (ckanMapping.hasMapping(CkanConstants.ResourceType.CSV_OBSERVATIONS_COLLECTION, resourceType)) {
                             return new SchemaDescriptor(dataset, schemaDescriptionNode, ckanMapping);
                         }
                     } catch (IOException e) {

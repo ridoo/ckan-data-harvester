@@ -43,6 +43,7 @@ public class DownloadCkanTestResources {
 
     public static void main(String[] args) throws URISyntaxException, IOException {
 
+//        System.setProperty("javax.net.debug","all");
         InMemoryCkanMetadataCache ckanMetadataCache = new InMemoryCkanMetadataCache();
         InMemoryCkanDataCache ckanDataCache = new InMemoryCkanDataCache();
 
