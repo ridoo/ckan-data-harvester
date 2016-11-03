@@ -160,7 +160,7 @@ class ObservationBuilder {
             LOGGER.debug("ignore observation having no time.");
             return null;
         }
-        
+
         if (value == null && geometryBuilder.canBuildGeometry()) {
             // construct observation at this stage to allow single lat/lon/alt
             // values to server as fallback geometry observation when no other
@@ -174,7 +174,7 @@ class ObservationBuilder {
                 omObservation.addParameter(geometryBuilder.createNamedValue());
             }
         }
-        
+
         if (value == null) {
             return null;
         }

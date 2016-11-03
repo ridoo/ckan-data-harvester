@@ -70,14 +70,14 @@ public class DefaultSosInsertionStrategyTest {
             throws OwsExceptionReport, IOException, URISyntaxException {
         assertDataInsertion("26128007-1fa7-475f-a4f1-5e798185eab9");
     }
-    
+
     @Test
     @Ignore("need for json parser to make this insertion work")
     public void when_inserting_TempFraunhoferIgd_dataset_then_getObservationNotEmpty()
             throws OwsExceptionReport, IOException, URISyntaxException {
         assertDataInsertion("a54b09b1-bbc0-4e8c-ac69-a9616603827e");
     }
-    
+
     @Test
     public void when_inserting_FraunhoferIgdTemp_dataset_then_getObservationNotEmpty()
             throws OwsExceptionReport, IOException, URISyntaxException {
@@ -110,7 +110,7 @@ public class DefaultSosInsertionStrategyTest {
             throws OwsExceptionReport, IOException, URISyntaxException {
         assertDataInsertion("4f09614f-0ff4-4604-9a4a-06057540aab4");
     }
-    
+
     @Test
     public void when_inserting_OpenWeatherMapCoord_dataset_then_getObservationNotEmpty()
             throws OwsExceptionReport, IOException, URISyntaxException {
