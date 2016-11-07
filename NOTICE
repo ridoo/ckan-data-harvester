@@ -6,6 +6,7 @@ This project includes:
   52North Sensor Web Client PDF report structure under GNU GENERAL PUBLIC LICENSE Version 2, June 1991
   52°North SOS - 2.0 XML Request Coding under GPLv2
   52°North SOS - Abstract SensorML Coding Module under GPLv2
+  52°North SOS - API for INSPIRE Module under GPLv2
   52°North SOS - AQD 1.0 API Operator under GPLv2
   52°North SOS - Cache under GPLv2
   52°North SOS - Extension Delete Observation - Hibernate DAO under GPLv2
@@ -29,7 +30,6 @@ This project includes:
   Apache Commons Codec under Apache License, Version 2.0
   Apache Commons CSV under Apache License, Version 2.0
   Apache FOP under The Apache Software License, Version 2.0
-  Apache Tika core under Apache License, Version 2.0
   Apache XML Graphics Commons under The Apache Software License, Version 2.0
   API interfaces under GNU Lesser General Public License (LGPL) version 2.1
   Avalon Framework API under The Apache Software License, Version 2.0
@@ -49,7 +49,6 @@ This project includes:
   Batik SVG transcoder classes under The Apache Software License, Version 2.0
   Batik utility library under The Apache Software License, Version 2.0
   Batik XML utility library under The Apache Software License, Version 2.0
-  c3p0 under GNU Lesser General Public License, Version 2.1 or Eclipse Public License, Version 1.0
   c3p0:JDBC DataSources/Resource Pools under GNU LESSER GENERAL PUBLIC LICENSE
   CKAN Data Harvester under The Apache Software License, Version 2.0
   CKAN Data Harvester Module under The Apache Software License, Version 2.0
@@ -62,6 +61,7 @@ This project includes:
   dom4j under DOM4J license, http://dom4j.sourceforge.net/dom4j-1.6.1/license.html (BSD style)
   EJML under The Apache Software License, Version 2.0
   EPSG Authority Service using HSQL database under GNU Lesser General Public License (LGPL) version 2.1
+  eu.trentorise.opendata:jackan under The Apache Software License, Version 2.0
   FindBugs-Annotations under GNU Lesser Public License
   FindBugs-jsr305 under The Apache Software License, Version 2.0
   GeoDB Core under BSD style, https://github.com/jdeolive/geodb/blob/master/LICENSE.txt
@@ -73,7 +73,6 @@ This project includes:
   hibernate-spatial under GNU Lesser General Public License (LGPL) version 2.1
   Hibernate/c3p0 Integration under GNU Lesser General Public License
   HyperSQL Database under HSQLDB License, a BSD open source license
-  Jackan under Apache License, Version 2.0
   Jackson-annotations under The Apache Software License, Version 2.0 or GNU Lesser General Public License, Version 2.1
   Jackson-core under The Apache Software License, Version 2.0 or GNU Lesser General Public License, Version 2.1
   jackson-databind under The Apache Software License, Version 2.0 or GNU Lesser General Public License, Version 2.1
@@ -98,7 +97,6 @@ This project includes:
   Log4j Implemented Over SLF4J under Apache Software Licenses
   Logback Classic Module under Eclipse Public License - v 1.0 or GNU Lesser General Public License
   Logback Core Module under Eclipse Public License - v 1.0 or GNU Lesser General Public License
-  mchange-commons-java library under GNU Lesser General Public License, Version 2.1 or Eclipse Public License, Version 1.0
   Metadata under GNU Lesser General Public License (LGPL) version 2.1
   net.sourceforge.hatbox:hatbox under GNU Lesser General Public License (LGPL) version 2.1
   OASIS WS-N specification schemas - including WS-BrokeredNotification (v1.3) under The Apache Software License, Version 2.0
