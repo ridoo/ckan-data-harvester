@@ -26,48 +26,18 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
-package org.n52.series.ckan.util;
+package org.n52.series.ckan.table;
 
-public class ResourceClientConfig {
+public class TableLoadException extends Exception {
 
-    private int socketTimeout = 10000;
+    private static final long serialVersionUID = -6887163388610684210L;
 
-    private int connectTimeout = 10000;
-
-    private int connectionRequestTimeout = 10000;
-
-    private int maxConnectionPoolSize = 5;
-
-    public int getMaxConnectionPoolSize() {
-        return maxConnectionPoolSize;
+    public TableLoadException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    public void setMaxConnectionPoolSize(int maxConnectionPoolSize) {
-        this.maxConnectionPoolSize = maxConnectionPoolSize;
-    }
-
-    public int getSocketTimeout() {
-        return socketTimeout;
-    }
-
-    public void setSocketTimeout(int socketTimeout) {
-        this.socketTimeout = socketTimeout;
-    }
-
-    public int getConnectTimeout() {
-        return connectTimeout;
-    }
-
-    public void setConnectTimeout(int connectTimeout) {
-        this.connectTimeout = connectTimeout;
-    }
-
-    public int getConnectionRequestTimeout() {
-        return connectionRequestTimeout;
-    }
-
-    public void setConnectionRequestTimeout(int connectionRequestTimeout) {
-        this.connectionRequestTimeout = connectionRequestTimeout;
+    public TableLoadException(String message) {
+        super(message);
     }
 
 }

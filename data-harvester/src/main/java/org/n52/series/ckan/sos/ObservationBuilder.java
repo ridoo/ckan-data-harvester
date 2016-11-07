@@ -105,6 +105,10 @@ class ObservationBuilder {
                 // TODO support NO_DATA
                 if (field.isOfType(CkanConstants.DataType.DOUBLE)) {
                     value = createQuantityObservationValue(field, cells.getValue());
+                } else if (field.isOfType(CkanConstants.DataType.GEOMETRY)){
+                    if (field.isOfType("JsonObject")) {
+                        geometryBuilder.withGeoJson(cells.getValue());
+                    }
                 }
             }
             else if (field.isField(CkanConstants.KnownFieldIdValue.RESULT_TIME)) {
@@ -112,6 +116,7 @@ class ObservationBuilder {
             }
             else if (field.isField(CkanConstants.KnownFieldIdValue.LOCATION)) {
                 if (field.isOfType(Geometry.class)) {
+                    observationType = OmConstants.OBS_TYPE_GEOMETRY_OBSERVATION;
                     geometryBuilder.withGeoJson(cells.getValue());
                 }
             }
@@ -152,17 +157,28 @@ class ObservationBuilder {
         // TODO support NO_DATA
 
         if (time == null) {
-            LOGGER.debug("ignore observation having no phenomenonTime.");
+            LOGGER.debug("ignore observation having no time.");
             return null;
         }
-        if (value == null) {
+
+        if (value == null && geometryBuilder.canBuildGeometry()) {
+            // construct observation at this stage to allow single lat/lon/alt
+            // values to server as fallback geometry observation when no other
+            // observation value are present
             SingleObservationValue<Geometry> obsValue = new SingleObservationValue<>();
             obsValue.setValue(geometryBuilder.createGeometryValue());
             observationType = OmConstants.OBS_TYPE_GEOMETRY_OBSERVATION;
             value = obsValue;
         } else {
-            omObservation.addParameter(geometryBuilder.createNamedValue());
+            if (geometryBuilder.canBuildGeometry()) {
+                omObservation.addParameter(geometryBuilder.createNamedValue());
+            }
         }
+
+        if (value == null) {
+            return null;
+        }
+
         value.setPhenomenonTime(time);
         omObservation.setValue(value);
         return new SosObservation(omObservation, observationType);

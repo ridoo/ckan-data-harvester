@@ -26,48 +26,21 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
-package org.n52.series.ckan.util;
+package org.n52.series.ckan.table;
 
-public class ResourceClientConfig {
+import org.n52.series.ckan.beans.DataFile;
 
-    private int socketTimeout = 10000;
+public class JsonTableLoader extends TableLoader {
 
-    private int connectTimeout = 10000;
-
-    private int connectionRequestTimeout = 10000;
-
-    private int maxConnectionPoolSize = 5;
-
-    public int getMaxConnectionPoolSize() {
-        return maxConnectionPoolSize;
+    public JsonTableLoader(DataTable table, DataFile datafile) {
+        super(table, datafile);
     }
 
-    public void setMaxConnectionPoolSize(int maxConnectionPoolSize) {
-        this.maxConnectionPoolSize = maxConnectionPoolSize;
-    }
+    @Override
+    public void loadData() throws TableLoadException {
 
-    public int getSocketTimeout() {
-        return socketTimeout;
-    }
+        // TODO Auto-generated method stub
 
-    public void setSocketTimeout(int socketTimeout) {
-        this.socketTimeout = socketTimeout;
-    }
-
-    public int getConnectTimeout() {
-        return connectTimeout;
-    }
-
-    public void setConnectTimeout(int connectTimeout) {
-        this.connectTimeout = connectTimeout;
-    }
-
-    public int getConnectionRequestTimeout() {
-        return connectionRequestTimeout;
-    }
-
-    public void setConnectionRequestTimeout(int connectionRequestTimeout) {
-        this.connectionRequestTimeout = connectionRequestTimeout;
     }
 
 }

@@ -91,7 +91,7 @@ public class GeometryBuilder {
         namedValue.setValue(new GeometryValue(getGeometry()));
         return namedValue;
     }
-    
+
     public boolean canBuildGeometry() {
         return geometry != null || hasCoordinates();
     }
