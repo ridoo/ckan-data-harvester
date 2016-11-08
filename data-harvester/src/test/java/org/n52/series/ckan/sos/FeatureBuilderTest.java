@@ -48,12 +48,6 @@ public class FeatureBuilderTest {
 
     private static final String ORGA_NAME = "test_orga";
 
-    private static final String RESOURCE_FIELD_TEMPLATE = "{"
-            + "  \"field_id\": \"%s\","
-            + "  \"short_name\": \"%s\","
-            + "  \"long_name\": \"%s\""
-            + "}";
-
     private FeatureBuilder featureBuilder;
 
     @Before

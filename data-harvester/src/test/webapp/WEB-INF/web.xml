@@ -98,20 +98,20 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	<servlet>
 		<servlet-name>dispatcher</servlet-name>
 		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-		<load-on-startup>1</load-on-startup>
 		<init-param>
 			<param-name>contextConfigLocation</param-name>
 			<param-value>/WEB-INF/applicationContext.xml,/WEB-INF/dispatcher-servlet.xml</param-value>
 		</init-param>
+        <load-on-startup>1</load-on-startup>
 	</servlet>
 	<servlet>
 		<servlet-name>rest-dispatcher</servlet-name>
 		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-		<load-on-startup>-1</load-on-startup>
 		<init-param>
 			<param-name>contextConfigLocation</param-name>
 			<param-value>/WEB-INF/spring/api-view-config.xml,/WEB-INF/spring/api-dispatcher.xml</param-value>
 		</init-param>
+        <load-on-startup>-1</load-on-startup>
 	</servlet>
 	<!-- Admin servlet -->
 	<servlet>
