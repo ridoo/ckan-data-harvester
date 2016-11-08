@@ -105,7 +105,8 @@ public class FileBasedCkanHarvester extends CkanHarvestingService {
         String format = resource.getFormat();
         for (File file : dataFolders) {
             if (file.isDirectory()) {
-                Path datapath = file.toPath().resolve(id + "." + format);
+                String fileName = id + "." + format.toLowerCase();
+                Path datapath = file.toPath().resolve(fileName);
                 if (datapath.toFile().exists()) {
                     return new DataFile(resource, format, datapath.toFile());
                 }
