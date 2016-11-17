@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.n52.sensorweb.ckan</groupId>
@@ -18,7 +18,7 @@
         <!-- dev | ci | prod -->
         <env>dev</env>
         <local.configFile>file:${user.home}/${project.build.finalName}.properties</local.configFile>
-    
+
         <enforcer.skip>true</enforcer.skip>
         <mdep.analyze.skip>true</mdep.analyze.skip>
 
@@ -30,14 +30,14 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
-        
+
         <dependency>
             <groupId>org.n52.sensorweb.ckan</groupId>
             <artifactId>data-harvester</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.n52.sensorweb.sos</groupId>
             <artifactId>webapp-bundle</artifactId>
@@ -48,7 +48,6 @@
 
     <build>
         <finalName>${project.artifactId}</finalName>
-        
         <plugins>
 
             <plugin>
@@ -70,11 +69,11 @@
                             </excludes>
                         </overlay>
                     </overlays>
+                    <nonFilteredFileExtensions>
+                        <!-- default value contains jpg,jpeg,gif,bmp,png -->
+                        <nonFilteredFileExtension>db</nonFilteredFileExtension>
+                    </nonFilteredFileExtensions>
                     <webResources>
-                        <resource>
-                            <directory>src/main/webapp</directory>
-                            <filtering>true</filtering>
-                        </resource>
                         <resource>
                             <!-- override SOS config if present -->
                             <directory>src/main/webapp</directory>
@@ -82,10 +81,16 @@
                             <filtering>false</filtering>
                         </resource>
                     </webResources>
+                    <webResources>
+                        <webResource>
+                            <directory>src/main/webapp</directory>
+                            <filtering>true</filtering>
+                        </webResource>
+                    </webResources>
                 </configuration>
             </plugin>
         </plugins>
-        
+
         <pluginManagement>
             <plugins>
                 <plugin>
