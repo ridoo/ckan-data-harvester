@@ -15,6 +15,8 @@
     <url>http://52north.org/communities/sensorweb/</url>
 
     <properties>
+        <local.configFile>file:${user.home}/${project.build.finalName}.properties</local.configFile>
+    
         <enforcer.skip>true</enforcer.skip>
         <mdep.analyze.skip>true</mdep.analyze.skip>
 
@@ -61,10 +63,16 @@
                                 <exclude>cache.tmp</exclude>
                                 <exclude>static/client/jsClient</exclude>
                                 <exclude>WEB-INF/classes/logback.xml</exclude>
+                                <exclude>WEB-INF/classes/config-*.json</exclude>
+                                <exclude>WEB-INF/spring</exclude>
                             </excludes>
                         </overlay>
                     </overlays>
                     <webResources>
+                        <resource>
+                            <directory>src/main/webapp</directory>
+                            <filtering>true</filtering>
+                        </resource>
                         <resource>
                             <!-- override SOS config if present -->
                             <directory>src/main/webapp</directory>
@@ -87,16 +95,17 @@
                         <stopPort>34343</stopPort>
                         <scanIntervalSeconds>0</scanIntervalSeconds>
                         <reload>manual</reload>
-                        <webAppConfig>
+                        <webApp>
                             <contextPath>/</contextPath>
+                            <baseAppFirst>false</baseAppFirst>
                             <persistTempDirectory>true</persistTempDirectory>
                             <allowDuplicateFragmentNames>true</allowDuplicateFragmentNames>
-                            <extraClasspath>/target/classes/;../data-harvester/target/classes;${project.build.outputDirectory}</extraClasspath>
-                        </webAppConfig>
+                            <extraClasspath>target/classes/;../data-harvester/target/classes;</extraClasspath>
+                        </webApp>
                         <scanTargets>
-                            <scanTarget>/target/classes/</scanTarget>
-                            <scanTarget>../data-harvester/target/classes</scanTarget>
+                            <scanTarget>target/classes/</scanTarget>
                             <scanTarget>${project.build.outputDirectory}</scanTarget>
+                            <scanTarget>../data-harvester/target/classes</scanTarget>
                         </scanTargets>
                         <systemProperties>
                             <systemProperty>
