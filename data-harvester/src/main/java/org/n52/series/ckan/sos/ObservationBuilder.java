@@ -250,6 +250,10 @@ class ObservationBuilder {
             else if (timeString.contains("+") || Pattern.matches("-\\d", timeString) || timeString.contains("Z")) {
                 return ISODateTimeFormat.dateOptionalTimeParser().withOffsetParsed().parseDateTime(timeString);
             }
+            else if (false /* TODO check, if time_zone field is set and parse to ISO */ ) {
+                // add timezone
+                return null;
+            }
             else {
                 return ISODateTimeFormat.dateOptionalTimeParser().withZone(DateTimeZone.UTC).parseDateTime(timeString);
             }
