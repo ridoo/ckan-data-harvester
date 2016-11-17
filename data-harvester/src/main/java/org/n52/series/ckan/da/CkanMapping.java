@@ -167,7 +167,7 @@ public class CkanMapping {
                     : getConfigFile(configFile);
             return file.exists()
                     ? createStreamFrom(file)
-                    : getClass().getResourceAsStream("/" + configFile);
+                    : getClass().getResourceAsStream("/" + DEFAULT_CKAN_MAPPING_FILE);
         }
 
         private File getConfigFile(String configFile) {
