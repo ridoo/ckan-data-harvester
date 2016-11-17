@@ -6,3 +6,4 @@ cache.tmp
 .settings
 target/
 configuration.db
+datasource.properties
