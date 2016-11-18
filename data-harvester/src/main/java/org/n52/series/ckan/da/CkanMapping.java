@@ -185,6 +185,7 @@ public class CkanMapping {
         private InputStream createStreamFrom(File file) {
             if (file != null) {
                 try {
+                    LOGGER.debug("Loading config from '{}'", file.getAbsolutePath());
                     return new FileInputStream(file);
                 } catch (FileNotFoundException e) {
                     LOGGER.debug("Missing config file '{}'! Loading from jar.", file.getAbsolutePath());
