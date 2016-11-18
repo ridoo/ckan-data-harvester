@@ -28,12 +28,15 @@
  */
 package org.n52.series.ckan.sos;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import eu.trentorise.opendata.jackan.model.CkanDataset;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Objects;
+
 import org.n52.series.ckan.util.JsonUtil;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import eu.trentorise.opendata.jackan.model.CkanDataset;
 
 public class SerializableCkanDataset implements Serializable {
 
@@ -44,7 +47,7 @@ public class SerializableCkanDataset implements Serializable {
     private final String id;
 
     public SerializableCkanDataset(CkanDataset dataset) throws JsonProcessingException {
-        this.ckanDatasetAsJson = JsonUtil.getCkanObjectMapper().writeValueAsString(dataset);
+        this.ckanDatasetAsJson = JsonUtil.getCkanObjectWriter().writeValueAsString(dataset);
         this.id = dataset.getId();
     }
 

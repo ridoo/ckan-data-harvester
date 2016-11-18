@@ -134,15 +134,15 @@ public class CkanHarvestingService implements ServletContextAware {
     }
 
     private DescriptionFile getSchemaDescription(CkanDataset dataset) throws IOException {
-        saveToFile("dataset.json", dataset, JsonUtil.getCkanObjectMapper().writeValueAsString(dataset));
+        saveToFile("dataset.json", dataset, JsonUtil.getCkanObjectWriter().writeValueAsString(dataset));
         SchemaDescriptor schemaDescription = metadataCache.getSchemaDescription(dataset.getId());
-        File file = saveToFile("schema_descriptor.json", dataset, schemaDescription.getNode());
+        File file = saveJsonToFile("schema_descriptor.json", dataset, schemaDescription.getNode());
         LOGGER.trace("Downloaded resource description to {}.", file.getAbsolutePath());
         return new DescriptionFile(dataset, file, schemaDescription);
     }
 
-    private File saveToFile(String filename, CkanDataset dataset, Object content) throws IOException {
-        return saveToFile(filename, dataset, JsonUtil.getObjectMapper().writeValueAsString(content));
+    private File saveJsonToFile(String filename, CkanDataset dataset, Object content) throws IOException {
+        return saveToFile(filename, dataset, JsonUtil.getJsonWriter().writeValueAsString(content));
     }
 
     private File saveToFile(String filename, CkanDataset dataset, String content) throws IOException {
