@@ -51,6 +51,7 @@ public interface CkanConstants {
         public static final String CSV_OBSERVATIONS_COLLECTION = "csv-observations-collection";
         public static final String PLATFORMS = "platforms";
         public static final String OBSERVATIONS = "observations";
+        public static final String OBSERVATIONS_WITH_GEOMETRIES = "observations_with_geometry";
     }
 
     public interface FieldPropertyName {

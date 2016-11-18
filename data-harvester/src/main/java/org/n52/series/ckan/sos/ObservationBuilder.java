@@ -38,6 +38,7 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.ISODateTimeFormat;
 import org.n52.series.ckan.beans.ResourceField;
+import org.n52.series.ckan.beans.ResourceMember;
 import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.table.ResourceKey;
 import org.n52.series.ckan.util.GeometryBuilder;
@@ -94,8 +95,7 @@ class ObservationBuilder {
         for (Map.Entry<ResourceField, String> cells : rowEntry.getValue().entrySet()) {
 
             ResourceField field = cells.getKey();
-            String resourceType = field.getQualifier().getResourceType();
-            if ( !resourceType.equalsIgnoreCase(CkanConstants.ResourceType.OBSERVATIONS)) {
+            if ( !field.isObservationField()) {
                 continue;
             }
 

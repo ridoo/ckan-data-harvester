@@ -103,7 +103,7 @@ public class DataCollection {
         for (Map.Entry<ResourceMember, DataFile> entry : getDataCollection().entrySet()) {
             ResourceMember member = entry.getKey();
             final String resourceType = member.getResourceType();
-            if ( !resourceType.equalsIgnoreCase(CkanConstants.ResourceType.OBSERVATIONS)) {
+            if ( !getObservationTypes().contains(resourceType)) {
                 typedCollection.put(member, entry.getValue());
             }
         }
@@ -111,7 +111,14 @@ public class DataCollection {
     }
 
     public Map<ResourceMember, DataFile> getObservationDataCollections() {
-        return getDataCollectionsOfType(getMappingsFor(CkanConstants.ResourceType.OBSERVATIONS));
+        Set<String> observationTypes = getObservationTypes();
+        return getDataCollectionsOfType(observationTypes);
+    }
+
+    private Set<String> getObservationTypes() {
+        Set<String> observationTypes = getMappingsFor(CkanConstants.ResourceType.OBSERVATIONS);
+        observationTypes.addAll(getMappingsFor(CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES));
+        return observationTypes;
     }
 
     public Map<ResourceMember, DataFile> getPlatformDataCollections() {
