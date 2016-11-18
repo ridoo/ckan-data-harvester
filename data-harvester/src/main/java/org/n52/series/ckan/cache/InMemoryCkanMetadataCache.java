@@ -28,7 +28,10 @@
  */
 package org.n52.series.ckan.cache;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
@@ -55,15 +58,12 @@ public class InMemoryCkanMetadataCache implements CkanMetadataCache {
 
     private final Map<String, CkanDataset> datasets;
 
-    private CkanMapping ckanMapping;
-
     public InMemoryCkanMetadataCache() {
         this(null);
     }
 
     public InMemoryCkanMetadataCache(String fieldIdMappingConfig) {
         this.datasets = new HashMap<>();
-        this.ckanMapping = CkanMapping.loadCkanMapping();
     }
 
     protected void putAll(Map<String, CkanDataset> datasets) {
@@ -151,16 +151,15 @@ public class InMemoryCkanMetadataCache implements CkanMetadataCache {
     }
 
     private SchemaDescriptor getSchemaDescriptor(CkanDataset dataset) {
+        CkanMapping ckanMapping = loadCkanMapping(dataset);
         if (dataset != null && dataset.getExtras() != null) {
             for (CkanPair extras : dataset.getExtras()) {
                 if (ckanMapping.hasMapping(CkanConstants.SchemaDescriptor.SCHEMA_DESCRIPTOR, extras.getKey())) {
-//                if (CkanConstants.SchemaDescriptor.SCHEMA_DESCRIPTOR.equalsIgnoreCase(extras.getKey())) {
                     try {
                         JsonNode schemaDescriptionNode = om.readTree(extras.getValue());
                         Set<String> types = ckanMapping.getMappings(CkanConstants.SchemaDescriptor.RESOURCE_TYPE);
                         String resourceType = JsonUtil.parse(schemaDescriptionNode, types);
 
-                        // TODO schema descriptor factory here when more types appear
                         if (ckanMapping.hasMapping(CkanConstants.ResourceType.CSV_OBSERVATIONS_COLLECTION, resourceType)) {
                             return new SchemaDescriptor(dataset, schemaDescriptionNode, ckanMapping);
                         }
@@ -171,6 +170,22 @@ public class InMemoryCkanMetadataCache implements CkanMetadataCache {
             }
         }
         return null;
+    }
+    
+    private CkanMapping loadCkanMapping(CkanDataset dataset) {
+        if (dataset != null) {
+            String customMappingPath = "/config-ckan-mapping-" + dataset.getId() + ".json";
+            URL resourceUrl = getClass().getResource(customMappingPath);
+            try {
+                if (resourceUrl != null) {
+                    File file = new File(resourceUrl.toURI());
+                    return CkanMapping.loadCkanMapping(file);
+                }
+            } catch (URISyntaxException e) {
+                LOGGER.info("Unable to get ckan mapping for dataset '{}'.", dataset.getName());
+            }
+        }
+        return CkanMapping.loadCkanMapping();
     }
 
 }
