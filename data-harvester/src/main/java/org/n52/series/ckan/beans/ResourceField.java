@@ -85,12 +85,12 @@ public class ResourceField {
     }
 
     public boolean isObservationField() {
-        return isMemberOfType(CkanConstants.ResourceType.OBSERVATIONS, qualifier)
-                || isMemberOfType(CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES, qualifier);
+        return isOfResourceType(CkanConstants.ResourceType.OBSERVATIONS)
+                || isOfResourceType(CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES);
     }
 
-    private boolean isMemberOfType(String type, ResourceMember member) {
-        return member != null && ckanMapping.getMappings(type).contains(member.getResourceType());
+    public boolean isOfResourceType(String type) {
+        return qualifier != null && ckanMapping.getMappings(type).contains(qualifier.getResourceType());
     }
 
     public String getFieldId() {
