@@ -79,7 +79,7 @@ public class CkanMapping {
                 : name;
         if ( !mappingsByName.containsKey(lowerCasedName)) {
             if ( !unmappedKeys.contains(lowerCasedName)) {
-                LOGGER.debug("No mapping for name '{}' (lowercased)", lowerCasedName);
+                LOGGER.trace("No mapping for name '{}' (lowercased)", lowerCasedName);
                 unmappedKeys.add(lowerCasedName);
             }
             return Collections.singleton(lowerCasedName);
@@ -174,7 +174,7 @@ public class CkanMapping {
             try {
                 Path path = Paths.get(CkanMapping.PropertyIdMappingLoader.class.getResource("/").toURI());
                 File file = path.resolve(configFile).toFile();
-                LOGGER.debug("Loading config from '{}'", file.getAbsolutePath());
+                LOGGER.trace("Loading config from '{}'", file.getAbsolutePath());
                 return file;
             } catch (URISyntaxException e) {
                 LOGGER.info("Could not find config file '{}'. Load from compiled default.", configFile, e);
@@ -185,17 +185,17 @@ public class CkanMapping {
         private InputStream createStreamFrom(File file) {
             if (file != null) {
                 try {
-                    LOGGER.debug("Loading config from '{}'", file.getAbsolutePath());
+                    LOGGER.trace("Loading config from '{}'", file.getAbsolutePath());
                     return new FileInputStream(file);
                 } catch (FileNotFoundException e) {
-                    LOGGER.debug("Missing config file '{}'! Loading from jar.", file.getAbsolutePath());
+                    LOGGER.warn("Missing config file '{}'! Loading from jar.", file.getAbsolutePath());
                 }
             }
             return loadDefaults();
         }
 
         private InputStream loadDefaults() {
-            LOGGER.debug("Loading '{}' from jar.", DEFAULT_CKAN_MAPPING_FILE);
+            LOGGER.trace("Loading '{}' from jar.", DEFAULT_CKAN_MAPPING_FILE);
             return CkanMapping.PropertyIdMappingLoader.class.getResourceAsStream(DEFAULT_CKAN_MAPPING_FILE);
         }
 
