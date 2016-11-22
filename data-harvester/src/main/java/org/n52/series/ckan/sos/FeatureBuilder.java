@@ -30,7 +30,9 @@ package org.n52.series.ckan.sos;
 
 import com.vividsolutions.jts.geom.Geometry;
 import eu.trentorise.opendata.jackan.model.CkanDataset;
+
 import java.util.Map;
+import org.n52.series.ckan.beans.DataCollection;
 import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.util.GeometryBuilder;
@@ -45,8 +47,11 @@ public class FeatureBuilder {
 
     private final String orgaName;
 
-    public FeatureBuilder(CkanDataset dataset) {
+    private final String resourceType;
+
+    public FeatureBuilder(CkanDataset dataset, String resourceType) {
         this.orgaName = dataset.getOrganization().getName();
+        this.resourceType = resourceType;
     }
 
     SamplingFeature createFeature(Map<ResourceField, String> rowEntry) {
@@ -60,31 +65,41 @@ public class FeatureBuilder {
             if (field.isField(CkanConstants.KnownFieldIdValue.STATION_NAME)) {
                 feature.addName(fieldEntry.getValue());
             }
-            if (field.isField(CkanConstants.KnownFieldIdValue.CRS)) {
-                geometryBuilder.withCrs(fieldEntry.getValue());
-            }
-            if (field.isField(CkanConstants.KnownFieldIdValue.LATITUDE)) {
-                geometryBuilder.setLatitude(fieldEntry.getValue());
-            }
-            if (field.isField(CkanConstants.KnownFieldIdValue.LONGITUDE)) {
-                geometryBuilder.setLongitude(fieldEntry.getValue());
-            }
-            if (field.isField(CkanConstants.KnownFieldIdValue.ALTITUDE)) {
-                geometryBuilder.setAltitude(fieldEntry.getValue());
-            }
-            if (field.isField(CkanConstants.KnownFieldIdValue.LOCATION)) {
-                if ( !field.hasProperty(CkanConstants.FieldPropertyName.PHENOMENON)
-                        && field.isOfType("JsonObject")) {
-                    geometryBuilder.withGeoJson(fieldEntry.getValue());
-                }
+            if ( !CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES.equalsIgnoreCase(resourceType)) {
+                parseGeometryField(geometryBuilder, fieldEntry);
             }
         }
-        setFeatureGeometry(feature, geometryBuilder.getGeometry());
-        feature.setFeatureType(geometryBuilder.getFeatureType());
+        if (geometryBuilder.canBuildGeometry()) {
+            setFeatureGeometry(feature, geometryBuilder.getGeometry());
+            feature.setFeatureType(geometryBuilder.getFeatureType());
+        }
         return feature;
     }
 
-    void setFeatureGeometry(SamplingFeature feature, Geometry geometry) {
+    private void parseGeometryField(final GeometryBuilder geometryBuilder, Map.Entry<ResourceField, String> fieldEntry) {
+        ResourceField field = fieldEntry.getKey();
+        if (field.isField(CkanConstants.KnownFieldIdValue.CRS)) {
+            geometryBuilder.withCrs(fieldEntry.getValue());
+        }
+        if (field.isField(CkanConstants.KnownFieldIdValue.LATITUDE)) {
+            geometryBuilder.setLatitude(fieldEntry.getValue());
+        }
+        if (field.isField(CkanConstants.KnownFieldIdValue.LONGITUDE)) {
+            geometryBuilder.setLongitude(fieldEntry.getValue());
+        }
+        if (field.isField(CkanConstants.KnownFieldIdValue.ALTITUDE)) {
+            geometryBuilder.setAltitude(fieldEntry.getValue());
+        }
+        if (field.isField(CkanConstants.KnownFieldIdValue.LOCATION)) {
+            if (field.isOfType("JsonObject")) {
+                geometryBuilder.withGeoJson(fieldEntry.getValue());
+            } else {
+                geometryBuilder.withWKT(fieldEntry.getValue());
+            }
+        }
+    }
+
+    private void setFeatureGeometry(SamplingFeature feature, Geometry geometry) {
         try {
             feature.setGeometry(geometry);
         }

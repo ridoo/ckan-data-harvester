@@ -38,7 +38,6 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.ISODateTimeFormat;
 import org.n52.series.ckan.beans.ResourceField;
-import org.n52.series.ckan.beans.ResourceMember;
 import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.table.ResourceKey;
 import org.n52.series.ckan.util.GeometryBuilder;
@@ -64,8 +63,9 @@ class ObservationBuilder {
 
     private final Entry<ResourceKey, Map<ResourceField, String>> rowEntry;
 
-    private UomParser uomParser;
+    private InsertSensorRequestBuilder insertSensorRequestBuilder;
 
+    private UomParser uomParser;
 
     ObservationBuilder(Entry<ResourceKey, Map<ResourceField, String>> rowEntry) {
         this(rowEntry, new UcumParser());
@@ -74,6 +74,10 @@ class ObservationBuilder {
     ObservationBuilder(Entry<ResourceKey, Map<ResourceField, String>> rowEntry, UomParser uomParser) {
         this.rowEntry = rowEntry;
         this.uomParser = uomParser;
+    }
+
+    void setInsertSensorRequestBuilder(InsertSensorRequestBuilder insertSensorRequestBuilder) {
+        this.insertSensorRequestBuilder = insertSensorRequestBuilder;
     }
 
     SosObservation createObservation(OmObservationConstellation constellation, Phenomenon phenomenon) {
@@ -105,20 +109,16 @@ class ObservationBuilder {
                 // TODO support NO_DATA
                 if (field.isOfType(CkanConstants.DataType.DOUBLE)) {
                     value = createQuantityObservationValue(field, cells.getValue());
-                } else if (field.isOfType(CkanConstants.DataType.GEOMETRY)){
-                    if (field.isOfType("JsonObject")) {
-                        geometryBuilder.withGeoJson(cells.getValue());
-                    }
+                } else if (field.isOfType(CkanConstants.DataType.GEOMETRY)) {
+                    observationType = OmConstants.OBS_TYPE_GEOMETRY_OBSERVATION;
+                    parseGeometryField(geometryBuilder, cells);
                 }
             }
             else if (field.isField(CkanConstants.KnownFieldIdValue.RESULT_TIME)) {
                 time = parseTimestamp(field, cells.getValue());
             }
             else if (field.isField(CkanConstants.KnownFieldIdValue.LOCATION)) {
-                if (field.isOfType(Geometry.class)) {
-                    observationType = OmConstants.OBS_TYPE_GEOMETRY_OBSERVATION;
-                    geometryBuilder.withGeoJson(cells.getValue());
-                }
+                parseGeometryField(geometryBuilder, cells);
             }
             else if (field.isField(CkanConstants.KnownFieldIdValue.CRS)) {
                 geometryBuilder.withCrs(cells.getValue());
@@ -164,7 +164,7 @@ class ObservationBuilder {
         if (value == null && geometryBuilder.canBuildGeometry()) {
             // construct observation at this stage to allow single lat/lon/alt
             // values to server as fallback geometry observation when no other
-            // observation value are present
+            // observation value is present
             SingleObservationValue<Geometry> obsValue = new SingleObservationValue<>();
             obsValue.setValue(geometryBuilder.createGeometryValue());
             observationType = OmConstants.OBS_TYPE_GEOMETRY_OBSERVATION;
@@ -181,7 +181,21 @@ class ObservationBuilder {
 
         value.setPhenomenonTime(time);
         omObservation.setValue(value);
-        return new SosObservation(omObservation, observationType);
+        if (observationType.equals(OmConstants.OBS_TYPE_GEOMETRY_OBSERVATION)) {
+            insertSensorRequestBuilder.setInsitu(false);
+        }
+        SosObservation o = new SosObservation(omObservation, observationType);
+        LOGGER.trace("Observation: {}", o);
+        return o;
+    }
+
+    private void parseGeometryField(final GeometryBuilder geometryBuilder, Entry<ResourceField, String> cells) {
+        ResourceField field = cells.getKey();
+        if (field.isOfType("JsonObject")) {
+            geometryBuilder.withGeoJson(cells.getValue());
+        } else {
+            geometryBuilder.withWKT(cells.getValue());
+        }
     }
 
     protected TimeInstant parseTimestamp(ResourceField field, String dateValue) {
