@@ -208,15 +208,14 @@
                 <plugin>
                     <groupId>pl.project13.maven</groupId>
                     <artifactId>git-commit-id-plugin</artifactId>
-                    <version>2.2.0</version>
+                    <version>2.2.1</version>
                     <configuration>
                         <dateFormat>yyyy-MM-dd HH:mm:ssZ</dateFormat>
                         <gitDescribe>
                             <!-- Faster to get just branch if skip = true -->
                             <skip>false</skip>
                         </gitDescribe>
-                        <timestampFormat>{0,date,yyyy-MM-dd
-                            HH:mm:ss}</timestampFormat>
+                        <timestampFormat>{0,date,yyyy-MM-ddHH:mm:ss}</timestampFormat>
                     </configuration>
                 </plugin>
 
