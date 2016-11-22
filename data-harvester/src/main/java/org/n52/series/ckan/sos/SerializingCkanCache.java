@@ -68,8 +68,7 @@ public class SerializingCkanCache extends InMemoryCkanMetadataCache implements C
     @PostConstruct
     public void init() {
         try {
-            final Path path = Paths.get(getClass().getResource("/").toURI());
-            final File cacheFile = path.resolve(metadataCacheFile).toFile();
+            final File cacheFile = getMetadataFile();
             final String filePath = cacheFile.getAbsolutePath();
             LOGGER.debug("Try reading cache from '{}'", filePath);
             mutex.lock();
@@ -87,6 +86,12 @@ public class SerializingCkanCache extends InMemoryCkanMetadataCache implements C
         finally {
             mutex.unlock();
         }
+    }
+
+    private File getMetadataFile() throws URISyntaxException {
+        final Path path = Paths.get(getClass().getResource("/").toURI());
+        final File cacheFile = path.resolve(metadataCacheFile).toFile();
+        return cacheFile;
     }
 
     private void readCacheFromFile(File cacheFile) {
@@ -164,13 +169,18 @@ public class SerializingCkanCache extends InMemoryCkanMetadataCache implements C
     }
 
     public void serialize() {
-        final File cacheFile = new File(metadataCacheFile);
-        mutex.lock();
-        try (ObjectOutputStream objOut = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
-            objOut.writeObject(cache);
-        } catch (IOException e) {
-            LOGGER.error("Could not write cache to file '{}'", cacheFile.getAbsolutePath(), e);
-        } finally {
+        try {
+            final File cacheFile = getMetadataFile();
+            String filePath = cacheFile.getAbsolutePath();
+            mutex.lock();
+            try (ObjectOutputStream objOut = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
+                objOut.writeObject(cache);
+            } catch (IOException e) {
+                LOGGER.error("Could not write cache to file '{}'", filePath, e);
+            }
+        } catch (URISyntaxException e) {
+            LOGGER.error("Could not write cache.", e);
+        }  finally {
             mutex.unlock();
         }
     }
