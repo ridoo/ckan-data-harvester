@@ -120,9 +120,7 @@ public class DataTable {
     }
 
     private void joinTable(DataTable other, DataTable outputTable, Collection<ResourceField> joinFields) {
-        LOGGER.debug("joining table {} (#{} rows, #{} cols) with table {} (#{} rows, #{} cols)",
-                resourceMember.getId(), rowSize(), columnSize(),
-                other.resourceMember.getId(), other.rowSize(), columnSize());
+        LOGGER.debug("joining (on fields {}) {} with {}.", joinFields, this, other);
         long start = System.currentTimeMillis();
         for (ResourceField field : joinFields) {
             final Map<ResourceKey, String> joinOnIndex = table.column(field);

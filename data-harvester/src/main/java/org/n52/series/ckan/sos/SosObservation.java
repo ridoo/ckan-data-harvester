@@ -53,4 +53,17 @@ public class SosObservation {
         return observation;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(getClass().getSimpleName())
+                .append("[observationType=").append(observationType);
+        if (observation != null) {
+            sb.append(", observationValue=").append(observation.getValue())
+                .append(", observationID=").append(observation.getObservationID())
+                .append(", seriesType=").append(observation.getSeriesType())
+                .append(", phenomenonTime=").append(observation.getPhenomenonTime())
+                .append(", ... ]");
+        }
+        return sb.toString();
+    }
 }

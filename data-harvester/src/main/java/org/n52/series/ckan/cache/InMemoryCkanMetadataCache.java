@@ -171,7 +171,7 @@ public class InMemoryCkanMetadataCache implements CkanMetadataCache {
         }
         return null;
     }
-    
+
     private CkanMapping loadCkanMapping(CkanDataset dataset) {
         if (dataset != null) {
             String customMappingPath = "/config-ckan-mapping-" + dataset.getId() + ".json";
