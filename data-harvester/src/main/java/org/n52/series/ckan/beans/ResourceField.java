@@ -75,7 +75,7 @@ public class ResourceField {
         this.ckanMapping = ckanMapping == null
                 ? CkanMapping.loadCkanMapping()
                 : ckanMapping;
-        Set<String> alternates = ckanMapping.getMappings(CkanConstants.FieldPropertyName.FIELD_ID);
+        Set<String> alternates = this.ckanMapping.getMappings(CkanConstants.FieldPropertyName.FIELD_ID);
         this.fieldId = JsonUtil.parse(node, alternates);
     }
 
