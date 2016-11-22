@@ -3,7 +3,8 @@
         "resource_descriptor"
     ],
     "platforms": [
-        "platform"
+        "platform",
+        "observed_geometries"
     ],
     "observations": [],
     "default" : [
