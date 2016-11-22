@@ -188,7 +188,7 @@ public class ResourceField {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.getFieldId(), 7);
+        return Objects.hash(this.getLowerCasedFieldId(), 7);
     }
 
     @Override
