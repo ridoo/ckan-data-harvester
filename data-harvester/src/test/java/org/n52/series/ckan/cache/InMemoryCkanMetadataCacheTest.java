@@ -43,7 +43,7 @@ import eu.trentorise.opendata.jackan.model.CkanPair;
 public class InMemoryCkanMetadataCacheTest {
 
     private InMemoryCkanMetadataCache ckanCache;
-    
+
     private String simpleDescriptor = "{"
             + "  \"resource_type\":\"csv-observations-collection\","
             + "  \"schema_descriptor_version\":\"0.1\","
