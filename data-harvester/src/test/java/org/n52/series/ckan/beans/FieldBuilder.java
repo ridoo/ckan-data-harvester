@@ -54,6 +54,8 @@ public class FieldBuilder {
     private final Map<String, JsonNode> valuesByField;
 
     private CkanMapping ckanMapping;
+    
+    private String resourceType;
 
     private int index;
 
@@ -87,11 +89,16 @@ public class FieldBuilder {
         return this;
     }
 
+    public FieldBuilder withResourceType(String resourceType) {
+        this.resourceType = resourceType;
+        return this;
+    }
+    
     public FieldBuilder withCkanMapping(CkanMapping ckanMapping) {
         this.ckanMapping = ckanMapping;
         return this;
     }
-
+    
     public FieldBuilder withFieldId(String fieldId) {
         return withProperty(CkanConstants.FieldPropertyName.FIELD_ID, fieldId);
     }
@@ -140,10 +147,6 @@ public class FieldBuilder {
         return withProperty(CkanConstants.FieldPropertyName.RESOURCE_NAME, resourceName);
     }
 
-    public FieldBuilder withResourceType(String resourceType) {
-        return withProperty(CkanConstants.FieldPropertyName.RESOURCE_TYPE, resourceType);
-    }
-
     public FieldBuilder withUom(String uom) {
         return withProperty(CkanConstants.FieldPropertyName.UOM, uom);
     }
@@ -189,7 +192,8 @@ public class FieldBuilder {
         for (Map.Entry<String, JsonNode> property : valuesByField.entrySet()) {
             field.put(property.getKey(), property.getValue());
         }
-        return new ResourceField(field, index, ckanMapping);
+        return new ResourceField(field, index, ckanMapping)
+                .withResourceType(resourceType);
     }
     public ResourceField createSimple(String id) {
         return createViaTemplate("{ \"field_id\": \"%s\", \"field_type\": \"string\" }", id);

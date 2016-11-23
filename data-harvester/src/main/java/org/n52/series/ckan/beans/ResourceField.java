@@ -56,6 +56,8 @@ public class ResourceField {
     private final int index;
 
     private ResourceMember qualifier;
+    
+    private String resourceType;
 
     private CkanMapping ckanMapping;
 
@@ -78,6 +80,11 @@ public class ResourceField {
         Set<String> alternates = this.ckanMapping.getMappings(CkanConstants.FieldPropertyName.FIELD_ID);
         this.fieldId = JsonUtil.parse(node, alternates);
     }
+    
+    public ResourceField withResourceType(String type) {
+        this.resourceType = type;
+        return this;
+    }
 
     public ResourceField withQualifier(ResourceMember qualifier) {
         this.qualifier = qualifier;
@@ -90,7 +97,11 @@ public class ResourceField {
     }
 
     public boolean isOfResourceType(String type) {
-        return qualifier != null && ckanMapping.getMappings(type).contains(qualifier.getResourceType());
+        Set<String> knownMappings = ckanMapping.getMappings(type);
+        if (resourceType != null && !resourceType.isEmpty()) {
+            return knownMappings.contains(resourceType);
+        }
+        return qualifier != null && knownMappings.contains(qualifier.getResourceType());
     }
 
     public String getFieldId() {

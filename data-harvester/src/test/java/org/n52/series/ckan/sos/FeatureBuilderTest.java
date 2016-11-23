@@ -41,6 +41,7 @@ import org.junit.Test;
 import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.beans.FieldBuilder;
 import static org.hamcrest.CoreMatchers.is;
+import org.n52.series.ckan.beans.ResourceMember;
 import org.n52.series.ckan.da.CkanConstants;
 
 public class FeatureBuilderTest {
@@ -48,13 +49,9 @@ public class FeatureBuilderTest {
     private static final String ORGA_NAME = "test_orga";
 
     private FeatureBuilder createFeatureBuilder() {
-        return createFeatureBuilder(CkanConstants.ResourceType.OBSERVATIONS);
-    }
-
-    private FeatureBuilder createFeatureBuilder(String type) {
         CkanDataset dataset = new CkanDataset("test_dataset");
         dataset.setOrganization(new CkanOrganization(ORGA_NAME));
-        return new FeatureBuilder(dataset, type);
+        return new FeatureBuilder(dataset);
     }
 
     @Test
@@ -68,9 +65,11 @@ public class FeatureBuilderTest {
 
     @Test
     public void when_rowEntryWithStationId_then_featureHasAppropriateFoiId() {
-        Map<ResourceField, String> row = singletonMap(FieldBuilder.aField()
+        ResourceField field = FieldBuilder.aField()
                 .withFieldId(CkanConstants.KnownFieldIdValue.STATION_ID)
-                .create(), "foobar_station");
+                .create();
+        field.setQualifier(new ResourceMember("foo", CkanConstants.ResourceType.OBSERVATIONS));
+        Map<ResourceField, String> row = singletonMap(field, "foobar_station");
         String actual = createFeatureBuilder().createFeature(row).getIdentifier();
         MatcherAssert.assertThat(actual, is(ORGA_NAME + "-foobar_station"));
     }
@@ -122,22 +121,24 @@ public class FeatureBuilderTest {
 
     @Test
     public void when_rowEntriesWithGeoJsonAsPhenomenon_then_featureHasNoGeometry() {
-        Map<ResourceField, String> row = singletonMap(FieldBuilder.aField()
+        ResourceField field = FieldBuilder.aField()
                 .withFieldId(CkanConstants.KnownFieldIdValue.LOCATION)
+                .withResourceType(CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES)
                 .withFieldType("JsonObject")
-                .create(), "{'coordinates':[51.05, 13.74],'type':'Point'}");
-        String type = CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES;
-        Geometry geometry = createFeatureBuilder(type).createFeature(row).getGeometry();
+                .create();
+        Map<ResourceField, String> row = singletonMap(field, "{'coordinates':[51.05, 13.74],'type':'Point'}");
+        Geometry geometry = createFeatureBuilder().createFeature(row).getGeometry();
         MatcherAssert.assertThat(geometry, is(CoreMatchers.nullValue(Geometry.class)));
     }
 
     @Test
     public void when_rowEntriesWithWkt_then_featureHasNoGeometry() {
-        Map<ResourceField, String> row = singletonMap(FieldBuilder.aField()
+        ResourceField field = FieldBuilder.aField()
                 .withFieldId(CkanConstants.KnownFieldIdValue.LOCATION)
-                .create(), "POINT(51.05 13.74)");
-        String type = CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES;
-        Geometry geometry = createFeatureBuilder(type).createFeature(row).getGeometry();
+                .withResourceType(CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES)
+                .create();
+        Map<ResourceField, String> row = singletonMap(field, "POINT(51.05 13.74)");
+        Geometry geometry = createFeatureBuilder().createFeature(row).getGeometry();
         MatcherAssert.assertThat(geometry, is(CoreMatchers.nullValue(Geometry.class)));
     }
 

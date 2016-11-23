@@ -61,6 +61,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.trentorise.opendata.jackan.model.CkanDataset;
 import eu.trentorise.opendata.jackan.model.CkanResource;
+import java.util.Collections;
 import org.n52.series.ckan.da.CkanConstants;
 
 class DefaultSosInsertionStrategy implements SosInsertionStrategy {
@@ -157,7 +158,7 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
 
             CkanDataset dataset = dataCollection.getDataset();
             ResourceMember member = rowEntry.getKey().getMember();
-            FeatureBuilder foiBuilder = new FeatureBuilder(dataset, member.getResourceType());
+            FeatureBuilder foiBuilder = new FeatureBuilder(dataset);
             AbstractFeature feature = foiBuilder.createFeature(rowEntry.getValue());
 
             ObservationBuilder observationBuilder = new ObservationBuilder(rowEntry, uomParser);
@@ -275,6 +276,7 @@ class DefaultSosInsertionStrategy implements SosInsertionStrategy {
     private SosInsertionMetadata createSosInsertionMetadata(DataInsertion dataInsertion) {
         SosInsertionMetadata metadata = new SosInsertionMetadata();
 //        metadata.setFeatureOfInterestTypes(dataInsertion.getFeaturesCharacteristics());
+        metadata.setFeatureOfInterestTypes(Collections.<String>emptyList());
         metadata.setObservationTypes(dataInsertion.getObservationTypes());
         return metadata;
     }

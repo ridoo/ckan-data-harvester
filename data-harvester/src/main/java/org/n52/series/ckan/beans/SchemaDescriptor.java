@@ -148,13 +148,15 @@ public class SchemaDescriptor {
 
     private List<ResourceField> parseResourceFields(ResourceMember qualifier, JsonNode member) {
         List<ResourceField> fields = new ArrayList<>();
+        JsonNode resourceType = member.findValue("resource_type");
         JsonNode fieldsNode = member.findValue("fields");
         Iterator<JsonNode> iter = fieldsNode.elements();
         int index = 0;
         while (iter.hasNext()) {
             JsonNode fieldNode = iter.next();
             fields.add(new ResourceField(fieldNode, index, ckanMapping)
-                       .withQualifier(qualifier));
+                    .withResourceType(resourceType.asText())
+                    .withQualifier(qualifier));
             index++;
         }
         return fields;

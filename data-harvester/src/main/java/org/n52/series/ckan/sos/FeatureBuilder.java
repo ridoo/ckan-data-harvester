@@ -32,8 +32,8 @@ import com.vividsolutions.jts.geom.Geometry;
 import eu.trentorise.opendata.jackan.model.CkanDataset;
 
 import java.util.Map;
-import org.n52.series.ckan.beans.DataCollection;
 import org.n52.series.ckan.beans.ResourceField;
+import org.n52.series.ckan.beans.ResourceMember;
 import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.util.GeometryBuilder;
 import org.n52.sos.exception.ows.concrete.InvalidSridException;
@@ -47,11 +47,8 @@ public class FeatureBuilder {
 
     private final String orgaName;
 
-    private final String resourceType;
-
-    public FeatureBuilder(CkanDataset dataset, String resourceType) {
+    public FeatureBuilder(CkanDataset dataset) {
         this.orgaName = dataset.getOrganization().getName();
-        this.resourceType = resourceType;
     }
 
     SamplingFeature createFeature(Map<ResourceField, String> rowEntry) {
@@ -65,7 +62,7 @@ public class FeatureBuilder {
             if (field.isField(CkanConstants.KnownFieldIdValue.STATION_NAME)) {
                 feature.addName(fieldEntry.getValue());
             }
-            if ( !CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES.equalsIgnoreCase(resourceType)) {
+            if ( !field.isOfResourceType(CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES)) {
                 parseGeometryField(geometryBuilder, fieldEntry);
             }
         }
