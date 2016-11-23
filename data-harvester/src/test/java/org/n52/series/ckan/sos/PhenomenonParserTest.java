@@ -114,6 +114,20 @@ public class PhenomenonParserTest {
     }
 
     @Test
+    public void when_loadingTemperatureDwdData_then_parseUOMFromSchemaDescription() {
+        String dataset = "eab53bfe-fce7-4fd8-8325-a0fe5cdb23c8";
+        String observationResource = "a29d8acc-f8b6-402a-b91b-d2962fb1ca10";
+        String type = CkanConstants.ResourceType.OBSERVATIONS;
+        List<String> phenomenonIds = parsePhenomenonIdsOfResource(dataset, observationResource, type);
+        String[] expected = {
+                "LUFTTEMPERATUR",
+                "REL_FEUCHTE"
+        };
+        assertThat(phenomenonIds, containsInAnyOrder(expected));
+        assertThat(phenomenonIds, not(containsInAnyOrder(new String[] { "STRUKTUR_VERSION", "QUALITAETS_NIVEAU", "MESS_DATUM", "STATIONS_ID"})));
+    }
+    
+    @Test
     public void when_loadingSunDwdData_then_parseUOMFromSchemaDescription() {
         String dataset = "582ca1ba-bdc0-48de-a685-3184339d29f0";
         String observationResource = "e4e8a0f7-dc71-4bcc-9011-5a9cdebf7f23";
