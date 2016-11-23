@@ -5,9 +5,9 @@
        xmlns:ctx="http://www.springframework.org/schema/context"
        xsi:schemaLocation="
         http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+        http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/context
-        http://www.springframework.org/schema/context/spring-context-4.2.xsd
+        http://www.springframework.org/schema/context/spring-context.xsd
         http://www.springframework.org/schema/mvc
         http://www.springframework.org/schema/mvc/spring-mvc-4.2.xsd">
 
@@ -38,29 +38,18 @@
         <property name="jobDescription" value="Harvests CKAN resources." />
         <property name="triggerName" value="ckanHarvesting_everyHalfHour" />
         <!-- http://quartz-scheduler.org/documentation/quartz-2.1.x/tutorials/tutorial-lesson-06 -->
-        <property name="cronExpression" value="0 0/30 23 * * ?" />
+        <property name="cronExpression" value="0 0/10 * * * ?" />
         <property name="triggerAtStartup" value="true" />
         <property name="enabled" value="true" />
 
         <property name="harvestingService" ref="ckanHarvestingService" />
-        <!--<property name="harvestingService" ref="testCkanHarvestingService" />-->
     </bean>
 
-    <!--    <bean id="testCkanHarvestingService" class="org.n52.series.ckan.util.FileBasedCkanHarvester">
+<!--    <bean id="ckanHarvestingService" class="org.n52.series.ckan.util.FileBasedCkanHarvester">
         <constructor-arg index="0" value="dwd" />
         <property name="resourceDownloadBaseFolder" value="test-data" />
-        <property name="metadataCache">
-            <bean class="org.n52.series.ckan.cache.InMemoryCkanMetadataCache" />
-            <bean class="org.n52.series.ckan.sos.SerializingCkanCache"
-                init-method="init" destroy-method="shutdown">
-                <property name="metadataCacheFile" value="cache/ckan-sos_cache">
-            </bean>
-        </property>
-        <property name="dataCache">
-            <bean class="org.n52.series.ckan.sos.SosDatabaseCache">
-                <property name="metadataCache" ref="metadataCache" />
-            </bean>
-        </property>
+        <property name="metadataCache" class="org.n52.series.ckan.cache.InMemoryCkanMetadataCache" />
+        <property name="dataCache" class="org.n52.series.ckan.cache.InMemoryCkanDataCache" />
     </bean>-->
 
     <bean id="ckanHarvestingService" class="org.n52.series.ckan.da.CkanHarvestingService">
@@ -88,9 +77,9 @@
         </property>
     </bean>
 
-    <!--<bean id="inMemoryCache" class="org.n52.series.ckan.cache.InMemoryCkanMetadataCache" />-->
     <bean id="serializingCache" class="org.n52.series.ckan.sos.SerializingCkanCache"
           init-method="init" destroy-method="shutdown">
         <property name="metadataCacheFile" value="cache/ckan-sos_cache" />
     </bean>
+
 </beans>
