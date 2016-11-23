@@ -65,7 +65,7 @@
                                 <exclude>static/client/jsClient</exclude>
                                 <exclude>WEB-INF/classes/logback.xml</exclude>
                                 <exclude>WEB-INF/classes/config-*.json</exclude>
-                                <exclude>WEB-INF/spring</exclude>
+                                <exclude>WEB-INF/spring/*.xml</exclude>
                             </excludes>
                         </overlay>
                     </overlays>
