@@ -28,6 +28,7 @@
  */
 package org.n52.series.ckan.beans;
 
+import eu.trentorise.opendata.jackan.model.CkanDataset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,10 +37,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import org.n52.series.ckan.da.CkanConstants;
-
-import eu.trentorise.opendata.jackan.model.CkanDataset;
+import org.n52.series.ckan.da.CkanMapping;
 
 public class DataCollection {
 
@@ -116,18 +115,18 @@ public class DataCollection {
     }
 
     private Set<String> getObservationTypes() {
-        Set<String> observationTypes = getMappingsFor(CkanConstants.ResourceType.OBSERVATIONS);
-        observationTypes.addAll(getMappingsFor(CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES));
+        Set<String> observationTypes = getCkanMapping().getResourceTypeMappings(CkanConstants.ResourceType.OBSERVATIONS);
+        observationTypes.addAll(getCkanMapping().getResourceTypeMappings(CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES));
         return observationTypes;
     }
 
     public Map<ResourceMember, DataFile> getPlatformDataCollections() {
-        return getDataCollectionsOfType(getMappingsFor(CkanConstants.ResourceType.PLATFORMS));
+        return getDataCollectionsOfType(getCkanMapping().getResourceTypeMappings(CkanConstants.ResourceType.PLATFORMS));
     }
 
-    private Set<String> getMappingsFor(String name) {
+    private CkanMapping getCkanMapping() {
         SchemaDescriptor descriptor = schemaDescriptor.getSchemaDescription();
-        return descriptor.getCkanMapping().getMappings(name);
+        return descriptor.getCkanMapping();
     }
 
     public Map<String, List<ResourceMember>> getResourceMembersByType() {

@@ -28,20 +28,16 @@
  */
 package org.n52.series.ckan.util;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.empty;
-import static org.junit.Assert.assertThat;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
-
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.empty;
+import static org.junit.Assert.assertThat;
 import org.junit.Before;
 import org.junit.Test;
-import org.n52.series.ckan.da.CkanMapping;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class JsonUtilTest {
 
@@ -106,8 +102,7 @@ public class JsonUtilTest {
     @Test
     public void when_parseWithAlternateProperties_then_findValue() throws IOException {
         JsonNode node = om.readTree(TEST_TEMPLATE);
-        CkanMapping ckanMapping = CkanMapping.loadCkanMapping();
-        Set<String> names = ckanMapping.getMappings("geometry");
+        Set<String> names = Collections.singleton("wkt_geometry");
         assertThat(JsonUtil.parse(node, names), is("POINT(7.2 51)"));
     }
 }

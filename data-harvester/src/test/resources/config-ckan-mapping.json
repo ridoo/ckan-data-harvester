@@ -1,123 +1,147 @@
 {
-    "schema_descriptor" : [
-        "resource_descriptor"
-    ],
-    "platforms": [
-        "platform",
-        "observed_geometries"
-    ],
-    "observations": [],
-    "default" : [
-        "default"
-    ],
-    "value": [
-        "messwert"
-    ],
-    "quality": [
-        "Qualität"
-    ],
-    "result_time": [
-        "resultTime",
-        "datetime",
-        "MESS_DATUM"
-    ],
-    "first_date": [
-       "von_datum"
-    ],
-    "last_date": [
-       "bis_datum"
-    ],
-    "timestamp": [
-       "millis",
-       "zeitstempel",
-       "unixtime"
-    ],
-    "headerrows": [],
-    "date_format": [],
-    "valid_time_start": [],
-    "valid_time_end": [],
-    "station_id": [
-        "stationId",
-        "Stations_id"
-    ],
-    "station_name": [
-        "stationName",
-        "sensor_name"
-    ],
-    "short_name": [
-        "shortName"
-    ],
-    "long_name": [
-        "longName"
-    ],
-    "field_id": [
-        "fieldid"
-    ],
-    "field_type": [
-        "fieldType"
-    ],
-    "resource_name": [
-        "resourceid"
-    ],
-    "resource_type": [
-        "resourcetype"
-    ],
-    "integer": [
-        "int"
-    ],
-    "boolean": [
-        "bool",
-        "truefalse"
-    ],
-    "date": [
-        "datum",
-        "calendar"
-    ],
-    "double": [
-        "float",
-        "decimal"
-    ],
-    "float": [
-        "double",
-        "decimal"
-    ],
-    "string": [
-        "text",
-        "varchar",
-        "char"
-    ],
-    "json" : [
-       "JsonObject",
-       "object",
-       "geojson"
-    ],
-    "geometry": [
-        "location",
-        "wkt_geometry",
-        "geojson_geometry",
-        "geojson",
-        "jsonObject"
-    ],
-    "longitude": [
-        "geoLaenge",
-        "longitude",
-        "lon"
-    ],
-    "latitude": [
-        "geoBreite",
-        "latitude",
-        "lat"
-    ],
-    "altitude" : [
-       "Stationshoehe",
-       "hoehe",
-       "hight"
-    ],
-    "crs": [],
-    "uom": [
-        "Einheit",
-        "unitOfMeasure",
-        "unit"
-    ]
-
+    "datatype": {
+        "boolean": [
+            "bool",
+            "truefalse"
+        ],
+        "date": [
+            "calendar",
+            "datum"
+        ],
+        "double": [
+            "decimal",
+            "float"
+        ],
+        "geometry": [
+            "geojson",
+            "geojson_geometry",
+            "jsonObject",
+            "location",
+            "wkt_geometry"
+        ],
+        "integer": [
+            "int"
+        ],
+        "json": [
+            "JsonObject",
+            "geojson",
+            "object"
+        ],
+        "string": [
+            "char",
+            "text",
+            "varchar"
+        ]
+    },
+    "field": {
+        "altitude": [
+            "Stationshoehe",
+            "hight",
+            "hoehe"
+        ],
+        "crs": [],
+        "first_date": [
+            "von_datum"
+        ],
+        "last_date": [
+            "bis_datum"
+        ],
+        "latitude": [
+            "geoBreite",
+            "lat"
+        ],
+        "location": [],
+        "longitude": [
+            "geoLaenge",
+            "lon"
+        ],
+        "observation_time": [
+            "MESS_DATUM",
+            "Timestamp",
+            "datetime",
+            "resulttime",
+            "result_time"
+        ],
+        "platform_id": [
+            "Stations_id",
+            "place",
+            "stationId",
+            "station_id"
+        ],
+        "platform_name": [
+            "sensor_name",
+            "stationName",
+            "station_name"
+        ],
+        "quality": [
+            "Qualität"
+        ],
+        "valid_time_end": [
+            "valid_time_end"
+        ],
+        "valid_time_start": [
+            "valid_time_start"
+        ],
+        "value": [
+            "messwert"
+        ]
+    },
+    "property": {
+        "crs": [],
+        "date_format": [],
+        "description": [],
+        "field_id": [
+            "fieldid"
+        ],
+        "field_role": [],
+        "field_type": [
+            "fieldType"
+        ],
+        "headerrows": [],
+        "long_name": [
+            "longName"
+        ],
+        "no_data": [],
+        "phenomenon": [],
+        "resource_name": [
+            "resourceid"
+        ],
+        "resource_type": [
+            "resourcetype"
+        ],
+        "short_name": [
+            "shortName"
+        ],
+        "uom": [
+            "Einheit",
+            "unit",
+            "unitOfMeasure"
+        ]
+    },
+    "resource_type": {
+        "csv-observations-collection": [
+            "csv-observation-collection"
+        ],
+        "observations": [],
+        "observations_with_geometries": [],
+        "platforms": []
+    },
+    "role": {
+        "timestamp": [
+            "millis",
+            "unixtime",
+            "zeitstempel"
+        ]
+    },
+    "schema_descriptor": {
+        "description": [],
+        "id": [],
+        "resource_type": [],
+        "schema_descriptor": [
+            "resource_descriptor"
+        ],
+        "version": [
+            "schema_descriptor_version"
+        ]
+    }
 }

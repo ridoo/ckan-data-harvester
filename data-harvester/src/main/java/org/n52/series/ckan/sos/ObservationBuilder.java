@@ -114,7 +114,7 @@ class ObservationBuilder {
                     parseGeometryField(geometryBuilder, cells);
                 }
             }
-            else if (field.isField(CkanConstants.KnownFieldIdValue.RESULT_TIME)) {
+            else if (field.isField(CkanConstants.KnownFieldIdValue.OBSERVATION_TIME)) {
                 time = parseTimestamp(field, cells.getValue());
             }
             else if (field.isField(CkanConstants.KnownFieldIdValue.LOCATION)) {

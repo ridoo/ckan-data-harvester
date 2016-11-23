@@ -29,18 +29,17 @@
 package org.n52.series.ckan.beans;
 
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.hamcrest.CoreMatchers;
+import static org.hamcrest.CoreMatchers.is;
 import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
+import static org.junit.Assert.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 import org.n52.series.ckan.da.CkanMapping;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
 
 public class ResourceFieldTest {
 
@@ -51,12 +50,17 @@ public class ResourceFieldTest {
     @Before
     public void setUp() {
         this.fieldCreator = new FieldBuilder();
-        this.ckanMapping = new CkanMapping();
-        List<String> mappings = Arrays.asList(new String[]{"IDENTIFIER_A", "IDENTIFIER_B"});
-        List<String> typeMappings = Arrays.asList(new String[]{"TYPE_A", "TYPE_B"});
-        this.ckanMapping
-            .addMapping("field_id", new HashSet<>(mappings))
-            .addMapping("field_type", new HashSet<>(typeMappings));
+        JsonNodeFactory factory = JsonNodeFactory.instance;
+
+        ObjectNode fieldNode = factory.objectNode();
+        fieldNode.putArray("field_id")
+                .add("IDENTIFIER_A")
+                .add("IDENTIFIER_B");
+        fieldNode.putArray("field_type")
+                .add("TYPE_A")
+                .add("TYPE_B");
+        JsonNode mapping = factory.objectNode().put("field", fieldNode);
+        this.ckanMapping = new CkanMapping(mapping);
     }
 
     @Test

@@ -32,7 +32,6 @@ import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
-
 import org.junit.Test;
 
 public class CkanMappingTest {
@@ -40,34 +39,34 @@ public class CkanMappingTest {
     @Test
     public void when_parsingIdMappings_then_idMappingsNotEmpty() {
         CkanMapping mappings = CkanMapping.loadCkanMapping("config-ckan-mapping.json");
-        assertThat(mappings.getMappings("result_time"), containsInAnyOrder("resulttime", "result_time", "datetime", "mess_datum"));
-        assertThat(mappings.getMappings("latitude"), containsInAnyOrder("geobreite", "latitude", "lat"));
-        assertThat(mappings.getMappings("longitude"), containsInAnyOrder("geolaenge", "longitude", "lon"));
+        assertThat(mappings.getFieldMappings(CkanConstants.KnownFieldIdValue.OBSERVATION_TIME), containsInAnyOrder("resulttime", "result_time", "datetime", "mess_datum", "timestamp", "observation_time"));
+        assertThat(mappings.getFieldMappings("latitude"), containsInAnyOrder("geobreite", "latitude", "lat"));
+        assertThat(mappings.getFieldMappings("longitude"), containsInAnyOrder("geolaenge", "longitude", "lon"));
     }
 
     @Test
     public void when_arbitraryConfigFileName_then_readConfig() {
          CkanMapping ckanMappin = CkanMapping.loadCkanMapping("some-ckan-config.json");
-         assertTrue(ckanMappin.hasMapping("crs", "9999"));
+         assertTrue(ckanMappin.hasFieldMappings("crs", "9999"));
     }
 
     @Test
     public void when_retrieveMappings_then_nameIsIncluded() {
          CkanMapping ckanMappin = CkanMapping.loadCkanMapping("some-ckan-config.json");
-         assertTrue(ckanMappin.hasMapping("crs", "crs"));
+         assertTrue(ckanMappin.hasFieldMappings("crs", "crs"));
     }
 
     @Test
     public void when_noMappings_then_onlyNameIsIncluded() {
          CkanMapping ckanMappin = CkanMapping.loadCkanMapping("some-ckan-config.json");
-         assertThat(ckanMappin.getMappings("does-not-exist"), hasSize(1));
-         assertTrue(ckanMappin.hasMapping("does-not-exist", "does-not-exist"));
+         assertThat(ckanMappin.getMappings("some", "does-not-exist"), hasSize(1));
+         assertTrue(ckanMappin.hasMappings("some", "does-not-exist", "does-not-exist"));
     }
 
     @Test
     public void when_parsingDefault_then_idMappingsNotEmpty() {
         CkanMapping mappings = CkanMapping.loadCkanMapping();
-        assertTrue(mappings.hasMapping("default", "default"));
+        assertTrue(mappings.hasMappings("", "default", "default"));
     }
 
 }

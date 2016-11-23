@@ -56,7 +56,7 @@ public class FeatureBuilder {
         final GeometryBuilder geometryBuilder = GeometryBuilder.create();
         for (Map.Entry<ResourceField, String> fieldEntry : rowEntry.entrySet()) {
             ResourceField field = fieldEntry.getKey();
-            if (field.isField(CkanConstants.KnownFieldIdValue.STATION_ID)) {
+            if (field.isField(CkanConstants.KnownFieldIdValue.PLATFORM_ID)) {
                 feature.setIdentifier(orgaName + "-" + fieldEntry.getValue());
             }
             if (field.isField(CkanConstants.KnownFieldIdValue.STATION_NAME)) {

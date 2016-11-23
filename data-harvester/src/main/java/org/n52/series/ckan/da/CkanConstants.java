@@ -41,17 +41,17 @@ public interface CkanConstants {
 
     public interface SchemaDescriptor {
         public static final String SCHEMA_DESCRIPTOR = "schema_descriptor";
-        public static final String VERSION = "schema_descriptor_version";
-        public static final String ID = "schema_descriptor_id";
-        public static final String DESCRIPTION = "schema_descriptor_description";
         public static final String RESOURCE_TYPE = "resource_type";
+        public static final String DESCRIPTION = "description";
+        public static final String VERSION = "version";
+        public static final String ID = "id";
     }
 
     public interface ResourceType {
         public static final String CSV_OBSERVATIONS_COLLECTION = "csv-observations-collection";
+        public static final String OBSERVATIONS_WITH_GEOMETRIES = "observations_with_geometry";
         public static final String PLATFORMS = "platforms";
         public static final String OBSERVATIONS = "observations";
-        public static final String OBSERVATIONS_WITH_GEOMETRIES = "observations_with_geometry";
     }
 
     public interface FieldPropertyName {
@@ -74,7 +74,7 @@ public interface CkanConstants {
     // TODO refactor to only contain ids mapping to ckan-mapping-ids
 
     public interface KnownFieldIdValue {
-        public static final String STATION_ID = "station_id";
+        public static final String PLATFORM_ID = "platform_id";
         public static final String CRS = "crs";
         public static final String LATITUDE = "latitude";
         public static final String LONGITUDE = "longitude";
@@ -82,7 +82,7 @@ public interface CkanConstants {
         public static final String STATION_NAME = "station_name";
         public static final String FIRST_DATE = "first_date";
         public static final String LAST_DATE = "last_date";
-        public static final String RESULT_TIME = "result_time";
+        public static final String OBSERVATION_TIME = "observation_time";
         public static final String LOCATION = "location";
         public static final String VALID_TIME_START = "valid_time_start";
         public static final String VALID_TIME_END = "valid_time_end";
@@ -101,12 +101,13 @@ public interface CkanConstants {
     }
 
     public interface DataType {
-        public static final String INTEGER = "Integer";
-        public static final String BOOLEAN = "Boolean";
-        public static final String GEOMETRY = "Geometry";
-        public static final String DOUBLE = "Double";
-        public static final String STRING = "String";
-        public static final String DATE = "Date";
+        public static final String INTEGER = "integer";
+        public static final String BOOLEAN = "boolean";
+        public static final String GEOMETRY = "geometry";
+        public static final String DOUBLE = "double";
+        public static final String STRING = "string";
+        public static final String DATE = "date";
+        public static final String JSON = "json";
     }
 
 }

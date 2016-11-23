@@ -90,7 +90,7 @@ public class ResourceMember {
     }
 
     public boolean isOfType(String type) {
-        return resourceType != null && ckanMapping.getMappings(type).contains(resourceType);
+        return resourceType != null && ckanMapping.getResourceTypeMappings(type).contains(resourceType);
     }
 
     public int getHeaderRows() {

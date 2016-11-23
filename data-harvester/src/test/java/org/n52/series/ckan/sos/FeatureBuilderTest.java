@@ -57,7 +57,7 @@ public class FeatureBuilderTest {
     @Test
     public void when_noGeometry_then_featureWithUnknownType() {
         Map<ResourceField, String> row = singletonMap(FieldBuilder.aField()
-                .withFieldId(CkanConstants.KnownFieldIdValue.STATION_ID)
+                .withFieldId(CkanConstants.KnownFieldIdValue.PLATFORM_ID)
                 .create(), "foobar_station");
         String actual = createFeatureBuilder().createFeature(row).getFeatureType();
         MatcherAssert.assertThat(actual, is("http://www.opengis.net/def/nil/OGC/0/unknown"));
@@ -66,7 +66,7 @@ public class FeatureBuilderTest {
     @Test
     public void when_rowEntryWithStationId_then_featureHasAppropriateFoiId() {
         ResourceField field = FieldBuilder.aField()
-                .withFieldId(CkanConstants.KnownFieldIdValue.STATION_ID)
+                .withFieldId(CkanConstants.KnownFieldIdValue.PLATFORM_ID)
                 .create();
         field.setQualifier(new ResourceMember("foo", CkanConstants.ResourceType.OBSERVATIONS));
         Map<ResourceField, String> row = singletonMap(field, "foobar_station");

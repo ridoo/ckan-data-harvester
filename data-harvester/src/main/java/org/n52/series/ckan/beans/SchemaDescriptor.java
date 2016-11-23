@@ -28,25 +28,21 @@
  */
 package org.n52.series.ckan.beans;
 
-import static org.n52.series.ckan.util.JsonUtil.parseMissingToNegativeInt;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.MissingNode;
+import eu.trentorise.opendata.jackan.model.CkanDataset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.da.CkanMapping;
 import org.n52.series.ckan.util.JsonUtil;
+import static org.n52.series.ckan.util.JsonUtil.parseMissingToNegativeInt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.MissingNode;
-
-import eu.trentorise.opendata.jackan.model.CkanDataset;
 
 public class SchemaDescriptor {
 
@@ -81,10 +77,6 @@ public class SchemaDescriptor {
         this.members = parseMemberDescriptions();
     }
 
-    private String getStringValueOf(JsonNode jsonNode, String field) {
-        return JsonUtil.parse(jsonNode, ckanMapping.getMappings(field));
-    }
-
     public String getVersion() {
         return getStringValueOf(node, CkanConstants.SchemaDescriptor.VERSION);
     }
@@ -95,6 +87,10 @@ public class SchemaDescriptor {
 
     public String getSchemaDescriptionType() {
         return getStringValueOf(node, CkanConstants.SchemaDescriptor.RESOURCE_TYPE);
+    }
+
+    private String getStringValueOf(JsonNode jsonNode, String field) {
+        return JsonUtil.parse(jsonNode, ckanMapping.getSchemaDescriptionMappings(field));
     }
 
     public JsonNode getNode() {
@@ -133,11 +129,11 @@ public class SchemaDescriptor {
         final Iterator<JsonNode> iter = membersNode.elements();
         while (iter.hasNext()) {
             JsonNode memberNode = iter.next();
-            for (String id : JsonUtil.parseMissingToEmptyArray(memberNode, ckanMapping.getMappings(CkanConstants.FieldPropertyName.RESOURCE_NAME))) {
+            for (String id : JsonUtil.parseMissingToEmptyArray(memberNode, ckanMapping.getFieldMappings(CkanConstants.FieldPropertyName.RESOURCE_NAME))) {
                 String resourceType = getStringValueOf(memberNode, CkanConstants.FieldPropertyName.RESOURCE_TYPE);
                 ResourceMember member = new ResourceMember(id, resourceType, ckanMapping);
                 member.setDatasetName(dataset.getName());
-                final int headerRows = parseMissingToNegativeInt(memberNode, ckanMapping.getMappings(CkanConstants.FieldPropertyName.HEADER_ROWS));
+                final int headerRows = parseMissingToNegativeInt(memberNode, ckanMapping.getFieldMappings(CkanConstants.FieldPropertyName.HEADER_ROWS));
                 member.setHeaderRows(headerRows < 0 ? 1 : headerRows); // assume 1 header row by default
                 member.setResourceFields(parseResourceFields(member, memberNode));
                 resourceMembers.add(member);

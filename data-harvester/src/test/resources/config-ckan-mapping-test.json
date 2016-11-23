@@ -1,5 +1,7 @@
 {
-    "schema_descriptor" : [
-        "custom_descriptor_key"
-    ]
+    "schema_descriptor": {
+        "schema_descriptor" : [
+            "custom_descriptor_key"
+        ]
+    }
 }
