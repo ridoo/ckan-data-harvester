@@ -172,6 +172,7 @@ public class SerializingCkanCache extends InMemoryCkanMetadataCache implements C
         try {
             final File cacheFile = getMetadataFile();
             String filePath = cacheFile.getAbsolutePath();
+            LOGGER.info("Serializing metadata to file {}", filePath);
             mutex.lock();
             try (ObjectOutputStream objOut = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
                 objOut.writeObject(cache);
