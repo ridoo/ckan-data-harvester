@@ -54,7 +54,7 @@ public class FieldBuilder {
     private final Map<String, JsonNode> valuesByField;
 
     private CkanMapping ckanMapping;
-    
+
     private String resourceType;
 
     private int index;
@@ -93,12 +93,12 @@ public class FieldBuilder {
         this.resourceType = resourceType;
         return this;
     }
-    
+
     public FieldBuilder withCkanMapping(CkanMapping ckanMapping) {
         this.ckanMapping = ckanMapping;
         return this;
     }
-    
+
     public FieldBuilder withFieldId(String fieldId) {
         return withProperty(CkanConstants.FieldPropertyName.FIELD_ID, fieldId);
     }

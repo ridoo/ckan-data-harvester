@@ -126,7 +126,7 @@ public class PhenomenonParserTest {
         assertThat(phenomenonIds, containsInAnyOrder(expected));
         assertThat(phenomenonIds, not(containsInAnyOrder(new String[] { "STRUKTUR_VERSION", "QUALITAETS_NIVEAU", "MESS_DATUM", "STATIONS_ID"})));
     }
-    
+
     @Test
     public void when_loadingSunDwdData_then_parseUOMFromSchemaDescription() {
         String dataset = "582ca1ba-bdc0-48de-a685-3184339d29f0";
