@@ -30,10 +30,8 @@ package org.n52.series.ckan.sos;
 
 import com.vividsolutions.jts.geom.Geometry;
 import eu.trentorise.opendata.jackan.model.CkanDataset;
-
 import java.util.Map;
 import org.n52.series.ckan.beans.ResourceField;
-import org.n52.series.ckan.beans.ResourceMember;
 import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.util.GeometryBuilder;
 import org.n52.sos.exception.ows.concrete.InvalidSridException;

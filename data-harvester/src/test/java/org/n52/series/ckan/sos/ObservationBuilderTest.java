@@ -127,10 +127,16 @@ public class ObservationBuilderTest {
         ObservationBuilder builder = new ObservationBuilder(null);
         String format = builder.parseDateFormat(field);
 
-        TimeInstant instant2 = (TimeInstant)builder.parseDateValue("2015-03-29T02:00:00+1", format);
+        TimeInstant instant2 = (TimeInstant)builder.parseDateValue("2012-07-23T11:00:00GMT+1", format);
         final DateTime dateTime2 = new DateTime("2015-03-29T01:00:00Z", DateTimeZone.UTC); // UTC
         Assert.assertTrue("expected: " + instant2.getValue().toString()  + ", actual: " + dateTime2,
                 instant2.getValue().equals(dateTime2));
+    }
+
+    @Test
+    public void when_timeStringEndsWithZulu_then_detectOffset() {
+        ObservationBuilder builder = new ObservationBuilder(null);
+        Assert.assertTrue(builder.hasOffset("2015-03-29T02:00:00Z"));
     }
 
     // @Test

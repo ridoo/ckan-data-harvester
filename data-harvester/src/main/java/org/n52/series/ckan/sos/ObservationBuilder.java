@@ -28,11 +28,12 @@
  */
 package org.n52.series.ckan.sos;
 
+import com.google.common.base.Strings;
+import com.vividsolutions.jts.geom.Geometry;
 import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
-
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
@@ -43,9 +44,9 @@ import org.n52.series.ckan.table.ResourceKey;
 import org.n52.series.ckan.util.GeometryBuilder;
 import org.n52.sos.exception.ows.concrete.DateTimeParseException;
 import org.n52.sos.ogc.gml.time.Time;
+import org.n52.sos.ogc.gml.time.Time.TimeIndeterminateValue;
 import org.n52.sos.ogc.gml.time.TimeInstant;
 import org.n52.sos.ogc.gml.time.TimePeriod;
-import org.n52.sos.ogc.gml.time.Time.TimeIndeterminateValue;
 import org.n52.sos.ogc.om.OmConstants;
 import org.n52.sos.ogc.om.OmObservation;
 import org.n52.sos.ogc.om.OmObservationConstellation;
@@ -53,9 +54,6 @@ import org.n52.sos.ogc.om.SingleObservationValue;
 import org.n52.sos.ogc.om.values.QuantityValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Strings;
-import com.vividsolutions.jts.geom.Geometry;
 
 class ObservationBuilder {
 
@@ -74,10 +72,6 @@ class ObservationBuilder {
     ObservationBuilder(Entry<ResourceKey, Map<ResourceField, String>> rowEntry, UomParser uomParser) {
         this.rowEntry = rowEntry;
         this.uomParser = uomParser;
-    }
-
-    void setInsertSensorRequestBuilder(InsertSensorRequestBuilder insertSensorRequestBuilder) {
-        this.insertSensorRequestBuilder = insertSensorRequestBuilder;
     }
 
     SosObservation createObservation(OmObservationConstellation constellation, Phenomenon phenomenon) {
@@ -189,6 +183,25 @@ class ObservationBuilder {
         return o;
     }
 
+    protected SingleObservationValue<Double> createQuantityObservationValue(ResourceField field, String value) {
+        try {
+            SingleObservationValue<Double> obsValue = new SingleObservationValue<>();
+            if (field.isOfType(Integer.class)
+                    || field.isOfType(Float.class)
+                    || field.isOfType(Double.class)
+                    || field.isOfType(String.class)) {
+                QuantityValue quantityValue = new QuantityValue(Double.parseDouble(value));
+                quantityValue.setUnit(uomParser.parse(field));
+                obsValue.setValue(quantityValue);
+                return obsValue;
+            }
+        }
+        catch (Exception e) {
+            LOGGER.error("could not parse value {}", value, e);
+        }
+        return null;
+    }
+
     private void parseGeometryField(final GeometryBuilder geometryBuilder, Entry<ResourceField, String> cells) {
         ResourceField field = cells.getKey();
         if (field.isOfType("JsonObject")) {
@@ -199,9 +212,18 @@ class ObservationBuilder {
     }
 
     protected TimeInstant parseTimestamp(ResourceField field, String dateValue) {
-        return !hasDateFormat(field)
+        return isLong(dateValue)// || !hasDateFormat(field)
             ? new TimeInstant(new Date(Long.parseLong(dateValue)))
             : parseDateValue(dateValue, parseDateFormat(field));
+    }
+
+    public boolean isLong(String value) {
+        try {
+            Long.parseLong(value);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
     protected String parseDateFormat(ResourceField field) {
@@ -261,7 +283,7 @@ class ObservationBuilder {
             if ( !Strings.isNullOrEmpty(format)) {
                 return DateTime.parse(timeString, DateTimeFormat.forPattern(format));
             }
-            else if (timeString.contains("+") || Pattern.matches("-\\d", timeString) || timeString.contains("Z")) {
+            else if (hasOffset(timeString)) {
                 return ISODateTimeFormat.dateOptionalTimeParser().withOffsetParsed().parseDateTime(timeString);
             }
             else if (false /* TODO check, if time_zone field is set and parse to ISO */ ) {
@@ -277,29 +299,20 @@ class ObservationBuilder {
         }
     }
 
+    protected boolean hasOffset(String timestring) {
+        return Pattern.matches("^\\.*T\\.*[+-]\\.*$", timestring)
+                || timestring.endsWith("z")
+                || timestring.endsWith("Z");
+    }
+
     private static boolean hasOffsetInfo(String dateValue) {
         return dateValue.endsWith("Z")
                 || dateValue.contains("+")
                 || Pattern.matches("-\\d", dateValue);
     }
 
-    protected SingleObservationValue<Double> createQuantityObservationValue(ResourceField field, String value) {
-        try {
-            SingleObservationValue<Double> obsValue = new SingleObservationValue<>();
-            if (field.isOfType(Integer.class)
-                    || field.isOfType(Float.class)
-                    || field.isOfType(Double.class)
-                    || field.isOfType(String.class)) {
-                QuantityValue quantityValue = new QuantityValue(Double.parseDouble(value));
-                quantityValue.setUnit(uomParser.parse(field));
-                obsValue.setValue(quantityValue);
-                return obsValue;
-            }
-        }
-        catch (Exception e) {
-            LOGGER.error("could not parse value {}", value, e);
-        }
-        return null;
+    void setInsertSensorRequestBuilder(InsertSensorRequestBuilder insertSensorRequestBuilder) {
+        this.insertSensorRequestBuilder = insertSensorRequestBuilder;
     }
 
 }
