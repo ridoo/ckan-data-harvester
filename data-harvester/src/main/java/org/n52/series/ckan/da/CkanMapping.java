@@ -29,6 +29,10 @@
 
 package org.n52.series.ckan.da;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.MissingNode;
+import com.google.common.base.Strings;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -37,99 +41,129 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Strings;
 
 public class CkanMapping {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CkanMapping.class);
 
-    private final Map<String, Set<String>> mappingsByName;
+    private final static String DEFAULT_CKAN_MAPPING_FILE = "config-ckan-mapping.json";
 
-    private final Set<String> unmappedKeys;
+    private final JsonNode fallbackMapping;
+
+    private final JsonNode jsonMapping;
 
     public CkanMapping() {
-        this.mappingsByName = new HashMap<>();
-        this.unmappedKeys = new HashSet<>();
+        this(null);
     }
 
-    public boolean hasMappings(String id) {
-        return mappingsByName.containsKey(id) && !mappingsByName.get(id).isEmpty();
+    public CkanMapping(JsonNode jsonCkanMapping) {
+        this(jsonCkanMapping, null);
     }
 
-    public boolean hasMapping(String name, String mapping) {
-        return getMappings(name).contains(mapping.toLowerCase(Locale.ROOT));
+    public CkanMapping(JsonNode jsonCkanMapping, JsonNode fallbackMapping) {
+        this.jsonMapping = jsonCkanMapping == null
+                ? MissingNode.getInstance()
+                : jsonCkanMapping;
+        this.fallbackMapping = fallbackMapping == null
+                ? MissingNode.getInstance()
+                : fallbackMapping;
     }
 
-    public Set<String> getMappings(String name) {
+    public boolean hasDataTypeMappings(String name, String mapping) {
+        return hasMappings("datatype", name, mapping);
+    }
+
+    public boolean hasFieldMappings(String name, String mapping) {
+        return hasMappings("field", name, mapping);
+    }
+
+    public boolean hasPropertyMappings(String name, String mapping) {
+        return hasMappings("property", name, mapping);
+    }
+
+    public boolean hasResourceTypeMappings(String name, String mapping) {
+        return hasMappings("resource_type", name, mapping);
+    }
+
+    public boolean hasRoleMappings(String name, String mapping) {
+        return hasMappings("role", name, mapping);
+    }
+
+    public boolean hasSchemaDescriptionMappings(String name, String mapping) {
+        return hasMappings("schema_descriptor", name, mapping);
+    }
+
+    public boolean hasMappings(String group, String name, String mapping) {
+        return getMappings(group, name).contains(mapping.toLowerCase(Locale.ROOT));
+    }
+
+    public Set<String> getDatatypeMappings(String name) {
+        return getMappings("datatype", name);
+    }
+
+    public Set<String> getFieldMappings(String name) {
+        return getMappings("field", name);
+    }
+
+    public Set<String> getPropertyMappings(String name) {
+        return getMappings("property", name);
+    }
+
+    public Set<String> getResourceTypeMappings(String name) {
+        return getMappings("resource_type", name);
+    }
+
+    public Set<String> getRoleMappings(String name) {
+        return getMappings("role", name);
+    }
+
+    public Set<String> getSchemaDescriptionMappings(String name) {
+        return getMappings("schema_descriptor", name);
+    }
+
+    public Set<String> getMappings(String group, String name) {
+        String lowerCasedGroup = !(group == null || group.isEmpty())
+                ? "/" + group.toLowerCase(Locale.ROOT)
+                : "";
         String lowerCasedName = name != null
                 ? name.toLowerCase(Locale.ROOT)
                 : name;
-        if ( !mappingsByName.containsKey(lowerCasedName)) {
-            if ( !unmappedKeys.contains(lowerCasedName)) {
-                LOGGER.debug("No mapping for name '{}' (lowercased)", lowerCasedName);
-                unmappedKeys.add(lowerCasedName);
-            }
-            return Collections.singleton(lowerCasedName);
+        String path = lowerCasedGroup + "/" + lowerCasedName;
+        JsonNode mappingArray = this.jsonMapping.at(path);
+        if (mappingArray.isMissingNode()) {
+            LOGGER.trace("try to get '{}' from fallback mapping.", path);
+            mappingArray = fallbackMapping.at(path);
         }
-        else {
-            Set<String> mappings = mappingsByName.get(lowerCasedName);
-            mappings.add(lowerCasedName); // add self
-            return mappings;
+        List<String> values = new ArrayList<>();
+        for (JsonNode node : mappingArray) {
+            values.add(node.asText().toLowerCase(Locale.ROOT));
         }
-    }
-
-    @JsonAnyGetter
-    public Map<String, Set<String>> getMappingsByName() {
-        return mappingsByName;
-    }
-
-    @JsonAnySetter
-    public CkanMapping addMapping(String name, Set<String> mappings) {
-        if (name != null) {
-            Set<String> lowerCasedMappings = toLowerCase(mappings);
-            this.mappingsByName.put(name.toLowerCase(Locale.ROOT), lowerCasedMappings);
-        }
-        return this;
-    }
-
-    private Set<String> toLowerCase(Set<String> mappings) {
-        HashSet<String> lowerCased = new HashSet<>();
-        for (String mapping : mappings) {
-            lowerCased.add(mapping.toLowerCase(Locale.ROOT));
-        }
-        return lowerCased;
+        values.add(lowerCasedName); // add self
+        return new HashSet<>(values);
     }
 
     public static CkanMapping loadCkanMapping() {
-        return new PropertyIdMappingLoader().loadConfig();
+        return new CkanMappingLoader().loadConfig();
     }
 
     public static CkanMapping loadCkanMapping(String configFile) {
-        return new PropertyIdMappingLoader().loadConfig(configFile);
+        return new CkanMappingLoader().loadConfig(configFile);
     }
 
     public static CkanMapping loadCkanMapping(File configFile) {
-        return new PropertyIdMappingLoader().loadConfig(configFile);
+        return new CkanMappingLoader().loadConfig(configFile);
     }
 
-    private static class PropertyIdMappingLoader {
+    private static class CkanMappingLoader {
 
-        private final static Logger LOGGER = LoggerFactory.getLogger(CkanMapping.PropertyIdMappingLoader.class);
-
-        private final static String DEFAULT_CKAN_MAPPING_FILE = "config-ckan-mapping.json";
+        private final static Logger LOGGER = LoggerFactory.getLogger(CkanMapping.CkanMappingLoader.class);
 
         private CkanMapping loadConfig() {
             return loadConfig((String) null);
@@ -154,10 +188,14 @@ public class CkanMapping {
             }
         }
 
-        private CkanMapping loadConfig(InputStream intputStream) throws IOException {
-            try (InputStream taskConfig = intputStream) {
+        private CkanMapping loadConfig(InputStream inputStream) throws IOException {
+            return new CkanMapping(readJson(inputStream), readJson(loadDefaults()));
+        }
+
+        private JsonNode readJson(InputStream inputStream) throws IOException {
+            try (InputStream mappingConfig = inputStream) {
                 ObjectMapper om = new ObjectMapper();
-                return om.readValue(taskConfig, CkanMapping.class);
+                return om.readTree(mappingConfig);
             }
         }
 
@@ -167,14 +205,14 @@ public class CkanMapping {
                     : getConfigFile(configFile);
             return file.exists()
                     ? createStreamFrom(file)
-                    : getClass().getResourceAsStream("/" + configFile);
+                    : loadDefaults();
         }
 
         private File getConfigFile(String configFile) {
             try {
-                Path path = Paths.get(CkanMapping.PropertyIdMappingLoader.class.getResource("/").toURI());
+                Path path = Paths.get(CkanMapping.CkanMappingLoader.class.getResource("/").toURI());
                 File file = path.resolve(configFile).toFile();
-                LOGGER.debug("Loading config from '{}'", file.getAbsolutePath());
+                LOGGER.trace("Loading config from '{}'", file.getAbsolutePath());
                 return file;
             } catch (URISyntaxException e) {
                 LOGGER.info("Could not find config file '{}'. Load from compiled default.", configFile, e);
@@ -185,17 +223,18 @@ public class CkanMapping {
         private InputStream createStreamFrom(File file) {
             if (file != null) {
                 try {
+                    LOGGER.trace("Loading config from '{}'", file.getAbsolutePath());
                     return new FileInputStream(file);
                 } catch (FileNotFoundException e) {
-                    LOGGER.debug("Missing config file '{}'! Loading from jar.", file.getAbsolutePath());
+                    LOGGER.warn("Missing config file '{}'! Loading from jar.", file.getAbsolutePath());
                 }
             }
             return loadDefaults();
         }
 
         private InputStream loadDefaults() {
-            LOGGER.debug("Loading '{}' from jar.", DEFAULT_CKAN_MAPPING_FILE);
-            return CkanMapping.PropertyIdMappingLoader.class.getResourceAsStream(DEFAULT_CKAN_MAPPING_FILE);
+            LOGGER.trace("Loading '{}' from jar.", DEFAULT_CKAN_MAPPING_FILE);
+            return getClass().getResourceAsStream("/" + DEFAULT_CKAN_MAPPING_FILE);
         }
 
     }

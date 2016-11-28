@@ -34,6 +34,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import org.n52.series.ckan.da.CkanMapping;
 
 public class ResourceMember {
 
@@ -47,14 +48,21 @@ public class ResourceMember {
 
     private List<ResourceField> resourceFields;
 
+    private final CkanMapping ckanMapping;
+
     public ResourceMember() {
         this(null, null);
     }
 
     public ResourceMember(String id, String resourceType) {
+        this(id, resourceType, CkanMapping.loadCkanMapping());
+    }
+
+    public ResourceMember(String id, String resourceType, CkanMapping ckanMapping) {
         this.id = id;
         this.resourceType = resourceType;
         this.resourceFields = new ArrayList<>();
+        this.ckanMapping = ckanMapping;
     }
 
     public String getId() {
@@ -79,6 +87,10 @@ public class ResourceMember {
 
     public void setResourceType(String resourceType) {
         this.resourceType = resourceType;
+    }
+
+    public boolean isOfType(String type) {
+        return resourceType != null && ckanMapping.getResourceTypeMappings(type).contains(resourceType);
     }
 
     public int getHeaderRows() {
@@ -217,9 +229,9 @@ public class ResourceMember {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         return sb.append("ResourceMember(")
-                .append("id=").append(id)
-                .append(", datasetName=")
+                .append("datasetName=")
                 .append(datasetName)
+                .append(", id=").append(id)
                 .append(", resourceType=")
                 .append(resourceType)
                 .append(")")

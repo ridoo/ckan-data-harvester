@@ -34,8 +34,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import com.fasterxml.jackson.core.util.DefaultIndenter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.MissingNode;
 
 import eu.trentorise.opendata.jackan.CkanClient;
@@ -52,8 +55,20 @@ public class JsonUtil {
         return om;
     }
 
-    public static ObjectMapper getObjectMapper() {
-        return new ObjectMapper();
+    public static ObjectWriter getCkanObjectWriter() {
+        return getWriter(om);
+    }
+
+    public static ObjectWriter getJsonWriter() {
+        ObjectMapper mapper = new ObjectMapper();
+        return getWriter(mapper);
+    }
+
+    private static ObjectWriter getWriter(ObjectMapper mapper) {
+        mapper.reader();
+        DefaultPrettyPrinter pp = new DefaultPrettyPrinter();
+        pp.indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE);
+        return mapper.writer(pp);
     }
 
     public static String parse(JsonNode node, Set<String> alternateFieldNames) {

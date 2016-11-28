@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.trentorise.opendata.jackan.model.CkanDataset;
 import eu.trentorise.opendata.jackan.model.CkanResource;
+import java.net.URL;
 
 public class FileBasedCkanHarvester extends CkanHarvestingService {
 
@@ -84,7 +85,11 @@ public class FileBasedCkanHarvester extends CkanHarvestingService {
     private File getSourceDataFolder() {
         String baseFolder = TEST_FILES_BASE_PATH + "/" + contextPath;
         LOGGER.trace("Source Data Folder: {}", baseFolder);
-        return new File(getClass().getResource(baseFolder).getFile());
+        URL resource = getClass().getResource(baseFolder);
+        if (resource == null) {
+            throw new IllegalStateException("invalid data folder: " + baseFolder);
+        }
+        return new File(resource.getFile());
     }
 
     private CkanDataset parseDatasetTestFile(File file) {

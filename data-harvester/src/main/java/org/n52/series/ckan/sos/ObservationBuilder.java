@@ -28,11 +28,12 @@
  */
 package org.n52.series.ckan.sos;
 
+import com.google.common.base.Strings;
+import com.vividsolutions.jts.geom.Geometry;
 import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
-
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
@@ -43,9 +44,9 @@ import org.n52.series.ckan.table.ResourceKey;
 import org.n52.series.ckan.util.GeometryBuilder;
 import org.n52.sos.exception.ows.concrete.DateTimeParseException;
 import org.n52.sos.ogc.gml.time.Time;
+import org.n52.sos.ogc.gml.time.Time.TimeIndeterminateValue;
 import org.n52.sos.ogc.gml.time.TimeInstant;
 import org.n52.sos.ogc.gml.time.TimePeriod;
-import org.n52.sos.ogc.gml.time.Time.TimeIndeterminateValue;
 import org.n52.sos.ogc.om.OmConstants;
 import org.n52.sos.ogc.om.OmObservation;
 import org.n52.sos.ogc.om.OmObservationConstellation;
@@ -54,17 +55,15 @@ import org.n52.sos.ogc.om.values.QuantityValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Strings;
-import com.vividsolutions.jts.geom.Geometry;
-
 class ObservationBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ObservationBuilder.class);
 
     private final Entry<ResourceKey, Map<ResourceField, String>> rowEntry;
 
-    private UomParser uomParser;
+    private InsertSensorRequestBuilder insertSensorRequestBuilder;
 
+    private UomParser uomParser;
 
     ObservationBuilder(Entry<ResourceKey, Map<ResourceField, String>> rowEntry) {
         this(rowEntry, new UcumParser());
@@ -94,8 +93,7 @@ class ObservationBuilder {
         for (Map.Entry<ResourceField, String> cells : rowEntry.getValue().entrySet()) {
 
             ResourceField field = cells.getKey();
-            String resourceType = field.getQualifier().getResourceType();
-            if ( !resourceType.equalsIgnoreCase(CkanConstants.ResourceType.OBSERVATIONS)) {
+            if ( !field.isObservationField()) {
                 continue;
             }
 
@@ -105,20 +103,16 @@ class ObservationBuilder {
                 // TODO support NO_DATA
                 if (field.isOfType(CkanConstants.DataType.DOUBLE)) {
                     value = createQuantityObservationValue(field, cells.getValue());
-                } else if (field.isOfType(CkanConstants.DataType.GEOMETRY)){
-                    if (field.isOfType("JsonObject")) {
-                        geometryBuilder.withGeoJson(cells.getValue());
-                    }
+                } else if (field.isOfType(CkanConstants.DataType.GEOMETRY)) {
+                    observationType = OmConstants.OBS_TYPE_GEOMETRY_OBSERVATION;
+                    parseGeometryField(geometryBuilder, cells);
                 }
             }
-            else if (field.isField(CkanConstants.KnownFieldIdValue.RESULT_TIME)) {
+            else if (field.isField(CkanConstants.KnownFieldIdValue.OBSERVATION_TIME)) {
                 time = parseTimestamp(field, cells.getValue());
             }
             else if (field.isField(CkanConstants.KnownFieldIdValue.LOCATION)) {
-                if (field.isOfType(Geometry.class)) {
-                    observationType = OmConstants.OBS_TYPE_GEOMETRY_OBSERVATION;
-                    geometryBuilder.withGeoJson(cells.getValue());
-                }
+                parseGeometryField(geometryBuilder, cells);
             }
             else if (field.isField(CkanConstants.KnownFieldIdValue.CRS)) {
                 geometryBuilder.withCrs(cells.getValue());
@@ -164,7 +158,7 @@ class ObservationBuilder {
         if (value == null && geometryBuilder.canBuildGeometry()) {
             // construct observation at this stage to allow single lat/lon/alt
             // values to server as fallback geometry observation when no other
-            // observation value are present
+            // observation value is present
             SingleObservationValue<Geometry> obsValue = new SingleObservationValue<>();
             obsValue.setValue(geometryBuilder.createGeometryValue());
             observationType = OmConstants.OBS_TYPE_GEOMETRY_OBSERVATION;
@@ -181,13 +175,55 @@ class ObservationBuilder {
 
         value.setPhenomenonTime(time);
         omObservation.setValue(value);
-        return new SosObservation(omObservation, observationType);
+        if (observationType.equals(OmConstants.OBS_TYPE_GEOMETRY_OBSERVATION)) {
+            insertSensorRequestBuilder.setInsitu(false);
+        }
+        SosObservation o = new SosObservation(omObservation, observationType);
+        LOGGER.trace("Observation: {}", o);
+        return o;
+    }
+
+    protected SingleObservationValue<Double> createQuantityObservationValue(ResourceField field, String value) {
+        try {
+            SingleObservationValue<Double> obsValue = new SingleObservationValue<>();
+            if (field.isOfType(Integer.class)
+                    || field.isOfType(Float.class)
+                    || field.isOfType(Double.class)
+                    || field.isOfType(String.class)) {
+                QuantityValue quantityValue = new QuantityValue(Double.parseDouble(value));
+                quantityValue.setUnit(uomParser.parse(field));
+                obsValue.setValue(quantityValue);
+                return obsValue;
+            }
+        }
+        catch (Exception e) {
+            LOGGER.error("could not parse value {}", value, e);
+        }
+        return null;
+    }
+
+    private void parseGeometryField(final GeometryBuilder geometryBuilder, Entry<ResourceField, String> cells) {
+        ResourceField field = cells.getKey();
+        if (field.isOfType("JsonObject")) {
+            geometryBuilder.withGeoJson(cells.getValue());
+        } else {
+            geometryBuilder.withWKT(cells.getValue());
+        }
     }
 
     protected TimeInstant parseTimestamp(ResourceField field, String dateValue) {
-        return !hasDateFormat(field)
+        return isLong(dateValue)// || !hasDateFormat(field)
             ? new TimeInstant(new Date(Long.parseLong(dateValue)))
             : parseDateValue(dateValue, parseDateFormat(field));
+    }
+
+    public boolean isLong(String value) {
+        try {
+            Long.parseLong(value);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
     protected String parseDateFormat(ResourceField field) {
@@ -247,8 +283,12 @@ class ObservationBuilder {
             if ( !Strings.isNullOrEmpty(format)) {
                 return DateTime.parse(timeString, DateTimeFormat.forPattern(format));
             }
-            else if (timeString.contains("+") || Pattern.matches("-\\d", timeString) || timeString.contains("Z")) {
+            else if (hasOffset(timeString)) {
                 return ISODateTimeFormat.dateOptionalTimeParser().withOffsetParsed().parseDateTime(timeString);
+            }
+            else if (false /* TODO check, if time_zone field is set and parse to ISO */ ) {
+                // add timezone
+                return null;
             }
             else {
                 return ISODateTimeFormat.dateOptionalTimeParser().withZone(DateTimeZone.UTC).parseDateTime(timeString);
@@ -259,29 +299,20 @@ class ObservationBuilder {
         }
     }
 
+    protected boolean hasOffset(String timestring) {
+        return Pattern.matches("^\\.*T\\.*[+-]\\.*$", timestring)
+                || timestring.endsWith("z")
+                || timestring.endsWith("Z");
+    }
+
     private static boolean hasOffsetInfo(String dateValue) {
         return dateValue.endsWith("Z")
                 || dateValue.contains("+")
                 || Pattern.matches("-\\d", dateValue);
     }
 
-    protected SingleObservationValue<Double> createQuantityObservationValue(ResourceField field, String value) {
-        try {
-            SingleObservationValue<Double> obsValue = new SingleObservationValue<>();
-            if (field.isOfType(Integer.class)
-                    || field.isOfType(Float.class)
-                    || field.isOfType(Double.class)
-                    || field.isOfType(String.class)) {
-                QuantityValue quantityValue = new QuantityValue(Double.parseDouble(value));
-                quantityValue.setUnit(uomParser.parse(field));
-                obsValue.setValue(quantityValue);
-                return obsValue;
-            }
-        }
-        catch (Exception e) {
-            LOGGER.error("could not parse value {}", value, e);
-        }
-        return null;
+    void setInsertSensorRequestBuilder(InsertSensorRequestBuilder insertSensorRequestBuilder) {
+        this.insertSensorRequestBuilder = insertSensorRequestBuilder;
     }
 
 }

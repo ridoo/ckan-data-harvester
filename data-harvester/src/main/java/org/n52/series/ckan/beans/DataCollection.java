@@ -28,6 +28,7 @@
  */
 package org.n52.series.ckan.beans;
 
+import eu.trentorise.opendata.jackan.model.CkanDataset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,10 +37,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import org.n52.series.ckan.da.CkanConstants;
-
-import eu.trentorise.opendata.jackan.model.CkanDataset;
+import org.n52.series.ckan.da.CkanMapping;
 
 public class DataCollection {
 
@@ -103,7 +102,7 @@ public class DataCollection {
         for (Map.Entry<ResourceMember, DataFile> entry : getDataCollection().entrySet()) {
             ResourceMember member = entry.getKey();
             final String resourceType = member.getResourceType();
-            if ( !resourceType.equalsIgnoreCase(CkanConstants.ResourceType.OBSERVATIONS)) {
+            if ( !getObservationTypes().contains(resourceType)) {
                 typedCollection.put(member, entry.getValue());
             }
         }
@@ -111,16 +110,23 @@ public class DataCollection {
     }
 
     public Map<ResourceMember, DataFile> getObservationDataCollections() {
-        return getDataCollectionsOfType(getMappingsFor(CkanConstants.ResourceType.OBSERVATIONS));
+        Set<String> observationTypes = getObservationTypes();
+        return getDataCollectionsOfType(observationTypes);
+    }
+
+    private Set<String> getObservationTypes() {
+        Set<String> observationTypes = getCkanMapping().getResourceTypeMappings(CkanConstants.ResourceType.OBSERVATIONS);
+        observationTypes.addAll(getCkanMapping().getResourceTypeMappings(CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES));
+        return observationTypes;
     }
 
     public Map<ResourceMember, DataFile> getPlatformDataCollections() {
-        return getDataCollectionsOfType(getMappingsFor(CkanConstants.ResourceType.PLATFORMS));
+        return getDataCollectionsOfType(getCkanMapping().getResourceTypeMappings(CkanConstants.ResourceType.PLATFORMS));
     }
 
-    private Set<String> getMappingsFor(String name) {
+    private CkanMapping getCkanMapping() {
         SchemaDescriptor descriptor = schemaDescriptor.getSchemaDescription();
-        return descriptor.getCkanMapping().getMappings(name);
+        return descriptor.getCkanMapping();
     }
 
     public Map<String, List<ResourceMember>> getResourceMembersByType() {

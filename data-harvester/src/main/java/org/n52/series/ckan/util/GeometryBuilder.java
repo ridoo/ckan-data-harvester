@@ -28,6 +28,8 @@
  */
 package org.n52.series.ckan.util;
 
+import static com.vividsolutions.jts.geom.PrecisionModel.FLOATING;
+
 import java.io.IOException;
 
 import org.n52.io.crs.CRSUtils;
@@ -38,15 +40,19 @@ import org.n52.sos.ogc.om.NamedValue;
 import org.n52.sos.ogc.om.OmConstants;
 import org.n52.sos.ogc.om.features.SfConstants;
 import org.n52.sos.ogc.om.values.GeometryValue;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.TransformException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.PrecisionModel;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKTReader;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.TransformException;
 
 public class GeometryBuilder {
 
@@ -69,6 +75,8 @@ public class GeometryBuilder {
     private double altitude;
 
     private Geometry geometry;
+
+    private String wellKnownText;
 
     public static GeometryBuilder create() {
         return new GeometryBuilder();
@@ -93,7 +101,9 @@ public class GeometryBuilder {
     }
 
     public boolean canBuildGeometry() {
-        return geometry != null || hasCoordinates();
+        return geometry != null
+                || wellKnownText != null
+                || hasCoordinates();
     }
 
     public Geometry getGeometry() {
@@ -103,6 +113,19 @@ public class GeometryBuilder {
         if (geometry != null) {
             return geometry;
         }
+        if (wellKnownText != null) {
+            try {
+                int srid = utils.getSrsIdFrom(crs);
+                PrecisionModel pm = new PrecisionModel(FLOATING);
+                GeometryFactory factory = new GeometryFactory(pm, srid);
+                WKTReader wktReader = new WKTReader(factory);
+                return wktReader.read(wellKnownText);
+            } catch (ParseException e) {
+                LOGGER.error("Location value is not parsable WKT. Value: {}", wellKnownText, e);
+                return null;
+            }
+        }
+
         final Point lonLatPoint = utils.createPoint(longitude, latitude, altitude, crs);
         try {
             return utils.transformInnerToOuter(lonLatPoint, crs);
@@ -169,6 +192,11 @@ public class GeometryBuilder {
         // TODO further types?
 
         return "http://www.opengis.net/def/nil/OGC/0/unknown";
+    }
+
+    public GeometryBuilder withWKT(String wellKnownText) {
+        this.wellKnownText = wellKnownText;
+        return this;
     }
 
 }

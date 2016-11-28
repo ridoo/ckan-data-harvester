@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.n52.sensorweb.ckan</groupId>
@@ -15,6 +15,10 @@
     <url>http://52north.org/communities/sensorweb/</url>
 
     <properties>
+        <!-- dev | ci | prod -->
+        <env>dev</env>
+        <local.configFile>file:${user.home}/${project.build.finalName}.properties</local.configFile>
+
         <enforcer.skip>true</enforcer.skip>
         <mdep.analyze.skip>true</mdep.analyze.skip>
 
@@ -26,14 +30,14 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
-        
+
         <dependency>
             <groupId>org.n52.sensorweb.ckan</groupId>
             <artifactId>data-harvester</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.n52.sensorweb.sos</groupId>
             <artifactId>webapp-bundle</artifactId>
@@ -44,7 +48,6 @@
 
     <build>
         <finalName>${project.artifactId}</finalName>
-        
         <plugins>
 
             <plugin>
@@ -61,9 +64,15 @@
                                 <exclude>cache.tmp</exclude>
                                 <exclude>static/client/jsClient</exclude>
                                 <exclude>WEB-INF/classes/logback.xml</exclude>
+                                <exclude>WEB-INF/classes/config-*.json</exclude>
+                                <exclude>WEB-INF/spring/*.xml</exclude>
                             </excludes>
                         </overlay>
                     </overlays>
+                    <nonFilteredFileExtensions>
+                        <!-- default value contains jpg,jpeg,gif,bmp,png -->
+                        <nonFilteredFileExtension>db</nonFilteredFileExtension>
+                    </nonFilteredFileExtensions>
                     <webResources>
                         <resource>
                             <!-- override SOS config if present -->
@@ -72,10 +81,16 @@
                             <filtering>false</filtering>
                         </resource>
                     </webResources>
+                    <webResources>
+                        <webResource>
+                            <directory>src/main/webapp</directory>
+                            <filtering>true</filtering>
+                        </webResource>
+                    </webResources>
                 </configuration>
             </plugin>
         </plugins>
-        
+
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -87,16 +102,17 @@
                         <stopPort>34343</stopPort>
                         <scanIntervalSeconds>0</scanIntervalSeconds>
                         <reload>manual</reload>
-                        <webAppConfig>
+                        <webApp>
                             <contextPath>/</contextPath>
+                            <baseAppFirst>false</baseAppFirst>
                             <persistTempDirectory>true</persistTempDirectory>
                             <allowDuplicateFragmentNames>true</allowDuplicateFragmentNames>
-                            <extraClasspath>/target/classes/;../data-harvester/target/classes;${project.build.outputDirectory}</extraClasspath>
-                        </webAppConfig>
+                            <extraClasspath>target/classes/;${project.build.outputDirectory};../data-harvester/target/classes;</extraClasspath>
+                        </webApp>
                         <scanTargets>
-                            <scanTarget>/target/classes/</scanTarget>
-                            <scanTarget>../data-harvester/target/classes</scanTarget>
+                            <scanTarget>target/classes/</scanTarget>
                             <scanTarget>${project.build.outputDirectory}</scanTarget>
+                            <scanTarget>../data-harvester/target/classes</scanTarget>
                         </scanTargets>
                         <systemProperties>
                             <systemProperty>

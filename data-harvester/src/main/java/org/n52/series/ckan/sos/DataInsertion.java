@@ -50,7 +50,7 @@ class DataInsertion {
 
     private static final ReferenceType SAMPLING_GEOMETRY_TYPE = new ReferenceType(OmConstants.PARAM_NAME_SAMPLING_GEOMETRY);
 
-    private final InsertSensorRequest request;
+    private final InsertSensorRequestBuilder requestBuilder;
 
     private final AbstractFeature feature;
 
@@ -60,33 +60,30 @@ class DataInsertion {
 
     private CkanSosObservationReference reference;
 
-    private boolean movingPlatform;
-
-    DataInsertion(InsertSensorRequest request, AbstractFeature feature) {
-        this.request = request;
-        this.feature = feature;
+    DataInsertion(InsertSensorRequestBuilder requestBuilder) {
+        this.requestBuilder = requestBuilder;
+        this.feature = requestBuilder.getFeature();
         this.observations = new ArrayList<>();
         this.observationTypes = new HashSet<>();
-        this.movingPlatform = false; // assume stationary by default
+    }
+
+    public InsertSensorRequestBuilder getRequestBuilder() {
+        return requestBuilder;
     }
 
     public InsertSensorRequest getRequest() {
-        return request;
+        return requestBuilder.build();
     }
 
     public AbstractFeature getFeature() {
         return feature;
     }
 
-    public boolean isMovingPlatform() {
-        return movingPlatform;
-    }
-
-    public Set<String> getFeaturesCharacteristics() {
-        return isMovingPlatform() // XXX
-                ? Collections.singleton(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_CURVE)
-                : Collections.singleton(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_FEATURE);
-    }
+//    public Set<String> getFeaturesCharacteristics() {
+//        return isMovingPlatform() // XXX
+//                ? Collections.singleton(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_CURVE)
+//                : Collections.singleton(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_FEATURE);
+//    }
 
     void setReference(CkanSosObservationReference reference) {
         this.reference = reference;
@@ -107,6 +104,7 @@ class DataInsertion {
 
     List<String> getOfferingIds() {
         List<String> ids = new ArrayList<>();
+        InsertSensorRequest request = getRequest();
         for (SosOffering offering : request.getAssignedOfferings()) {
             ids.add(offering.getIdentifier());
         }
@@ -119,14 +117,14 @@ class DataInsertion {
         }
 
         OmObservation observation = sosObservation.getObservation();
-        if ( !movingPlatform && observation.getParameter() != null) {
-            Collection<NamedValue< ? >> parameters = observation.getParameter();
-            for (NamedValue< ? > namedValue : parameters) {
-                if (SAMPLING_GEOMETRY_TYPE.equals(namedValue.getName())) {
-                    movingPlatform = true;
-                }
-            }
-        }
+//        if ( !movingPlatform && observation.getParameter() != null) {
+//            Collection<NamedValue< ? >> parameters = observation.getParameter();
+//            for (NamedValue< ? > namedValue : parameters) {
+//                if (SAMPLING_GEOMETRY_TYPE.equals(namedValue.getName())) {
+//                    movingPlatform = true;
+//                }
+//            }
+//        }
         observationTypes.add(sosObservation.getObservationType());
         observations.add(observation);
     }

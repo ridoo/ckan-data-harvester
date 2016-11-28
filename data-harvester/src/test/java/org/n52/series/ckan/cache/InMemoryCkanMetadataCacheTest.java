@@ -28,9 +28,9 @@
  */
 package org.n52.series.ckan.cache;
 
+import eu.trentorise.opendata.jackan.model.CkanDataset;
+import eu.trentorise.opendata.jackan.model.CkanPair;
 import java.util.Collections;
-import java.util.UUID;
-
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.Before;
@@ -38,13 +38,16 @@ import org.junit.Test;
 import org.n52.series.ckan.beans.SchemaDescriptor;
 import org.n52.series.ckan.da.CkanConstants;
 
-import eu.trentorise.opendata.jackan.model.CkanDataset;
-import eu.trentorise.opendata.jackan.model.CkanPair;
-import eu.trentorise.opendata.jackan.model.CkanResource;
-
 public class InMemoryCkanMetadataCacheTest {
 
     private InMemoryCkanMetadataCache ckanCache;
+
+    private final String simpleDescriptor = "{"
+            + "  \"resource_type\":\"csv-observations-collection\","
+            + "  \"schema_descriptor_version\":\"0.1\","
+            + "  \"members\":["
+            + "  ]"
+            + "}";
 
     @Before
     public void setUp() {
@@ -60,7 +63,7 @@ public class InMemoryCkanMetadataCacheTest {
     @Test
     public void shouldReturnResourceDescription() {
         CkanDataset dataset = new CkanDataset("test-dataset");
-        CkanPair extras = new CkanPair(CkanConstants.SchemaDescriptor.SCHEMA_DESCRIPTOR, "{\"resource_type\":\"csv-observations-collection\",\"schema_descriptor_version\":\"0.1\",\"members\":[]}");
+        CkanPair extras = new CkanPair(CkanConstants.SchemaDescriptor.SCHEMA_DESCRIPTOR, simpleDescriptor);
         dataset.setExtras(Collections.singletonList(extras));
 
         ckanCache.insertOrUpdate(dataset);
@@ -69,11 +72,16 @@ public class InMemoryCkanMetadataCacheTest {
         MatcherAssert.assertThat(actualId, CoreMatchers.is("0.1"));
     }
 
-    private CkanResource createRandomCkanResource(CkanDataset dataset) {
-        String id = UUID.randomUUID().toString();
-        String url = "https://nonsense.eu/" + id;
-        CkanResource normalResource = new CkanResource(url, dataset.getId());
-        normalResource.setId(id);
-        return normalResource;
+    @Test
+    public void when_havingCustomMappingFile_then_customMappingsAreUsed() {
+        CkanDataset dataset = new CkanDataset("test-dataset");
+        dataset.setId("test"); // will use config-ckan-mapping-test.json
+        CkanPair extras = new CkanPair("custom_descriptor_key", simpleDescriptor);
+        dataset.setExtras(Collections.singletonList(extras));
+
+        ckanCache.insertOrUpdate(dataset);
+        final SchemaDescriptor actual = ckanCache.getSchemaDescription(dataset.getId());
+        String actualId = actual.getVersion();
+        MatcherAssert.assertThat(actualId, CoreMatchers.is("0.1"));
     }
 }

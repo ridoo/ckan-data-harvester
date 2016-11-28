@@ -36,6 +36,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.annotation.PostConstruct;
@@ -64,11 +67,11 @@ public class SerializingCkanCache extends InMemoryCkanMetadataCache implements C
 
     @PostConstruct
     public void init() {
-        final File cacheFile = new File(metadataCacheFile);
-        final String filePath = cacheFile.getAbsolutePath();
-        LOGGER.debug("Try reading cache from '{}'", filePath);
-        mutex.lock();
         try {
+            final File cacheFile = getMetadataFile();
+            final String filePath = cacheFile.getAbsolutePath();
+            LOGGER.debug("Try reading cache from '{}'", filePath);
+            mutex.lock();
             if ( !cacheFile.exists()) {
                 if ( !cacheFile.getParentFile().mkdirs() || !cacheFile.createNewFile()) {
                     LOGGER.error("Could not create file '{}'.", filePath);
@@ -76,7 +79,7 @@ public class SerializingCkanCache extends InMemoryCkanMetadataCache implements C
             } else {
                 readCacheFromFile(cacheFile);
             }
-        } catch (IOException e) {
+        } catch (URISyntaxException | IOException e) {
             LOGGER.error("Could not create file '{}'", metadataCacheFile, e);
             throw new IllegalStateException("config parameter 'metadataCacheFile' is not valid.", e);
         }
@@ -85,16 +88,24 @@ public class SerializingCkanCache extends InMemoryCkanMetadataCache implements C
         }
     }
 
+    private File getMetadataFile() throws URISyntaxException {
+        final Path path = Paths.get(getClass().getResource("/").toURI());
+        final File cacheFile = path.resolve(metadataCacheFile).toFile();
+        return cacheFile;
+    }
+
     private void readCacheFromFile(File cacheFile) {
         final String filePath = cacheFile.getAbsolutePath();
-        LOGGER.info("Read cache file from '{}'", filePath);
-        try (ObjectInputStream objIn = new ObjectInputStream(new FileInputStream(cacheFile))) {
-            cache = (SerializedCache) objIn.readObject();
-            putAll(cache.getDatasets());
-        } catch (IOException e) {
-            LOGGER.error("Could not deserialize from '{}'", filePath, e);
-        } catch (ClassNotFoundException e) {
-             LOGGER.error("Cache file outdated: '{}'", filePath, e);
+        if (new File(filePath).exists()) {
+            LOGGER.info("Read cache file from '{}'", filePath);
+            try (ObjectInputStream objIn = new ObjectInputStream(new FileInputStream(cacheFile))) {
+                cache = (SerializedCache) objIn.readObject();
+                putAll(cache.getDatasets());
+            } catch (IOException e) {
+                LOGGER.error("Could not deserialize from '{}'", filePath, e);
+            } catch (ClassNotFoundException e) {
+                 LOGGER.error("Cache file outdated: '{}'", filePath, e);
+            }
         }
     }
 
@@ -158,13 +169,19 @@ public class SerializingCkanCache extends InMemoryCkanMetadataCache implements C
     }
 
     public void serialize() {
-        final File cacheFile = new File(metadataCacheFile);
-        mutex.lock();
-        try (ObjectOutputStream objOut = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
-            objOut.writeObject(cache);
-        } catch (IOException e) {
-            LOGGER.error("Could not write cache to file '{}'", cacheFile.getAbsolutePath(), e);
-        } finally {
+        try {
+            final File cacheFile = getMetadataFile();
+            String filePath = cacheFile.getAbsolutePath();
+            LOGGER.info("Serializing metadata to file {}", filePath);
+            mutex.lock();
+            try (ObjectOutputStream objOut = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
+                objOut.writeObject(cache);
+            } catch (IOException e) {
+                LOGGER.error("Could not write cache to file '{}'", filePath, e);
+            }
+        } catch (URISyntaxException e) {
+            LOGGER.error("Could not write cache.", e);
+        }  finally {
             mutex.unlock();
         }
     }

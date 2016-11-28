@@ -74,9 +74,9 @@ This project includes:
   Hibernate/c3p0 Integration under GNU Lesser General Public License
   HyperSQL Database under HSQLDB License, a BSD open source license
   Jackan under The Apache Software License, Version 2.0
-  Jackson-annotations under The Apache Software License, Version 2.0 or GNU Lesser General Public License, Version 2.1
-  Jackson-core under The Apache Software License, Version 2.0 or GNU Lesser General Public License, Version 2.1
-  jackson-databind under The Apache Software License, Version 2.0 or GNU Lesser General Public License, Version 2.1
+  Jackson-annotations under The Apache Software License, Version 2.0
+  Jackson-core under The Apache Software License, Version 2.0
+  jackson-databind under The Apache Software License, Version 2.0
   Jackson-datatype-Guava under The Apache Software License, Version 2.0
   Java Annotation Indexer under AL 2.0
   Java implementation of GeographicLib under The MIT License(MIT)

@@ -101,6 +101,17 @@ public class Phenomenon {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return new StringBuilder(getClass().getSimpleName())
+                .append("[id=").append(id)
+                .append(", label=").append(label)
+                .append(", uom=").append(uom)
+                .append(", fieldIdx=").append(fieldIdx)
+                .append("]")
+                .toString();
+    }
+
 
 
 }

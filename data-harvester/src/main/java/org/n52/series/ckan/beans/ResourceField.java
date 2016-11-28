@@ -28,18 +28,16 @@
  */
 package org.n52.series.ckan.beans;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.MissingNode;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
-
 import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.da.CkanMapping;
 import org.n52.series.ckan.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.MissingNode;
 
 public class ResourceField {
 
@@ -56,6 +54,8 @@ public class ResourceField {
     private final int index;
 
     private ResourceMember qualifier;
+
+    private String resourceType;
 
     private CkanMapping ckanMapping;
 
@@ -75,13 +75,31 @@ public class ResourceField {
         this.ckanMapping = ckanMapping == null
                 ? CkanMapping.loadCkanMapping()
                 : ckanMapping;
-        Set<String> alternates = ckanMapping.getMappings(CkanConstants.FieldPropertyName.FIELD_ID);
+        Set<String> alternates = this.ckanMapping.getFieldMappings(CkanConstants.FieldPropertyName.FIELD_ID);
         this.fieldId = JsonUtil.parse(node, alternates);
+    }
+
+    public ResourceField withResourceType(String type) {
+        this.resourceType = type;
+        return this;
     }
 
     public ResourceField withQualifier(ResourceMember qualifier) {
         this.qualifier = qualifier;
         return this;
+    }
+
+    public boolean isObservationField() {
+        return isOfResourceType(CkanConstants.ResourceType.OBSERVATIONS)
+                || isOfResourceType(CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES);
+    }
+
+    public boolean isOfResourceType(String type) {
+        Set<String> knownMappings = ckanMapping.getResourceTypeMappings(type);
+        if (resourceType != null && !resourceType.isEmpty()) {
+            return knownMappings.contains(resourceType);
+        }
+        return qualifier != null && knownMappings.contains(qualifier.getResourceType());
     }
 
     public String getFieldId() {
@@ -124,6 +142,10 @@ public class ResourceField {
         return getValueOfField(CkanConstants.FieldPropertyName.FIELD_ROLE);
     }
 
+    private String getValueOfField(String property) {
+        return JsonUtil.parse(node, ckanMapping.getPropertyMappings(property));
+    }
+
     public boolean hasFieldRole() {
         return !getFieldRole().isEmpty();
     }
@@ -133,7 +155,7 @@ public class ResourceField {
             return false;
         }
         final String value = getFieldId();
-        return ckanMapping.hasMapping(field, value);
+        return ckanMapping.hasFieldMappings(field, value);
     }
 
     public boolean hasProperty(String property) {
@@ -170,16 +192,12 @@ public class ResourceField {
             return false;
         }
         final String fieldType = getFieldType();
-        return ckanMapping.hasMapping(ofType, fieldType);
-    }
-
-    private String getValueOfField(String fieldName) {
-        return JsonUtil.parse(node, ckanMapping.getMappings(fieldName));
+        return ckanMapping.hasFieldMappings(ofType, fieldType);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.getFieldId(), 7);
+        return Objects.hash(this.getLowerCasedFieldId(), 7);
     }
 
     @Override
