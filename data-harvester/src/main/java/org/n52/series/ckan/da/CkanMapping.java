@@ -161,6 +161,15 @@ public class CkanMapping {
         return new CkanMappingLoader().loadConfig(configFile);
     }
 
+    public static CkanMapping loadCkanMapping(InputStream inputStream) {
+        try {
+            return new CkanMappingLoader().loadConfig(inputStream);
+        } catch (IOException e) {
+            LOGGER.error("Could not load from input stream. Using empty config.", e);
+            return new CkanMapping();
+        }
+    }
+
     private static class CkanMappingLoader {
 
         private final static Logger LOGGER = LoggerFactory.getLogger(CkanMapping.CkanMappingLoader.class);
@@ -187,6 +196,7 @@ public class CkanMapping {
                 return new CkanMapping();
             }
         }
+
 
         private CkanMapping loadConfig(InputStream inputStream) throws IOException {
             return new CkanMapping(readJson(inputStream), readJson(loadDefaults()));

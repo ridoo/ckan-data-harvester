@@ -34,6 +34,7 @@ import eu.trentorise.opendata.jackan.model.CkanDataset;
 import eu.trentorise.opendata.jackan.model.CkanPair;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.sql.Timestamp;
@@ -171,16 +172,11 @@ public class InMemoryCkanMetadataCache implements CkanMetadataCache {
 
     private CkanMapping loadCkanMapping(CkanDataset dataset) {
         if (dataset != null) {
-            String customMappingPath = "/config-ckan-mapping-" + dataset.getId() + ".json";
-            URL resourceUrl = getClass().getResource(customMappingPath);
-            try {
-                if (resourceUrl != null) {
-                    File file = new File(resourceUrl.toURI());
-                    return CkanMapping.loadCkanMapping(file);
-                }
-            } catch (URISyntaxException e) {
-                LOGGER.info("Unable to get ckan mapping for dataset '{}'.", dataset.getName());
-            }
+        String customMappingPath = "/config-ckan-mapping-" + dataset.getId() + ".json";
+            InputStream is = getClass().getResourceAsStream(customMappingPath);
+            return is != null
+                    ? CkanMapping.loadCkanMapping(is)
+                    : CkanMapping.loadCkanMapping();
         }
         return CkanMapping.loadCkanMapping();
     }
