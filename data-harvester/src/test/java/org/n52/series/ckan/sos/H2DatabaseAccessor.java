@@ -33,23 +33,23 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import org.n52.series.ckan.cache.InMemoryCkanDataCache;
+import org.junit.Assert;
 import org.n52.sos.ds.hibernate.GetObservationDAO;
 import org.n52.sos.ds.hibernate.H2Configuration;
-import org.n52.sos.ds.hibernate.HibernateTestCase;
 import org.n52.sos.ogc.om.OmObservation;
 import org.n52.sos.ogc.ows.OwsExceptionReport;
 import org.n52.sos.ogc.sos.Sos2Constants;
 import org.n52.sos.ogc.sos.SosConstants;
 import org.n52.sos.request.GetObservationRequest;
 import org.n52.sos.response.GetObservationResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class SosH2Store extends HibernateTestCase {
+public class H2DatabaseAccessor {
 
-    private InMemoryCkanDataCache ckanDataCache;
+    private static final Logger LOGGER = LoggerFactory.getLogger(H2DatabaseAccessor.class);
 
-    public SosH2Store(InMemoryCkanDataCache ckanDataCache) throws IOException, URISyntaxException {
-        this.ckanDataCache = ckanDataCache;
+    public H2DatabaseAccessor() throws IOException, URISyntaxException {
         H2Configuration.assertInitialized();
     }
 
@@ -57,19 +57,19 @@ public class SosH2Store extends HibernateTestCase {
     // TODO think of refactoring how strategy works to run tests fast
     // TODO think of making this an integration test
 
-    void insertDatasetViaStrategy(String datasetId, SosInsertionStrategy insertionStrategy) throws OwsExceptionReport {
-        insertionStrategy.insertOrUpdate(ckanDataCache.getCollection(datasetId));
-    }
-
-    void assertObservationsAvailable() throws OwsExceptionReport {
-        GetObservationDAO getObsDAO = new GetObservationDAO();
-        GetObservationRequest getObsReq = new GetObservationRequest();
-        getObsReq.setService(SosConstants.SOS);
-        getObsReq.setVersion(Sos2Constants.SERVICEVERSION);
-        GetObservationResponse getObsResponse = getObsDAO.getObservation(getObsReq);
-        List<OmObservation> observationCollection = getObsResponse.getObservationCollection();
-        assertThat(observationCollection, is(notNullValue()));
-        assertThat(observationCollection, is(not(empty())));
+    List<OmObservation> getObservations() {
+        try {
+            GetObservationDAO getObsDAO = new GetObservationDAO();
+            GetObservationRequest getObsReq = new GetObservationRequest();
+            getObsReq.setService(SosConstants.SOS);
+            getObsReq.setVersion(Sos2Constants.SERVICEVERSION);
+            GetObservationResponse getObsResponse = getObsDAO.getObservation(getObsReq);
+            return getObsResponse.getObservationCollection();
+        } catch (OwsExceptionReport e) {
+            LOGGER.error("Could not query H2 database!", e);
+            Assert.fail("Could not query H2 database!");
+            return null;
+        }
     }
 
 }

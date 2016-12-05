@@ -43,25 +43,25 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import org.n52.series.ckan.cache.InMemoryCkanMetadataCache;
+import org.n52.series.ckan.cache.InMemoryMetadataStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SerializingCkanCache extends InMemoryCkanMetadataCache implements CkanSosReferenceCache {
+public class SerializingMetadataStore extends InMemoryMetadataStore implements CkanSosReferenceCache {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SerializingCkanCache.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SerializingMetadataStore.class);
 
     private final Lock mutex = new ReentrantLock();
 
     private SerializedCache cache = new SerializedCache();
 
-    private String metadataCacheFile;
+    private String filePath;
 
-    public SerializingCkanCache() {
+    public SerializingMetadataStore() {
         super();
     }
 
-    public SerializingCkanCache(String ckanMappingFile) {
+    public SerializingMetadataStore(String ckanMappingFile) {
         super(ckanMappingFile);
     }
 
@@ -80,7 +80,7 @@ public class SerializingCkanCache extends InMemoryCkanMetadataCache implements C
                 readCacheFromFile(cacheFile);
             }
         } catch (URISyntaxException | IOException e) {
-            LOGGER.error("Could not create file '{}'", metadataCacheFile, e);
+            LOGGER.error("Could not create file '{}'", filePath, e);
             throw new IllegalStateException("config parameter 'metadataCacheFile' is not valid.", e);
         }
         finally {
@@ -90,7 +90,7 @@ public class SerializingCkanCache extends InMemoryCkanMetadataCache implements C
 
     private File getMetadataFile() throws URISyntaxException {
         final Path path = Paths.get(getClass().getResource("/").toURI());
-        final File cacheFile = path.resolve(metadataCacheFile).toFile();
+        final File cacheFile = path.resolve(filePath).toFile();
         return cacheFile;
     }
 
@@ -186,11 +186,11 @@ public class SerializingCkanCache extends InMemoryCkanMetadataCache implements C
         }
     }
 
-    public String getMetadataCacheFile() {
-        return metadataCacheFile;
+    public String getFilePath() {
+        return filePath;
     }
 
-    public void setMetadataCacheFile(String metadataCacheFile) {
-        this.metadataCacheFile = metadataCacheFile;
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
     }
 }

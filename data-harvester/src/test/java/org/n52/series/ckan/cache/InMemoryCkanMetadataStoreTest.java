@@ -38,9 +38,9 @@ import org.junit.Test;
 import org.n52.series.ckan.beans.SchemaDescriptor;
 import org.n52.series.ckan.da.CkanConstants;
 
-public class InMemoryCkanMetadataCacheTest {
+public class InMemoryCkanMetadataStoreTest {
 
-    private InMemoryCkanMetadataCache ckanCache;
+    private InMemoryMetadataStore metadataStore;
 
     private final String simpleDescriptor = "{"
             + "  \"resource_type\":\"csv-observations-collection\","
@@ -51,12 +51,12 @@ public class InMemoryCkanMetadataCacheTest {
 
     @Before
     public void setUp() {
-        ckanCache = new InMemoryCkanMetadataCache();
+        metadataStore = new InMemoryMetadataStore();
     }
 
     @Test
     public void shouldInstantiateEmpty() {
-        final Iterable<String> ids = ckanCache.getDatasetIds();
+        final Iterable<String> ids = metadataStore.getDatasetIds();
         MatcherAssert.assertThat(ids.iterator().hasNext(), CoreMatchers.is(false));
     }
 
@@ -66,10 +66,10 @@ public class InMemoryCkanMetadataCacheTest {
         CkanPair extras = new CkanPair(CkanConstants.SchemaDescriptor.SCHEMA_DESCRIPTOR, simpleDescriptor);
         dataset.setExtras(Collections.singletonList(extras));
 
-        ckanCache.insertOrUpdate(dataset);
-        final SchemaDescriptor actual = ckanCache.getSchemaDescription(dataset.getId());
-        String actualId = actual.getVersion();
-        MatcherAssert.assertThat(actualId, CoreMatchers.is("0.1"));
+        metadataStore.insertOrUpdate(dataset);
+        final SchemaDescriptor actual = metadataStore.getSchemaDescription(dataset.getId());
+        String actualVersion = actual.getVersion();
+        MatcherAssert.assertThat(actualVersion, CoreMatchers.is("0.1"));
     }
 
     @Test
@@ -79,8 +79,8 @@ public class InMemoryCkanMetadataCacheTest {
         CkanPair extras = new CkanPair("custom_descriptor_key", simpleDescriptor);
         dataset.setExtras(Collections.singletonList(extras));
 
-        ckanCache.insertOrUpdate(dataset);
-        final SchemaDescriptor actual = ckanCache.getSchemaDescription(dataset.getId());
+        metadataStore.insertOrUpdate(dataset);
+        final SchemaDescriptor actual = metadataStore.getSchemaDescription(dataset.getId());
         String actualId = actual.getVersion();
         MatcherAssert.assertThat(actualId, CoreMatchers.is("0.1"));
     }

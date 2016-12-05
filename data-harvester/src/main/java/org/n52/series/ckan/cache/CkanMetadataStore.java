@@ -28,39 +28,30 @@
  */
 package org.n52.series.ckan.cache;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import org.n52.series.ckan.beans.DataCollection;
-
 import eu.trentorise.opendata.jackan.model.CkanDataset;
+import org.n52.series.ckan.beans.SchemaDescriptor;
 
-public class InMemoryCkanDataCache implements CkanDataSink {
+public interface CkanMetadataStore {
 
-    private final Map<String, DataCollection> datasets = new HashMap<>();
+    public int size();
 
-    @Override
-    public void insertOrUpdate(DataCollection dataCollection) {
-        CkanDataset dataset = dataCollection.getDataset();
-        if (datasets.containsKey(dataset.getId())) {
-            // TODO update
-        } else {
-            datasets.put(dataset.getId(), dataCollection);
-        }
-    }
+    public void clear();
 
-    public Iterable<DataCollection> getCollections() {
-        return Collections.unmodifiableCollection(datasets.values());
-    }
+    public boolean contains(CkanDataset dataset);
 
-    public DataCollection getCollection(String datasetId) {
-        return datasets.get(datasetId);
-    }
+    public boolean containsNewerThan(CkanDataset dataset);
 
-    public Set<String> getCollectionIds() {
-        return datasets.keySet();
-    }
+    public void insertOrUpdate(CkanDataset dataset);
 
+    public void delete(CkanDataset dataset);
+
+    public Iterable<String> getDatasetIds();
+
+    public Iterable<CkanDataset> getDatasets();
+
+    public CkanDataset getDataset(String datasetId);
+
+    public boolean hasSchemaDescriptor(CkanDataset datasetId);
+
+    public SchemaDescriptor getSchemaDescription(String datasetId);
 }

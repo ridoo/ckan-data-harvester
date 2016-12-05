@@ -49,7 +49,14 @@ public interface CkanConstants {
 
     public interface ResourceType {
         public static final String CSV_OBSERVATIONS_COLLECTION = "csv-observations-collection";
+        /**
+         * since schema descriptior version 0.3 
+         */
         public static final String OBSERVATIONS_WITH_GEOMETRIES = "observations_with_geometry";
+        /**
+         * since schema descriptior version 0.3 
+         */
+        public static final String OBSERVED_GEOMETRIES = "observed_geometries";
         public static final String PLATFORMS = "platforms";
         public static final String OBSERVATIONS = "observations";
     }

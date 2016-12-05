@@ -26,10 +26,42 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
-package org.n52.series.ckan.sos;
+package org.n52.series.ckan.cache;
 
-import org.n52.series.ckan.cache.CkanDataSink;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
-public interface SosInsertionStrategy extends CkanDataSink {
+import org.n52.series.ckan.beans.DataCollection;
+import org.n52.series.ckan.da.DataStoreManager;
+
+import eu.trentorise.opendata.jackan.model.CkanDataset;
+
+public class InMemoryDataStoreManager implements DataStoreManager {
+
+    private final Map<String, DataCollection> datasets = new HashMap<>();
+
+    @Override
+    public void insertOrUpdate(DataCollection dataCollection) {
+        CkanDataset dataset = dataCollection.getDataset();
+        if (datasets.containsKey(dataset.getId())) {
+            // TODO update
+        } else {
+            datasets.put(dataset.getId(), dataCollection);
+        }
+    }
+
+    public Iterable<DataCollection> getCollections() {
+        return Collections.unmodifiableCollection(datasets.values());
+    }
+
+    public DataCollection getCollection(String datasetId) {
+        return datasets.get(datasetId);
+    }
+
+    public Set<String> getCollectionIds() {
+        return datasets.keySet();
+    }
 
 }

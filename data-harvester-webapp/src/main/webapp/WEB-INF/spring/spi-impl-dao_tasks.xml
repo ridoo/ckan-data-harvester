@@ -48,8 +48,8 @@
 <!--    <bean id="ckanHarvestingService" class="org.n52.series.ckan.util.FileBasedCkanHarvester">
         <constructor-arg index="0" value="dwd" />
         <property name="resourceDownloadBaseFolder" value="test-data" />
-        <property name="metadataCache" class="org.n52.series.ckan.cache.InMemoryCkanMetadataCache" />
-        <property name="dataCache" class="org.n52.series.ckan.cache.InMemoryCkanDataCache" />
+        <property name="metadataCache" class="org.n52.series.ckan.cache.InMemoryMetadataStore" />
+        <property name="dataStoreManager" class="org.n52.series.ckan.cache.InMemoryDataStoreManager" />
     </bean>-->
 
     <bean id="ckanHarvestingService" class="org.n52.series.ckan.da.CkanHarvestingService">
@@ -58,10 +58,10 @@
                 <constructor-arg index="0" value="https://ckan.colabis.de" />
             </bean>
         </property>
-        <property name="metadataCache" ref="serializingCache" />
-        <property name="dataCache">
-            <bean class="org.n52.series.ckan.sos.SosDatabaseCache">
-                <property name="ckanSosReferenceCache" ref="serializingCache" />
+        <property name="metadataStore" ref="serializingMetadataStore" />
+        <property name="dataStoreManager">
+            <bean class="org.n52.series.ckan.sos.SosDataStoreManager">
+                <constructor-arg index="0" ref="serializingMetadataStore" />
             </bean>
         </property>
         <property name="resourceClient">
@@ -77,9 +77,9 @@
         </property>
     </bean>
 
-    <bean id="serializingCache" class="org.n52.series.ckan.sos.SerializingCkanCache"
+    <bean id="serializingMetadataStore" class="org.n52.series.ckan.sos.SerializingMetadataStore"
           init-method="init" destroy-method="shutdown">
-        <property name="metadataCacheFile" value="cache/ckan-sos_cache" />
+        <property name="filePath" value="cache/ckan-sos_cache" />
     </bean>
 
 </beans>

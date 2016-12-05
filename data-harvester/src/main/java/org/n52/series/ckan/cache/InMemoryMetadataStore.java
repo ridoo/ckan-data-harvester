@@ -48,19 +48,19 @@ import org.n52.series.ckan.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class InMemoryCkanMetadataCache implements CkanMetadataCache {
+public class InMemoryMetadataStore implements CkanMetadataStore {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(InMemoryCkanMetadataCache.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InMemoryMetadataStore.class);
 
     private final ObjectMapper om = new ObjectMapper(); // TODO use global om config
 
     private final Map<String, CkanDataset> datasets;
 
-    public InMemoryCkanMetadataCache() {
+    public InMemoryMetadataStore() {
         this(null);
     }
 
-    public InMemoryCkanMetadataCache(String fieldIdMappingConfig) {
+    public InMemoryMetadataStore(String fieldIdMappingConfig) {
         this.datasets = new HashMap<>();
     }
 

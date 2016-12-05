@@ -30,43 +30,36 @@ package org.n52.series.ckan.sos;
 
 import org.n52.series.ckan.beans.DataCollection;
 import org.n52.series.ckan.beans.DescriptionFile;
+import org.n52.series.ckan.beans.DescriptorVersion;
+import org.n52.series.ckan.beans.DescriptorVersionTest;
+import org.n52.series.ckan.beans.SchemaDescriptor;
 
 public class SosStrategyFactory {
 
-    private DataCollection dataCollection;
+    private CkanSosReferenceCache ckanSosReferenceCache;
 
-    private CkanSosReferenceCache ckanSosReferencingCache;
-
-    private SosStrategyFactory() {
-
-    }
-
-    public static SosStrategyFactory create() {
-        return new SosStrategyFactory();
-    }
-
-
-    public SosInsertionStrategy createInsertionStrategy() {
+    public SosInsertStrategy createInsertStrategy(DataCollection dataCollection) {
 
         // depending on dataCollection structure we might have to choose a different insertion strategy
         // TODO add analytic methods to CsvObservationCollection to decide which strategy will fit
 
         // TODO might also help
-        DescriptionFile schemaDescriptor = dataCollection.getSchemaDescriptor();
-
-        return ckanSosReferencingCache == null
-                ? new DefaultSosInsertionStrategy()
-                : new DefaultSosInsertionStrategy(ckanSosReferencingCache);
-    }
-
-    public SosStrategyFactory withData(DataCollection dataCollection) {
-        this.dataCollection = dataCollection;
-        return this;
+        DescriptionFile file = dataCollection.getSchemaDescriptor();
+        SchemaDescriptor schemaDescription = file.getSchemaDescription();
+        DescriptorVersion version = new DescriptorVersion(schemaDescription.getVersion());
+        if (version.isGreaterOrEquals("0.3")) {
+            // TODO
+        }
+        
+        return ckanSosReferenceCache == null
+                ? new DefaultSosInsertStrategy()
+                : new DefaultSosInsertStrategy(ckanSosReferenceCache);
     }
 
     public SosStrategyFactory withReferenceCache(CkanSosReferenceCache ckanSosReferenceCache) {
-        this.ckanSosReferencingCache = ckanSosReferenceCache;
+        this.ckanSosReferenceCache = ckanSosReferenceCache;
         return this;
     }
+    
 
 }

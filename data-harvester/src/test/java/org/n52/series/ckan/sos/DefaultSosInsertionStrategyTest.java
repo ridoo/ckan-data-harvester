@@ -31,17 +31,23 @@ package org.n52.series.ckan.sos;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.n52.series.ckan.cache.InMemoryDataStoreManager;
 import org.n52.series.ckan.util.FileBasedCkanHarvestingService;
 import org.n52.sos.config.SettingsManager;
+import org.n52.sos.ds.hibernate.HibernateTestCase;
 import org.n52.sos.exception.ConfigurationException;
 import org.n52.sos.ogc.ows.OwsExceptionReport;
 
-public class DefaultSosInsertionStrategyTest {
+public class DefaultSosInsertionStrategyTest extends HibernateTestCase {
 
     private FileBasedCkanHarvestingService service;
 
@@ -119,12 +125,26 @@ public class DefaultSosInsertionStrategyTest {
     private void assertDataInsertion(String datasetId)
             throws URISyntaxException, IOException, OwsExceptionReport, ConfigurationException {
         try {
-            SosH2Store sosStore = new SosH2Store(service.getCkanDataCache());
-            sosStore.insertDatasetViaStrategy(datasetId, new DefaultSosInsertionStrategy());
-            sosStore.assertObservationsAvailable();
+            SosDataStoreManager dataStore = new SosDataStoreManager();
+            InMemoryDataStoreManager ckanDataCache = service.getCkanDataStoreManager();
+            dataStore.insertOrUpdate(ckanDataCache.getCollection(datasetId));
+            assertThat(new H2DatabaseAccessor(), observationsAvailable());
         } finally {
             SettingsManager.getInstance().cleanup();
         }
+    }
+
+    public Matcher<H2DatabaseAccessor> observationsAvailable() {
+        return new TypeSafeMatcher<H2DatabaseAccessor>() {
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("emptyStore should return ").appendValue(Boolean.TRUE);
+            }
+            @Override
+            protected boolean matchesSafely(H2DatabaseAccessor item) {
+                return !item.getObservations().isEmpty();
+            }
+        };
     }
 
 }

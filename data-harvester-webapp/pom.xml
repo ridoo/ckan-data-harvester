@@ -81,12 +81,12 @@
                         <nonFilteredFileExtension>db</nonFilteredFileExtension>
                     </nonFilteredFileExtensions>
                     <webResources>
-                        <resource>
+                        <webResource>
                             <!-- override SOS config if present -->
                             <directory>src/main/webapp</directory>
                             <include>configuration.db</include>
                             <filtering>false</filtering>
-                        </resource>
+                        </webResource>
                     </webResources>
                     <webResources>
                         <webResource>

@@ -116,12 +116,22 @@ public class DataCollection {
 
     private Set<String> getObservationTypes() {
         Set<String> observationTypes = getCkanMapping().getResourceTypeMappings(CkanConstants.ResourceType.OBSERVATIONS);
-        observationTypes.addAll(getCkanMapping().getResourceTypeMappings(CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES));
+        if (getDescriptorVersion().isGreaterOrEquals("0.3")) {
+            observationTypes.addAll(getCkanMapping().getResourceTypeMappings(CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES));
+        }
         return observationTypes;
     }
 
     public Map<ResourceMember, DataFile> getPlatformDataCollections() {
-        return getDataCollectionsOfType(getCkanMapping().getResourceTypeMappings(CkanConstants.ResourceType.PLATFORMS));
+        Set<String> types = getDescriptorVersion().isGreaterOrEquals("0.3")
+                ? getCkanMapping().getResourceTypeMappings(CkanConstants.ResourceType.OBSERVED_GEOMETRIES)
+                : getCkanMapping().getResourceTypeMappings(CkanConstants.ResourceType.PLATFORMS);
+        return getDataCollectionsOfType(types);
+    }
+    
+    public DescriptorVersion getDescriptorVersion() {
+        SchemaDescriptor schemaDescription = schemaDescriptor.getSchemaDescription();
+        return new DescriptorVersion(schemaDescription.getVersion());
     }
 
     private CkanMapping getCkanMapping() {
