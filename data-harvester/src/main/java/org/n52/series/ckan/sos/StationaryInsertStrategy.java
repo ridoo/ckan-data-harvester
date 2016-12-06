@@ -91,8 +91,8 @@ class StationaryInsertStrategy implements SosInsertStrategy {
 
             for (Phenomenon phenomenon : phenomena) {
                 InsertSensorRequestBuilder insertSensorRequestBuilder = InsertSensorRequestBuilder.create(feature, phenomenon)
-                        .setMobile(member.isOfType(CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES))
-                        .withDataset(dataset);
+                        .withDataset(dataset)
+                        .setMobile(false);
                 String procedureId = insertSensorRequestBuilder.getProcedureId();
                 if ( !dataInsertions.containsKey(procedureId)) {
                     LOGGER.debug("Building InsertSensorRequest with: procedure '{}', phenomenon '{}' (unit '{}')",
