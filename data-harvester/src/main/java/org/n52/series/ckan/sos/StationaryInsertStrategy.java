@@ -53,20 +53,20 @@ import org.slf4j.LoggerFactory;
 import eu.trentorise.opendata.jackan.model.CkanDataset;
 import eu.trentorise.opendata.jackan.model.CkanResource;
 
-class DefaultSosInsertStrategy implements SosInsertStrategy {
+class StationaryInsertStrategy implements SosInsertStrategy {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultSosInsertStrategy.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StationaryInsertStrategy.class);
 
-    private final CkanSosReferenceCache ckanSosReferencingCache;
+    private final CkanSosReferenceCache ckanSosReferenceCache;
 
     private UomParser uomParser = new UcumParser();
 
-    DefaultSosInsertStrategy() {
+    StationaryInsertStrategy() {
         this(null);
     }
 
-    DefaultSosInsertStrategy(CkanSosReferenceCache ckanSosReferencingCache) {
-        this.ckanSosReferencingCache = ckanSosReferencingCache;
+    StationaryInsertStrategy(CkanSosReferenceCache ckanSosReferencingCache) {
+        this.ckanSosReferenceCache = ckanSosReferencingCache;
     }
 
     @Override
@@ -76,7 +76,7 @@ class DefaultSosInsertStrategy implements SosInsertStrategy {
         final List<Phenomenon> phenomena = phenomenonParser.parse(resourceFields);
         LOGGER.debug("Phenomena: {}", phenomena);
 
-        LOGGER.debug("Start insertion ...");
+        LOGGER.debug("Create stationary insertions ...");
         Map<String, DataInsertion> dataInsertions = new HashMap<>();
         for (Entry<ResourceKey, Map<ResourceField, String>> rowEntry : dataTable.getTable().rowMap().entrySet()) {
 
@@ -102,7 +102,7 @@ class DefaultSosInsertStrategy implements SosInsertStrategy {
                     DataInsertion dataInsertion = new DataInsertion(insertSensorRequestBuilder);
                     dataInsertions.put(procedureId, dataInsertion);
 
-                    if (ckanSosReferencingCache != null) {
+                    if (ckanSosReferenceCache != null) {
                         DataFile dataFile = dataCollection.getDataFile(member);
                         CkanResource resource = dataFile.getResource();
                         dataInsertion.setReference(CkanSosObservationReference.create(resource));

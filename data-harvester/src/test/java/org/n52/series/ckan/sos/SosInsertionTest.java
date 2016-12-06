@@ -47,7 +47,7 @@ import org.n52.sos.ds.hibernate.HibernateTestCase;
 import org.n52.sos.exception.ConfigurationException;
 import org.n52.sos.ogc.ows.OwsExceptionReport;
 
-public class DefaultSosInsertionStrategyTest extends HibernateTestCase {
+public class SosInsertionTest extends HibernateTestCase {
 
     private FileBasedCkanHarvestingService service;
 
@@ -116,7 +116,7 @@ public class DefaultSosInsertionStrategyTest extends HibernateTestCase {
     }
 
     @Test
-    @Ignore("currently toooooo slooooooooooow for unit testing")
+//    @Ignore("currently toooooo slooooooooooow for unit testing")
     public void when_inserting_heavyMetalSamples_dataset_then_getObservationNotEmpty()
             throws OwsExceptionReport, IOException, URISyntaxException {
         assertDataInsertion("3eb54ee2-6ec5-4ad9-af96-264159008aa7");

@@ -1,14 +1,19 @@
 package org.n52.series.ckan.sos;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.n52.series.ckan.beans.DataCollection;
 import org.n52.series.ckan.beans.DataFile;
 import org.n52.series.ckan.beans.ResourceMember;
+import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.da.DataStoreManager;
 import org.n52.series.ckan.table.DataTable;
 import org.n52.series.ckan.table.ResourceTable;
@@ -37,9 +42,7 @@ public class SosDataStoreManager implements DataStoreManager {
 
     private final DeleteObservationDAO deleteObservationDao;
 
-    private final CkanSosReferenceCache ckanSosReferencingCache;
-
-    private final SosStrategyFactory strategyFactory;
+    private final CkanSosReferenceCache ckanSosReferenceCache;
 
     SosDataStoreManager() {
         this(null);
@@ -52,19 +55,17 @@ public class SosDataStoreManager implements DataStoreManager {
     public SosDataStoreManager(InsertSensorDAO insertSensorDao,
             InsertObservationDAO insertObservationDao,
             DeleteObservationDAO deleteObservationDao,
-            CkanSosReferenceCache ckanSosReferencingCache) {
+            CkanSosReferenceCache ckanSosReferenceCache) {
         this.insertSensorDao = insertSensorDao;
         this.insertObservationDao = insertObservationDao;
         this.deleteObservationDao = deleteObservationDao;
-        this.ckanSosReferencingCache = ckanSosReferencingCache;
-        this.strategyFactory = new SosStrategyFactory()
-                .withReferenceCache(ckanSosReferencingCache);
+        this.ckanSosReferenceCache = ckanSosReferenceCache;
     }
 
+    @Override
     public void insertOrUpdate(DataCollection dataCollection) {
         try {
-            DataTable table = loadData(dataCollection);
-            Map<String, DataInsertion> datainsertions = getDataInsertions(table, dataCollection);
+            Map<String, DataInsertion> datainsertions = getDataInsertions(dataCollection);
             if (storeDataInsertions(datainsertions)) {
                 // Trigger SOS Capabilities cache reloading after insertion
                 Configurator.getInstance().getCacheController().update();
@@ -75,15 +76,16 @@ public class SosDataStoreManager implements DataStoreManager {
         }
     }
 
-    private DataTable loadData(DataCollection dataCollection) {
+    private DataTable loadData(DataCollection dataCollection, Set<String> resourceTypesToInsert) {
         CkanDataset dataset = dataCollection.getDataset();
         LOGGER.debug("load data for dataset '{}'", dataset.getName());
         DataTable fullTable = new ResourceTable();
 
         // TODO write test for it
         // TODO if dataset is newer than in cache -> set flag to re-insert whole datacollection
+        
 
-        Map<String, List<ResourceMember>> resourceMembersByType = dataCollection.getResourceMembersByType();
+        Map<String, List<ResourceMember>> resourceMembersByType = dataCollection.getResourceMembersByType(resourceTypesToInsert);
         for (List<ResourceMember> membersWithCommonResourceTypes : resourceMembersByType.values()) {
             DataTable dataTable = new ResourceTable();
             for (ResourceMember member : membersWithCommonResourceTypes) {
@@ -108,17 +110,17 @@ public class SosDataStoreManager implements DataStoreManager {
     }
 
     private boolean isUpdateNeeded(CkanResource resource, DataFile dataFile) {
-        if (ckanSosReferencingCache == null) {
+        if (ckanSosReferenceCache == null) {
             return true;
         }
 
         try {
-            if ( !ckanSosReferencingCache.exists(resource)) {
+            if ( !ckanSosReferenceCache.exists(resource)) {
                 CkanSosObservationReference reference = new CkanSosObservationReference(resource);
-                ckanSosReferencingCache.addOrUpdate(reference);
+                ckanSosReferenceCache.addOrUpdate(reference);
                 return true;
             }
-            CkanSosObservationReference reference = ckanSosReferencingCache.getReference(resource);
+            CkanSosObservationReference reference = ckanSosReferenceCache.getReference(resource);
             final CkanResource ckanResource = reference.getResource().getCkanResource();
 
             if ( !dataFile.isNewerThan(ckanResource)) {
@@ -150,9 +152,38 @@ public class SosDataStoreManager implements DataStoreManager {
         return true;
     }
 
-    private Map<String, DataInsertion> getDataInsertions(DataTable table, DataCollection dataCollection) {
-        SosInsertStrategy strategy = strategyFactory.createInsertStrategy(dataCollection);
-        return strategy.createDataInsertions(table, dataCollection);
+    private Map<String, DataInsertion> getDataInsertions(DataCollection dataCollection) {
+        Map<String, DataInsertion> dataInsertions = new HashMap<>();
+
+        // add stationary observation data
+        SosInsertStrategy stationaryStrategy = ckanSosReferenceCache == null
+                ? new StationaryInsertStrategy()
+                : new StationaryInsertStrategy(ckanSosReferenceCache);
+        DataTable stationaryInserts = loadData(dataCollection, getStationaryObservationTypes());
+        dataInsertions.putAll(stationaryStrategy.createDataInsertions(stationaryInserts, dataCollection));
+        
+        // add mobile observation data
+        SosInsertStrategy mobileStrategy = ckanSosReferenceCache == null
+                ? new MobileInsertStrategy()
+                : new MobileInsertStrategy(ckanSosReferenceCache);
+        DataTable mobileInserts = loadData(dataCollection, getMobileObservationTypes());
+        dataInsertions.putAll(mobileStrategy.createDataInsertions(mobileInserts, dataCollection));
+        
+        return dataInsertions;
+    }
+
+    private Set<String> getStationaryObservationTypes() {
+        return new HashSet<>(Arrays.<String>asList(new String[] {
+                CkanConstants.ResourceType.PLATFORMS,
+                CkanConstants.ResourceType.OBSERVATIONS,
+                CkanConstants.ResourceType.OBSERVED_GEOMETRIES // since 0.3
+        }));
+    }
+    
+    private Set<String> getMobileObservationTypes() {
+        return new HashSet<>(Arrays.<String>asList(new String[] {
+                CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES // since 0.3
+        }));
     }
 
     private boolean storeDataInsertions(Map<String, DataInsertion> dataInsertionByProcedure) {
@@ -175,8 +206,8 @@ public class SosDataStoreManager implements DataStoreManager {
                 LOGGER.debug("Insertion completed in {}s.", (System.currentTimeMillis() - start) / 1000d);
                 dataInserted = true;
 
-                if (ckanSosReferencingCache != null && dataInsertion.hasObservationsReference()) {
-                    ckanSosReferencingCache.addOrUpdate(dataInsertion.getObservationsReference());
+                if (ckanSosReferenceCache != null && dataInsertion.hasObservationsReference()) {
+                    ckanSosReferenceCache.addOrUpdate(dataInsertion.getObservationsReference());
                 }
             }
             catch (Exception e) {
