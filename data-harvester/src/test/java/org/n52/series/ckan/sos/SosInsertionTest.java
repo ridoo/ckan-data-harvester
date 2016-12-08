@@ -109,7 +109,7 @@ public class SosInsertionTest extends HibernateTestCase {
     @Test
     public void when_inserting_DWDPrecipitation_dataset_then_getObservationNotEmpty() {
         insertDataset("26128007-1fa7-475f-a4f1-5e798185eab9");
-        // TODO schema descriptor actually describes two more (NIEDERSCHLAG_GEFALLEN_IND 
+        // TODO schema descriptor actually describes two more (NIEDERSCHLAG_GEFALLEN_IND
         // and NIEDESCHLAGSFORM) phenomena but both are missing the `phenomenon` field value
         //MatcherAssert.assertThat(database, hasDatasetCount(12));
         MatcherAssert.assertThat(database, hasDatasetCount(4));
@@ -150,7 +150,7 @@ public class SosInsertionTest extends HibernateTestCase {
         insertDataset("3eb54ee2-6ec5-4ad9-af96-264159008aa7");
         MatcherAssert.assertThat(database, hasDatasetCount(6));
         assertThat(database, hasObservationsAvailable());
-        
+
         // check if each track is available as own dataset
         MatcherAssert.assertThat(database, H2DatabaseAccessor.hasDatasetsWithFeatureId("2012-07-20 - Bannewitz"));
         MatcherAssert.assertThat(database, H2DatabaseAccessor.hasDatasetsWithFeatureId("2012-07-21 - Bannewitz"));
@@ -159,7 +159,7 @@ public class SosInsertionTest extends HibernateTestCase {
         MatcherAssert.assertThat(database, H2DatabaseAccessor.hasDatasetsWithFeatureId("2012-07-25 - Bannewitz"));
         MatcherAssert.assertThat(database, H2DatabaseAccessor.hasDatasetsWithFeatureId("2012-07-27 - Bannewitz"));
     }
-    
+
     @Test
     @Ignore("this dataset needs some discussion first")
     public void when_inserting_emmissionSimulationResults_dataset_then_getObservationNotEmpty() {

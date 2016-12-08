@@ -58,9 +58,9 @@ import eu.trentorise.opendata.jackan.model.CkanPair;
 public class InMemoryMetadataStore implements CkanMetadataStore {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InMemoryMetadataStore.class);
-    
+
     private static final String CONFIG_FILE_BLACKLIST_DATASET_IDS = "/dataset-blacklist.txt";
-    
+
     private final ObjectMapper om = new ObjectMapper(); // TODO use global om config
 
     private final Map<String, CkanDataset> datasets;
@@ -74,12 +74,12 @@ public class InMemoryMetadataStore implements CkanMetadataStore {
     public InMemoryMetadataStore(String fieldIdMappingConfig) {
         this(fieldIdMappingConfig, CONFIG_FILE_BLACKLIST_DATASET_IDS);
     }
-    
+
     protected InMemoryMetadataStore(String fieldIdMappingConfig, String blacklistConfigFile) {
         this.datasets = new HashMap<>();
         this.blacklistedDatasetIds = readBlacklistedDatasetIds(blacklistConfigFile);
     }
-    
+
     private List<String> readBlacklistedDatasetIds(String resource) {
         List<String> blacklistedIds = new ArrayList<>();
         URL url = getClass().getResource(resource);
@@ -111,7 +111,7 @@ public class InMemoryMetadataStore implements CkanMetadataStore {
         }
         return blacklistedIds;
     }
-    
+
     private boolean isComment(String line) {
         return line.startsWith("#")
                 || line.startsWith("//")
@@ -121,7 +121,7 @@ public class InMemoryMetadataStore implements CkanMetadataStore {
     protected List<String> getBlacklistedDatasetIds() {
         return Collections.unmodifiableList(blacklistedDatasetIds);
     }
-    
+
     protected void putAll(Map<String, CkanDataset> datasets) {
         this.datasets.putAll(datasets);
     }

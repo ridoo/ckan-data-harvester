@@ -138,7 +138,7 @@
         </dependency>
         <dependency>
             <groupId>org.n52.sensorweb.sos</groupId>
-            <artifactId>gda-operations</artifactId>
+            <artifactId>gda-operation</artifactId>
             <version>${sos.version}</version>
         </dependency>
         <dependency>

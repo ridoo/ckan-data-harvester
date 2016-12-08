@@ -92,19 +92,19 @@ public class InMemoryCkanMetadataStoreTest {
         String actualId = actual.getVersion();
         MatcherAssert.assertThat(actualId, CoreMatchers.is("0.1"));
     }
-    
+
     @Test
     public void when_noDatasetIdBlacklistFile_then_emptyBlacklist() {
         MatcherAssert.assertThat(metadataStore.getBlacklistedDatasetIds(), is(empty()));
     }
-    
+
     @Test
     public void when_notExistingBlacklistFile_then_emptyBlacklist() {
         InMemoryMetadataStore metadataStore = new InMemoryMetadataStore(null, "/does-not-exist.txt");
         List<String> actual = metadataStore.getBlacklistedDatasetIds();
         MatcherAssert.assertThat(actual, is(empty()));
     }
-    
+
     @Test
     public void when_nonEmptyBlacklistFile_then_nonEmptyBlacklist() {
         InMemoryMetadataStore metadataStore = new InMemoryMetadataStore(null, "/non-empty_dataset-blacklist.txt");
