@@ -136,7 +136,7 @@ public class CkanMapping {
                 ? name.toLowerCase(Locale.ROOT)
                 : name;
         String path = lowerCasedGroup + "/" + lowerCasedName;
-        JsonNode mappingArray = this.jsonMapping.at(path);
+        JsonNode mappingArray = getConfigValueAt(path);
         if (mappingArray.isMissingNode()) {
             LOGGER.trace("try to get '{}' from fallback mapping.", path);
             mappingArray = fallbackMapping.at(path);
@@ -147,6 +147,10 @@ public class CkanMapping {
         }
         values.add(lowerCasedName); // add self
         return new HashSet<>(values);
+    }
+
+    public JsonNode getConfigValueAt(String path) {
+        return this.jsonMapping.at(path);
     }
 
     public static CkanMapping loadCkanMapping() {
