@@ -39,6 +39,7 @@ import org.hamcrest.MatcherAssert;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -157,6 +158,17 @@ public class SosInsertionTest extends HibernateTestCase {
         MatcherAssert.assertThat(database, H2DatabaseAccessor.hasDatasetsWithFeatureId("2012-07-23 - Bannewitz"));
         MatcherAssert.assertThat(database, H2DatabaseAccessor.hasDatasetsWithFeatureId("2012-07-25 - Bannewitz"));
         MatcherAssert.assertThat(database, H2DatabaseAccessor.hasDatasetsWithFeatureId("2012-07-27 - Bannewitz"));
+    }
+    
+    @Test
+    @Ignore("this dataset needs some discussion first")
+    public void when_inserting_emmissionSimulationResults_dataset_then_getObservationNotEmpty() {
+        // TODO simulation results need discussion
+        // 1) a mobile platform (car) which is declared as observation --> observation_with_geometry
+        // 2) the track must be identifiable ... can be artificially differentiated by combining columns
+        //    --> e.g. timestamp (using raw, or an aggregating pattern)
+        insertDataset("30bdf3a2-74ba-43e0-9b31-50e5f5414402");
+        assertThat(database, hasObservationsAvailable());
     }
 
     private void insertDataset(String datasetId) {
