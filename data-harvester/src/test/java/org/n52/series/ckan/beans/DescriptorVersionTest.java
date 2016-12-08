@@ -12,7 +12,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 public class DescriptorVersionTest {
-    
+
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
@@ -23,14 +23,14 @@ public class DescriptorVersionTest {
         thrown.expectMessage("foobar");
         new DescriptorVersion("foobar");
     }
-    
+
     @Test
     public void when_negative_version_then_throwException() {
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("negative");
         new DescriptorVersion("-1.4");
     }
-    
+
     @Test
     public void when_valid_version_then_printVersionString() {
         DescriptorVersion version = new DescriptorVersion("1.4");
@@ -42,14 +42,14 @@ public class DescriptorVersionTest {
         DescriptorVersion version = new DescriptorVersion(".4");
         MatcherAssert.assertThat(version.toString(), is("0.4"));
     }
-    
+
     @Test
     public void when_versionGreater_then_greaterOrEquals() {
         DescriptorVersion oneVersion = new DescriptorVersion("0.3");
         DescriptorVersion otherVersion = new DescriptorVersion("0.4");
         MatcherAssert.assertThat(oneVersion.isGreaterOrEquals(otherVersion), is(false));
     }
-    
+
     @Test
     public void when_versionWithMoreDetails_then_considerMayorAndMinorOnly() {
         DescriptorVersion oneVersion = new DescriptorVersion("0.4.1-alpha.1");
@@ -57,19 +57,19 @@ public class DescriptorVersionTest {
         // only minor and mayor parts are considered
         MatcherAssert.assertThat(otherVersion.isGreaterOrEquals(oneVersion), is(true));
     }
-    
+
     @Test
     public void when_valid_version_then_getMayor() {
         DescriptorVersion version = new DescriptorVersion("01.4");
         MatcherAssert.assertThat(version.getMayor(), is(1));
     }
-    
+
     @Test
     public void when_valid_version_then_getMinor() {
         DescriptorVersion version = new DescriptorVersion("01.4");
         MatcherAssert.assertThat(version.getMinor(), is(4));
     }
-    
+
     @Test
     public void when_twoSameVersions_then_compare() {
         DescriptorVersion oneVersion = new DescriptorVersion("01.4");
@@ -83,7 +83,7 @@ public class DescriptorVersionTest {
         DescriptorVersion otherVersion = new DescriptorVersion("0.4.5");
         MatcherAssert.assertThat(oneVersion.compareTo(otherVersion), greaterThan(0));
     }
-    
+
     @Test
     public void when_differentMajorVersions_then_greaterThanTest() {
         DescriptorVersion oneVersion = new DescriptorVersion("01.4.5");

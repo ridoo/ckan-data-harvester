@@ -40,9 +40,9 @@ public class MobileInsertStrategy implements SosInsertStrategy {
         for (Entry<ResourceKey, Map<ResourceField, String>> rowEntry : dataTable.getTable().rowMap().entrySet()) {
             
         }
-        
-        
         return dataInsertions;
     }
+
+
 
 }

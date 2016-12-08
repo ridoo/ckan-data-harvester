@@ -83,7 +83,7 @@ public class SosDataStoreManager implements DataStoreManager {
 
         // TODO write test for it
         // TODO if dataset is newer than in cache -> set flag to re-insert whole datacollection
-        
+
 
         Map<String, List<ResourceMember>> resourceMembersByType = dataCollection.getResourceMembersByType(resourceTypesToInsert);
         for (List<ResourceMember> membersWithCommonResourceTypes : resourceMembersByType.values()) {
@@ -161,14 +161,14 @@ public class SosDataStoreManager implements DataStoreManager {
                 : new StationaryInsertStrategy(ckanSosReferenceCache);
         DataTable stationaryInserts = loadData(dataCollection, getStationaryObservationTypes());
         dataInsertions.putAll(stationaryStrategy.createDataInsertions(stationaryInserts, dataCollection));
-        
+
         // add mobile observation data
         SosInsertStrategy mobileStrategy = ckanSosReferenceCache == null
                 ? new MobileInsertStrategy()
                 : new MobileInsertStrategy(ckanSosReferenceCache);
         DataTable mobileInserts = loadData(dataCollection, getMobileObservationTypes());
         dataInsertions.putAll(mobileStrategy.createDataInsertions(mobileInserts, dataCollection));
-        
+
         return dataInsertions;
     }
 
@@ -179,7 +179,7 @@ public class SosDataStoreManager implements DataStoreManager {
                 CkanConstants.ResourceType.OBSERVED_GEOMETRIES // since 0.3
         }));
     }
-    
+
     private Set<String> getMobileObservationTypes() {
         return new HashSet<>(Arrays.<String>asList(new String[] {
                 CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES // since 0.3

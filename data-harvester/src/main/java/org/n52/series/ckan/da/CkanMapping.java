@@ -197,7 +197,6 @@ public class CkanMapping {
             }
         }
 
-
         private CkanMapping loadConfig(InputStream inputStream) throws IOException {
             return new CkanMapping(readJson(inputStream), readJson(loadDefaults()));
         }

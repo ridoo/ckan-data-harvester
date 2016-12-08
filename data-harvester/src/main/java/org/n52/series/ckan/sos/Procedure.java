@@ -9,14 +9,14 @@ import org.n52.sos.ogc.sensorML.elements.SmlIdentifier;
 public class Procedure {
 
     private String id;
-    
+
     private String longName;
 
     Procedure(String id, String longName) {
         this.id = id;
         this.longName = longName;
     }
-    
+
     public String getId() {
         return id;
     }
@@ -32,7 +32,7 @@ public class Procedure {
                 OGCConstants.URN_UNIQUE_IDENTIFIER,
                 id);
         idents.add(uniqueId);
-        
+
         if (longName != null) {
             SmlIdentifier longName = new SmlIdentifier(
                     "longName",
@@ -42,5 +42,5 @@ public class Procedure {
         }
         return idents;
     }
-    
+
 }
