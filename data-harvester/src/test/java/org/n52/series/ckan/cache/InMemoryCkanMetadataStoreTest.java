@@ -107,6 +107,7 @@ public class InMemoryCkanMetadataStoreTest {
     
     @Test
     public void when_nonEmptyBlacklistFile_then_nonEmptyBlacklist() {
+        InMemoryMetadataStore metadataStore = new InMemoryMetadataStore(null, "/non-empty_dataset-blacklist.txt");
         List<String> actual = metadataStore.getBlacklistedDatasetIds();
         MatcherAssert.assertThat(actual, is(not(empty())));
         MatcherAssert.assertThat(actual, contains("30bdf3a2-74ba-43e0-9b31-50e5f5414402"));

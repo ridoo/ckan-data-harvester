@@ -77,18 +77,21 @@ public class InMemoryMetadataStore implements CkanMetadataStore {
     
     protected InMemoryMetadataStore(String fieldIdMappingConfig, String blacklistConfigFile) {
         this.datasets = new HashMap<>();
-        this.blacklistedDatasetIds = readBlacklistedDatasetIds();
+        this.blacklistedDatasetIds = readBlacklistedDatasetIds(blacklistConfigFile);
     }
     
-    private List<String> readBlacklistedDatasetIds() {
+    private List<String> readBlacklistedDatasetIds(String resource) {
         List<String> blacklistedIds = new ArrayList<>();
-        String resource = CONFIG_FILE_BLACKLIST_DATASET_IDS;
         URL url = getClass().getResource(resource);
-        try {
-            File file = new File(url.toURI());
-            blacklistedIds.addAll(readLinesFromFile(file));
-        } catch (URISyntaxException e) {
-            LOGGER.warn("Could not find file via URL '{}'", url.toString());
+        if (url == null) {
+            LOGGER.warn("Could not find file via '{}'", resource);
+        } else {
+            try {
+                File file = new File(url.toURI());
+                blacklistedIds.addAll(readLinesFromFile(file));
+            } catch (URISyntaxException e) {
+                LOGGER.warn("Could not find file via URL '{}'", url.toString());
+            }
         }
         return blacklistedIds;
     }
