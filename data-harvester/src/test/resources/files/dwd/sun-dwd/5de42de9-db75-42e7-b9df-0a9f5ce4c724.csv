@@ -1,2 +1,3 @@
-﻿1048,19740801,20151205,227,51.1280,13.7543,Dresden-Klotzsche,Sachsen
+﻿Stations_id,von_datum,bis_datum,Stationshoehe,geoBreite,geoLaenge,Stationsname,Bundesland
+1048,19740801,20151205,227,51.1280,13.7543,Dresden-Klotzsche,Sachsen
 1050,19990701,20151205,114,51.0221,13.8470,Dresden-Hosterwitz,Sachsen
