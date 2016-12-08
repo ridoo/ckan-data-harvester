@@ -51,14 +51,14 @@ import eu.trentorise.opendata.jackan.model.CkanDataset;
 import eu.trentorise.opendata.jackan.model.CkanOrganization;
 import eu.trentorise.opendata.jackan.model.CkanTag;
 
-public class InsertSensorRequestBuilder {
+public class SensorBuilder {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(InsertSensorRequestBuilder.class);
-
-    private final AbstractFeature feature;
+    private static final Logger LOGGER = LoggerFactory.getLogger(SensorBuilder.class);
 
     private final Phenomenon phenomenon;
-    
+
+    private AbstractFeature feature;
+
     private Procedure procedure;
 
     private CkanDataset dataset;
@@ -67,31 +67,35 @@ public class InsertSensorRequestBuilder {
 
     private Boolean mobile = Boolean.FALSE;
 
-    public static InsertSensorRequestBuilder create(AbstractFeature feature, Phenomenon phenomenon) {
-        return new InsertSensorRequestBuilder(feature, phenomenon);
+    public static SensorBuilder create(Phenomenon phenomenon) {
+        return new SensorBuilder(phenomenon);
     }
 
-    private InsertSensorRequestBuilder(AbstractFeature feature, Phenomenon phenomenon) {
+    private SensorBuilder(Phenomenon phenomenon) {
         this.phenomenon = phenomenon;
-        this.feature = feature;
     }
-    
-    public InsertSensorRequestBuilder withProcedure(Procedure procedure) {
+
+    public SensorBuilder withFeature(AbstractFeature feature) {
+        this.feature = feature;
+        return this;
+    }
+
+    public SensorBuilder withProcedure(Procedure procedure) {
         this.procedure = procedure;
         return this;
     }
 
-    public InsertSensorRequestBuilder withDataset(CkanDataset dataset) {
+    public SensorBuilder withDataset(CkanDataset dataset) {
         this.dataset = dataset;
         return this;
     }
 
-    public InsertSensorRequestBuilder setMobile(boolean mobile) {
+    public SensorBuilder setMobile(boolean mobile) {
         this.mobile = mobile;
         return this;
     }
 
-    public InsertSensorRequestBuilder setInsitu(boolean insitu) {
+    public SensorBuilder setInsitu(boolean insitu) {
         this.insitu = insitu;
         return this;
     }
@@ -100,11 +104,25 @@ public class InsertSensorRequestBuilder {
         return feature;
     }
 
+    public Procedure getProcedure() {
+        if (procedure != null) {
+            return procedure;
+        }
+        String procedureId = createProcedureId();
+        String longName = createProcedureLongName();
+        procedure = new Procedure(procedureId, longName);
+        return procedure;
+    }
+
     public String getProcedureId() {
+        return createProcedureId();
+    }
+
+    private String createProcedureId() {
         if (procedure != null) {
             return procedure.getId();
         }
-        
+
         // TODO procedure is dataset
 
         StringBuilder sb = new StringBuilder();
@@ -132,7 +150,7 @@ public class InsertSensorRequestBuilder {
             system.setDescription(dataset.getNotes());
         }
 
-        final String procedureId = getProcedureId();
+        final String procedureId = getProcedure().getId();
         final SosOffering sosOffering = new SosOffering(procedureId);
         system.setInputs(Collections.<SmlIo< ? >> singletonList(createInput()))
                 .setOutputs(Collections.<SmlIo< ? >> singletonList(createOutput()))
@@ -196,12 +214,7 @@ public class InsertSensorRequestBuilder {
     }
 
     private List<SmlIdentifier> createIdentificationList() {
-        if (procedure == null) {
-            String procedureId = getProcedureId();
-            String longName = createProcedureLongName();
-            procedure = new Procedure(procedureId, longName);
-        }
-        return procedure.createIdentifierList();
+        return getProcedure().createIdentifierList();
     }
 
     private String createProcedureLongName() {
