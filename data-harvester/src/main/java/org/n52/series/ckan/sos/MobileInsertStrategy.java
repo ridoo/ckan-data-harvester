@@ -49,15 +49,12 @@ public class MobileInsertStrategy extends AbstractInsertStrategy {
              * feature afterwards (need to determine first observation
              * value of a track for the feature id).
              */
-//            SamplingFeature feature = foiBuilder.addTrackPoint(rowEntry.getValue());
             String trackId = foiBuilder.addTrackPoint(rowEntry.getValue());
             ObservationBuilder observationBuilder = new ObservationBuilder(rowEntry, getUomParser());
-//            String featureId = feature.getIdentifier();
 
             for (Phenomenon phenomenon : phenomena) {
                 SensorBuilder sensorBuilder = SensorBuilder.create(phenomenon)
                         .withProcedure(procedure)
-//                        .withFeature(feature)
                         .withDataset(dataset)
                         .setMobile(true);
 

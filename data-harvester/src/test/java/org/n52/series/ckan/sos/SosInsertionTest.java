@@ -29,11 +29,15 @@
 
 package org.n52.series.ckan.sos;
 
+import static org.n52.series.ckan.sos.H2DatabaseAccessor.hasDatasetCount;
+import static org.n52.series.ckan.sos.H2DatabaseAccessor.hasObservationsAvailable;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.hamcrest.MatcherAssert;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -55,9 +59,12 @@ public class SosInsertionTest extends HibernateTestCase {
     @Rule
     public TemporaryFolder testFolder = new TemporaryFolder();
 
+    private H2DatabaseAccessor database;
+
     @Before
     public void setUp() throws IOException, URISyntaxException {
         service = new FileBasedCkanHarvestingService(testFolder.getRoot());
+        database = new H2DatabaseAccessor();
     }
 
     @Test
@@ -112,6 +119,15 @@ public class SosInsertionTest extends HibernateTestCase {
     public void when_inserting_heavyMetalSamples_dataset_then_getObservationNotEmpty()
             throws OwsExceptionReport, IOException, URISyntaxException {
         assertDataInsertion("3eb54ee2-6ec5-4ad9-af96-264159008aa7");
+        MatcherAssert.assertThat(database, hasDatasetCount(6));
+        
+        // check if each track is available as own dataset
+        MatcherAssert.assertThat(database, H2DatabaseAccessor.hasDatasetsWithFeatureId("2012-07-20 - Bannewitz"));
+        MatcherAssert.assertThat(database, H2DatabaseAccessor.hasDatasetsWithFeatureId("2012-07-21 - Bannewitz"));
+        MatcherAssert.assertThat(database, H2DatabaseAccessor.hasDatasetsWithFeatureId("2012-07-22 - Bannewitz"));
+        MatcherAssert.assertThat(database, H2DatabaseAccessor.hasDatasetsWithFeatureId("2012-07-23 - Bannewitz"));
+        MatcherAssert.assertThat(database, H2DatabaseAccessor.hasDatasetsWithFeatureId("2012-07-25 - Bannewitz"));
+        MatcherAssert.assertThat(database, H2DatabaseAccessor.hasDatasetsWithFeatureId("2012-07-27 - Bannewitz"));
     }
 
     private void assertDataInsertion(String datasetId)
@@ -120,23 +136,11 @@ public class SosInsertionTest extends HibernateTestCase {
             SosDataStoreManager dataStore = new SosDataStoreManager();
             InMemoryDataStoreManager ckanDataCache = service.getCkanDataStoreManager();
             dataStore.insertOrUpdate(ckanDataCache.getCollection(datasetId));
-            assertThat(new H2DatabaseAccessor(), observationsAvailable());
+            
+            assertThat(database, hasObservationsAvailable());
         } finally {
             SettingsManager.getInstance().cleanup();
         }
-    }
-
-    public Matcher<H2DatabaseAccessor> observationsAvailable() {
-        return new TypeSafeMatcher<H2DatabaseAccessor>() {
-            @Override
-            public void describeTo(Description description) {
-                description.appendText("emptyStore should return ").appendValue(Boolean.TRUE);
-            }
-            @Override
-            protected boolean matchesSafely(H2DatabaseAccessor item) {
-                return !item.getObservations().isEmpty();
-            }
-        };
     }
 
 }

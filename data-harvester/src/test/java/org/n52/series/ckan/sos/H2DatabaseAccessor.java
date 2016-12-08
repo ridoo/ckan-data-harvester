@@ -31,11 +31,19 @@ package org.n52.series.ckan.sos;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.List;
 
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 import org.junit.Assert;
+import org.n52.sos.ds.hibernate.GetDataAvailabilityDAO;
 import org.n52.sos.ds.hibernate.GetObservationDAO;
 import org.n52.sos.ds.hibernate.H2Configuration;
+import org.n52.sos.gda.GetDataAvailabilityRequest;
+import org.n52.sos.gda.GetDataAvailabilityResponse;
+import org.n52.sos.gda.GetDataAvailabilityResponse.DataAvailability;
 import org.n52.sos.ogc.om.OmObservation;
 import org.n52.sos.ogc.ows.OwsExceptionReport;
 import org.n52.sos.ogc.sos.Sos2Constants;
@@ -52,6 +60,61 @@ public class H2DatabaseAccessor {
     public H2DatabaseAccessor() throws IOException, URISyntaxException {
         H2Configuration.assertInitialized();
     }
+    
+
+    public static Matcher<H2DatabaseAccessor> hasObservationsAvailable() {
+        return new TypeSafeMatcher<H2DatabaseAccessor>() {
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("emptyStore should return ").appendValue(Boolean.TRUE);
+            }
+            @Override
+            protected void describeMismatchSafely(H2DatabaseAccessor item, Description mismatchDescription) {
+                mismatchDescription.appendText("was").appendValue(Boolean.FALSE);
+            }
+            @Override
+            protected boolean matchesSafely(H2DatabaseAccessor database) {
+                return !database.getObservations().isEmpty();
+            }
+        };
+    }
+    
+    public static Matcher<H2DatabaseAccessor> hasDatasetCount(final int expected) {
+        return new TypeSafeMatcher<H2DatabaseAccessor>() {
+            int actual;
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("dataset count should return ").appendValue(expected);
+            }
+            @Override
+            protected void describeMismatchSafely(H2DatabaseAccessor item, Description mismatchDescription) {
+                mismatchDescription.appendText("was").appendValue(actual);
+            }
+            @Override
+            protected boolean matchesSafely(H2DatabaseAccessor database) {
+                actual = database.getDataAvailability().size();
+                return actual == expected;
+            }
+        };
+    }
+    
+    public static Matcher<H2DatabaseAccessor> hasDatasetsWithFeatureId(final String featureId) {
+        return new TypeSafeMatcher<H2DatabaseAccessor>() {
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("dataset count should return ").appendValue(Boolean.TRUE);
+            }
+            @Override
+            protected void describeMismatchSafely(H2DatabaseAccessor item, Description mismatchDescription) {
+                mismatchDescription.appendText("was").appendValue(Boolean.FALSE);
+            }
+            @Override
+            protected boolean matchesSafely(H2DatabaseAccessor database) {
+                return !database.getDataAvailabilityForFeatures(featureId).isEmpty();
+            }
+        };
+    }
+    
 
     // TODO test via data loaders for each file set (reduce each to a minimum to keep tests fast)
     // TODO think of refactoring how strategy works to run tests fast
@@ -70,6 +133,39 @@ public class H2DatabaseAccessor {
             Assert.fail("Could not query H2 database!");
             return null;
         }
+    }
+    
+
+    List<DataAvailability> getDataAvailability() {
+        return getDataAvailability(createBasicGdaRequest());
+    }
+    
+    List<DataAvailability> getDataAvailabilityForFeatures(String... features) {
+         GetDataAvailabilityRequest request = createBasicGdaRequest();
+        request = features != null
+                ? request.setFeatureOfInterest(Arrays.asList(features))
+                : request;
+        return getDataAvailability(request);
+    }
+    
+    List<DataAvailability> getDataAvailability(GetDataAvailabilityRequest request) {
+        try {
+            GetDataAvailabilityDAO gdaDAO = new GetDataAvailabilityDAO();
+            GetDataAvailabilityResponse gdaResponse = gdaDAO.getDataAvailability(request);
+            return gdaResponse.getDataAvailabilities();
+        } catch (OwsExceptionReport e) {
+            LOGGER.error("Could not query H2 database!", e);
+            Assert.fail("Could not query H2 database!");
+            return null;
+        }
+    }
+
+
+    private GetDataAvailabilityRequest createBasicGdaRequest() {
+        GetDataAvailabilityRequest gdaReq = new GetDataAvailabilityRequest();
+        gdaReq.setVersion(Sos2Constants.SERVICEVERSION);
+        gdaReq.setService(SosConstants.SOS);
+        return gdaReq;
     }
 
 }
