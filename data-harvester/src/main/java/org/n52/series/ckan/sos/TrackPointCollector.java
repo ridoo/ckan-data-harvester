@@ -216,23 +216,29 @@ public class TrackPointCollector {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             TrackPoint other = (TrackPoint) obj;
             if (featureName == null) {
-                if (other.featureName != null)
+                if (other.featureName != null) {
                     return false;
-            } else if (!featureName.equals(other.featureName))
+                }
+            } else if (!featureName.equals(other.featureName)) {
                 return false;
+            }
             if (geometry == null) {
                 if (other.geometry != null)
                     return false;
-            } else if (!geometry.equals(other.geometry))
+            } else if (!geometry.equals(other.geometry)) {
                 return false;
+            }
             return true;
         }
     }
