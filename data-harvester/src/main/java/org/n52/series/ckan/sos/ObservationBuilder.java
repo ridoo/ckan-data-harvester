@@ -107,7 +107,7 @@ class ObservationBuilder {
                 String phenomenonId = constellation.getObservableProperty().getIdentifier();
                 omObservation.setIdentifier(rowEntry.getKey().getKeyId() + "_" + phenomenonId);
                 // TODO support NO_DATA
-                if (field.isOfType(CkanConstants.DataType.DOUBLE)) {
+                if (field.isOneOfType(CkanConstants.DataType.QUANTITY)) {
                     value = createQuantityObservationValue(field, cells.getValue());
                 } else if (field.isOfType(CkanConstants.DataType.GEOMETRY)) {
                     observationType = OmConstants.OBS_TYPE_GEOMETRY_OBSERVATION;

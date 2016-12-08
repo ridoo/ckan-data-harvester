@@ -117,6 +117,7 @@ public interface CkanConstants {
         public static final String STRING = "string";
         public static final String DATE = "date";
         public static final String JSON = "json";
+        public static final String[] QUANTITY = { INTEGER, DOUBLE };
     }
 
 }
