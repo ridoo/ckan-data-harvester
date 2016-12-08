@@ -11,12 +11,16 @@ This project includes:
   52°North SOS - Cache under GPLv2
   52°North SOS - Extension Delete Observation - Hibernate DAO under GPLv2
   52°North SOS - Extension Delete Observation - Operation under GPLv2
+  52°North SOS - Extension GetDataAvailability - Hibernate DAO under GPLv2
+  52°North SOS - Extension GetDataAvailability - SOS 2.0 Operation under GPLv2
   52°North SOS - Hibernate Common under GPLv2
   52°North SOS - Hibernate DAOs under GPLv2
   52°North SOS - Hibernate Feature Query DAO under GPLv2
   52°North SOS - Hibernate H2 under GPLv2
   52°North SOS - Hibernate Mappings under GPLv2
   52°North SOS - Hibernate Session Factory under GPLv2
+  52°North SOS - JSON Common under GPLv2
+  52°North SOS - KVP Binding under GPLv2
   52°North SOS - SensorML 101 Request Coding under GPLv2
   52°North SOS - SOS API Module under GPLv2
   52°North SOS - SQLite Configuration under GPLv2
@@ -83,6 +87,8 @@ This project includes:
   Java implementation of GeographicLib under The MIT License(MIT)
   Java Persistence API, Version 2.1 under Eclipse Public License (EPL), Version 1.0 or Eclipse Distribution License (EDL), Version 1.0
   Java Transaction API under Common Development and Distribution License or GNU General Public License, Version 2 with the Classpath Exception
+  JavaBeans Activation Framework (JAF) under Common Development and Distribution License (CDDL) v1.0
+  JavaMail API jar under CDDL or GPLv2+CE
   Javassist under MPL 1.1 or LGPL 2.1 or Apache License 2.0
   JBoss Logging 3 under Apache License, version 2.0
   JBoss Logging I18n Annotations under Public Domain
@@ -91,14 +97,18 @@ This project includes:
   JFreeChart under GNU Lesser General Public Licence
   jgridshift under GNU Lesser General Public License, version 2.0 (LGPLv2)
   Joda-Time under Apache 2
+  JOpt Simple under The MIT License
   jsr-275 under BSD License
   JTS Topology Suite under Lesser General Public License (LGPL)
   JUL to SLF4J bridge under MIT License
   JUnit under Eclipse Public License 1.0
+  libphonenumber under The Apache Software License, Version 2.0
   Log4j Implemented Over SLF4J under Apache Software Licenses
   Logback Classic Module under Eclipse Public License - v 1.0 or GNU Lesser General Public License
   Logback Core Module under Eclipse Public License - v 1.0 or GNU Lesser General Public License
   Metadata under GNU Lesser General Public License (LGPL) version 2.1
+  Mozilla Rhino under Mozilla Public License, Version 2.0
+  null under Lesser General Public License, version 3 or greater or Apache Software License, version 2.0
   OASIS WS-N specification schemas - including WS-BrokeredNotification (v1.3) under The Apache Software License, Version 2.0
   OASIS WS-Resources specification schemas v1.2 under The Apache Software License, Version 2.0
   OGC Filter schema (spec. v2.0) under The Apache Software License, Version 2.0
@@ -111,6 +121,7 @@ This project includes:
   OGC SensorML schema (spec. v1.0.1) under The Apache Software License, Version 2.0
   OGC SOS DeleteObservation schema 1.0 under The Apache Software License, Version 2.0
   OGC SOS DeleteObservation schema 2.0 under The Apache Software License, Version 2.0
+  OGC SOS GetDataAvailability schema 1.0 (OGC Best Practice 14-004r1) under The Apache Software License, Version 2.0
   OGC SOS schema (spec. v2.0) under The Apache Software License, Version 2.0
   OGC SWECommon schema (spec. v1.0.1) under The Apache Software License, Version 2.0
   OGC SWECommon schema (spec. v2.0) under The Apache Software License, Version 2.0
@@ -121,6 +132,7 @@ This project includes:
   Quartz Enterprise Job Scheduler under Apache 2.0
   Referencing services under GNU Lesser General Public License (LGPL) version 2.1
   Reflections under WTFPL
+  SaxonB under Mozilla Public License Version 1.0
   Series REST API - IO module under GNU General Public License, Version 2.0
   servlet-api under CDDL 1.1 or GPL2 w/ CPE
   SLF4J API Module under MIT License
@@ -143,5 +155,6 @@ This project includes:
   XML Commons External Components XML APIs under The Apache Software License, Version 2.0
   XML Commons External Components XML APIs Extensions under The Apache Software License, Version 2.0
   XmlBeans under The Apache Software License, Version 2.0
+  XmlBeansXPath under The Apache Software License, Version 2.0
   XMLUnit for Java under BSD License
 
