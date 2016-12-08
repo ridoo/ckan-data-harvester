@@ -74,8 +74,11 @@ public class TrackPointCollector {
 
     public SamplingFeature createFeature(TrackPoint trackPoint) {
         String featureName = trackPoint.getFeatureName();
+        String featureIdentifier = featureName != null
+                ? getTrackId(trackPoint) + " - " + featureName
+                : getTrackId(trackPoint);
         SamplingFeature feature = foiBuilder.createEmptyFeature();
-        feature.setIdentifier(getTrackId(trackPoint) + " - " + featureName);
+        feature.setIdentifier(featureIdentifier);
         feature.addName(featureName);
         return feature;
     }
@@ -114,7 +117,7 @@ public class TrackPointCollector {
 
         public String getFeatureName() {
             String fieldId = CkanConstants.KnownFieldIdValue.TRACK_POINT;
-            return getValue(fieldId, "NA");
+            return getValue(fieldId, null);
         }
 
         public TimeInstant getTimestamp() {

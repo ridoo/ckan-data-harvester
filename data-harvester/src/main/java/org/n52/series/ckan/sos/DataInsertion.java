@@ -134,9 +134,9 @@ class DataInsertion {
         for (OmObservation observation : observations) {
             /*
              * for observations belonging to a track (mobile platforms) the
-             * feature and offering ids are only available after iterating 
+             * feature and offering ids are only available after iterating
              * over the observation set. When request is created, we assume
-             * that the csv dataset(s) has been parsed all information is 
+             * that the csv dataset(s) has been parsed all information is
              * valid from that point in time.
              */
             OmObservationConstellation constellation = observation.getObservationConstellation();
