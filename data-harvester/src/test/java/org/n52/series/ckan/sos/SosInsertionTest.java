@@ -59,12 +59,10 @@ public class SosInsertionTest extends HibernateTestCase {
     @Rule
     public TemporaryFolder testFolder = new TemporaryFolder();
 
-    private H2DatabaseAccessor database;
 
     @Before
     public void setUp() throws IOException, URISyntaxException {
         service = new FileBasedCkanHarvestingService(testFolder.getRoot());
-        database = new H2DatabaseAccessor();
     }
 
     @Test
@@ -137,6 +135,7 @@ public class SosInsertionTest extends HibernateTestCase {
             InMemoryDataStoreManager ckanDataCache = service.getCkanDataStoreManager();
             dataStore.insertOrUpdate(ckanDataCache.getCollection(datasetId));
 
+            H2DatabaseAccessor database = new H2DatabaseAccessor();
             assertThat(database, hasObservationsAvailable());
         } finally {
             SettingsManager.getInstance().cleanup();
