@@ -60,7 +60,7 @@ public class H2DatabaseAccessor {
     public H2DatabaseAccessor() throws IOException, URISyntaxException {
         H2Configuration.assertInitialized();
     }
-    
+
 
     public static Matcher<H2DatabaseAccessor> hasObservationsAvailable() {
         return new TypeSafeMatcher<H2DatabaseAccessor>() {
@@ -78,7 +78,7 @@ public class H2DatabaseAccessor {
             }
         };
     }
-    
+
     public static Matcher<H2DatabaseAccessor> hasDatasetCount(final int expected) {
         return new TypeSafeMatcher<H2DatabaseAccessor>() {
             int actual;
@@ -97,7 +97,7 @@ public class H2DatabaseAccessor {
             }
         };
     }
-    
+
     public static Matcher<H2DatabaseAccessor> hasDatasetsWithFeatureId(final String featureId) {
         return new TypeSafeMatcher<H2DatabaseAccessor>() {
             @Override
@@ -114,7 +114,7 @@ public class H2DatabaseAccessor {
             }
         };
     }
-    
+
 
     // TODO test via data loaders for each file set (reduce each to a minimum to keep tests fast)
     // TODO think of refactoring how strategy works to run tests fast
@@ -134,12 +134,12 @@ public class H2DatabaseAccessor {
             return null;
         }
     }
-    
+
 
     List<DataAvailability> getDataAvailability() {
         return getDataAvailability(createBasicGdaRequest());
     }
-    
+
     List<DataAvailability> getDataAvailabilityForFeatures(String... features) {
          GetDataAvailabilityRequest request = createBasicGdaRequest();
         request = features != null
@@ -147,7 +147,7 @@ public class H2DatabaseAccessor {
                 : request;
         return getDataAvailability(request);
     }
-    
+
     List<DataAvailability> getDataAvailability(GetDataAvailabilityRequest request) {
         try {
             GetDataAvailabilityDAO gdaDAO = new GetDataAvailabilityDAO();

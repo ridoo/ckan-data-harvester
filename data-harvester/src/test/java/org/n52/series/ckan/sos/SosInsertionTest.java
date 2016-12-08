@@ -120,7 +120,7 @@ public class SosInsertionTest extends HibernateTestCase {
             throws OwsExceptionReport, IOException, URISyntaxException {
         assertDataInsertion("3eb54ee2-6ec5-4ad9-af96-264159008aa7");
         MatcherAssert.assertThat(database, hasDatasetCount(6));
-        
+
         // check if each track is available as own dataset
         MatcherAssert.assertThat(database, H2DatabaseAccessor.hasDatasetsWithFeatureId("2012-07-20 - Bannewitz"));
         MatcherAssert.assertThat(database, H2DatabaseAccessor.hasDatasetsWithFeatureId("2012-07-21 - Bannewitz"));
@@ -136,7 +136,7 @@ public class SosInsertionTest extends HibernateTestCase {
             SosDataStoreManager dataStore = new SosDataStoreManager();
             InMemoryDataStoreManager ckanDataCache = service.getCkanDataStoreManager();
             dataStore.insertOrUpdate(ckanDataCache.getCollection(datasetId));
-            
+
             assertThat(database, hasObservationsAvailable());
         } finally {
             SettingsManager.getInstance().cleanup();
