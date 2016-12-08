@@ -88,7 +88,7 @@ public class DataTable {
     }
 
     private void extendTable(DataTable other, DataTable outputTable) {
-        LOGGER.debug("joining table {} (#{} rows, #{} cols) with table {} (#{} rows, #{} cols)",
+        LOGGER.debug("extending table {} (#{} rows, #{} cols) with table {} (#{} rows, #{} cols)",
                      resourceMember.getId(), rowSize(), columnSize(),
                      other.resourceMember.getId(), other.rowSize(), columnSize());
         long start = System.currentTimeMillis();
@@ -158,7 +158,7 @@ public class DataTable {
                 (System.currentTimeMillis() - start) / 1000d);
     }
 
-    public void addRow(ResourceKey id, ResourceField field, String value) {
+    public void setCellValue(ResourceKey id, ResourceField field, String value) {
         table.put(id, field, value);
     }
 
