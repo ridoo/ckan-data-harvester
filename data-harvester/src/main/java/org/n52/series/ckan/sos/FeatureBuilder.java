@@ -28,36 +28,80 @@
  */
 package org.n52.series.ckan.sos;
 
-import com.vividsolutions.jts.geom.Geometry;
-import eu.trentorise.opendata.jackan.model.CkanDataset;
 import java.util.Map;
+
 import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.da.CkanConstants;
+import org.n52.series.ckan.da.CkanMapping;
+import org.n52.series.ckan.sos.TrackPointCollector.TrackPoint;
 import org.n52.series.ckan.util.GeometryBuilder;
 import org.n52.sos.exception.ows.concrete.InvalidSridException;
 import org.n52.sos.ogc.om.features.samplingFeatures.SamplingFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vividsolutions.jts.geom.Geometry;
+
+import eu.trentorise.opendata.jackan.model.CkanDataset;
+
 public class FeatureBuilder {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(FeatureBuilder.class);
 
-    private final String orgaName;
+    private final CkanDataset dataset;
+
+    private TrackPointCollector trackPointCollector;
 
     public FeatureBuilder(CkanDataset dataset) {
-        this.orgaName = dataset.getOrganization().getName();
+        this(dataset, CkanMapping.loadCkanMapping());
+    }
+
+    public FeatureBuilder(CkanDataset dataset, CkanMapping ckanMapping) {
+        this.trackPointCollector = new TrackPointCollector(this, ckanMapping);
+        this.dataset = dataset;
+    }
+
+    String addTrackPoint(Map<ResourceField, String> rowEntry) {
+        final TrackPoint trackPoint = trackPointCollector.newTrackPoint();
+        final GeometryBuilder geometryBuilder = GeometryBuilder.create();
+        for (Map.Entry<ResourceField, String> fieldEntry : rowEntry.entrySet()) {
+            ResourceField field = fieldEntry.getKey();
+            if (field.isField(CkanConstants.KnownFieldIdValue.OBSERVATION_TIME)) {
+                trackPoint.withProperty(field, fieldEntry.getValue());
+            }
+            if (field.isField(CkanConstants.KnownFieldIdValue.TRACK_ID)) {
+                trackPoint.withProperty(field, fieldEntry.getValue());
+            }
+            if (field.isField(CkanConstants.KnownFieldIdValue.TRACK_POINT)) {
+                trackPoint.withProperty(field, fieldEntry.getValue());
+            } else {
+                trackPoint.withProperty(field, fieldEntry.getValue());
+            }
+            parseGeometryField(geometryBuilder, fieldEntry);
+        }
+        if (geometryBuilder.canBuildGeometry()) {
+            trackPoint.withGeometry(geometryBuilder.getGeometry());
+        }
+
+        return trackPointCollector.addToTrack(trackPoint);
+//        return trackPointCollector.getFeature(trackPoint);
+    }
+
+    SamplingFeature getFeatureFor(String trackId) {
+        TrackPoint startPoint = trackPointCollector.getStart(trackId);
+        return trackPointCollector.createFeature(startPoint);
     }
 
     SamplingFeature createFeature(Map<ResourceField, String> rowEntry) {
-        final SamplingFeature feature = new SamplingFeature(null);
+        final SamplingFeature feature = createEmptyFeature();
         final GeometryBuilder geometryBuilder = GeometryBuilder.create();
         for (Map.Entry<ResourceField, String> fieldEntry : rowEntry.entrySet()) {
             ResourceField field = fieldEntry.getKey();
             if (field.isField(CkanConstants.KnownFieldIdValue.PLATFORM_ID)) {
+                String orgaName = dataset.getOrganization().getName();
                 feature.setIdentifier(orgaName + "-" + fieldEntry.getValue());
             }
-            if (field.isField(CkanConstants.KnownFieldIdValue.STATION_NAME)) {
+            if (field.isField(CkanConstants.KnownFieldIdValue.PLATFORM_NAME)) {
                 feature.addName(fieldEntry.getValue());
             }
             if ( !field.isOfResourceType(CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES)) {
@@ -69,6 +113,12 @@ public class FeatureBuilder {
             feature.setFeatureType(geometryBuilder.getFeatureType());
         }
         return feature;
+    }
+
+    SamplingFeature createEmptyFeature() {
+        SamplingFeature emptyFeature = new SamplingFeature(null);
+        emptyFeature.setIdentifier("UNINITIALIZED FEATURE");
+        return emptyFeature;
     }
 
     private void parseGeometryField(final GeometryBuilder geometryBuilder, Map.Entry<ResourceField, String> fieldEntry) {

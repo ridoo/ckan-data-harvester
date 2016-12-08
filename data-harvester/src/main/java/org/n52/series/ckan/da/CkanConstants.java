@@ -50,11 +50,11 @@ public interface CkanConstants {
     public interface ResourceType {
         public static final String CSV_OBSERVATIONS_COLLECTION = "csv-observations-collection";
         /**
-         * since schema descriptior version 0.3 
+         * since schema descriptior version 0.3
          */
         public static final String OBSERVATIONS_WITH_GEOMETRIES = "observations_with_geometry";
         /**
-         * since schema descriptior version 0.3 
+         * since schema descriptior version 0.3
          */
         public static final String OBSERVED_GEOMETRIES = "observed_geometries";
         public static final String PLATFORMS = "platforms";
@@ -86,7 +86,7 @@ public interface CkanConstants {
         public static final String LATITUDE = "latitude";
         public static final String LONGITUDE = "longitude";
         public static final String ALTITUDE = "altitude";
-        public static final String STATION_NAME = "station_name";
+        public static final String PLATFORM_NAME = "platform_name";
         public static final String FIRST_DATE = "first_date";
         public static final String LAST_DATE = "last_date";
         public static final String OBSERVATION_TIME = "observation_time";
@@ -95,6 +95,8 @@ public interface CkanConstants {
         public static final String VALID_TIME_END = "valid_time_end";
         public static final String VALUE = "value";
         public static final String QUALITY = "quality";
+        public static final String TRACK_ID = "track_id";
+        public static final String TRACK_POINT = "track_point";
     }
 
     public interface KnownFieldRoleValue {

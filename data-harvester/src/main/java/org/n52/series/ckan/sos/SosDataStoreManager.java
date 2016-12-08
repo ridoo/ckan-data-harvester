@@ -195,7 +195,7 @@ public class SosDataStoreManager implements DataStoreManager {
                 LOGGER.debug("procedure {} => store {}", entry.getKey(), dataInsertion);
                 long start = System.currentTimeMillis();
                 if (dataInsertion.hasObservations()) {
-                    InsertSensorRequest insertSensorRequest = dataInsertion.getRequest();
+                    InsertSensorRequest insertSensorRequest = dataInsertion.buildInsertSensorRequest();
 
                     SosInsertionMetadata metadata = createSosInsertionMetadata(dataInsertion);
                     insertSensorRequest.setMetadata(metadata);

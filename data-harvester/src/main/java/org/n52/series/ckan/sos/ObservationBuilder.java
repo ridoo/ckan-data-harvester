@@ -30,6 +30,7 @@ package org.n52.series.ckan.sos;
 
 import java.util.Map;
 import java.util.Map.Entry;
+
 import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.table.ResourceKey;
@@ -47,6 +48,8 @@ import org.n52.sos.ogc.om.values.QuantityValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 class ObservationBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ObservationBuilder.class);
@@ -54,6 +57,8 @@ class ObservationBuilder {
     private final Entry<ResourceKey, Map<ResourceField, String>> rowEntry;
 
     private final TimeFieldParser timeFieldParser;
+
+    private SensorBuilder sensorBuilder;
 
     private UomParser uomParser;
 
@@ -67,10 +72,18 @@ class ObservationBuilder {
         this.uomParser = uomParser;
     }
 
-    SosObservation createObservation(OmObservationConstellation constellation, Phenomenon phenomenon) {
+
+    ObservationBuilder withSensorBuilder(SensorBuilder insertSensorRequestBuilder) {
+        this.sensorBuilder = insertSensorRequestBuilder;
+        return this;
+    }
+
+    SosObservation createObservation(DataInsertion dataInsertion, Phenomenon phenomenon) {
         if (rowEntry == null) {
             return new SosObservation();
         }
+
+        OmObservationConstellation constellation = dataInsertion.createConstellation(phenomenon);
 
         SingleObservationValue< ? > value = null;
         Time time = null;
@@ -168,8 +181,8 @@ class ObservationBuilder {
 
         value.setPhenomenonTime(time);
         omObservation.setValue(value);
-        if (observationType.equals(OmConstants.OBS_TYPE_GEOMETRY_OBSERVATION)) {
-            insertSensorRequestBuilder.setInsitu(false);
+        if (sensorBuilder != null && observationType.equals(OmConstants.OBS_TYPE_GEOMETRY_OBSERVATION)) {
+            sensorBuilder.setInsitu(false);
         }
         SosObservation o = new SosObservation(omObservation, observationType);
         LOGGER.trace("Observation: {}", o);

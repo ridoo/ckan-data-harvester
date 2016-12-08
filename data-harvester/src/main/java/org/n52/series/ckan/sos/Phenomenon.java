@@ -30,6 +30,8 @@ package org.n52.series.ckan.sos;
 
 import java.util.Objects;
 
+import org.n52.sos.ogc.om.OmObservableProperty;
+
 public class Phenomenon {
 
     private final String id;
@@ -65,6 +67,10 @@ public class Phenomenon {
 
     public int getFieldIdx() {
         return fieldIdx;
+    }
+
+    public OmObservableProperty toObservableProperty() {
+        return new OmObservableProperty(getId());
     }
 
     @Override
