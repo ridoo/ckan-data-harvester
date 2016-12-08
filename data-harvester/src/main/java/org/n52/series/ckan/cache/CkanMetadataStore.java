@@ -26,10 +26,32 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
-package org.n52.series.ckan.sos;
+package org.n52.series.ckan.cache;
 
-import org.n52.series.ckan.cache.CkanDataSink;
+import eu.trentorise.opendata.jackan.model.CkanDataset;
+import org.n52.series.ckan.beans.SchemaDescriptor;
 
-public interface SosInsertionStrategy extends CkanDataSink {
+public interface CkanMetadataStore {
 
+    public int size();
+
+    public void clear();
+
+    public boolean contains(CkanDataset dataset);
+
+    public boolean containsNewerThan(CkanDataset dataset);
+
+    public void insertOrUpdate(CkanDataset dataset);
+
+    public void delete(CkanDataset dataset);
+
+    public Iterable<String> getDatasetIds();
+
+    public Iterable<CkanDataset> getDatasets();
+
+    public CkanDataset getDataset(String datasetId);
+
+    public boolean hasSchemaDescriptor(CkanDataset datasetId);
+
+    public SchemaDescriptor getSchemaDescription(String datasetId);
 }

@@ -40,16 +40,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.ServletContext;
+
 import org.n52.series.ckan.beans.DataCollection;
 import org.n52.series.ckan.beans.DataFile;
 import org.n52.series.ckan.beans.DescriptionFile;
 import org.n52.series.ckan.beans.SchemaDescriptor;
-import org.n52.series.ckan.cache.CkanDataSink;
-import org.n52.series.ckan.cache.CkanMetadataCache;
+import org.n52.series.ckan.cache.CkanMetadataStore;
 import org.n52.series.ckan.util.JsonUtil;
 import org.n52.series.ckan.util.ResourceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.context.ServletContextAware;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -59,8 +61,6 @@ import eu.trentorise.opendata.jackan.SearchResults;
 import eu.trentorise.opendata.jackan.model.CkanDataset;
 import eu.trentorise.opendata.jackan.model.CkanResource;
 import eu.trentorise.opendata.traceprov.internal.org.apache.commons.io.FileUtils;
-import javax.servlet.ServletContext;
-import org.springframework.web.context.ServletContextAware;
 
 public class CkanHarvestingService implements ServletContextAware {
 
@@ -74,9 +74,9 @@ public class CkanHarvestingService implements ServletContextAware {
 
     private ResourceClient resourceClient;
 
-    private CkanMetadataCache metadataCache;
+    private CkanMetadataStore metadataStore;
 
-    private CkanDataSink dataCache;
+    private DataStoreManager dataStoreManager;
 
     public CkanHarvestingService() {
         this.resourceDownloadBaseFolder = resolveDownloadFolder("");
@@ -96,11 +96,11 @@ public class CkanHarvestingService implements ServletContextAware {
             SearchResults<CkanDataset> datasets = ckanClient.searchDatasets(query, limit, offset);
             for (CkanDataset dataset : datasets.getResults()) {
                 LOGGER.debug("Inserting dataset '{}' ...", dataset.getName());
-                metadataCache.insertOrUpdate(dataset);
+                metadataStore.insertOrUpdate(dataset);
             }
             lastSize = datasets.getCount();
         }
-        LOGGER.info("Finished harvesting CKAN datasets (got #{} datasets).", metadataCache.size());
+        LOGGER.info("Finished harvesting CKAN datasets (got #{} datasets).", metadataStore.size());
     }
 
     private boolean hasMorePages(int lastSize) {
@@ -113,8 +113,8 @@ public class CkanHarvestingService implements ServletContextAware {
     public void harvestResources() throws IOException {
         LOGGER.info("Start harvesting data resources.");
         int observationCollectionCount = 0;
-        for (CkanDataset dataset : metadataCache.getDatasets()) {
-            if (metadataCache.hasSchemaDescriptor(dataset)) {
+        for (CkanDataset dataset : metadataStore.getDatasets()) {
+            if (metadataStore.hasSchemaDescriptor(dataset)) {
                 LOGGER.debug("Download resources for dataset {} (Name: {}).",
                         dataset.getId(), dataset.getName());
                 DescriptionFile description = getSchemaDescription(dataset);
@@ -126,7 +126,7 @@ public class CkanHarvestingService implements ServletContextAware {
 
                 // TODO check when to delete or update resource
 
-                dataCache.insertOrUpdate(new DataCollection(dataset, description, dataFiles));
+                dataStoreManager.insertOrUpdate(new DataCollection(dataset, description, dataFiles));
                 observationCollectionCount++;
             }
         }
@@ -135,7 +135,7 @@ public class CkanHarvestingService implements ServletContextAware {
 
     private DescriptionFile getSchemaDescription(CkanDataset dataset) throws IOException {
         saveToFile("dataset.json", dataset, JsonUtil.getCkanObjectWriter().writeValueAsString(dataset));
-        SchemaDescriptor schemaDescription = metadataCache.getSchemaDescription(dataset.getId());
+        SchemaDescriptor schemaDescription = metadataStore.getSchemaDescription(dataset.getId());
         File file = saveJsonToFile("schema_descriptor.json", dataset, schemaDescription.getNode());
         LOGGER.trace("Downloaded resource description to {}.", file.getAbsolutePath());
         return new DescriptionFile(dataset, file, schemaDescription);
@@ -266,20 +266,20 @@ public class CkanHarvestingService implements ServletContextAware {
         this.resourceClient = resourceClient;
     }
 
-    public CkanDataSink getDataCache() {
-        return dataCache;
+    public DataStoreManager getDataStoreManager() {
+        return dataStoreManager;
     }
 
-    public void setDataCache(CkanDataSink dataCache) {
-        this.dataCache = dataCache;
+    public void setDataStoreManager(DataStoreManager dataStoremanager) {
+        this.dataStoreManager = dataStoremanager;
     }
 
-    public CkanMetadataCache getMetadataCache() {
-        return metadataCache;
+    public CkanMetadataStore getMetadataStore() {
+        return metadataStore;
     }
 
-    public void setMetadataCache(CkanMetadataCache metadataCache) {
-        this.metadataCache = metadataCache;
+    public void setMetadataStore(CkanMetadataStore metadataStore) {
+        this.metadataStore = metadataStore;
     }
 
 }

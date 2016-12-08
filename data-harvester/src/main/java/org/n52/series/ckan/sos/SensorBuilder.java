@@ -15,16 +15,14 @@
  */
 package org.n52.series.ckan.sos;
 
-import eu.trentorise.opendata.jackan.model.CkanDataset;
-import eu.trentorise.opendata.jackan.model.CkanOrganization;
-import eu.trentorise.opendata.jackan.model.CkanTag;
+import static java.util.Collections.singletonList;
+
 import java.util.ArrayList;
 import java.util.Collections;
-import static java.util.Collections.singletonList;
 import java.util.Date;
 import java.util.List;
+
 import org.n52.sos.encode.SensorMLEncoderv101;
-import org.n52.sos.ogc.OGCConstants;
 import org.n52.sos.ogc.gml.AbstractFeature;
 import org.n52.sos.ogc.gml.time.TimePeriod;
 import org.n52.sos.ogc.ows.OwsExceptionReport;
@@ -49,13 +47,19 @@ import org.n52.sos.request.InsertSensorRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class InsertSensorRequestBuilder {
+import eu.trentorise.opendata.jackan.model.CkanDataset;
+import eu.trentorise.opendata.jackan.model.CkanOrganization;
+import eu.trentorise.opendata.jackan.model.CkanTag;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(InsertSensorRequestBuilder.class);
+public class SensorBuilder {
 
-    private final AbstractFeature feature;
+    private static final Logger LOGGER = LoggerFactory.getLogger(SensorBuilder.class);
 
     private final Phenomenon phenomenon;
+
+    private AbstractFeature feature;
+
+    private Procedure procedure;
 
     private CkanDataset dataset;
 
@@ -63,26 +67,35 @@ public class InsertSensorRequestBuilder {
 
     private Boolean mobile = Boolean.FALSE;
 
-    public static InsertSensorRequestBuilder create(AbstractFeature feature, Phenomenon phenomenon) {
-        return new InsertSensorRequestBuilder(feature, phenomenon);
+    public static SensorBuilder create(Phenomenon phenomenon) {
+        return new SensorBuilder(phenomenon);
     }
 
-    private InsertSensorRequestBuilder(AbstractFeature feature, Phenomenon phenomenon) {
+    private SensorBuilder(Phenomenon phenomenon) {
         this.phenomenon = phenomenon;
-        this.feature = feature;
     }
 
-    public InsertSensorRequestBuilder withDataset(CkanDataset dataset) {
+    public SensorBuilder withFeature(AbstractFeature feature) {
+        this.feature = feature;
+        return this;
+    }
+
+    public SensorBuilder withProcedure(Procedure procedure) {
+        this.procedure = procedure;
+        return this;
+    }
+
+    public SensorBuilder withDataset(CkanDataset dataset) {
         this.dataset = dataset;
         return this;
     }
 
-    public InsertSensorRequestBuilder setMobile(boolean mobile) {
+    public SensorBuilder setMobile(boolean mobile) {
         this.mobile = mobile;
         return this;
     }
 
-    public InsertSensorRequestBuilder setInsitu(boolean insitu) {
+    public SensorBuilder setInsitu(boolean insitu) {
         this.insitu = insitu;
         return this;
     }
@@ -91,7 +104,24 @@ public class InsertSensorRequestBuilder {
         return feature;
     }
 
+    public Procedure getProcedure() {
+        if (procedure != null) {
+            return procedure;
+        }
+        String procedureId = createProcedureId();
+        String longName = createProcedureLongName();
+        procedure = new Procedure(procedureId, longName);
+        return procedure;
+    }
+
     public String getProcedureId() {
+        return createProcedureId();
+    }
+
+    private String createProcedureId() {
+        if (procedure != null) {
+            return procedure.getId();
+        }
 
         // TODO procedure is dataset
 
@@ -120,7 +150,7 @@ public class InsertSensorRequestBuilder {
             system.setDescription(dataset.getNotes());
         }
 
-        final String procedureId = getProcedureId();
+        final String procedureId = getProcedure().getId();
         final SosOffering sosOffering = new SosOffering(procedureId);
         system.setInputs(Collections.<SmlIo< ? >> singletonList(createInput()))
                 .setOutputs(Collections.<SmlIo< ? >> singletonList(createOutput()))
@@ -184,22 +214,13 @@ public class InsertSensorRequestBuilder {
     }
 
     private List<SmlIdentifier> createIdentificationList() {
-        List<SmlIdentifier> idents = new ArrayList<>();
-        SmlIdentifier uniqueId = new SmlIdentifier(
-                OGCConstants.UNIQUE_ID,
-                OGCConstants.URN_UNIQUE_IDENTIFIER,
-                // TODO check feautre id vs name
-                getProcedureId());
-        SmlIdentifier longName = new SmlIdentifier(
-                "longName",
-                "urn:ogc:def:identifier:OGC:1.0:longName",
-                createProcedureLongName());
-        idents.add(uniqueId);
-        idents.add(longName);
-        return idents;
+        return getProcedure().createIdentifierList();
     }
 
     private String createProcedureLongName() {
+        if (procedure != null) {
+            return procedure.getLongName();
+        }
         StringBuilder phenomenonName = new StringBuilder();
         phenomenonName.append(phenomenon.getLabel()).append("@");
         if (feature.isSetName()) {

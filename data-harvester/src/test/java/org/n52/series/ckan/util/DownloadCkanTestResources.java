@@ -33,8 +33,8 @@ import java.net.URISyntaxException;
 
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
-import org.n52.series.ckan.cache.InMemoryCkanDataCache;
-import org.n52.series.ckan.cache.InMemoryCkanMetadataCache;
+import org.n52.series.ckan.cache.InMemoryDataStoreManager;
+import org.n52.series.ckan.cache.InMemoryMetadataStore;
 import org.n52.series.ckan.da.CkanHarvestingService;
 
 import eu.trentorise.opendata.jackan.CkanClient;
@@ -44,8 +44,8 @@ public class DownloadCkanTestResources {
     public static void main(String[] args) throws URISyntaxException, IOException {
 
 //        System.setProperty("javax.net.debug","all");
-        InMemoryCkanMetadataCache ckanMetadataCache = new InMemoryCkanMetadataCache();
-        InMemoryCkanDataCache ckanDataCache = new InMemoryCkanDataCache();
+        InMemoryMetadataStore ckanMetadataStore = new InMemoryMetadataStore();
+        InMemoryDataStoreManager ckanDataStoreManager = new InMemoryDataStoreManager();
 
         CkanHarvestingService ckanHarvester = new CkanHarvestingService();
         ckanHarvester.setCkanClient(new CkanClient("https://ckan.colabis.de"));
@@ -53,10 +53,10 @@ public class DownloadCkanTestResources {
 
         String baseFolder = DownloadCkanTestResources.class.getResource("/files").toString();
         ckanHarvester.setResourceDownloadBaseFolder(baseFolder + "/dwd");
-        ckanHarvester.setMetadataCache(ckanMetadataCache);
-        ckanHarvester.setDataCache(ckanDataCache);
+        ckanHarvester.setMetadataStore(ckanMetadataStore);
+        ckanHarvester.setDataStoreManager(ckanDataStoreManager);
 
-        MatcherAssert.assertThat(ckanMetadataCache.size(), CoreMatchers.is(0));
+        MatcherAssert.assertThat(ckanMetadataStore.size(), CoreMatchers.is(0));
         ckanHarvester.harvestDatasets();
         ckanHarvester.harvestResources();
     }

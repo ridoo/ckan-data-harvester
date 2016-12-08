@@ -34,6 +34,8 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.n52.io.task.ScheduledJob;
 import org.quartz.InterruptableJob;
@@ -136,13 +138,12 @@ public class HarvestingJob extends ScheduledJob implements InterruptableJob {
 
     private String getOutputFolder(String outputPath) throws URISyntaxException {
         URL resource = getClass().getResource("/");
-        URI baseFolder = resource.toURI();
-        String outputDirectory = baseFolder + outputPath + "/";
-        File dir = new File(outputDirectory);
-        if ( !dir.exists()) {
-            dir.mkdirs();
+        Path baseFolder = Paths.get(resource.toURI());
+        File outputDir = baseFolder.resolve(outputPath).toFile();
+        if ( !outputDir.exists()) {
+            outputDir.mkdirs();
         }
-        return outputDirectory;
+        return outputDir.getAbsolutePath();
     }
 
     public CkanHarvestingService getHarvestingService() {

@@ -199,6 +199,10 @@ public class ResourceMember {
                 : resourceFields;
     }
 
+    public CkanMapping getCkanMapping() {
+        return ckanMapping;
+    }
+
     @Override
     public int hashCode() {
         int hash = 3;

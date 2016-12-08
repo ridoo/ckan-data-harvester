@@ -26,47 +26,42 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
-package org.n52.series.ckan.sos;
+package org.n52.series.ckan.cache;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import org.n52.series.ckan.beans.DataCollection;
-import org.n52.series.ckan.beans.DescriptionFile;
+import org.n52.series.ckan.da.DataStoreManager;
 
-public class SosStrategyFactory {
+import eu.trentorise.opendata.jackan.model.CkanDataset;
 
-    private DataCollection dataCollection;
+public class InMemoryDataStoreManager implements DataStoreManager {
 
-    private CkanSosReferenceCache ckanSosReferencingCache;
+    private final Map<String, DataCollection> datasets = new HashMap<>();
 
-    private SosStrategyFactory() {
-
+    @Override
+    public void insertOrUpdate(DataCollection dataCollection) {
+        CkanDataset dataset = dataCollection.getDataset();
+        if (datasets.containsKey(dataset.getId())) {
+            // TODO update
+        } else {
+            datasets.put(dataset.getId(), dataCollection);
+        }
     }
 
-    public static SosStrategyFactory create() {
-        return new SosStrategyFactory();
+    public Iterable<DataCollection> getCollections() {
+        return Collections.unmodifiableCollection(datasets.values());
     }
 
-
-    public SosInsertionStrategy createInsertionStrategy() {
-
-        // depending on dataCollection structure we might have to choose a different insertion strategy
-        // TODO add analytic methods to CsvObservationCollection to decide which strategy will fit
-
-        // TODO might also help
-        DescriptionFile schemaDescriptor = dataCollection.getSchemaDescriptor();
-
-        return ckanSosReferencingCache == null
-                ? new DefaultSosInsertionStrategy()
-                : new DefaultSosInsertionStrategy(ckanSosReferencingCache);
+    public DataCollection getCollection(String datasetId) {
+        return datasets.get(datasetId);
     }
 
-    public SosStrategyFactory withData(DataCollection dataCollection) {
-        this.dataCollection = dataCollection;
-        return this;
-    }
-
-    public SosStrategyFactory withReferenceCache(CkanSosReferenceCache ckanSosReferenceCache) {
-        this.ckanSosReferencingCache = ckanSosReferenceCache;
-        return this;
+    public Set<String> getCollectionIds() {
+        return datasets.keySet();
     }
 
 }

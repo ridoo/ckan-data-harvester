@@ -28,7 +28,6 @@
  */
 package org.n52.series.ckan.beans;
 
-import eu.trentorise.opendata.jackan.model.CkanDataset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,8 +36,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.n52.series.ckan.da.CkanConstants;
+
 import org.n52.series.ckan.da.CkanMapping;
+
+import eu.trentorise.opendata.jackan.model.CkanDataset;
 
 public class DataCollection {
 
@@ -97,60 +98,74 @@ public class DataCollection {
                 : Collections.<ResourceMember, DataFile>emptyMap();
     }
 
-    public Map<ResourceMember, DataFile> getMetadataCollection() {
-        Map<ResourceMember, DataFile> typedCollection = new HashMap<>();
-        for (Map.Entry<ResourceMember, DataFile> entry : getDataCollection().entrySet()) {
-            ResourceMember member = entry.getKey();
-            final String resourceType = member.getResourceType();
-            if ( !getObservationTypes().contains(resourceType)) {
-                typedCollection.put(member, entry.getValue());
-            }
-        }
-        return typedCollection;
-    }
+//    public Map<ResourceMember, DataFile> getMetadataCollection() {
+//        Map<ResourceMember, DataFile> typedCollection = new HashMap<>();
+//        for (Map.Entry<ResourceMember, DataFile> entry : getDataCollection().entrySet()) {
+//            ResourceMember member = entry.getKey();
+//            final String resourceType = member.getResourceType();
+//            if ( !getObservationTypes().contains(resourceType)) {
+//                typedCollection.put(member, entry.getValue());
+//            }
+//        }
+//        return typedCollection;
+//    }
+//
+//    public Map<ResourceMember, DataFile> getObservationDataCollections() {
+//        Set<String> observationTypes = getObservationTypes();
+//        return getDataCollectionsOfType(observationTypes);
+//    }
+//
+//    private Set<String> getObservationTypes() {
+//        Set<String> observationTypes = getCkanMapping().getResourceTypeMappings(CkanConstants.ResourceType.OBSERVATIONS);
+//        if (getDescriptorVersion().isGreaterOrEquals("0.3")) {
+//            observationTypes.addAll(getCkanMapping().getResourceTypeMappings(CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES));
+//        }
+//        return observationTypes;
+//    }
+//
+//    public Map<ResourceMember, DataFile> getPlatformDataCollections() {
+//        Set<String> types = getDescriptorVersion().isGreaterOrEquals("0.3")
+//                ? getCkanMapping().getResourceTypeMappings(CkanConstants.ResourceType.OBSERVED_GEOMETRIES)
+//                : getCkanMapping().getResourceTypeMappings(CkanConstants.ResourceType.PLATFORMS);
+//        return getDataCollectionsOfType(types);
+//    }
 
-    public Map<ResourceMember, DataFile> getObservationDataCollections() {
-        Set<String> observationTypes = getObservationTypes();
-        return getDataCollectionsOfType(observationTypes);
-    }
+  public CkanMapping getCkanMapping() {
+      SchemaDescriptor descriptor = schemaDescriptor.getSchemaDescription();
+      return descriptor.getCkanMapping();
+  }
 
-    private Set<String> getObservationTypes() {
-        Set<String> observationTypes = getCkanMapping().getResourceTypeMappings(CkanConstants.ResourceType.OBSERVATIONS);
-        observationTypes.addAll(getCkanMapping().getResourceTypeMappings(CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES));
-        return observationTypes;
-    }
-
-    public Map<ResourceMember, DataFile> getPlatformDataCollections() {
-        return getDataCollectionsOfType(getCkanMapping().getResourceTypeMappings(CkanConstants.ResourceType.PLATFORMS));
-    }
-
-    private CkanMapping getCkanMapping() {
-        SchemaDescriptor descriptor = schemaDescriptor.getSchemaDescription();
-        return descriptor.getCkanMapping();
+    public DescriptorVersion getDescriptorVersion() {
+        SchemaDescriptor schemaDescription = schemaDescriptor.getSchemaDescription();
+        return new DescriptorVersion(schemaDescription.getVersion());
     }
 
     public Map<String, List<ResourceMember>> getResourceMembersByType() {
+        return getResourceMembersByType(null);
+    }
+
+    public Map<String, List<ResourceMember>> getResourceMembersByType(Set<String> filter) {
         Map<String, List<ResourceMember>> resourceMembersByType = new HashMap<>();
         for (ResourceMember member : dataCollection.keySet()) {
             String resourceType = member.getResourceType();
-            if ( !resourceMembersByType.containsKey(resourceType)) {
-                resourceMembersByType.put(resourceType, new ArrayList<ResourceMember>());
+            if (filter == null || filter.isEmpty() || filter.contains(resourceType)) {
+                if ( !resourceMembersByType.containsKey(resourceType)) {
+                    resourceMembersByType.put(resourceType, new ArrayList<ResourceMember>());
+                }
+                resourceMembersByType.get(resourceType).add(member);
             }
-            resourceMembersByType.get(resourceType).add(member);
         }
         return resourceMembersByType;
     }
-
-    public Map<ResourceMember, DataFile> getDataCollectionsOfType(Set<String> types) {
-        Map<ResourceMember, DataFile> typedCollection = new HashMap<>();
-        for (Map.Entry<ResourceMember, DataFile> entry : dataCollection.entrySet()) {
-            ResourceMember member = entry.getKey();
-            if (types.contains(member.getResourceType())) {
-                typedCollection.put(member, entry.getValue());
-            }
-        }
-        return typedCollection;
-    }
+//    public Map<ResourceMember, DataFile> getDataCollectionsOfType(Set<String> types) {
+//        Map<ResourceMember, DataFile> typedCollection = new HashMap<>();
+//        for (Map.Entry<ResourceMember, DataFile> entry : dataCollection.entrySet()) {
+//            ResourceMember member = entry.getKey();
+//            if (types.contains(member.getResourceType())) {
+//                typedCollection.put(member, entry.getValue());
+//            }
+//        }
+//        return typedCollection;
 
     public Set<ResourceField> getJoinFieldIds(Set<ResourceMember> members) {
         List<ResourceField> allFields = new ArrayList<>();

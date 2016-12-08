@@ -26,12 +26,11 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
-package org.n52.series.ckan.cache;
+package org.n52.series.ckan.da;
 
 import org.n52.series.ckan.beans.DataCollection;
 
-public interface CkanDataSink {
+public interface DataStoreManager {
 
-    public void insertOrUpdate(DataCollection dataCollection);
-
+    void insertOrUpdate(DataCollection dataCollection);
 }

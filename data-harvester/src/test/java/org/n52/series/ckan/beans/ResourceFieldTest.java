@@ -39,6 +39,7 @@ import org.junit.Assert;
 import static org.junit.Assert.assertThat;
 import org.junit.Before;
 import org.junit.Test;
+import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.da.CkanMapping;
 
 public class ResourceFieldTest {
@@ -106,6 +107,15 @@ public class ResourceFieldTest {
     @Test
     public void when_simpleCreation_then_falseOnIsOfTypeClass() {
         Assert.assertFalse(new ResourceField().isOfType(Double.class));
+    }
+
+    @Test
+    public void when_fieldWithFieldType_then_detectFieldType() {
+        ResourceField testField = fieldCreator
+                .withFieldId("float_field")
+                .withFieldType("Float")
+                .create();
+        Assert.assertTrue(testField.isOfType(CkanConstants.DataType.DOUBLE));
     }
 
     @Test

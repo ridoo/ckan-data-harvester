@@ -77,7 +77,7 @@ public class FeatureBuilderTest {
     @Test
     public void when_rowEntryWithStationName_then_featureHasAppropriateName() {
         Map<ResourceField, String> row = singletonMap(FieldBuilder.aField()
-                .withFieldId(CkanConstants.KnownFieldIdValue.STATION_NAME)
+                .withFieldId(CkanConstants.KnownFieldIdValue.PLATFORM_NAME)
                 .create(), "foobar_station");
         String actual = createFeatureBuilder().createFeature(row).getFirstName().getValue();
         MatcherAssert.assertThat(actual, is("foobar_station"));

@@ -28,39 +28,39 @@
  */
 package org.n52.series.ckan.util;
 
-import org.n52.series.ckan.cache.InMemoryCkanMetadataCache;
+import org.n52.series.ckan.cache.InMemoryMetadataStore;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import org.n52.series.ckan.cache.InMemoryCkanDataCache;
+import org.n52.series.ckan.cache.InMemoryDataStoreManager;
 import org.n52.series.ckan.da.CkanHarvestingService;
 
 public class FileBasedCkanHarvestingService {
 
-    private final InMemoryCkanMetadataCache ckanMetadataCache;
+    private final InMemoryMetadataStore ckanMetadataStore;
 
-    private final InMemoryCkanDataCache ckanDataCache;
+    private final InMemoryDataStoreManager ckanDataStoreManager;
 
     private final CkanHarvestingService ckanHarvester;
 
     public FileBasedCkanHarvestingService(File folder) throws URISyntaxException, IOException {
-        ckanMetadataCache = new InMemoryCkanMetadataCache();
-        ckanDataCache = new InMemoryCkanDataCache();
+        ckanMetadataStore = new InMemoryMetadataStore();
+        ckanDataStoreManager = new InMemoryDataStoreManager();
 
         ckanHarvester = new FileBasedCkanHarvester("dwd");
         ckanHarvester.setResourceDownloadBaseFolder(folder.toURI().toString());
-        ckanHarvester.setMetadataCache(ckanMetadataCache);
-        ckanHarvester.setDataCache(ckanDataCache);
+        ckanHarvester.setMetadataStore(ckanMetadataStore);
+        ckanHarvester.setDataStoreManager(ckanDataStoreManager);
 
         ckanHarvester.harvestDatasets();
         ckanHarvester.harvestResources();
     }
 
-    public InMemoryCkanMetadataCache getCkanMetadataCache() {
-        return ckanMetadataCache;
+    public InMemoryMetadataStore getCkanMetadataStore() {
+        return ckanMetadataStore;
     }
 
-    public InMemoryCkanDataCache getCkanDataCache() {
-        return ckanDataCache;
+    public InMemoryDataStoreManager getCkanDataStoreManager() {
+        return ckanDataStoreManager;
     }
 }

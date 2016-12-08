@@ -29,18 +29,15 @@
 package org.n52.series.ckan.sos;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.n52.sos.ogc.gml.AbstractFeature;
-import org.n52.sos.ogc.gml.ReferenceType;
-import org.n52.sos.ogc.om.NamedValue;
 import org.n52.sos.ogc.om.OmConstants;
 import org.n52.sos.ogc.om.OmObservation;
-import org.n52.sos.ogc.om.features.SfConstants;
+import org.n52.sos.ogc.om.OmObservationConstellation;
 import org.n52.sos.ogc.ows.OwsExceptionReport;
 import org.n52.sos.ogc.sos.SosOffering;
 import org.n52.sos.request.InsertObservationRequest;
@@ -48,11 +45,7 @@ import org.n52.sos.request.InsertSensorRequest;
 
 class DataInsertion {
 
-    private static final ReferenceType SAMPLING_GEOMETRY_TYPE = new ReferenceType(OmConstants.PARAM_NAME_SAMPLING_GEOMETRY);
-
-    private final InsertSensorRequestBuilder requestBuilder;
-
-    private final AbstractFeature feature;
+    private final SensorBuilder sensorBuilder;
 
     private final List<OmObservation> observations;
 
@@ -60,23 +53,22 @@ class DataInsertion {
 
     private CkanSosObservationReference reference;
 
-    DataInsertion(InsertSensorRequestBuilder requestBuilder) {
-        this.requestBuilder = requestBuilder;
-        this.feature = requestBuilder.getFeature();
+    DataInsertion(SensorBuilder sensorBuilder) {
+        this.sensorBuilder = sensorBuilder;
         this.observations = new ArrayList<>();
         this.observationTypes = new HashSet<>();
     }
 
-    public InsertSensorRequestBuilder getRequestBuilder() {
-        return requestBuilder;
+    public SensorBuilder getSensorBuilder() {
+        return sensorBuilder;
     }
 
-    public InsertSensorRequest getRequest() {
-        return requestBuilder.build();
+    public InsertSensorRequest buildInsertSensorRequest() {
+        return sensorBuilder.build();
     }
 
     public AbstractFeature getFeature() {
-        return feature;
+        return sensorBuilder.getFeature();
     }
 
 //    public Set<String> getFeaturesCharacteristics() {
@@ -104,7 +96,7 @@ class DataInsertion {
 
     List<String> getOfferingIds() {
         List<String> ids = new ArrayList<>();
-        InsertSensorRequest request = getRequest();
+        InsertSensorRequest request = buildInsertSensorRequest();
         for (SosOffering offering : request.getAssignedOfferings()) {
             ids.add(offering.getIdentifier());
         }
@@ -138,15 +130,36 @@ class DataInsertion {
     }
 
     InsertObservationRequest createInsertObservationRequest() throws OwsExceptionReport {
+        InsertSensorRequest insertSensorRequest = buildInsertSensorRequest();
+        for (OmObservation observation : observations) {
+            /*
+             * for observations belonging to a track (mobile platforms) the
+             * feature and offering ids are only available after iterating
+             * over the observation set. When request is created, we assume
+             * that the csv dataset(s) has been parsed all information is
+             * valid from that point in time.
+             */
+            OmObservationConstellation constellation = observation.getObservationConstellation();
+            constellation.setProcedure(insertSensorRequest.getProcedureDescription());
+            constellation.setFeatureOfInterest(getFeature());
+            constellation.setOfferings(getOfferingIds());
+        }
         InsertObservationRequest insertObservationRequest = new InsertObservationRequest();
         insertObservationRequest.setOfferings(getOfferingIds());
         insertObservationRequest.setObservation(observations);
         return insertObservationRequest;
     }
 
+    OmObservationConstellation createConstellation(Phenomenon phenomenon) {
+        OmObservationConstellation constellation = new OmObservationConstellation();
+        constellation.setObservableProperty(phenomenon.toObservableProperty());
+        constellation.setObservationType(OmConstants.OBS_TYPE_MEASUREMENT);
+        return constellation;
+    }
+
     @Override
     public String toString() {
-        String featureIdentifier = "Feature: '" + feature.getIdentifier() + "'";
+        String featureIdentifier = "Feature: '" + getFeature().getIdentifier() + "'";
         String observationCount = "Observations: #" + observations.size();
         return getClass().getSimpleName() + " [ " + featureIdentifier + ", " + observationCount + "]";
     }

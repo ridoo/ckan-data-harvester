@@ -57,8 +57,8 @@ public abstract class TableLoader {
         return dataFile;
     }
 
-    protected void addRow(ResourceKey id, ResourceField field, String value) {
-        table.addRow(id, field, value);
+    protected void setCellValue(ResourceKey id, ResourceField field, String value) {
+        table.setCellValue(id, field, value);
     }
 
     protected void logMemory() {

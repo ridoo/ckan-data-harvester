@@ -85,7 +85,7 @@ public class CsvTableLoader extends TableLoader {
                 for (int j = 0 ; j < columnHeaders.size() ; j++) {
                     final ResourceField field = resourceMember.getField(j);
                     final String value = line.get(j);
-                    addRow(id, field, value);
+                    setCellValue(id, field, value);
                 }
             }
 

@@ -37,18 +37,18 @@ import org.n52.series.ckan.beans.DataCollection;
 import org.n52.series.ckan.beans.DataFile;
 import org.n52.series.ckan.beans.ResourceMember;
 import org.n52.series.ckan.beans.SchemaDescriptor;
-import org.n52.series.ckan.cache.InMemoryCkanDataCache;
+import org.n52.series.ckan.cache.InMemoryDataStoreManager;
 import org.n52.series.ckan.util.FileBasedCkanHarvestingService;
 
 public class ResourceTestHelper {
 
     private FileBasedCkanHarvestingService service;
 
-    private InMemoryCkanDataCache ckanDataCache;
+    private InMemoryDataStoreManager ckanDataCache;
 
     public ResourceTestHelper(TemporaryFolder testFolder) throws URISyntaxException, IOException {
         service = new FileBasedCkanHarvestingService(testFolder.getRoot());
-        ckanDataCache = service.getCkanDataCache();
+        ckanDataCache = service.getCkanDataStoreManager();
     }
 
     public ResourceTable readPlatformTable(String datasetId, String resourceId) {

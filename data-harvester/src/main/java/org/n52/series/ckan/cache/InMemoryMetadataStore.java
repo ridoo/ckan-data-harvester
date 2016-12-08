@@ -28,18 +28,20 @@
  */
 package org.n52.series.ckan.cache;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.trentorise.opendata.jackan.model.CkanDataset;
-import eu.trentorise.opendata.jackan.model.CkanPair;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
+
 import org.n52.series.ckan.beans.SchemaDescriptor;
 import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.da.CkanMapping;
@@ -47,20 +49,77 @@ import org.n52.series.ckan.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class InMemoryCkanMetadataCache implements CkanMetadataCache {
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(InMemoryCkanMetadataCache.class);
+import eu.trentorise.opendata.jackan.model.CkanDataset;
+import eu.trentorise.opendata.jackan.model.CkanPair;
+
+public class InMemoryMetadataStore implements CkanMetadataStore {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(InMemoryMetadataStore.class);
+
+    private static final String CONFIG_FILE_BLACKLIST_DATASET_IDS = "/dataset-blacklist.txt";
 
     private final ObjectMapper om = new ObjectMapper(); // TODO use global om config
 
     private final Map<String, CkanDataset> datasets;
 
-    public InMemoryCkanMetadataCache() {
-        this(null);
+    private final List<String> blacklistedDatasetIds;
+
+    public InMemoryMetadataStore() {
+        this(null, CONFIG_FILE_BLACKLIST_DATASET_IDS);
     }
 
-    public InMemoryCkanMetadataCache(String fieldIdMappingConfig) {
+    public InMemoryMetadataStore(String fieldIdMappingConfig) {
+        this(fieldIdMappingConfig, CONFIG_FILE_BLACKLIST_DATASET_IDS);
+    }
+
+    protected InMemoryMetadataStore(String fieldIdMappingConfig, String blacklistConfigFile) {
         this.datasets = new HashMap<>();
+        this.blacklistedDatasetIds = readBlacklistedDatasetIds(blacklistConfigFile);
+    }
+
+    private List<String> readBlacklistedDatasetIds(String resource) {
+        List<String> blacklistedIds = new ArrayList<>();
+        URL url = getClass().getResource(resource);
+        if (url == null) {
+            LOGGER.warn("Could not find file via '{}'", resource);
+        } else {
+            try {
+                File file = new File(url.toURI());
+                blacklistedIds.addAll(readLinesFromFile(file));
+            } catch (URISyntaxException e) {
+                LOGGER.warn("Could not find file via URL '{}'", url.toString());
+            }
+        }
+        return blacklistedIds;
+    }
+
+    private List<String> readLinesFromFile(File file) {
+        List<String> blacklistedIds = new ArrayList<>();
+        try(Scanner scanner = new Scanner(file)) {
+            while (scanner.hasNext()) {
+                String line = scanner.nextLine();
+                line = line != null ? line.trim() : line;
+                if ( !isComment(line)) {
+                    blacklistedIds.add(line);
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Could not read blacklisted dataset ids! Check file at '{}'", file.getAbsolutePath());
+        }
+        return blacklistedIds;
+    }
+
+    private boolean isComment(String line) {
+        return line.startsWith("#")
+                || line.startsWith("//")
+                || line.startsWith(";");
+    }
+
+    protected List<String> getBlacklistedDatasetIds() {
+        return Collections.unmodifiableList(blacklistedDatasetIds);
     }
 
     protected void putAll(Map<String, CkanDataset> datasets) {
@@ -99,15 +158,16 @@ public class InMemoryCkanMetadataCache implements CkanMetadataCache {
     @Override
     public void insertOrUpdate(CkanDataset dataset) {
         if (dataset != null) {
-            if ( !hasSchemaDescriptor(dataset)) {
-                LOGGER.info("Ignore dataset '{}' ('{}') as it has no ResourceDescription.", dataset.getId(), dataset.getName());
+            String datasetId = dataset.getId();
+            if ( blacklistedDatasetIds.contains(datasetId) || !hasSchemaDescriptor(dataset)) {
+                LOGGER.info("Ignore dataset '{}' ('{}') as it has no ResourceDescription.", datasetId, dataset.getName());
             } else {
                 if (containsNewerThan(dataset)) {
-                    LOGGER.info("No data updates for dataset '{}' ('{}').", dataset.getId(), dataset.getName());
+                    LOGGER.info("No data updates for dataset '{}' ('{}').", datasetId, dataset.getName());
                     return;
                 }
-                LOGGER.info("New data present for dataset '{}' ('{}').", dataset.getId(), dataset.getName());
-                datasets.put(dataset.getId(), dataset);
+                LOGGER.info("New data present for dataset '{}' ('{}').", datasetId, dataset.getName());
+                datasets.put(datasetId, dataset);
                 // TODO load resource files if newer and
                   // TODO update metadata
                   // TODO update observation data
@@ -171,16 +231,11 @@ public class InMemoryCkanMetadataCache implements CkanMetadataCache {
 
     private CkanMapping loadCkanMapping(CkanDataset dataset) {
         if (dataset != null) {
-            String customMappingPath = "/config-ckan-mapping-" + dataset.getId() + ".json";
-            URL resourceUrl = getClass().getResource(customMappingPath);
-            try {
-                if (resourceUrl != null) {
-                    File file = new File(resourceUrl.toURI());
-                    return CkanMapping.loadCkanMapping(file);
-                }
-            } catch (URISyntaxException e) {
-                LOGGER.info("Unable to get ckan mapping for dataset '{}'.", dataset.getName());
-            }
+        String customMappingPath = "/config-ckan-mapping-" + dataset.getId() + ".json";
+            InputStream is = getClass().getResourceAsStream(customMappingPath);
+            return is != null
+                    ? CkanMapping.loadCkanMapping(is)
+                    : CkanMapping.loadCkanMapping();
         }
         return CkanMapping.loadCkanMapping();
     }

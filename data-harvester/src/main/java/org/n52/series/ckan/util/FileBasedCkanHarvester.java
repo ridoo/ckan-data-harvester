@@ -61,7 +61,7 @@ public class FileBasedCkanHarvester extends CkanHarvestingService {
         for (File file : getDatasets()) {
             CkanDataset dataset = parseDatasetTestFile(file);
             try {
-                getMetadataCache().insertOrUpdate(dataset);
+                getMetadataStore().insertOrUpdate(dataset);
             }
             catch (IllegalStateException e) {
                 LOGGER.warn("Inconsistent test data for dataset '{}'");

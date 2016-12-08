@@ -187,12 +187,22 @@ public class ResourceField {
         return isOfType(clazz.getSimpleName());
     }
 
+
+    public boolean isOneOfType(String[] types) {
+        for (String type : types) {
+            if (isOfType(type)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public boolean isOfType(String ofType) {
         if (node.isMissingNode()) {
             return false;
         }
         final String fieldType = getFieldType();
-        return ckanMapping.hasFieldMappings(ofType, fieldType);
+        return ckanMapping.hasDataTypeMappings(ofType, fieldType);
     }
 
     @Override
