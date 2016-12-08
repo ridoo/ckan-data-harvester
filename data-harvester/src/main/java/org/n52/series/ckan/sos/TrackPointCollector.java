@@ -234,8 +234,9 @@ public class TrackPointCollector {
                 return false;
             }
             if (geometry == null) {
-                if (other.geometry != null)
+                if (other.geometry != null) {
                     return false;
+                }
             } else if (!geometry.equals(other.geometry)) {
                 return false;
             }
