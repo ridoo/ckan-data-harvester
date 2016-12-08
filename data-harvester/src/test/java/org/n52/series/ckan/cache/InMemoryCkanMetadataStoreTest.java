@@ -30,7 +30,15 @@ package org.n52.series.ckan.cache;
 
 import eu.trentorise.opendata.jackan.model.CkanDataset;
 import eu.trentorise.opendata.jackan.model.CkanPair;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
+
 import java.util.Collections;
+import java.util.List;
+
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.Before;
@@ -83,5 +91,24 @@ public class InMemoryCkanMetadataStoreTest {
         final SchemaDescriptor actual = metadataStore.getSchemaDescription(dataset.getId());
         String actualId = actual.getVersion();
         MatcherAssert.assertThat(actualId, CoreMatchers.is("0.1"));
+    }
+    
+    @Test
+    public void when_noDatasetIdBlacklistFile_then_emptyBlacklist() {
+        MatcherAssert.assertThat(metadataStore.getBlacklistedDatasetIds(), is(empty()));
+    }
+    
+    @Test
+    public void when_notExistingBlacklistFile_then_emptyBlacklist() {
+        InMemoryMetadataStore metadataStore = new InMemoryMetadataStore(null, "/does-not-exist.txt");
+        List<String> actual = metadataStore.getBlacklistedDatasetIds();
+        MatcherAssert.assertThat(actual, is(empty()));
+    }
+    
+    @Test
+    public void when_nonEmptyBlacklistFile_then_nonEmptyBlacklist() {
+        List<String> actual = metadataStore.getBlacklistedDatasetIds();
+        MatcherAssert.assertThat(actual, is(not(empty())));
+        MatcherAssert.assertThat(actual, contains("30bdf3a2-74ba-43e0-9b31-50e5f5414402"));
     }
 }
