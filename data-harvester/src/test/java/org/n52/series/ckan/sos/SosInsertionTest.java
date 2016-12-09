@@ -56,7 +56,7 @@ import org.n52.sos.exception.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//@Ignore("currently toooooo slooooooooooow for unit testing")
+@Ignore("currently toooooo slooooooooooow for unit testing")
 public class SosInsertionTest extends HibernateTestCase {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(SosInsertionTest.class);
