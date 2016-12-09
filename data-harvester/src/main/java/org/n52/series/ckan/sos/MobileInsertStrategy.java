@@ -38,7 +38,8 @@ public class MobileInsertStrategy extends AbstractInsertStrategy {
         CkanDataset dataset = dataCollection.getDataset();
         CkanMapping ckanMapping = member.getCkanMapping();
         FeatureBuilder foiBuilder = new FeatureBuilder(dataset, ckanMapping);
-        Procedure procedure = new Procedure(member.getId(), member.getDatasetName());
+        Procedure procedure = new Procedure(dataset.getId(), dataset.getName());
+
         SensorBuilder sensorBuilderTemplate = SensorBuilder.create()
                 .withProcedure(procedure)
                 .withDataset(dataset)
@@ -57,10 +58,6 @@ public class MobileInsertStrategy extends AbstractInsertStrategy {
             ObservationBuilder observationBuilder = new ObservationBuilder(rowEntry, getUomParser());
 
             for (Phenomenon phenomenon : phenomena) {
-                SensorBuilder sensorBuilder = SensorBuilder.create(phenomenon)
-                        .withProcedure(procedure)
-                        .withDataset(dataset)
-                        .setMobile(true);
                 sensorBuilderTemplate.addPhenomenon(phenomenon);
 
                 if ( !dataInsertions.containsKey(trackId)) {
