@@ -39,6 +39,7 @@ import java.net.URISyntaxException;
 
 import org.hamcrest.MatcherAssert;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -81,8 +82,8 @@ public class SosInsertionTest extends HibernateTestCase {
         H2Configuration.recreate();
     }
 
-    @After
-    public void cleanUp() throws ConnectionProviderException, ConfigurationException {
+    @AfterClass
+    public static void cleanUp() throws ConnectionProviderException, ConfigurationException {
         SettingsManager.getInstance().cleanup();
     }
 
