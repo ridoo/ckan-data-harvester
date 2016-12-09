@@ -15,8 +15,6 @@
  */
 package org.n52.series.ckan.sos;
 
-import static java.util.Collections.singletonList;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -37,11 +35,11 @@ import org.n52.sos.ogc.sensorML.elements.SmlClassifier;
 import org.n52.sos.ogc.sensorML.elements.SmlIdentifier;
 import org.n52.sos.ogc.sensorML.elements.SmlIo;
 import org.n52.sos.ogc.sos.SosOffering;
+import org.n52.sos.ogc.swe.SweAbstractDataComponent;
 import org.n52.sos.ogc.swe.SweField;
 import org.n52.sos.ogc.swe.SweSimpleDataRecord;
 import org.n52.sos.ogc.swe.simpleType.SweBoolean;
 import org.n52.sos.ogc.swe.simpleType.SweObservableProperty;
-import org.n52.sos.ogc.swe.simpleType.SweQuantity;
 import org.n52.sos.ogc.swe.simpleType.SweText;
 import org.n52.sos.request.InsertSensorRequest;
 import org.slf4j.Logger;
@@ -55,7 +53,7 @@ public class SensorBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SensorBuilder.class);
 
-    private final Phenomenon phenomenon;
+    private final List<Phenomenon> phenomenona;
 
     private AbstractFeature feature;
 
@@ -67,12 +65,28 @@ public class SensorBuilder {
 
     private Boolean mobile = Boolean.FALSE;
 
-    public static SensorBuilder create(Phenomenon phenomenon) {
-        return new SensorBuilder(phenomenon);
+    public static SensorBuilder create() {
+        return new SensorBuilder();
     }
-
-    private SensorBuilder(Phenomenon phenomenon) {
-        this.phenomenon = phenomenon;
+    
+    private SensorBuilder() {
+        this.phenomenona = new ArrayList<>();
+    }
+    
+    public SensorBuilder copy() {
+        SensorBuilder copy = new SensorBuilder();
+        copy.phenomenona.addAll(phenomenona);
+        copy.feature = feature;
+        copy.procedure = procedure;
+        copy.dataset = dataset;
+        copy.insitu = insitu;
+        copy.mobile = mobile;
+        return copy;
+    }
+    
+    public SensorBuilder addPhenomenon(Phenomenon phenomenon) {
+        this.phenomenona.add(phenomenon);
+        return this;
     }
 
     public SensorBuilder withFeature(AbstractFeature feature) {
@@ -126,23 +140,30 @@ public class SensorBuilder {
         // TODO procedure is dataset
 
         StringBuilder sb = new StringBuilder();
-        sb.append(phenomenon.getLabel()).append("_");
+        sb.append(dataset.getName()).append("_");
         sb = feature.isSetName()
                 ?  sb.append(feature.getFirstName().getValue())
                 : sb.append(feature.getIdentifier());
         return sb.toString();
+    }
+    
+    private List<String> phenomenaToIdList() {
+        List<String> ids = new ArrayList<>();
+        for (Phenomenon phenomenon : phenomenona) {
+            ids.add(phenomenon.getId());
+        }
+        return ids;
     }
 
     public InsertSensorRequest build() {
         if (feature == null) {
             throw new NullPointerException("feature cannot be null!");
         }
-        if (phenomenon == null) {
-            throw new NullPointerException("phenomenon cannot be null!");
+        if (phenomenona.isEmpty()) {
+            throw new NullPointerException("no phenomenona!");
         }
         final InsertSensorRequest insertSensorRequest = new InsertSensorRequest();
-//        insertSensorRequest.setObservableProperty(phenomenaToIdList(phenomena));
-        insertSensorRequest.setObservableProperty(singletonList(phenomenon.getId()));
+        insertSensorRequest.setObservableProperty(phenomenaToIdList());
         insertSensorRequest.setProcedureDescriptionFormat("http://www.opengis.net/sensorML/1.0.1");
 
         final org.n52.sos.ogc.sensorML.System system = new org.n52.sos.ogc.sensorML.System();
@@ -152,8 +173,8 @@ public class SensorBuilder {
 
         final String procedureId = getProcedure().getId();
         final SosOffering sosOffering = new SosOffering(procedureId);
-        system.setInputs(Collections.<SmlIo< ? >> singletonList(createInput()))
-                .setOutputs(Collections.<SmlIo< ? >> singletonList(createOutput()))
+        system.setInputs(createInputs())
+                .setOutputs(createOutputs())
                 .setKeywords(createKeywordList())
                 .setIdentifications(createIdentificationList())
                 .setClassifications(createClassificationList())
@@ -182,12 +203,18 @@ public class SensorBuilder {
         }
     }
 
-    private SmlIo< ? > createInput() {
-        return new SmlIo<>(new SweObservableProperty().setDefinition(phenomenon.getId())).setIoName(phenomenon.getId());
+    private List<SmlIo< ? >> createInputs() {
+        List<SmlIo<?>> ios = new ArrayList<>();
+        for (Phenomenon phenomenon: phenomenona) {
+            SweAbstractDataComponent observableProperty = new SweObservableProperty()
+                    .setDefinition(phenomenon.getId());
+            ios.add(new SmlIo<>(observableProperty).setIoName(phenomenon.getId()));
+        }
+        return ios;
     }
 
-    private SmlIo< ? > createOutput() {
-        return new SmlIo<>(new SweQuantity().setUom(phenomenon.getUom()).setDefinition(phenomenon.getId())).setIoName(phenomenon.getId());
+    private List<SmlIo< ? >> createOutputs() {
+        return createInputs();
     }
 
     private List<String> createKeywordList() {
@@ -196,8 +223,10 @@ public class SensorBuilder {
         if (feature.isSetName()) {
             keywords.add(feature.getFirstName().getValue());
         }
-        keywords.add(phenomenon.getLabel());
-        keywords.add(phenomenon.getId());
+        for (Phenomenon phenomenon: phenomenona) {
+            keywords.add(phenomenon.getLabel());
+            keywords.add(phenomenon.getId());
+        }
         addDatasetTags(keywords);
         return keywords;
     }
@@ -221,24 +250,28 @@ public class SensorBuilder {
         if (procedure != null) {
             return procedure.getLongName();
         }
-        StringBuilder phenomenonName = new StringBuilder();
-        phenomenonName.append(phenomenon.getLabel()).append("@");
+        String datasetname = dataset.getName();
+        StringBuilder procedureName = new StringBuilder();
+        procedureName.append(datasetname).append("@");
         if (feature.isSetName()) {
-            phenomenonName.append(feature.getFirstName().getValue());
+            procedureName.append(feature.getFirstName().getValue());
         }
         else {
-            phenomenonName.append(feature.getIdentifier());
+            procedureName.append(feature.getIdentifier());
         }
-        return phenomenonName.toString();
+        return procedureName.toString();
     }
 
     private List<SmlClassifier> createClassificationList() {
-        SmlClassifier smlClassifier = new SmlClassifier(
-                "phenomenon",
-                "urn:ogc:def:classifier:OGC:1.0:phenomenon",
-                null,
-                phenomenon.getId());
-        return Collections.singletonList(smlClassifier);
+        List<SmlClassifier> classifiers = new ArrayList<>();
+        for (Phenomenon phenomenon: phenomenona) {
+            classifiers.add(new SmlClassifier(
+                    "phenomenon",
+                    "urn:ogc:def:classifier:OGC:1.0:phenomenon",
+                    null,
+                    phenomenon.getId()));
+        }
+        return classifiers;
     }
 
     private TimePeriod createValidTimePeriod() {
@@ -247,21 +280,10 @@ public class SensorBuilder {
 
     private List<SmlCapabilities> createCapabilities(SosOffering offering) {
         List<SmlCapabilities> capabilities = new ArrayList<>();
-        capabilities.add(createFeatureCapabilities());
         capabilities.add(createOfferingCapabilities(offering));
         capabilities.add(createMetadataCapabilities());
         // capabilities.add(createBboxCapabilities(feature)); // TODO
         return capabilities;
-    }
-
-    private SmlCapabilities createFeatureCapabilities() {
-        SmlCapabilities featuresCapabilities = new SmlCapabilities("featuresOfInterest");
-        SweField field = createTextField(
-                SensorML20Constants.FEATURE_OF_INTEREST_FIELD_NAME,
-                SensorML20Constants.FEATURE_OF_INTEREST_FIELD_DEFINITION,
-                feature.getIdentifier());
-        final SweSimpleDataRecord record = new SweSimpleDataRecord().addField(field);
-        return featuresCapabilities.setDataRecord(record);
     }
 
     private SmlCapabilities createOfferingCapabilities(SosOffering offering) {
@@ -280,13 +302,16 @@ public class SensorBuilder {
 
     private SmlCapabilities createMetadataCapabilities() {
         SmlCapabilities capabilities = new SmlCapabilities("metadata");
-        capabilities.addCapability(new SmlCapability("insitu", createBool(this.insitu)));
-        capabilities.addCapability(new SmlCapability("mobile", createBool(this.mobile)));
+        capabilities.addCapability(new SmlCapability("insitu", createBool("insitu", this.insitu)));
+        capabilities.addCapability(new SmlCapability("mobile", createBool("mobile", this.mobile)));
         return capabilities;
     }
 
-    private SweBoolean createBool(Boolean bool) {
-        return new SweBoolean().setValue(bool);
+    private SweBoolean createBool(String definition, Boolean bool) {
+        SweBoolean sweBool = new SweBoolean();
+        sweBool.setDefinition(definition);
+        sweBool.setValue(bool);
+        return sweBool;
     }
 
     private SweField createTextField(String name, String definition, String value) {

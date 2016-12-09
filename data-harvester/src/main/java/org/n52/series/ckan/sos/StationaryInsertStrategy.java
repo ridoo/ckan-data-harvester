@@ -74,12 +74,13 @@ class StationaryInsertStrategy extends AbstractInsertStrategy {
             AbstractFeature feature = foiBuilder.createFeature(rowEntry.getValue());
 
             ObservationBuilder observationBuilder = new ObservationBuilder(rowEntry, getUomParser());
+            SensorBuilder sensorBuilder = SensorBuilder.create()
+                    .withFeature(feature)
+                    .withDataset(dataset)
+                    .setMobile(false);
 
             for (Phenomenon phenomenon : phenomena) {
-                SensorBuilder sensorBuilder = SensorBuilder.create(phenomenon)
-                        .withFeature(feature)
-                        .withDataset(dataset)
-                        .setMobile(false);
+                sensorBuilder.addPhenomenon(phenomenon);
                 String procedureId = sensorBuilder.getProcedureId();
                 if ( !dataInsertions.containsKey(procedureId)) {
                     LOGGER.debug("Building sensor with: procedure '{}', phenomenon '{}' (unit '{}')",

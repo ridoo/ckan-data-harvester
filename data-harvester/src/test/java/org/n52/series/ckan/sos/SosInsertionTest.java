@@ -31,12 +31,15 @@ package org.n52.series.ckan.sos;
 
 import static org.n52.series.ckan.sos.H2DatabaseAccessor.hasDatasetCount;
 import static org.n52.series.ckan.sos.H2DatabaseAccessor.hasObservationsAvailable;
+import static org.n52.series.ckan.sos.H2DatabaseAccessor.isInsituProcedure;
+import static org.n52.series.ckan.sos.H2DatabaseAccessor.isMobileProcedure;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 
 import org.hamcrest.MatcherAssert;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -50,7 +53,6 @@ import org.n52.sos.ds.ConnectionProviderException;
 import org.n52.sos.ds.hibernate.H2Configuration;
 import org.n52.sos.ds.hibernate.HibernateTestCase;
 import org.n52.sos.exception.ConfigurationException;
-import org.n52.sos.ogc.ows.OwsExceptionReport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,8 +82,8 @@ public class SosInsertionTest extends HibernateTestCase {
         H2Configuration.recreate();
     }
 
-    @After
-    public void cleanUp() throws ConnectionProviderException, ConfigurationException {
+    @AfterClass
+    public static void cleanUp() throws ConnectionProviderException, ConfigurationException {
         SettingsManager.getInstance().cleanup();
     }
 
@@ -148,10 +150,12 @@ public class SosInsertionTest extends HibernateTestCase {
     @Test
     public void when_inserting_heavyMetalSamples_dataset_then_getObservationNotEmpty() {
         insertDataset("3eb54ee2-6ec5-4ad9-af96-264159008aa7");
-        MatcherAssert.assertThat(database, hasDatasetCount(6));
+        MatcherAssert.assertThat(database, hasDatasetCount(90));
         assertThat(database, hasObservationsAvailable());
 
-        // check if each track is available as own dataset
+        // check if mobile and if each track is available as individual dataset
+        assertThat(database, isMobileProcedure("3eb54ee2-6ec5-4ad9-af96-264159008aa7"));
+        assertThat(database, isInsituProcedure("3eb54ee2-6ec5-4ad9-af96-264159008aa7"));
         MatcherAssert.assertThat(database, H2DatabaseAccessor.hasDatasetsWithFeatureId("2012-07-20 - Bannewitz"));
         MatcherAssert.assertThat(database, H2DatabaseAccessor.hasDatasetsWithFeatureId("2012-07-21 - Bannewitz"));
         MatcherAssert.assertThat(database, H2DatabaseAccessor.hasDatasetsWithFeatureId("2012-07-22 - Bannewitz"));

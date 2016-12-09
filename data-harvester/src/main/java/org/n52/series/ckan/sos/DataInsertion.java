@@ -45,18 +45,22 @@ import org.n52.sos.request.InsertSensorRequest;
 
 class DataInsertion {
 
-    private final SensorBuilder sensorBuilder;
-
     private final List<OmObservation> observations;
 
     private final Set<String> observationTypes;
 
     private CkanSosObservationReference reference;
 
+    private SensorBuilder sensorBuilder;
+
     DataInsertion(SensorBuilder sensorBuilder) {
         this.sensorBuilder = sensorBuilder;
         this.observations = new ArrayList<>();
         this.observationTypes = new HashSet<>();
+    }
+
+    public void setSensorBuilder(SensorBuilder sensorBuilder) {
+        this.sensorBuilder = sensorBuilder;
     }
 
     public SensorBuilder getSensorBuilder() {

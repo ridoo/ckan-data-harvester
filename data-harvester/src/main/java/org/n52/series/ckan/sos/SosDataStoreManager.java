@@ -84,7 +84,6 @@ public class SosDataStoreManager implements DataStoreManager {
         // TODO write test for it
         // TODO if dataset is newer than in cache -> set flag to re-insert whole datacollection
 
-
         Map<String, List<ResourceMember>> resourceMembersByType = dataCollection.getResourceMembersByType(resourceTypesToInsert);
         for (List<ResourceMember> membersWithCommonResourceTypes : resourceMembersByType.values()) {
             DataTable dataTable = new ResourceTable();
@@ -113,6 +112,7 @@ public class SosDataStoreManager implements DataStoreManager {
         if (ckanSosReferenceCache == null) {
             return true;
         }
+        
 
         try {
             if ( !ckanSosReferenceCache.exists(resource)) {
@@ -131,6 +131,9 @@ public class SosDataStoreManager implements DataStoreManager {
             }
 
             long count = 0;
+
+            // TODO a real update would be better (instead of deleting and inserting)
+
             LOGGER.debug("start deleting existing observation data before updating data.");
             for (String observationIdentifier : reference.getObservationIdentifiers()) {
                 try {
@@ -216,7 +219,6 @@ public class SosDataStoreManager implements DataStoreManager {
         }
         return dataInserted;
     }
-
 
     private SosInsertionMetadata createSosInsertionMetadata(DataInsertion dataInsertion) {
         SosInsertionMetadata metadata = new SosInsertionMetadata();
