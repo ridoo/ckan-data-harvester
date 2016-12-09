@@ -166,7 +166,7 @@ public class ResourceField {
     public String getOther(String name) {
         return node.at("/" + name).asText();
     }
-    
+
     public String normalizeValue(String value) {
         if (value != null) {
             try {
@@ -178,7 +178,7 @@ public class ResourceField {
             } catch (NumberFormatException e) {
                 LOGGER.error("Could normalize field value '{}' (type {}) ", value, getFieldType(), e);
             }
-        } 
+        }
         return value;
     }
 

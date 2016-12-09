@@ -119,7 +119,7 @@ public class H2DatabaseAccessor {
             }
         };
     }
-    
+
     public static Matcher<H2DatabaseAccessor> isMobileProcedure(final String procedureId) {
         return new TypeSafeMatcher<H2DatabaseAccessor>() {
             boolean capabilitiesMissing;
@@ -147,7 +147,7 @@ public class H2DatabaseAccessor {
             }
         };
     }
-    
+
     public static Matcher<H2DatabaseAccessor> isInsituProcedure(final String procedureId) {
         return new TypeSafeMatcher<H2DatabaseAccessor>() {
             boolean capabilitiesMissing;

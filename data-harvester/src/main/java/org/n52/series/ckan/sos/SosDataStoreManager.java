@@ -112,7 +112,7 @@ public class SosDataStoreManager implements DataStoreManager {
         if (ckanSosReferenceCache == null) {
             return true;
         }
-        
+
 
         try {
             if ( !ckanSosReferenceCache.exists(resource)) {

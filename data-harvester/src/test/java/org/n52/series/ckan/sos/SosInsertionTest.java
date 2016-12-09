@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
 
 @Ignore("currently toooooo slooooooooooow for unit testing")
 public class SosInsertionTest extends HibernateTestCase {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SosInsertionTest.class);
 
     private FileBasedCkanHarvestingService service;

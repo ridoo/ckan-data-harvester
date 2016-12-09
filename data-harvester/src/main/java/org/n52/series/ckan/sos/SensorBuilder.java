@@ -68,11 +68,11 @@ public class SensorBuilder {
     public static SensorBuilder create() {
         return new SensorBuilder();
     }
-    
+
     private SensorBuilder() {
         this.phenomenona = new ArrayList<>();
     }
-    
+
     public SensorBuilder copy() {
         SensorBuilder copy = new SensorBuilder();
         copy.phenomenona.addAll(phenomenona);
@@ -83,7 +83,7 @@ public class SensorBuilder {
         copy.mobile = mobile;
         return copy;
     }
-    
+
     public SensorBuilder addPhenomenon(Phenomenon phenomenon) {
         this.phenomenona.add(phenomenon);
         return this;
@@ -146,7 +146,7 @@ public class SensorBuilder {
                 : sb.append(feature.getIdentifier());
         return sb.toString();
     }
-    
+
     private List<String> phenomenaToIdList() {
         List<String> ids = new ArrayList<>();
         for (Phenomenon phenomenon : phenomenona) {
