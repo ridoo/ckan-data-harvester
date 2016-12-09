@@ -103,40 +103,41 @@ class ObservationBuilder {
                 continue;
             }
 
+            String normalizedValue = field.normalizeValue(cells.getValue());
             if (field.getIndex() == phenomenon.getFieldIdx()) {
                 String phenomenonId = constellation.getObservableProperty().getIdentifier();
                 omObservation.setIdentifier(rowEntry.getKey().getKeyId() + "_" + phenomenonId);
                 // TODO support NO_DATA
                 if (field.isOneOfType(CkanConstants.DataType.QUANTITY)) {
-                    value = createQuantityObservationValue(field, cells.getValue());
+                    value = createQuantityObservationValue(field, normalizedValue);
                 } else if (field.isOfType(CkanConstants.DataType.GEOMETRY)) {
                     observationType = OmConstants.OBS_TYPE_GEOMETRY_OBSERVATION;
                     parseGeometryField(geometryBuilder, cells);
                 }
             }
             else if (field.isField(CkanConstants.KnownFieldIdValue.OBSERVATION_TIME)) {
-                time = timeFieldParser.parseTimestamp(cells.getValue(), field);
+                time = timeFieldParser.parseTimestamp(normalizedValue, field);
             }
             else if (field.isField(CkanConstants.KnownFieldIdValue.LOCATION)) {
                 parseGeometryField(geometryBuilder, cells);
             }
             else if (field.isField(CkanConstants.KnownFieldIdValue.CRS)) {
-                geometryBuilder.withCrs(cells.getValue());
+                geometryBuilder.withCrs(normalizedValue);
             }
             else if (field.isField(CkanConstants.KnownFieldIdValue.LATITUDE)) {
-                geometryBuilder.setLatitude(cells.getValue());
+                geometryBuilder.setLatitude(normalizedValue);
             }
             else if (field.isField(CkanConstants.KnownFieldIdValue.LONGITUDE)) {
-                geometryBuilder.setLongitude(cells.getValue());
+                geometryBuilder.setLongitude(normalizedValue);
             }
             else if (field.isField(CkanConstants.KnownFieldIdValue.ALTITUDE)) {
-                geometryBuilder.setAltitude(cells.getValue());
+                geometryBuilder.setAltitude(normalizedValue);
             }
             else if (field.isField(CkanConstants.KnownFieldIdValue.VALID_TIME_START)) {
-                validStart = timeFieldParser.parseTimestamp(cells.getValue(), field);
+                validStart = timeFieldParser.parseTimestamp(normalizedValue, field);
             }
             else if (field.isField(CkanConstants.KnownFieldIdValue.VALID_TIME_END)) {
-                validEnd = timeFieldParser.parseTimestamp(cells.getValue(), field);
+                validEnd = timeFieldParser.parseTimestamp(normalizedValue, field);
             }
         }
 

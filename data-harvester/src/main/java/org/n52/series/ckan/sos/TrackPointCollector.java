@@ -191,8 +191,9 @@ public class TrackPointCollector {
 
         public String getValue(String fieldId, String defaultValue) {
             ResourceField field = getField(fieldId);
+            String value = valuesByField.get(field);
             return field != null
-                    ? valuesByField.get(field)
+                    ? field.normalizeValue(value)
                     : defaultValue;
         }
 
