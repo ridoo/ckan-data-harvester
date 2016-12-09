@@ -66,16 +66,17 @@ public class FeatureBuilder {
         final GeometryBuilder geometryBuilder = GeometryBuilder.create();
         for (Map.Entry<ResourceField, String> fieldEntry : rowEntry.entrySet()) {
             ResourceField field = fieldEntry.getKey();
+            String value = field.normalizeValue(fieldEntry.getValue());
             if (field.isField(CkanConstants.KnownFieldIdValue.OBSERVATION_TIME)) {
-                trackPoint.withProperty(field, fieldEntry.getValue());
+                trackPoint.withProperty(field, value);
             }
             if (field.isField(CkanConstants.KnownFieldIdValue.TRACK_ID)) {
-                trackPoint.withProperty(field, fieldEntry.getValue());
+                trackPoint.withProperty(field, value);
             }
             if (field.isField(CkanConstants.KnownFieldIdValue.TRACK_POINT)) {
-                trackPoint.withProperty(field, fieldEntry.getValue());
+                trackPoint.withProperty(field, value);
             } else {
-                trackPoint.withProperty(field, fieldEntry.getValue());
+                trackPoint.withProperty(field, value);
             }
             parseGeometryField(geometryBuilder, fieldEntry);
         }
@@ -97,12 +98,13 @@ public class FeatureBuilder {
         final GeometryBuilder geometryBuilder = GeometryBuilder.create();
         for (Map.Entry<ResourceField, String> fieldEntry : rowEntry.entrySet()) {
             ResourceField field = fieldEntry.getKey();
+            String value = field.normalizeValue(fieldEntry.getValue());
             if (field.isField(CkanConstants.KnownFieldIdValue.PLATFORM_ID)) {
                 String orgaName = dataset.getOrganization().getName();
-                feature.setIdentifier(orgaName + "-" + fieldEntry.getValue());
+                feature.setIdentifier(orgaName + "-" + value);
             }
             if (field.isField(CkanConstants.KnownFieldIdValue.PLATFORM_NAME)) {
-                feature.addName(fieldEntry.getValue());
+                feature.addName(value);
             }
             if ( !field.isOfResourceType(CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES)) {
                 parseGeometryField(geometryBuilder, fieldEntry);
@@ -123,17 +125,18 @@ public class FeatureBuilder {
 
     private void parseGeometryField(final GeometryBuilder geometryBuilder, Map.Entry<ResourceField, String> fieldEntry) {
         ResourceField field = fieldEntry.getKey();
+        String value = field.normalizeValue(fieldEntry.getValue());
         if (field.isField(CkanConstants.KnownFieldIdValue.CRS)) {
-            geometryBuilder.withCrs(fieldEntry.getValue());
+            geometryBuilder.withCrs(value);
         }
         if (field.isField(CkanConstants.KnownFieldIdValue.LATITUDE)) {
-            geometryBuilder.setLatitude(fieldEntry.getValue());
+            geometryBuilder.setLatitude(value);
         }
         if (field.isField(CkanConstants.KnownFieldIdValue.LONGITUDE)) {
-            geometryBuilder.setLongitude(fieldEntry.getValue());
+            geometryBuilder.setLongitude(value);
         }
         if (field.isField(CkanConstants.KnownFieldIdValue.ALTITUDE)) {
-            geometryBuilder.setAltitude(fieldEntry.getValue());
+            geometryBuilder.setAltitude(value);
         }
         if (field.isField(CkanConstants.KnownFieldIdValue.LOCATION)) {
             if (field.isOfType("JsonObject")) {

@@ -166,6 +166,21 @@ public class ResourceField {
     public String getOther(String name) {
         return node.at("/" + name).asText();
     }
+    
+    public String normalizeValue(String value) {
+        if (value != null) {
+            try {
+                if (this.isOfType(Integer.class)) {
+                    value = new Integer(value).toString();
+                } else if (this.isOfType(Double.class)) {
+                    value = new Double(value).toString();
+                }
+            } catch (NumberFormatException e) {
+                LOGGER.error("Could normalize field value '{}' (type {}) ", value, getFieldType(), e);
+            }
+        } 
+        return value;
+    }
 
     public boolean equalsValues(String thisValue, String otherValue) {
         if (otherValue != null) {
