@@ -38,6 +38,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.Assert;
+import org.n52.sos.ds.hibernate.DescribeSensorDAO;
 import org.n52.sos.ds.hibernate.GetDataAvailabilityDAO;
 import org.n52.sos.ds.hibernate.GetObservationDAO;
 import org.n52.sos.ds.hibernate.H2Configuration;
@@ -48,8 +49,12 @@ import org.n52.sos.ogc.om.OmObservation;
 import org.n52.sos.ogc.ows.OwsExceptionReport;
 import org.n52.sos.ogc.sos.Sos2Constants;
 import org.n52.sos.ogc.sos.SosConstants;
+import org.n52.sos.ogc.sos.SosProcedureDescription;
+import org.n52.sos.request.DescribeSensorRequest;
 import org.n52.sos.request.GetObservationRequest;
+import org.n52.sos.response.DescribeSensorResponse;
 import org.n52.sos.response.GetObservationResponse;
+import org.n52.sos.service.AbstractServiceCommunicationObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,7 +119,62 @@ public class H2DatabaseAccessor {
             }
         };
     }
-
+    
+    public static Matcher<H2DatabaseAccessor> isMobileProcedure(final String procedureId) {
+        return new TypeSafeMatcher<H2DatabaseAccessor>() {
+            boolean capabilitiesMissing;
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("mobile capabilities should return ").appendValue(Boolean.TRUE);
+            }
+            @Override
+            protected void describeMismatchSafely(H2DatabaseAccessor item, Description mismatchDescription) {
+                if (capabilitiesMissing) {
+                    mismatchDescription.appendText("was").appendValue(Boolean.FALSE + " (default), as of missing capabilities!");
+                }
+                mismatchDescription.appendText("was").appendValue(Boolean.FALSE);
+            }
+            @Override
+            protected boolean matchesSafely(H2DatabaseAccessor database) {
+                DescribeSensorResponse response = database.describeSensor(procedureId);
+                List<SosProcedureDescription> descriptions = response.getProcedureDescriptions();
+                for (SosProcedureDescription sensorDescription : descriptions) {
+                    if (procedureId.equals(sensorDescription.getIdentifier())) {
+                        return sensorDescription.getMobile();
+                    }
+                }
+                return false;
+            }
+        };
+    }
+    
+    public static Matcher<H2DatabaseAccessor> isInsituProcedure(final String procedureId) {
+        return new TypeSafeMatcher<H2DatabaseAccessor>() {
+            boolean capabilitiesMissing;
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("insitu capabilities should return ").appendValue(Boolean.TRUE);
+            }
+            @Override
+            protected void describeMismatchSafely(H2DatabaseAccessor item, Description mismatchDescription) {
+                if (capabilitiesMissing) {
+                    mismatchDescription.appendText("was").appendValue(Boolean.FALSE + " (default), as of missing capabilities!");
+                }
+                mismatchDescription.appendText("was").appendValue(Boolean.FALSE);
+            }
+            @Override
+            protected boolean matchesSafely(H2DatabaseAccessor database) {
+                DescribeSensorResponse response = database.describeSensor(procedureId);
+                List<SosProcedureDescription> descriptions = response.getProcedureDescriptions();
+                for (SosProcedureDescription sensorDescription : descriptions) {
+                    if (procedureId.equals(sensorDescription.getIdentifier())) {
+                        return sensorDescription.getInsitu();
+                    }
+                }
+                return false;
+            }
+        };
+    }
 
     // TODO test via data loaders for each file set (reduce each to a minimum to keep tests fast)
     // TODO think of refactoring how strategy works to run tests fast
@@ -123,10 +183,8 @@ public class H2DatabaseAccessor {
     List<OmObservation> getObservations() {
         try {
             GetObservationDAO getObsDAO = new GetObservationDAO();
-            GetObservationRequest getObsReq = new GetObservationRequest();
-            getObsReq.setService(SosConstants.SOS);
-            getObsReq.setVersion(Sos2Constants.SERVICEVERSION);
-            GetObservationResponse getObsResponse = getObsDAO.getObservation(getObsReq);
+            GetObservationRequest request = applyCommonParameters(new GetObservationRequest());
+            GetObservationResponse getObsResponse = getObsDAO.getObservation(request);
             return getObsResponse.getObservationCollection();
         } catch (OwsExceptionReport e) {
             LOGGER.error("Could not query H2 database!", e);
@@ -136,12 +194,32 @@ public class H2DatabaseAccessor {
     }
 
 
+    private <T extends AbstractServiceCommunicationObject> T applyCommonParameters(T request) {
+        request.setVersion(Sos2Constants.SERVICEVERSION);
+        request.setService(SosConstants.SOS);
+        return request;
+    }
+
+    DescribeSensorResponse describeSensor(String procedureId) {
+        try {
+            DescribeSensorDAO descSensor = new DescribeSensorDAO();
+            DescribeSensorRequest request = applyCommonParameters(new DescribeSensorRequest());
+            request.setProcedureDescriptionFormat("http://www.opengis.net/sensorML/1.0.1");
+            request.setProcedure(procedureId);
+            return descSensor.getSensorDescription(request);
+        } catch (OwsExceptionReport e) {
+            LOGGER.error("Could not query H2 database!", e);
+            Assert.fail("Could not query H2 database!");
+            return null;
+        }
+    }
+
     List<DataAvailability> getDataAvailability() {
-        return getDataAvailability(createBasicGdaRequest());
+        return getDataAvailability(applyCommonParameters(new GetDataAvailabilityRequest()));
     }
 
     List<DataAvailability> getDataAvailabilityForFeatures(String... features) {
-         GetDataAvailabilityRequest request = createBasicGdaRequest();
+         GetDataAvailabilityRequest request = applyCommonParameters(new GetDataAvailabilityRequest());
         request = features != null
                 ? request.setFeatureOfInterest(Arrays.asList(features))
                 : request;
@@ -158,14 +236,6 @@ public class H2DatabaseAccessor {
             Assert.fail("Could not query H2 database!");
             return null;
         }
-    }
-
-
-    private GetDataAvailabilityRequest createBasicGdaRequest() {
-        GetDataAvailabilityRequest gdaReq = new GetDataAvailabilityRequest();
-        gdaReq.setVersion(Sos2Constants.SERVICEVERSION);
-        gdaReq.setService(SosConstants.SOS);
-        return gdaReq;
     }
 
 }
