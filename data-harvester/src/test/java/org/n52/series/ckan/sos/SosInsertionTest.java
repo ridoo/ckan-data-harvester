@@ -38,7 +38,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import org.hamcrest.MatcherAssert;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
