@@ -39,6 +39,10 @@ public class MobileInsertStrategy extends AbstractInsertStrategy {
         CkanMapping ckanMapping = member.getCkanMapping();
         FeatureBuilder foiBuilder = new FeatureBuilder(dataset, ckanMapping);
         Procedure procedure = new Procedure(member.getId(), member.getDatasetName());
+        SensorBuilder sensorBuilderTemplate = SensorBuilder.create()
+                .withProcedure(procedure)
+                .withDataset(dataset)
+                .setMobile(true);
 
         LOGGER.debug("Create mobile insertions ...");
         Map<String, DataInsertion> dataInsertions = new HashMap<>();
@@ -57,17 +61,18 @@ public class MobileInsertStrategy extends AbstractInsertStrategy {
                         .withProcedure(procedure)
                         .withDataset(dataset)
                         .setMobile(true);
+                sensorBuilderTemplate.addPhenomenon(phenomenon);
 
                 if ( !dataInsertions.containsKey(trackId)) {
                     LOGGER.debug("Building sensor with: procedure '{}'", trackId);
                     DataFile dataFile = dataCollection.getDataFile(member);
-                    DataInsertion dataInsertion = createDataInsertion(sensorBuilder, dataFile);
+                    DataInsertion dataInsertion = createDataInsertion(sensorBuilderTemplate, dataFile);
                     dataInsertions.put(trackId, dataInsertion);
                 }
 
                 DataInsertion dataInsertion = dataInsertions.get(trackId);
                 final SosObservation observation =  observationBuilder
-                        .withSensorBuilder(sensorBuilder)
+                        .withSensorBuilder(sensorBuilderTemplate)
                         .createObservation(dataInsertion, phenomenon);
                 if (observation != null) {
                     dataInsertion.addObservation(observation);
@@ -78,7 +83,8 @@ public class MobileInsertStrategy extends AbstractInsertStrategy {
             String trackId = entry.getKey();
             DataInsertion dataInsertion = entry.getValue();
             AbstractFeature feature = foiBuilder.getFeatureFor(trackId);
-            dataInsertion.getSensorBuilder().withFeature(feature);
+            SensorBuilder template = dataInsertion.getSensorBuilder();
+            dataInsertion.setSensorBuilder(template.copy().withFeature(feature));
         }
         return dataInsertions;
     }

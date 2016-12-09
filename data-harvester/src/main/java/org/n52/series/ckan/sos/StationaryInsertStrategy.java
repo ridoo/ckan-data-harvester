@@ -76,7 +76,8 @@ class StationaryInsertStrategy extends AbstractInsertStrategy {
             ObservationBuilder observationBuilder = new ObservationBuilder(rowEntry, getUomParser());
 
             for (Phenomenon phenomenon : phenomena) {
-                SensorBuilder sensorBuilder = SensorBuilder.create(phenomenon)
+                SensorBuilder sensorBuilder = SensorBuilder.create()
+                        .addPhenomenon(phenomenon)
                         .withFeature(feature)
                         .withDataset(dataset)
                         .setMobile(false);
