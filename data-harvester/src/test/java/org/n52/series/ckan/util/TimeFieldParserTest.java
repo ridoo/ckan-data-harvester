@@ -63,6 +63,17 @@ public class TimeFieldParserTest {
         Assert.assertTrue("expected: " + instant.getValue().toString()
                 + ", actual: " + dateTime, instant.getValue().equals(dateTime));
     }
+    
+    @Test
+    public void when_customDateFormat_then_longValueIsNotUnixTime() {
+        ResourceField field = fieldCreator.createViaTemplate(TEST_DATE_TEMPLATE, "my-test-id", "YYYYMMDDhh");
+        TimeFieldParser parser = new TimeFieldParser();
+        TimeInstant actual = parser.parseTimestamp("2015032902", field);
+
+        final DateTime dateTime = new DateTime("2015-03-29T02:00:00Z");
+        Assert.assertTrue("expected: " + dateTime.toString()
+                + ", actual: " + actual.getValue().toString(), actual.getValue().equals(dateTime));
+    }
 
     @Test
     public void iso8601FormatValueHavingOffset() {
