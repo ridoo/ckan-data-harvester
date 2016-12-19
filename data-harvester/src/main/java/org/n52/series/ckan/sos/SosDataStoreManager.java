@@ -113,7 +113,6 @@ public class SosDataStoreManager implements DataStoreManager {
             return true;
         }
 
-
         try {
             if ( !ckanSosReferenceCache.exists(resource)) {
                 CkanSosObservationReference reference = new CkanSosObservationReference(resource);
