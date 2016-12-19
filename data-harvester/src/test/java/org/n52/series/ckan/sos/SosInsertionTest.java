@@ -29,13 +29,13 @@
 
 package org.n52.series.ckan.sos;
 
-import static org.n52.series.ckan.sos.H2DatabaseAccessor.hasDatasetCount;
 import static org.n52.series.ckan.sos.H2DatabaseAccessor.hasObservationsAvailable;
-import static org.n52.series.ckan.sos.H2DatabaseAccessor.isInsituProcedure;
-import static org.n52.series.ckan.sos.H2DatabaseAccessor.isMobileProcedure;
+import static org.n52.series.ckan.sos.matcher.DataAvailabilityMatcher.containsDatasetWithFeature;
+import static org.n52.series.ckan.sos.matcher.DataAvailabilityMatcher.containsDatasetWithPhenomenon;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 
 import org.hamcrest.MatcherAssert;
 import org.junit.AfterClass;
@@ -46,16 +46,19 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.n52.series.ckan.cache.InMemoryDataStoreManager;
+import org.n52.series.ckan.sos.matcher.SensorDescriptionMatcher;
 import org.n52.series.ckan.util.FileBasedCkanHarvestingService;
 import org.n52.sos.config.SettingsManager;
 import org.n52.sos.ds.ConnectionProviderException;
 import org.n52.sos.ds.hibernate.H2Configuration;
 import org.n52.sos.ds.hibernate.HibernateTestCase;
 import org.n52.sos.exception.ConfigurationException;
+import org.n52.sos.gda.GetDataAvailabilityResponse.DataAvailability;
+import org.n52.sos.response.DescribeSensorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Ignore("currently toooooo slooooooooooow for unit testing")
+//@Ignore("currently toooooo slooooooooooow for unit testing")
 public class SosInsertionTest extends HibernateTestCase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SosInsertionTest.class);
@@ -89,21 +92,35 @@ public class SosInsertionTest extends HibernateTestCase {
     @Test
     public void when_inserting_DWDWind_dataset_then_getObservationNotEmpty() {
         insertDataset("12c3c8f1-bf44-47e1-b294-b6fc889873fc");
-        MatcherAssert.assertThat(database, hasDatasetCount(2));
+        List<DataAvailability> dataAvailability = database.getDataAvailability();
+        MatcherAssert.assertThat("Wrong dataset count", dataAvailability.size(), is(2));
+        assertThat(dataAvailability, not(containsDatasetWithPhenomenon("Stationshoehe")));
+        assertThat(dataAvailability, containsDatasetWithPhenomenon("WINDGESCHWINDIKGKEIT"));
+        assertThat(dataAvailability, containsDatasetWithPhenomenon("WINDRICHTUNG"));
+
         assertThat(database, hasObservationsAvailable());
     }
 
     @Test
     public void when_inserting_DWDTemperature_dataset_then_getObservationNotEmpty() {
         insertDataset("eab53bfe-fce7-4fd8-8325-a0fe5cdb23c8");
-        MatcherAssert.assertThat(database, hasDatasetCount(8));
+        List<DataAvailability> dataAvailability = database.getDataAvailability();
+        assertThat("Wrong dataset count", dataAvailability.size(), is(8));
+        assertThat(dataAvailability, not(containsDatasetWithPhenomenon("Stationshoehe")));
+        assertThat(dataAvailability, containsDatasetWithPhenomenon("LUFTTEMPERATUR"));
+        assertThat(dataAvailability, containsDatasetWithPhenomenon("REL_FEUCHTE"));
+
         assertThat(database, hasObservationsAvailable());
     }
 
     @Test
     public void when_inserting_DWDSun_dataset_then_getObservationNotEmpty() {
         insertDataset("582ca1ba-bdc0-48de-a685-3184339d29f0");
-        MatcherAssert.assertThat(database, hasDatasetCount(2));
+        List<DataAvailability> dataAvailability = database.getDataAvailability();
+        MatcherAssert.assertThat("Wrong dataset count", dataAvailability.size(), is(2));
+        assertThat(dataAvailability, not(containsDatasetWithPhenomenon("Stationshoehe")));
+        assertThat(dataAvailability, containsDatasetWithPhenomenon("STUNDENSUMME_SONNENSCHEIN"));
+
         assertThat(database, hasObservationsAvailable());
     }
 
@@ -113,7 +130,11 @@ public class SosInsertionTest extends HibernateTestCase {
         // TODO schema descriptor actually describes two more (NIEDERSCHLAG_GEFALLEN_IND
         // and NIEDESCHLAGSFORM) phenomena but both are missing the `phenomenon` field value
         //MatcherAssert.assertThat(database, hasDatasetCount(12));
-        MatcherAssert.assertThat(database, hasDatasetCount(4));
+        List<DataAvailability> dataAvailability = database.getDataAvailability();
+        MatcherAssert.assertThat("Wrong dataset count", dataAvailability.size(), is(4));
+        assertThat(dataAvailability, not(containsDatasetWithPhenomenon("Stationshoehe")));
+        assertThat(dataAvailability, containsDatasetWithPhenomenon("NIEDERSCHLAGSHOEHE"));
+
         assertThat(database, hasObservationsAvailable());
 
     }
@@ -121,46 +142,79 @@ public class SosInsertionTest extends HibernateTestCase {
     @Test
     public void when_inserting_FraunhoferIgdTemp_dataset_then_getObservationNotEmpty() {
         insertDataset("f5c3eb65-c695-49a4-8992-ed54f973b950");
-        MatcherAssert.assertThat(database, hasDatasetCount(1));
+        List<DataAvailability> dataAvailability = database.getDataAvailability();
+        MatcherAssert.assertThat("Wrong dataset count", dataAvailability.size(), is(1));
+        assertThat(dataAvailability, containsDatasetWithPhenomenon("temperature"));
+
         assertThat(database, hasObservationsAvailable());
     }
 
     @Test
     public void when_inserting_FraunhoferIgdCoord_dataset_then_getObservationNotEmpty() {
         insertDataset("3aa04d90-4003-408a-8f3f-463dd6cb7486");
-        MatcherAssert.assertThat(database, hasDatasetCount(1));
+        List<DataAvailability> dataAvailability = database.getDataAvailability();
+        MatcherAssert.assertThat("Wrong dataset count", dataAvailability.size(), is(1));
+        assertThat(dataAvailability, containsDatasetWithPhenomenon("location"));
+
         assertThat(database, hasObservationsAvailable());
     }
 
     @Test
     public void when_inserting_OpenWeatherMapCoord_dataset_then_getObservationNotEmpty() {
         insertDataset("fb0f0f57-7a01-4385-9fe1-9fb366a63c4e");
-        MatcherAssert.assertThat(database, hasDatasetCount(3));
+        List<DataAvailability> dataAvailability = database.getDataAvailability();
+        MatcherAssert.assertThat("Wrong dataset count", dataAvailability.size(), is(3));
+        assertThat(dataAvailability, containsDatasetWithPhenomenon("location"));
+
         assertThat(database, hasObservationsAvailable());
     }
 
     @Test
     public void when_inserting_OpenWeatherMapTemp_dataset_then_getObservationNotEmpty() {
         insertDataset("a5442a6a-0a84-4326-a5b5-e6288e8fa457");
-        MatcherAssert.assertThat(database, hasDatasetCount(3));
+        List<DataAvailability> dataAvailability = database.getDataAvailability();
+        MatcherAssert.assertThat("Wrong dataset count", dataAvailability.size(), is(3));
+        assertThat(dataAvailability, containsDatasetWithPhenomenon("temperature"));
+
         assertThat(database, hasObservationsAvailable());
     }
 
     @Test
     public void when_inserting_heavyMetalSamples_dataset_then_getObservationNotEmpty() {
         insertDataset("3eb54ee2-6ec5-4ad9-af96-264159008aa7");
-        MatcherAssert.assertThat(database, hasDatasetCount(90));
+        List<DataAvailability> dataAvailability = database.getDataAvailability();
+        MatcherAssert.assertThat("Wrong dataset count", dataAvailability.size(), is(90));
+        MatcherAssert.assertThat(dataAvailability, containsDatasetWithPhenomenon("Zn(1000 - 400) [micro_g/g]"));
+        MatcherAssert.assertThat(dataAvailability, containsDatasetWithPhenomenon("Zn(400 - 100) [micro_g/g]"));
+        MatcherAssert.assertThat(dataAvailability, containsDatasetWithPhenomenon("Zn(100 - 63) [micro_g/g]"));
+        MatcherAssert.assertThat(dataAvailability, containsDatasetWithPhenomenon("Zn(63 - 0.45) [micro_g/g]"));
+        MatcherAssert.assertThat(dataAvailability, containsDatasetWithPhenomenon("Zn(SUMM) [micro_g/g]"));
+        MatcherAssert.assertThat(dataAvailability, containsDatasetWithPhenomenon("Cu(1000 - 400) [micro_g/g]"));
+        MatcherAssert.assertThat(dataAvailability, containsDatasetWithPhenomenon("Cu(400 - 100) [micro_g/g]"));
+        MatcherAssert.assertThat(dataAvailability, containsDatasetWithPhenomenon("Cu(100 - 63) [micro_g/g]"));
+        MatcherAssert.assertThat(dataAvailability, containsDatasetWithPhenomenon("Cu(63 - 0.45) [micro_g/g]"));
+        MatcherAssert.assertThat(dataAvailability, containsDatasetWithPhenomenon("Cu(SUMM) [micro_g/g]"));
+        MatcherAssert.assertThat(dataAvailability, containsDatasetWithPhenomenon("Cd(1000 - 400) [micro_g/g]"));
+        MatcherAssert.assertThat(dataAvailability, containsDatasetWithPhenomenon("Cd(400 - 100) [micro_g/g]"));
+        MatcherAssert.assertThat(dataAvailability, containsDatasetWithPhenomenon("Cd(100 - 63) [micro_g/g]"));
+        MatcherAssert.assertThat(dataAvailability, containsDatasetWithPhenomenon("Cd(63 - 0.45) [micro_g/g]"));
+        MatcherAssert.assertThat(dataAvailability, containsDatasetWithPhenomenon("Cd(SUMM) [micro_g/g]"));
+
+        // check if mobile/insitu capabilities
+        DescribeSensorResponse sensorDescription = database.describeSensor("3eb54ee2-6ec5-4ad9-af96-264159008aa7");
+        MatcherAssert.assertThat(sensorDescription, SensorDescriptionMatcher.isMobileProcedure("3eb54ee2-6ec5-4ad9-af96-264159008aa7"));
+        MatcherAssert.assertThat(sensorDescription, SensorDescriptionMatcher.isInsituProcedure("3eb54ee2-6ec5-4ad9-af96-264159008aa7"));
+        
+        // each track is available as individual dataset
+        MatcherAssert.assertThat(dataAvailability, containsDatasetWithFeature("2012-07-20 - Bannewitz"));
+        MatcherAssert.assertThat(dataAvailability, containsDatasetWithFeature("2012-07-21 - Bannewitz"));
+        MatcherAssert.assertThat(dataAvailability, containsDatasetWithFeature("2012-07-22 - Bannewitz"));
+        MatcherAssert.assertThat(dataAvailability, containsDatasetWithFeature("2012-07-23 - Bannewitz"));
+        MatcherAssert.assertThat(dataAvailability, containsDatasetWithFeature("2012-07-25 - Bannewitz"));
+        MatcherAssert.assertThat(dataAvailability, containsDatasetWithFeature("2012-07-27 - Bannewitz"));
+
         assertThat(database, hasObservationsAvailable());
 
-        // check if mobile and if each track is available as individual dataset
-        assertThat(database, isMobileProcedure("3eb54ee2-6ec5-4ad9-af96-264159008aa7"));
-        assertThat(database, isInsituProcedure("3eb54ee2-6ec5-4ad9-af96-264159008aa7"));
-        MatcherAssert.assertThat(database, H2DatabaseAccessor.hasDatasetsWithFeatureId("2012-07-20 - Bannewitz"));
-        MatcherAssert.assertThat(database, H2DatabaseAccessor.hasDatasetsWithFeatureId("2012-07-21 - Bannewitz"));
-        MatcherAssert.assertThat(database, H2DatabaseAccessor.hasDatasetsWithFeatureId("2012-07-22 - Bannewitz"));
-        MatcherAssert.assertThat(database, H2DatabaseAccessor.hasDatasetsWithFeatureId("2012-07-23 - Bannewitz"));
-        MatcherAssert.assertThat(database, H2DatabaseAccessor.hasDatasetsWithFeatureId("2012-07-25 - Bannewitz"));
-        MatcherAssert.assertThat(database, H2DatabaseAccessor.hasDatasetsWithFeatureId("2012-07-27 - Bannewitz"));
     }
 
     @Test
