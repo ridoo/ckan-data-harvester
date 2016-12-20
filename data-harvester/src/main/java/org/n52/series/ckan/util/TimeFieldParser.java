@@ -21,12 +21,12 @@ public class TimeFieldParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(TimeFieldParser.class);
 
     public TimeInstant parseTimestamp(String dateValue, ResourceField field) {
-        return isLong(dateValue)// || !hasDateFormat(field)
+        return isLong(dateValue) && !hasDateFormat(field)
             ? new TimeInstant(new Date(Long.parseLong(dateValue)))
             : parseDateValue(dateValue, parseDateFormat(field));
     }
 
-    public boolean isLong(String value) {
+    private boolean isLong(String value) {
         try {
             Long.parseLong(value);
             return true;
