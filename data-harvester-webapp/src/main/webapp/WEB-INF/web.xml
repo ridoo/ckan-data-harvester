@@ -4,9 +4,9 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
 http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	version="2.5">
-	<display-name>52°North Sensor Observation Service, Git-Branch '${git.branch}' with
+	<display-name>52°North COLABIS CKAN SOS, Git-Branch '${git.branch}' with
 		state '${git.commit.id}' @ git.build.time</display-name>
-	<description>This is an OGC SOS with Sensor Web REST-API.</description>
+	<description>This is an OGC SOS with Sensor Web REST-API providing data from COLABIS CKAN Server.</description>
 	<context-param>
 		<!--defines the directory in which the log files will be stored. -->
 		<param-name>logDir</param-name>
