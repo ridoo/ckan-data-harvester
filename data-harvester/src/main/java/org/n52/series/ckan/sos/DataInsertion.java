@@ -113,14 +113,6 @@ class DataInsertion {
         }
 
         OmObservation observation = sosObservation.getObservation();
-//        if ( !movingPlatform && observation.getParameter() != null) {
-//            Collection<NamedValue< ? >> parameters = observation.getParameter();
-//            for (NamedValue< ? > namedValue : parameters) {
-//                if (SAMPLING_GEOMETRY_TYPE.equals(namedValue.getName())) {
-//                    movingPlatform = true;
-//                }
-//            }
-//        }
         observationTypes.add(sosObservation.getObservationType());
         observations.add(observation);
     }

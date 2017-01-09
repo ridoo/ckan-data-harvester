@@ -63,7 +63,7 @@ public class TimeFieldParserTest {
         Assert.assertTrue("expected: " + instant.getValue().toString()
                 + ", actual: " + dateTime, instant.getValue().equals(dateTime));
     }
-    
+
     @Test
     public void when_customDateFormat_then_longValueIsNotUnixTime() {
         ResourceField field = fieldCreator.createViaTemplate(TEST_DATE_TEMPLATE, "my-test-id", "YYYYMMDDhh");
