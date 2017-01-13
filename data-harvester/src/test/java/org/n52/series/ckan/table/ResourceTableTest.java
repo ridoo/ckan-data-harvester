@@ -41,12 +41,16 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.n52.series.ckan.beans.ResourceMember;
+import org.n52.series.ckan.sos.Phenomenon;
+import org.n52.series.ckan.sos.PhenomenonParser;
 
 import com.google.common.collect.Table;
 
 public class ResourceTableTest {
 
     private static final String DWD_TEMPERATUR_DATASET_ID = "eab53bfe-fce7-4fd8-8325-a0fe5cdb23c8";
+    
+    private static final String DWD_PLATFORM_DATA_ID_1 = "8f0637bc-c15e-4f74-b7d8-bfc4ed2ac2f9";
 
     private static final String OBSERVATION_DATA_ID_1 = "2cbb2409-5591-40a9-a60b-544ebb809fb8";
 
@@ -77,7 +81,7 @@ public class ResourceTableTest {
     }
 
     @Test
-    public void when_joinNonTrivialWithTrivial_outputHasDimensionOfNonTrivial() {
+    public void when_joinNonTrivialWithTrivial_outputHasRowsOfNonTrivial() {
         ResourceTable nonTrivial = tableHelper.readObservationTable(DWD_TEMPERATUR_DATASET_ID, OBSERVATION_DATA_ID_1);
 
         List<String> expectedColumns = nonTrivial.getResourceMember().getColumnHeaders();
@@ -88,7 +92,7 @@ public class ResourceTableTest {
     }
 
     @Test
-    public void when_joiningTrivialWithNonTrivial_outputHasDimensionOfNonTrivial() {
+    public void when_joiningTrivialWithNonTrivial_outputHasRowsOfNonTrivial() {
         ResourceTable nonTrivial = tableHelper.readObservationTable(DWD_TEMPERATUR_DATASET_ID, OBSERVATION_DATA_ID_1);
 
         List<String> expectedHeaders = nonTrivial.getResourceMember().getColumnHeaders();
@@ -115,6 +119,33 @@ public class ResourceTableTest {
         List<String> actualColumnHeaders = output.getResourceMember().getColumnHeaders();
         List<String> expectedColumnHeaders = member1.getColumnHeaders();
         assertThat(actualColumnHeaders, is(expectedColumnHeaders));
+    }
+    
+    @Test
+    public void when_joiningDataOfSameCollectionButDifferentType_joinColumnsAppearJustOnce() {
+        ResourceTable nonTrivial1 = tableHelper.readObservationTable(DWD_TEMPERATUR_DATASET_ID, OBSERVATION_DATA_ID_1);
+        ResourceTable nonTrivial2 = tableHelper.readPlatformTable(DWD_TEMPERATUR_DATASET_ID, DWD_PLATFORM_DATA_ID_1);
+        DataTable output = nonTrivial1.innerJoin(nonTrivial2);
+
+        ResourceMember member1 = nonTrivial1.getResourceMember();
+        ResourceMember member2 = nonTrivial2.getResourceMember();
+        int joinColumnSize = member1.getJoinableFields(member2).size();
+
+        int allColumnSize = nonTrivial1.columnSize() + nonTrivial2.columnSize();
+        assertThat(output.columnSize(), is(allColumnSize - joinColumnSize));
+    }
+    
+    @Test
+    public void when_joiningDataOfSameCollectionButDifferentType_phenomenaOfBothTablesAreAvailable() {
+        ResourceTable nonTrivial1 = tableHelper.readObservationTable(DWD_TEMPERATUR_DATASET_ID, OBSERVATION_DATA_ID_1);
+        ResourceTable nonTrivial2 = tableHelper.readPlatformTable(DWD_TEMPERATUR_DATASET_ID, DWD_PLATFORM_DATA_ID_1);
+        DataTable output = nonTrivial1.innerJoin(nonTrivial2);
+
+        PhenomenonParser parser = new PhenomenonParser();
+        List<Phenomenon> phenomenaObservations = parser.parse(nonTrivial1.getResourceFields());
+        List<Phenomenon> phenomenaPlatforms = parser.parse(nonTrivial2.getResourceFields());
+        List<Phenomenon> allPhenomena = parser.parse(output.getResourceFields());
+        assertThat(allPhenomena.size(), is(phenomenaObservations.size() + phenomenaPlatforms.size()));
     }
 
 }
