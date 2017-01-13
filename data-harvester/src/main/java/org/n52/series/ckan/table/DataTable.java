@@ -31,6 +31,7 @@ package org.n52.series.ckan.table;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -71,6 +72,14 @@ public class DataTable {
 
     public ResourceMember getResourceMember() {
         return resourceMember;
+    }
+    
+    public Collection<ResourceField> getResourceFields() {
+        List<ResourceField> fields = new ArrayList<>(resourceMember.getResourceFields());
+        for (ResourceMember joinedMember : joinedMembers) {
+            fields.addAll(joinedMember.getResourceFields());
+        }
+        return Collections.unmodifiableList(fields);
     }
 
     public DataTable extendWith(DataTable other) {
