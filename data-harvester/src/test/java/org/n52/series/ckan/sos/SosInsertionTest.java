@@ -93,8 +93,8 @@ public class SosInsertionTest extends HibernateTestCase {
     public void when_inserting_DWDWind_dataset_then_getObservationNotEmpty() {
         insertDataset("12c3c8f1-bf44-47e1-b294-b6fc889873fc");
         List<DataAvailability> dataAvailability = database.getDataAvailability();
-        MatcherAssert.assertThat("Wrong dataset count", dataAvailability.size(), is(2));
-        assertThat(dataAvailability, not(containsDatasetWithPhenomenon("Stationshoehe")));
+        MatcherAssert.assertThat("Wrong dataset count", dataAvailability.size(), is(3));
+        assertThat(dataAvailability, containsDatasetWithPhenomenon("Stationshoehe"));
         assertThat(dataAvailability, containsDatasetWithPhenomenon("WINDGESCHWINDIKGKEIT"));
         assertThat(dataAvailability, containsDatasetWithPhenomenon("WINDRICHTUNG"));
 
@@ -105,8 +105,8 @@ public class SosInsertionTest extends HibernateTestCase {
     public void when_inserting_DWDTemperature_dataset_then_getObservationNotEmpty() {
         insertDataset("eab53bfe-fce7-4fd8-8325-a0fe5cdb23c8");
         List<DataAvailability> dataAvailability = database.getDataAvailability();
-        assertThat("Wrong dataset count", dataAvailability.size(), is(8));
-        assertThat(dataAvailability, not(containsDatasetWithPhenomenon("Stationshoehe")));
+        assertThat("Wrong dataset count", dataAvailability.size(), is(12));
+        assertThat(dataAvailability, containsDatasetWithPhenomenon("Stationshoehe"));
         assertThat(dataAvailability, containsDatasetWithPhenomenon("LUFTTEMPERATUR"));
         assertThat(dataAvailability, containsDatasetWithPhenomenon("REL_FEUCHTE"));
 
@@ -117,8 +117,8 @@ public class SosInsertionTest extends HibernateTestCase {
     public void when_inserting_DWDSun_dataset_then_getObservationNotEmpty() {
         insertDataset("582ca1ba-bdc0-48de-a685-3184339d29f0");
         List<DataAvailability> dataAvailability = database.getDataAvailability();
-        MatcherAssert.assertThat("Wrong dataset count", dataAvailability.size(), is(2));
-        assertThat(dataAvailability, not(containsDatasetWithPhenomenon("Stationshoehe")));
+        MatcherAssert.assertThat("Wrong dataset count", dataAvailability.size(), is(4));
+        assertThat(dataAvailability, containsDatasetWithPhenomenon("Stationshoehe"));
         assertThat(dataAvailability, containsDatasetWithPhenomenon("STUNDENSUMME_SONNENSCHEIN"));
 
         assertThat(database, hasObservationsAvailable());
@@ -131,12 +131,11 @@ public class SosInsertionTest extends HibernateTestCase {
         // and NIEDESCHLAGSFORM) phenomena but both are missing the `phenomenon` field value
         //MatcherAssert.assertThat(database, hasDatasetCount(12));
         List<DataAvailability> dataAvailability = database.getDataAvailability();
-        MatcherAssert.assertThat("Wrong dataset count", dataAvailability.size(), is(4));
-        assertThat(dataAvailability, not(containsDatasetWithPhenomenon("Stationshoehe")));
+        MatcherAssert.assertThat("Wrong dataset count", dataAvailability.size(), is(8));
+        assertThat(dataAvailability, containsDatasetWithPhenomenon("Stationshoehe"));
         assertThat(dataAvailability, containsDatasetWithPhenomenon("NIEDERSCHLAGSHOEHE"));
 
         assertThat(database, hasObservationsAvailable());
-
     }
 
     @Test

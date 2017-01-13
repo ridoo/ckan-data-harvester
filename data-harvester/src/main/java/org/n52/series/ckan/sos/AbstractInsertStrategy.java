@@ -1,5 +1,6 @@
 package org.n52.series.ckan.sos;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.n52.series.ckan.beans.DataFile;
@@ -37,7 +38,7 @@ public abstract class AbstractInsertStrategy implements SosInsertStrategy {
 
     protected List<Phenomenon> parsePhenomena(DataTable dataTable) {
         PhenomenonParser phenomenonParser = new PhenomenonParser(uomParser);
-        List<ResourceField> resourceFields = dataTable.getResourceMember().getResourceFields();
+        Collection<ResourceField> resourceFields = dataTable.getResourceFields();
         final List<Phenomenon> phenomena = phenomenonParser.parse(resourceFields);
         LOGGER.debug("Phenomena: {}", phenomena);
         return phenomena;

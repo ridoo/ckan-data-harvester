@@ -65,7 +65,6 @@ public class JoinIndexTest {
         MatcherAssert.assertThat(index1.equals(index2), CoreMatchers.is(true));
     }
 
-
     @Test
     public void shouldFailTestingEqualityWithDifferentValue() {
         final ResourceField first = fieldCreator.createSimple("test42");
