@@ -136,7 +136,6 @@ public class SosInsertionTest extends HibernateTestCase {
         assertThat(dataAvailability, containsDatasetWithPhenomenon("NIEDERSCHLAGSHOEHE"));
 
         assertThat(database, hasObservationsAvailable());
-
     }
 
     @Test
