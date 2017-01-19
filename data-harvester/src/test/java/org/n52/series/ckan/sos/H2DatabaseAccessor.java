@@ -67,9 +67,9 @@ public class H2DatabaseAccessor {
 
 
     public static Matcher<H2DatabaseAccessor> hasObservationsAvailable() {
-        
+
         // TODO move to separate matcher
-        
+
         return new TypeSafeMatcher<H2DatabaseAccessor>() {
             @Override
             public void describeTo(Description description) {

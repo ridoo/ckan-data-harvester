@@ -203,7 +203,7 @@ public class SosInsertionTest extends HibernateTestCase {
         DescribeSensorResponse sensorDescription = database.describeSensor("3eb54ee2-6ec5-4ad9-af96-264159008aa7");
         MatcherAssert.assertThat(sensorDescription, SensorDescriptionMatcher.isMobileProcedure("3eb54ee2-6ec5-4ad9-af96-264159008aa7"));
         MatcherAssert.assertThat(sensorDescription, SensorDescriptionMatcher.isInsituProcedure("3eb54ee2-6ec5-4ad9-af96-264159008aa7"));
-        
+
         // each track is available as individual dataset
         MatcherAssert.assertThat(dataAvailability, containsDatasetWithFeature("2012-07-20 - Bannewitz"));
         MatcherAssert.assertThat(dataAvailability, containsDatasetWithFeature("2012-07-21 - Bannewitz"));

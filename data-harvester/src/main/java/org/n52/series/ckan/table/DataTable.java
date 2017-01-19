@@ -73,7 +73,7 @@ public class DataTable {
     public ResourceMember getResourceMember() {
         return resourceMember;
     }
-    
+
     public Collection<ResourceField> getResourceFields() {
         List<ResourceField> fields = new ArrayList<>(resourceMember.getResourceFields());
         for (ResourceMember joinedMember : joinedMembers) {

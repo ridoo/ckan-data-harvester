@@ -10,7 +10,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	<context-param>
 		<!--defines the directory in which the log files will be stored. -->
 		<param-name>logDir</param-name>
-		<!-- a relative path is not allowed, if a relative path would be supported 
+		<!-- a relative path is not allowed, if a relative path would be supported
 			the log dir has to be in the WEB-INF dir -->
 		<param-value>${conf.sos.logdir}</param-value>
 	</context-param>
