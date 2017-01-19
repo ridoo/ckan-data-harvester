@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2016 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2015-2017 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -73,7 +73,7 @@ public class DataTable {
     public ResourceMember getResourceMember() {
         return resourceMember;
     }
-    
+
     public Collection<ResourceField> getResourceFields() {
         List<ResourceField> fields = new ArrayList<>(resourceMember.getResourceFields());
         for (ResourceMember joinedMember : joinedMembers) {

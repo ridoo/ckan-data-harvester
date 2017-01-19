@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2016 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2015-2017 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -26,7 +26,6 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
-
 package org.n52.series.ckan.sos;
 
 import static org.n52.series.ckan.sos.H2DatabaseAccessor.hasObservationsAvailable;
@@ -203,7 +202,7 @@ public class SosInsertionTest extends HibernateTestCase {
         DescribeSensorResponse sensorDescription = database.describeSensor("3eb54ee2-6ec5-4ad9-af96-264159008aa7");
         MatcherAssert.assertThat(sensorDescription, SensorDescriptionMatcher.isMobileProcedure("3eb54ee2-6ec5-4ad9-af96-264159008aa7"));
         MatcherAssert.assertThat(sensorDescription, SensorDescriptionMatcher.isInsituProcedure("3eb54ee2-6ec5-4ad9-af96-264159008aa7"));
-        
+
         // each track is available as individual dataset
         MatcherAssert.assertThat(dataAvailability, containsDatasetWithFeature("2012-07-20 - Bannewitz"));
         MatcherAssert.assertThat(dataAvailability, containsDatasetWithFeature("2012-07-21 - Bannewitz"));

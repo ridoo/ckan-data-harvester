@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2016 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2015-2017 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -26,7 +26,6 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
-
 package org.n52.series.ckan.sos;
 
 import java.io.IOException;
@@ -67,9 +66,9 @@ public class H2DatabaseAccessor {
 
 
     public static Matcher<H2DatabaseAccessor> hasObservationsAvailable() {
-        
+
         // TODO move to separate matcher
-        
+
         return new TypeSafeMatcher<H2DatabaseAccessor>() {
             @Override
             public void describeTo(Description description) {

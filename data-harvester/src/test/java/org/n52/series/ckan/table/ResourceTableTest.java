@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2016 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2015-2017 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -49,7 +49,7 @@ import com.google.common.collect.Table;
 public class ResourceTableTest {
 
     private static final String DWD_TEMPERATUR_DATASET_ID = "eab53bfe-fce7-4fd8-8325-a0fe5cdb23c8";
-    
+
     private static final String DWD_PLATFORM_DATA_ID_1 = "8f0637bc-c15e-4f74-b7d8-bfc4ed2ac2f9";
 
     private static final String OBSERVATION_DATA_ID_1 = "2cbb2409-5591-40a9-a60b-544ebb809fb8";
@@ -120,7 +120,7 @@ public class ResourceTableTest {
         List<String> expectedColumnHeaders = member1.getColumnHeaders();
         assertThat(actualColumnHeaders, is(expectedColumnHeaders));
     }
-    
+
     @Test
     public void when_joiningDataOfSameCollectionButDifferentType_joinColumnsAppearJustOnce() {
         ResourceTable nonTrivial1 = tableHelper.readObservationTable(DWD_TEMPERATUR_DATASET_ID, OBSERVATION_DATA_ID_1);
@@ -134,7 +134,7 @@ public class ResourceTableTest {
         int allColumnSize = nonTrivial1.columnSize() + nonTrivial2.columnSize();
         assertThat(output.columnSize(), is(allColumnSize - joinColumnSize));
     }
-    
+
     @Test
     public void when_joiningDataOfSameCollectionButDifferentType_phenomenaOfBothTablesAreAvailable() {
         ResourceTable nonTrivial1 = tableHelper.readObservationTable(DWD_TEMPERATUR_DATASET_ID, OBSERVATION_DATA_ID_1);
