@@ -2,11 +2,11 @@
     "selectedLineWidth": 4,
     "commonLineWidth": 1,
     "restApiUrls": {
-	    "http://localhost:8080/api/v1/": "localhost"
+	    "${external.url}/api/v1/": "localhost"
     },
     "defaultProvider": {
         "serviceID": "1",
-        "apiUrl": "http://localhost:8080/api/v1/"
+        "apiUrl": "${external.url}/api/v1/"
     },
     "chartOptions":{
         "yaxis":{
