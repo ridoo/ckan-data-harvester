@@ -24,7 +24,6 @@
         <spring.version>4.2.5.RELEASE</spring.version>
         <jackan.version>0.4.3-SNAPSHOT</jackan.version>
         <jackson.version>2.7.3</jackson.version>
-        <series.api.version>2.0.0-SNAPSHOT</series.api.version>
     </properties>
     <dependencies>
         <dependency>
