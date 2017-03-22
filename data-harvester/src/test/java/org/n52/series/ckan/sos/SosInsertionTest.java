@@ -51,7 +51,6 @@ import org.n52.sos.config.SettingsManager;
 import org.n52.sos.ds.ConnectionProviderException;
 import org.n52.sos.ds.hibernate.H2Configuration;
 import org.n52.sos.ds.hibernate.HibernateTestCase;
-import org.n52.sos.exception.ConfigurationException;
 import org.n52.sos.gda.GetDataAvailabilityResponse.DataAvailability;
 import org.n52.sos.response.DescribeSensorResponse;
 import org.slf4j.Logger;
@@ -84,7 +83,7 @@ public class SosInsertionTest extends HibernateTestCase {
     }
 
     @AfterClass
-    public static void cleanUp() throws ConnectionProviderException, ConfigurationException {
+    public static void cleanUp() throws ConnectionProviderException {
         SettingsManager.getInstance().cleanup();
     }
 
