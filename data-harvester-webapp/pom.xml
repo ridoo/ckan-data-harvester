@@ -76,7 +76,7 @@
                             <artifactId>webapp-bundle</artifactId>
                             <excludes>
                                 <exclude>cache.tmp</exclude>
-                                <exclude>static/client/jsClient</exclude>
+                                <exclude>static/client/**</exclude>
                                 <exclude>WEB-INF/classes/logback.xml</exclude>
                                 <exclude>WEB-INF/classes/config-*.json</exclude>
                                 <exclude>WEB-INF/spring/*.xml</exclude>
