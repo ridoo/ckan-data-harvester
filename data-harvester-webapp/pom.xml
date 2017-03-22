@@ -17,8 +17,10 @@
     <properties>
         <!-- dev | ci | prod -->
         <env>dev</env>
-        <local.configFile>file:${user.home}/${project.build.finalName}.properties</local.configFile>
-        <config.logger.fileappender.filepath>${catalina.base:-.}/logs/${project.build.finalName}</config.logger.fileappender.filepath>
+        <finalName>${project.artifactId}</finalName>
+        <local.configFile>file:${user.home}/${finalName}.properties</local.configFile>
+        <config.logger.fileappender.filepath>${catalina.base:-.}/logs/${finalName}</config.logger.fileappender.filepath>
+        <external.url>http://localhost:8080/${finalName}</external.url>
 
         <enforcer.skip>true</enforcer.skip>
         <mdep.analyze.skip>true</mdep.analyze.skip>
@@ -55,15 +57,14 @@
     </dependencies>
 
     <build>
-        <finalName>${project.artifactId}</finalName>
-	<resources>
+        <finalName>${finalName}</finalName>
+        <resources>
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
             </resource>
-	</resources>
+        </resources>
         <plugins>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
