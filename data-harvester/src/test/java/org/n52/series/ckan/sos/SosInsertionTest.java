@@ -58,7 +58,7 @@ import org.n52.sos.response.GetFeatureOfInterestResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Ignore("currently toooooo slooooooooooow for unit testing")
+//@Ignore("currently toooooo slooooooooooow for unit testing")
 public class SosInsertionTest extends HibernateTestCase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SosInsertionTest.class);
@@ -100,8 +100,9 @@ public class SosInsertionTest extends HibernateTestCase {
         assertThat(dataAvailability, containsDatasetWithPhenomenon("WINDGESCHWINDIKGKEIT"));
         assertThat(dataAvailability, containsDatasetWithPhenomenon("WINDRICHTUNG"));
 
-        GetFeatureOfInterestResponse featureResponse = database.getFeatures();
-        MatcherAssert.assertThat(featureResponse, FeatureOfInterestMatcher.contains("dwd-1048"));
+        GetFeatureOfInterestResponse allFeatures = database.getFeatures();
+        MatcherAssert.assertThat(allFeatures, FeatureOfInterestMatcher.contains("dwd-1048"));
+        MatcherAssert.assertThat(allFeatures, FeatureOfInterestMatcher.isSamplingPoint("dwd-1048"));
         
         assertThat(database, hasObservationsAvailable());
     }

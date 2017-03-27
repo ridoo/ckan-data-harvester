@@ -28,24 +28,39 @@
  */
 package org.n52.series.ckan.sos.matcher;
 
-import java.util.List;
-
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.n52.sos.ogc.gml.AbstractFeature;
 import org.n52.sos.ogc.om.features.FeatureCollection;
-import org.n52.sos.ogc.sos.SosProcedureDescription;
-import org.n52.sos.response.DescribeSensorResponse;
+import org.n52.sos.ogc.om.features.SfConstants;
+import org.n52.sos.ogc.om.features.samplingFeatures.AbstractSamplingFeature;
 import org.n52.sos.response.GetFeatureOfInterestResponse;
 
 public class FeatureOfInterestMatcher {
+    
+    public static Matcher<GetFeatureOfInterestResponse> isSamplingPoint(String featureId) {
+        return new SampleFeatureMatcher() {
+            @Override
+            protected boolean matchesSafely(GetFeatureOfInterestResponse response) {
+                return isSamplingPoint(featureId, response);
+            }
+        };
+    }
+    public static Matcher<GetFeatureOfInterestResponse> isSamplingCurve(String featureId) {
+        return new SampleFeatureMatcher() {
+            @Override
+            protected boolean matchesSafely(GetFeatureOfInterestResponse response) {
+                return isSamplingCurve(featureId, response);
+            }
+        };
+    }
 
     public static Matcher<GetFeatureOfInterestResponse> contains(final String featureId) {
-        return new TypeSafeMatcher<GetFeatureOfInterestResponse>() {
+        return new GetFoiResponseMatcher() {
             @Override
             public void describeTo(Description description) {
-                description.appendText("getFoi should have contained feature withg ID").appendValue(featureId);
+                description.appendText("getFoi should have contained feature with ID").appendValue(featureId);
             }
             @Override
             protected void describeMismatchSafely(GetFeatureOfInterestResponse item, Description mismatchDescription) {
@@ -53,47 +68,69 @@ public class FeatureOfInterestMatcher {
             }
             @Override
             protected boolean matchesSafely(GetFeatureOfInterestResponse response) {
-                AbstractFeature feature = response.getAbstractFeature();
-                if (feature == null) {
-                    return false;
-                }
-                if ( !feature.getClass().isAssignableFrom(FeatureCollection.class)) {
-                    String id = feature.getIdentifier();
-                    return id != null && id.equals(featureId);
-                } else {
-                    FeatureCollection features = (FeatureCollection) feature;
-                    for (AbstractFeature item : features) {
-                        String id = item.getIdentifier();
-                        if (id != null && id.equals(featureId)) {
-                            return true;
-                        }
-                    }
-                }
-                return false;
+                return getFeature(featureId, response) != null;
             }
         };
     }
+    
+    private static abstract class SampleFeatureMatcher extends GetFoiResponseMatcher {
+        private AbstractSamplingFeature feature;
+        @Override
+        public void describeTo(Description description) {
+            if ( !isSamplingFeature(feature)) {
+                description.appendText("was").appendValue("not a sampling feature!");
+            } else {
+                AbstractSamplingFeature sf = (AbstractSamplingFeature) feature;
+                description.appendText("was").appendValue(sf.getFeatureType());
+            }
+        }
+        protected boolean isSamplingPoint(String featureId, GetFeatureOfInterestResponse response) {
+            AbstractSamplingFeature feature = getSamplingFeature(featureId, response);
+            return isOfSamplingType(feature, SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_POINT);
+        }
+        protected boolean isSamplingCurve(String featureId, GetFeatureOfInterestResponse response) {
+            AbstractSamplingFeature feature = getSamplingFeature(featureId, response);
+            return isOfSamplingType(feature, SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_CURVE);
+        }
+        
+        private boolean isOfSamplingType(AbstractSamplingFeature feature, String type) {
+            return feature != null && feature.getFeatureType().equals(type);
+        }
 
-    public static Matcher<DescribeSensorResponse> isInsituProcedure(final String procedureId) {
-        return new TypeSafeMatcher<DescribeSensorResponse>() {
-            @Override
-            public void describeTo(Description description) {
-                description.appendText("insitu capabilities should return ").appendValue(Boolean.TRUE);
+        protected boolean isSamplingFeature(AbstractFeature feature) {
+            return feature != null && AbstractSamplingFeature.class.isAssignableFrom(feature.getClass());
+        }
+        
+        protected AbstractSamplingFeature getSamplingFeature(String featureId, GetFeatureOfInterestResponse response) {
+            AbstractFeature abstractFeature = super.getFeature(featureId, response);
+            feature = isSamplingFeature(abstractFeature)
+                    ? (AbstractSamplingFeature) abstractFeature
+                    : null;
+            return feature;
+        }
+    }
+
+    private static abstract class GetFoiResponseMatcher extends TypeSafeMatcher<GetFeatureOfInterestResponse> {
+        
+        protected AbstractFeature getFeature(String featureId, GetFeatureOfInterestResponse response) {
+            AbstractFeature feature = response.getAbstractFeature();
+            if (feature == null) {
+                return feature;
             }
-            @Override
-            protected void describeMismatchSafely(DescribeSensorResponse item, Description mismatchDescription) {
-                mismatchDescription.appendText("was").appendValue(Boolean.FALSE);
+            if ( !FeatureCollection.class.isAssignableFrom(feature.getClass())) {
+                String id = feature.getIdentifier();
+                return id != null && id.equals(featureId)
+                        ? feature
+                        : null;
             }
-            @Override
-            protected boolean matchesSafely(DescribeSensorResponse response) {
-                List<SosProcedureDescription> descriptions = response.getProcedureDescriptions();
-                for (SosProcedureDescription sensorDescription : descriptions) {
-                    if (procedureId.equals(sensorDescription.getIdentifier())) {
-                        return sensorDescription.getInsitu();
-                    }
+            FeatureCollection features = (FeatureCollection) feature;
+            for (AbstractFeature item : features) {
+                String id = item.getIdentifier();
+                if (id != null && id.equals(featureId)) {
+                    return item;
                 }
-                return false;
             }
-        };
+            return null;
+        }
     }
 }
