@@ -1,0 +1,97 @@
+{
+  "members" : [
+    {
+      "fields" : [
+        {
+          "field_id" : "id",
+          "field_type" : "String"
+        },
+        {
+          "field_id" : "laenge",
+          "field_type" : "Float",
+          "short_name" : "segment length",
+          "phenomenon" : "length",
+          "uom" : "m"
+        },
+        {
+          "field_id" : "flaeche",
+          "field_type" : "Float",
+          "short_name" : "segment area",
+          "phenomenon" : "area",
+          "uom" : "m2"
+        },
+        {
+          "field_id" : "lat",
+          "field_type" : "Float",
+          "uom" : "decimal degrees",
+          "field_role" : "latitude"
+        },
+        {
+          "field_id" : "lon",
+          "field_type" : "Float",
+          "uom" : "decimal degrees",
+          "field_role" : "longitude"
+        }
+      ],
+      "resource_name" : [
+        "4a0f1eba-a415-44fd-a426-6b53a438f683"
+      ],
+      "resource_type" : "observed_geometries"
+    },
+    {
+      "fields" : [
+        {
+          "field_id" : "id",
+          "field_type" : "String"
+        },
+        {
+          "field_id" : "gesamt_mg_m2",
+          "field_type" : "Float",
+          "short_name" : "total pollutant emission",
+          "phenomenon" : "pollutant emission",
+          "uom" : "mg/m2"
+        },
+        {
+          "field_id" : "reifen_mg_m2",
+          "field_type" : "Float",
+          "short_name" : "tyre pollutant emission",
+          "phenomenon" : "pollutant emission",
+          "uom" : "mg/m2"
+        },
+        {
+          "field_id" : "bremsen_mg_m2",
+          "field_type" : "Float",
+          "short_name" : "brakes pollutant emission",
+          "phenomenon" : "pollutant emission",
+          "uom" : "mg/m2"
+        },
+        {
+          "field_id" : "strasse_mg_m2",
+          "field_type" : "Float",
+          "short_name" : "street pollutant emission",
+          "phenomenon" : "pollutant emission",
+          "uom" : "mg/m2"
+        },
+        {
+          "field_id" : "zw",
+          "field_type" : "Float",
+          "short_name" : "quality parameter"
+        },
+        {
+          "field_id" : "datum",
+          "field_type" : "Date",
+          "date_format" : "YYYY-MM-dd"
+        }
+      ],
+      "resource_name" : [
+        "28523713-2ed2-45bf-8884-91995384b74a",
+        "8e6ec101-3a70-4023-a4a1-e341a68a6280",
+        "80f204dc-c568-4f3a-af2d-fbd76f5cf2bf",
+        "a1e210a3-b83e-4e96-b38c-716db1920b10"
+      ],
+      "resource_type" : "observations"
+    }
+  ],
+  "resource_type" : "csv-observations-collection",
+  "schema_descriptor_version" : 0.3
+}
