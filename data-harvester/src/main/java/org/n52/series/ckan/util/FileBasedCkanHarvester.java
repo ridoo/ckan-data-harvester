@@ -30,6 +30,7 @@ package org.n52.series.ckan.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +42,6 @@ import org.slf4j.LoggerFactory;
 
 import eu.trentorise.opendata.jackan.model.CkanDataset;
 import eu.trentorise.opendata.jackan.model.CkanResource;
-import java.net.URL;
 
 public class FileBasedCkanHarvester extends CkanHarvestingService {
 

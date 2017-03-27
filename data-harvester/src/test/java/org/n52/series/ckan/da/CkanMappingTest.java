@@ -32,6 +32,7 @@ import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
+
 import org.junit.Test;
 
 public class CkanMappingTest {

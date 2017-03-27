@@ -28,14 +28,16 @@
  */
 package org.n52.series.ckan.da;
 
-import eu.trentorise.opendata.jackan.CkanClient;
-import eu.trentorise.opendata.jackan.CkanQuery;
-import eu.trentorise.opendata.jackan.model.CkanDataset;
 import java.util.List;
+
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import eu.trentorise.opendata.jackan.CkanClient;
+import eu.trentorise.opendata.jackan.CkanQuery;
+import eu.trentorise.opendata.jackan.model.CkanDataset;
 
 @Ignore("Ignore Jackan Library Sandboxing")
 public class CkanClientTest {

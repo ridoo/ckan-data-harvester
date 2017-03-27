@@ -28,11 +28,12 @@
  */
 package org.n52.series.ckan.util;
 
-import org.n52.series.ckan.cache.InMemoryMetadataStore;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+
 import org.n52.series.ckan.cache.InMemoryDataStoreManager;
+import org.n52.series.ckan.cache.InMemoryMetadataStore;
 import org.n52.series.ckan.da.CkanHarvestingService;
 
 public class FileBasedCkanHarvestingService {

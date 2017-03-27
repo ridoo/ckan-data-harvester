@@ -28,6 +28,13 @@
  */
 package org.n52.series.ckan.util;
 
+import java.io.IOException;
+import java.net.ProxySelector;
+
+import javax.net.ssl.SSLContext;
+
+import org.n52.series.ckan.da.CkanConstants;
+
 import eu.trentorise.opendata.jackan.internal.org.apache.http.Consts;
 import eu.trentorise.opendata.jackan.internal.org.apache.http.HttpEntity;
 import eu.trentorise.opendata.jackan.internal.org.apache.http.HttpResponse;
@@ -49,10 +56,6 @@ import eu.trentorise.opendata.jackan.internal.org.apache.http.impl.client.HttpCl
 import eu.trentorise.opendata.jackan.internal.org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import eu.trentorise.opendata.jackan.internal.org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 import eu.trentorise.opendata.jackan.internal.org.apache.http.util.EntityUtils;
-import java.io.IOException;
-import java.net.ProxySelector;
-import javax.net.ssl.SSLContext;
-import org.n52.series.ckan.da.CkanConstants;
 
 public class ResourceClient {
 

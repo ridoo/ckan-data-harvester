@@ -32,8 +32,8 @@ import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.Before;
 import org.junit.Test;
-import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.beans.FieldBuilder;
+import org.n52.series.ckan.beans.ResourceField;
 
 public class JoinIndexTest {
 

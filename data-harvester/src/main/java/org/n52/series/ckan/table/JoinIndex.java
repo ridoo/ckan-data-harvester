@@ -29,6 +29,7 @@
 package org.n52.series.ckan.table;
 
 import java.util.Objects;
+
 import org.n52.series.ckan.beans.ResourceField;
 
 public class JoinIndex {

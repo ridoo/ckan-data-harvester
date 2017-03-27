@@ -28,16 +28,18 @@
  */
 package org.n52.series.ckan.sos;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import eu.trentorise.opendata.jackan.model.CkanDataset;
-import eu.trentorise.opendata.jackan.model.CkanResource;
 import java.io.IOException;
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import eu.trentorise.opendata.jackan.model.CkanDataset;
+import eu.trentorise.opendata.jackan.model.CkanResource;
 
 public class SerializedCache implements CkanSosReferenceCache, Serializable {
 

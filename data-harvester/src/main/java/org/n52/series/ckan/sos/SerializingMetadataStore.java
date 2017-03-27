@@ -28,8 +28,6 @@
  */
 package org.n52.series.ckan.sos;
 
-import eu.trentorise.opendata.jackan.model.CkanDataset;
-import eu.trentorise.opendata.jackan.model.CkanResource;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -41,11 +39,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+
 import org.n52.series.ckan.cache.InMemoryMetadataStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import eu.trentorise.opendata.jackan.model.CkanDataset;
+import eu.trentorise.opendata.jackan.model.CkanResource;
 
 public class SerializingMetadataStore extends InMemoryMetadataStore implements CkanSosReferenceCache {
 
