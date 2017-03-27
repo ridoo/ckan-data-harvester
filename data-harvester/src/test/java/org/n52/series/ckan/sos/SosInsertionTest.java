@@ -45,6 +45,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.n52.series.ckan.cache.InMemoryDataStoreManager;
+import org.n52.series.ckan.sos.matcher.FeatureOfInterestMatcher;
 import org.n52.series.ckan.sos.matcher.SensorDescriptionMatcher;
 import org.n52.series.ckan.util.FileBasedCkanHarvestingService;
 import org.n52.sos.config.SettingsManager;
@@ -53,6 +54,7 @@ import org.n52.sos.ds.hibernate.H2Configuration;
 import org.n52.sos.ds.hibernate.HibernateTestCase;
 import org.n52.sos.gda.GetDataAvailabilityResponse.DataAvailability;
 import org.n52.sos.response.DescribeSensorResponse;
+import org.n52.sos.response.GetFeatureOfInterestResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,13 +91,18 @@ public class SosInsertionTest extends HibernateTestCase {
 
     @Test
     public void when_inserting_DWDWind_dataset_then_getObservationNotEmpty() {
-        insertDataset("12c3c8f1-bf44-47e1-b294-b6fc889873fc");
+        String datasetId = "12c3c8f1-bf44-47e1-b294-b6fc889873fc";
+        
+        insertDataset(datasetId);
         List<DataAvailability> dataAvailability = database.getDataAvailability();
         MatcherAssert.assertThat("Wrong dataset count", dataAvailability.size(), is(3));
         assertThat(dataAvailability, containsDatasetWithPhenomenon("Stationshoehe"));
         assertThat(dataAvailability, containsDatasetWithPhenomenon("WINDGESCHWINDIKGKEIT"));
         assertThat(dataAvailability, containsDatasetWithPhenomenon("WINDRICHTUNG"));
 
+        GetFeatureOfInterestResponse featureResponse = database.getFeatures();
+        MatcherAssert.assertThat(featureResponse, FeatureOfInterestMatcher.contains("dwd-1048"));
+        
         assertThat(database, hasObservationsAvailable());
     }
 
@@ -178,7 +185,9 @@ public class SosInsertionTest extends HibernateTestCase {
 
     @Test
     public void when_inserting_heavyMetalSamples_dataset_then_getObservationNotEmpty() {
-        insertDataset("3eb54ee2-6ec5-4ad9-af96-264159008aa7");
+        String datasetId = "3eb54ee2-6ec5-4ad9-af96-264159008aa7";
+        
+        insertDataset(datasetId);
         List<DataAvailability> dataAvailability = database.getDataAvailability();
         MatcherAssert.assertThat("Wrong dataset count", dataAvailability.size(), is(90));
         MatcherAssert.assertThat(dataAvailability, containsDatasetWithPhenomenon("Zn(1000 - 400) [micro_g/g]"));
@@ -198,9 +207,9 @@ public class SosInsertionTest extends HibernateTestCase {
         MatcherAssert.assertThat(dataAvailability, containsDatasetWithPhenomenon("Cd(SUMM) [micro_g/g]"));
 
         // check if mobile/insitu capabilities
-        DescribeSensorResponse sensorDescription = database.describeSensor("3eb54ee2-6ec5-4ad9-af96-264159008aa7");
-        MatcherAssert.assertThat(sensorDescription, SensorDescriptionMatcher.isMobileProcedure("3eb54ee2-6ec5-4ad9-af96-264159008aa7"));
-        MatcherAssert.assertThat(sensorDescription, SensorDescriptionMatcher.isInsituProcedure("3eb54ee2-6ec5-4ad9-af96-264159008aa7"));
+        DescribeSensorResponse sensorDescription = database.describeSensor(datasetId);
+        MatcherAssert.assertThat(sensorDescription, SensorDescriptionMatcher.isMobileProcedure(datasetId));
+        MatcherAssert.assertThat(sensorDescription, SensorDescriptionMatcher.isInsituProcedure(datasetId));
 
         // each track is available as individual dataset
         MatcherAssert.assertThat(dataAvailability, containsDatasetWithFeature("2012-07-20 - Bannewitz"));
