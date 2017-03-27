@@ -44,14 +44,14 @@ import static org.hamcrest.CoreMatchers.is;
 import org.n52.series.ckan.beans.ResourceMember;
 import org.n52.series.ckan.da.CkanConstants;
 
-public class FeatureBuilderTest {
+public class SimpleFeatureBuilderTest {
 
     private static final String ORGA_NAME = "test_orga";
 
-    private FeatureBuilder createFeatureBuilder() {
+    private SimpleFeatureBuilder createFeatureBuilder() {
         CkanDataset dataset = new CkanDataset("test_dataset");
         dataset.setOrganization(new CkanOrganization(ORGA_NAME));
-        return new FeatureBuilder(dataset);
+        return new SimpleFeatureBuilder(dataset);
     }
 
     @Test

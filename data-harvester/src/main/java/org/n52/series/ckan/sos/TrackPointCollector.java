@@ -28,6 +28,8 @@
  */
 package org.n52.series.ckan.sos;
 
+import static org.n52.series.ckan.sos.SimpleFeatureBuilder.createEmptyFeature;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,22 +51,19 @@ import com.vividsolutions.jts.geom.Geometry;
 
 public class TrackPointCollector {
 
-    private final FeatureBuilder foiBuilder;
-
     private final Map<String, List<TrackPoint>> trackPointsByTrackId;
 
     private final Map<String, SamplingFeature> featureByTrackId;
 
     private final CkanMapping ckanMapping;
 
-    public TrackPointCollector(FeatureBuilder foibuilder) {
-        this(foibuilder, CkanMapping.loadCkanMapping());
+    public TrackPointCollector() {
+        this(CkanMapping.loadCkanMapping());
     }
 
-    public TrackPointCollector(FeatureBuilder foiBuilder, CkanMapping ckanMapping) {
+    public TrackPointCollector(CkanMapping ckanMapping) {
         this.trackPointsByTrackId = new HashMap<>();
         this.featureByTrackId = new HashMap<>();
-        this.foiBuilder = foiBuilder;
         this.ckanMapping = ckanMapping;
     }
 
@@ -84,7 +83,13 @@ public class TrackPointCollector {
         }
         return trackId;
     }
-    public TrackPoint getStart(String trackId) {
+
+    SamplingFeature getFeatureFor(String trackId) {
+        TrackPoint startPoint = getStart(trackId);
+        return createFeature(startPoint);
+    }
+
+     TrackPoint getStart(String trackId) {
         TrackPoint startPoint = null;
         if (trackPointsByTrackId.containsKey(trackId)) {
             for (TrackPoint candidate : trackPointsByTrackId.get(trackId)) {
@@ -105,7 +110,7 @@ public class TrackPointCollector {
         String featureIdentifier = featureName != null
                 ? getTrackId(trackPoint) + " - " + featureName
                 : getTrackId(trackPoint);
-        SamplingFeature feature = foiBuilder.createEmptyFeature();
+        SamplingFeature feature = createEmptyFeature();
         feature.setIdentifier(featureIdentifier);
         feature.addName(featureName);
         return feature;
@@ -125,7 +130,7 @@ public class TrackPointCollector {
 
         private final Map<ResourceField, String> valuesByField;
 
-        private String featureName;
+//        private String featureName;
 
         private Geometry geometry;
 
@@ -238,7 +243,7 @@ public class TrackPointCollector {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((featureName == null) ? 0 : featureName.hashCode());
+//            result = prime * result + ((featureName == null) ? 0 : featureName.hashCode());
             result = prime * result + ((geometry == null) ? 0 : geometry.hashCode());
             return result;
         }
@@ -255,13 +260,13 @@ public class TrackPointCollector {
                 return false;
             }
             TrackPoint other = (TrackPoint) obj;
-            if (featureName == null) {
-                if (other.featureName != null) {
-                    return false;
-                }
-            } else if (!featureName.equals(other.featureName)) {
-                return false;
-            }
+//            if (featureName == null) {
+//                if (other.featureName != null) {
+//                    return false;
+//                }
+//            } else if (!featureName.equals(other.featureName)) {
+//                return false;
+//            }
             if (geometry == null) {
                 if (other.geometry != null) {
                     return false;
