@@ -183,6 +183,10 @@ public class TrackPointCollector {
             return getField(fieldId) != null;
         }
 
+        public boolean isValid() {
+            return geometry != null;
+        }
+        
         public Geometry getGeometry() {
             return geometry;
         }
@@ -225,9 +229,9 @@ public class TrackPointCollector {
         public String getValue(String fieldId, String defaultValue) {
             ResourceField field = getField(fieldId);
             String value = valuesByField.get(field);
-            return field != null
-                    ? field.normalizeValue(value)
-                    : defaultValue;
+            return field == null
+                    ? defaultValue
+                    : value;
         }
 
         public ResourceField getField(String fieldId) {

@@ -39,7 +39,6 @@ import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.beans.ResourceMember;
 import org.n52.series.ckan.table.DataTable;
 import org.n52.series.ckan.table.ResourceKey;
-import org.n52.sos.ogc.gml.AbstractFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,12 +68,11 @@ class StationaryInsertStrategy extends AbstractInsertStrategy {
 
             CkanDataset dataset = dataCollection.getDataset();
             ResourceMember member = rowEntry.getKey().getMember();
-            FeatureBuilder foiBuilder = new FeatureBuilder(dataset);
-            AbstractFeature feature = foiBuilder.createFeature(rowEntry.getValue());
+            SimpleFeatureBuilder foiBuilder = new SimpleFeatureBuilder(dataset);
+            foiBuilder.visit(rowEntry.getValue());
 
-            ObservationBuilder observationBuilder = new ObservationBuilder(rowEntry, getUomParser());
             SensorBuilder sensorBuilder = SensorBuilder.create()
-                    .withFeature(feature)
+                    .withFeature(foiBuilder.getResult())
                     .withDataset(dataset)
                     .setMobile(false);
 
@@ -92,9 +90,12 @@ class StationaryInsertStrategy extends AbstractInsertStrategy {
                 }
 
                 DataInsertion dataInsertion = dataInsertions.get(procedureId);
-                final SosObservation observation =  observationBuilder
+                final SosObservation observation = ObservationBuilder
+                        .create(phenomenon, rowEntry.getKey())
+                        .withUomParser(getUomParser())
                         .withSensorBuilder(sensorBuilder)
-                        .createObservation(dataInsertion, phenomenon);
+                        .visit(rowEntry.getValue())
+                        .getResult();
                 if (observation != null) {
                     dataInsertion.addObservation(observation);
                 }

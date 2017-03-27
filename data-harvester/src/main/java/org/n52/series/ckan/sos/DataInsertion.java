@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.n52.sos.ogc.gml.AbstractFeature;
-import org.n52.sos.ogc.om.OmConstants;
 import org.n52.sos.ogc.om.OmObservation;
 import org.n52.sos.ogc.om.OmObservationConstellation;
 import org.n52.sos.ogc.ows.OwsExceptionReport;
@@ -144,13 +143,6 @@ class DataInsertion {
         insertObservationRequest.setOfferings(getOfferingIds());
         insertObservationRequest.setObservation(observations);
         return insertObservationRequest;
-    }
-
-    OmObservationConstellation createConstellation(Phenomenon phenomenon) {
-        OmObservationConstellation constellation = new OmObservationConstellation();
-        constellation.setObservableProperty(phenomenon.toObservableProperty());
-        constellation.setObservationType(OmConstants.OBS_TYPE_MEASUREMENT);
-        return constellation;
     }
 
     @Override

@@ -28,21 +28,25 @@
  */
 package org.n52.series.ckan.sos;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.io.WKTWriter;
-import eu.trentorise.opendata.jackan.model.CkanDataset;
-import eu.trentorise.opendata.jackan.model.CkanOrganization;
 import static java.util.Collections.singletonMap;
+import static org.hamcrest.CoreMatchers.is;
+
 import java.util.HashMap;
 import java.util.Map;
+
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.Test;
-import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.beans.FieldBuilder;
-import static org.hamcrest.CoreMatchers.is;
+import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.beans.ResourceMember;
 import org.n52.series.ckan.da.CkanConstants;
+
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.io.WKTWriter;
+
+import eu.trentorise.opendata.jackan.model.CkanDataset;
+import eu.trentorise.opendata.jackan.model.CkanOrganization;
 
 public class SimpleFeatureBuilderTest {
 
@@ -59,7 +63,10 @@ public class SimpleFeatureBuilderTest {
         Map<ResourceField, String> row = singletonMap(FieldBuilder.aField()
                 .withFieldId(CkanConstants.KnownFieldIdValue.PLATFORM_ID)
                 .create(), "foobar_station");
-        String actual = createFeatureBuilder().createFeature(row).getFeatureType();
+        String actual = createFeatureBuilder()
+                .visit(row)
+                .getResult()
+                .getFeatureType();
         MatcherAssert.assertThat(actual, is("http://www.opengis.net/def/nil/OGC/0/unknown"));
     }
 
@@ -70,7 +77,10 @@ public class SimpleFeatureBuilderTest {
                 .create();
         field.setQualifier(new ResourceMember("foo", CkanConstants.ResourceType.OBSERVATIONS));
         Map<ResourceField, String> row = singletonMap(field, "foobar_station");
-        String actual = createFeatureBuilder().createFeature(row).getIdentifier();
+        String actual = createFeatureBuilder()
+                .visit(row)
+                .getResult()
+                .getIdentifier();
         MatcherAssert.assertThat(actual, is(ORGA_NAME + "-foobar_station"));
     }
 
@@ -79,7 +89,10 @@ public class SimpleFeatureBuilderTest {
         Map<ResourceField, String> row = singletonMap(FieldBuilder.aField()
                 .withFieldId(CkanConstants.KnownFieldIdValue.PLATFORM_NAME)
                 .create(), "foobar_station");
-        String actual = createFeatureBuilder().createFeature(row).getFirstName().getValue();
+        String actual = createFeatureBuilder()
+                .visit(row)
+                .getResult()
+                .getFirstName().getValue();
         MatcherAssert.assertThat(actual, is("foobar_station"));
     }
 
@@ -101,7 +114,11 @@ public class SimpleFeatureBuilderTest {
                 .withFieldType(CkanConstants.DataType.DOUBLE)
                 .withUom("m")
                 .create(), "10");
-        Geometry geometry = createFeatureBuilder().createFeature(row).getGeometry();
+
+        Geometry geometry = createFeatureBuilder()
+                .visit(row)
+                .getResult()
+                .getGeometry();
 
 //        final String actual = geometry.toText(); // toText() does not respect altitude
         final String actual = new WKTWriter(3).write(geometry);
@@ -115,7 +132,10 @@ public class SimpleFeatureBuilderTest {
                 .withFieldType("JsonObject")
                 .withUom("geojson")
                 .create(), "{'coordinates':[51.05, 13.74],'type':'Point'}");
-        Geometry geometry = createFeatureBuilder().createFeature(row).getGeometry();
+        Geometry geometry = createFeatureBuilder()
+                .visit(row)
+                .getResult()
+                .getGeometry();
         MatcherAssert.assertThat(geometry.toText(), is("POINT (51.05 13.74)"));
     }
 
@@ -127,7 +147,10 @@ public class SimpleFeatureBuilderTest {
                 .withFieldType("JsonObject")
                 .create();
         Map<ResourceField, String> row = singletonMap(field, "{'coordinates':[51.05, 13.74],'type':'Point'}");
-        Geometry geometry = createFeatureBuilder().createFeature(row).getGeometry();
+        Geometry geometry = createFeatureBuilder()
+                .visit(row)
+                .getResult()
+                .getGeometry();
         MatcherAssert.assertThat(geometry, is(CoreMatchers.nullValue(Geometry.class)));
     }
 
@@ -138,7 +161,10 @@ public class SimpleFeatureBuilderTest {
                 .withResourceType(CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES)
                 .create();
         Map<ResourceField, String> row = singletonMap(field, "POINT(51.05 13.74)");
-        Geometry geometry = createFeatureBuilder().createFeature(row).getGeometry();
+        Geometry geometry = createFeatureBuilder()
+                .visit(row)
+                .getResult()
+                .getGeometry();
         MatcherAssert.assertThat(geometry, is(CoreMatchers.nullValue(Geometry.class)));
     }
 

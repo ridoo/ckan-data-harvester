@@ -33,6 +33,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.n52.series.ckan.beans.FieldBuilder;
 import org.n52.series.ckan.beans.ResourceField;
+import org.n52.series.ckan.sos.ObservationBuilder.SingleObservationValueBuilder;
+import org.n52.series.ckan.table.ResourceKey;
 import org.n52.sos.ogc.om.SingleObservationValue;
 import org.n52.sos.ogc.om.values.QuantityValue;
 
@@ -40,7 +42,10 @@ public class ObservationBuilderTest {
 
     @Test
     public void when_floatTypedValue_then_createQuantityObservation() {
-        ObservationBuilder builder = new ObservationBuilder(null);
+        Phenomenon phenomenon = new Phenomenon("temperature", "Temperature", 0, "°K");
+        ObservationBuilder builder = ObservationBuilder.create(phenomenon, new ResourceKey());
+        SingleObservationValueBuilder valueBuilder = builder.new SingleObservationValueBuilder();
+        
         ResourceField field = new FieldBuilder()
                 .createViaTemplate("{"
                         + " \"field_id\" : \"value\", "
@@ -49,7 +54,8 @@ public class ObservationBuilderTest {
                         + " \"phenomenon\" : \"temperature\","
                         + " \"uom\" : \"°K\","
                         + " \"field_type\" : \"Float\" }");
-        SingleObservationValue<Double> value = builder.createQuantityObservationValue(field, "25.0");
+        SingleObservationValue<Double> value = valueBuilder.createQuantityValue(field, "25.0");
+        
         Assert.assertNotNull(value);
         Assert.assertThat(value.getValue(), CoreMatchers.instanceOf(QuantityValue.class));
         Assert.assertThat(value.getValue().getValue(), CoreMatchers.is(25.0));

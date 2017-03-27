@@ -29,6 +29,7 @@
 package org.n52.series.ckan.table;
 
 import java.util.Objects;
+
 import org.n52.series.ckan.beans.ResourceMember;
 
 public class ResourceKey {
@@ -36,6 +37,11 @@ public class ResourceKey {
     private final String keyId;
 
     private final ResourceMember member;
+    
+    public ResourceKey() {
+        this.keyId = "";
+        this.member = null;
+    }
 
     public ResourceKey(String keyId, ResourceMember member) {
         this.member = member;

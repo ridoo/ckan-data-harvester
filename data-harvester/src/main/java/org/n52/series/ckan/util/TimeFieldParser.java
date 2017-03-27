@@ -38,7 +38,9 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.da.CkanConstants;
 import org.n52.sos.exception.ows.concrete.DateTimeParseException;
+import org.n52.sos.ogc.gml.time.Time.TimeIndeterminateValue;
 import org.n52.sos.ogc.gml.time.TimeInstant;
+import org.n52.sos.ogc.gml.time.TimePeriod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,11 +49,73 @@ import com.google.common.base.Strings;
 public class TimeFieldParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TimeFieldParser.class);
-
+    
     public TimeInstant parseTimestamp(String dateValue, ResourceField field) {
         return isLong(dateValue) && !hasDateFormat(field)
             ? new TimeInstant(new Date(Long.parseLong(dateValue)))
             : parseDateValue(dateValue, parseDateFormat(field));
+    }
+    
+    public class ValidTimeBuilder extends ObservationFieldVisitor<TimePeriod> {
+
+        private TimeInstant validStart;
+        
+        private TimeInstant validEnd;
+        
+        @Override
+        public void visitObservationField(ResourceField field, String value) {
+            if (field.isField(CkanConstants.KnownFieldIdValue.VALID_TIME_START)) {
+                validStart = parseTimestamp(value, field);
+            }
+            else if (field.isField(CkanConstants.KnownFieldIdValue.VALID_TIME_END)) {
+                validEnd = parseTimestamp(value, field);
+            }
+        }
+    
+        @Override
+        public boolean hasResult() {
+            return validStart == null && validEnd == null;
+        }
+
+        @Override
+        public TimePeriod getResult() {
+            if (validStart == null && validEnd == null) {
+                return null;
+            }
+            TimePeriod validTime;
+            if (validStart != null && validEnd == null) {
+                validTime = new TimePeriod(validStart, new TimeInstant(TimeIndeterminateValue.unknown));
+            }
+            else if (validStart == null && validEnd != null) {
+                validTime = new TimePeriod(new TimeInstant(TimeIndeterminateValue.unknown), validEnd);
+            }
+            else {
+                validTime = new TimePeriod(validStart, validEnd);
+            }
+            return validTime;
+        }
+    }
+
+    public class TimeBuilder extends ObservationFieldVisitor<TimeInstant> {
+
+        private TimeInstant time;
+        
+        @Override
+        public void visitObservationField(ResourceField field, String value) {
+            if (field.isField(CkanConstants.KnownFieldIdValue.OBSERVATION_TIME)) {
+                time = parseTimestamp(value, field);
+            }
+        }
+    
+        @Override
+        public boolean hasResult() {
+            return time != null;
+        }
+
+        @Override
+        public TimeInstant getResult() {
+            return time;
+        }
     }
 
     private boolean isLong(String value) {

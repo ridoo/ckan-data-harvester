@@ -65,7 +65,6 @@ public class MobileInsertStrategy extends AbstractInsertStrategy {
         ResourceMember member = dataTable.getResourceMember();
         CkanDataset dataset = dataCollection.getDataset();
         CkanMapping ckanMapping = member.getCkanMapping();
-        FeatureBuilder foiBuilder = new FeatureBuilder(dataset, ckanMapping);
         Procedure procedure = new Procedure(dataset.getId(), dataset.getName());
 
         SensorBuilder sensorBuilderTemplate = SensorBuilder.create()
@@ -75,6 +74,8 @@ public class MobileInsertStrategy extends AbstractInsertStrategy {
 
         LOGGER.debug("Create mobile insertions ...");
         Map<String, DataInsertion> dataInsertions = new HashMap<>();
+        TrackPointCollector trackCollector = new TrackPointCollector(ckanMapping);
+        TrackPointBuilder trackBuilder = new TrackPointBuilder(trackCollector);
         for (Entry<ResourceKey, Map<ResourceField, String>> rowEntry : dataTable.getTable().rowMap().entrySet()) {
 
             /*
@@ -82,9 +83,9 @@ public class MobileInsertStrategy extends AbstractInsertStrategy {
              * feature afterwards (need to determine first observation
              * value of a track for the feature id).
              */
-            String trackId = foiBuilder.addTrackPoint(rowEntry.getValue());
-            ObservationBuilder observationBuilder = new ObservationBuilder(rowEntry, getUomParser());
-
+            trackBuilder.visit(rowEntry.getValue());
+            String trackId = trackBuilder.getResult();
+            
             for (Phenomenon phenomenon : phenomena) {
                 sensorBuilderTemplate.addPhenomenon(phenomenon);
 
@@ -96,9 +97,13 @@ public class MobileInsertStrategy extends AbstractInsertStrategy {
                 }
 
                 DataInsertion dataInsertion = dataInsertions.get(trackId);
-                final SosObservation observation =  observationBuilder
+                final SosObservation observation = ObservationBuilder
+                        .create(phenomenon, rowEntry.getKey())
+                        .withUomParser(getUomParser())
                         .withSensorBuilder(sensorBuilderTemplate)
-                        .createObservation(dataInsertion, phenomenon);
+                        .visit(rowEntry.getValue())
+                        .getResult();
+
                 if (observation != null) {
                     dataInsertion.addObservation(observation);
                 }
@@ -107,8 +112,8 @@ public class MobileInsertStrategy extends AbstractInsertStrategy {
         for (Entry<String, DataInsertion> entry : dataInsertions.entrySet()) {
             String trackId = entry.getKey();
             DataInsertion dataInsertion = entry.getValue();
-            AbstractFeature feature = foiBuilder.getFeatureFor(trackId);
             SensorBuilder template = dataInsertion.getSensorBuilder();
+            AbstractFeature feature = trackCollector.getFeatureFor(trackId);
             dataInsertion.setSensorBuilder(template.copy().withFeature(feature));
         }
         return dataInsertions;

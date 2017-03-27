@@ -35,11 +35,12 @@ import java.io.IOException;
 import org.n52.io.crs.CRSUtils;
 import org.n52.io.geojson.GeoJSONDecoder;
 import org.n52.io.geojson.GeoJSONException;
-import org.n52.sos.ogc.gml.ReferenceType;
-import org.n52.sos.ogc.om.NamedValue;
-import org.n52.sos.ogc.om.OmConstants;
+import org.n52.series.ckan.beans.ResourceField;
+import org.n52.series.ckan.da.CkanConstants;
 import org.n52.sos.ogc.om.features.SfConstants;
 import org.n52.sos.ogc.om.values.GeometryValue;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.TransformException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,10 +52,8 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.TransformException;
 
-public class GeometryBuilder {
+public class GeometryBuilder implements FieldVisitor<GeometryValue> {
 
     // TODO add line string builder
 
@@ -89,15 +88,45 @@ public class GeometryBuilder {
         return this;
     }
 
-    public GeometryValue createGeometryValue() {
-        return new GeometryValue(getGeometry());
+    @Override
+    public void visit(ResourceField field, String value) {
+        if (field.isField(CkanConstants.KnownFieldIdValue.LATITUDE)) {
+            setLatitude(value);
+        }
+        else if (field.isField(CkanConstants.KnownFieldIdValue.LONGITUDE)) {
+            setLongitude(value);
+        }
+        else if (field.isField(CkanConstants.KnownFieldIdValue.ALTITUDE)) {
+            setAltitude(value);
+        }
+        else if (field.isField(CkanConstants.KnownFieldIdValue.CRS)) {
+            withCrs(value);
+        }
+        else if (field.isField(CkanConstants.KnownFieldIdValue.LOCATION)) {
+            parseGeometryField(field, value);
+        }
+        else if (field.isOfType(CkanConstants.DataType.GEOMETRY)) {
+            // in case of geometry observations
+            parseGeometryField(field, value);
+        }
+    }
+    
+    private void parseGeometryField(ResourceField field, String value) {
+        if (field.isOfType("JsonObject")) {
+            withGeoJson(value);
+        } else {
+            withWKT(value);
+        }
     }
 
-    public NamedValue<Geometry> createNamedValue() {
-        final NamedValue<Geometry> namedValue = new NamedValue<>();
-        namedValue.setName(new ReferenceType(OmConstants.PARAM_NAME_SAMPLING_GEOMETRY));
-        namedValue.setValue(new GeometryValue(getGeometry()));
-        return namedValue;
+    @Override
+    public boolean hasResult() {
+        return canBuildGeometry();
+    }
+
+    @Override
+    public GeometryValue getResult() {
+        return new GeometryValue(getGeometry());
     }
 
     public boolean canBuildGeometry() {

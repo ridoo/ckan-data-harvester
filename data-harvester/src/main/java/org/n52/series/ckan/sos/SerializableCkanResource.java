@@ -28,12 +28,15 @@
  */
 package org.n52.series.ckan.sos;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import eu.trentorise.opendata.jackan.model.CkanResource;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Objects;
+
 import org.n52.series.ckan.util.JsonUtil;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import eu.trentorise.opendata.jackan.model.CkanResource;
 
 public class SerializableCkanResource implements Serializable {
     private static final long serialVersionUID = 830823271754623889L;
