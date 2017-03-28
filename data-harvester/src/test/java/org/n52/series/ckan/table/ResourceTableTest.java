@@ -34,12 +34,17 @@ import static org.hamcrest.Matchers.notNullValue;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.n52.series.ckan.beans.DataFile;
+import org.n52.series.ckan.beans.FieldBuilder;
+import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.beans.ResourceMember;
 import org.n52.series.ckan.sos.Phenomenon;
 import org.n52.series.ckan.sos.PhenomenonParser;
@@ -146,6 +151,31 @@ public class ResourceTableTest {
         List<Phenomenon> phenomenaPlatforms = parser.parse(nonTrivial2.getResourceFields());
         List<Phenomenon> allPhenomena = parser.parse(output.getResourceFields());
         assertThat(allPhenomena.size(), is(phenomenaObservations.size() + phenomenaPlatforms.size()));
+    }
+    
+    @Test
+    public void when_twoJoinColumnsWithSwitchedValues_then_noRowsGetsJoined() {
+        ResourceMember first = new ResourceMember("TABLE_A", "aType");
+        ResourceField firstA = FieldBuilder.aFieldAt(0).createSimple("A");
+        ResourceField firstB = FieldBuilder.aFieldAt(1).createSimple("B");
+        ResourceTable table = prepareTable(firstA, firstB, first);
+        
+        
+        ResourceMember second = new ResourceMember("TABLE_B", "bType");
+        ResourceField secondA = FieldBuilder.aFieldAt(0).createSimple("A");
+        ResourceField secondB = FieldBuilder.aFieldAt(1).createSimple("B");
+        ResourceTable other = prepareTable(secondB, secondA, second);
+        
+        DataTable joinedTable = table.innerJoin(other);
+        assertThat(joinedTable.rowSize(), is(0));
+    }
+    
+    private ResourceTable prepareTable(ResourceField first, ResourceField second, ResourceMember member) {
+        member.setResourceFields(Arrays.asList(first, second));
+        ResourceTable table = new ResourceTable(member, new DataFile());
+        table.setCellValue(member.createResourceKey(first.getIndex()), first , "A");
+        table.setCellValue(member.createResourceKey(second.getIndex()), second , "B");
+        return table;
     }
 
 }
