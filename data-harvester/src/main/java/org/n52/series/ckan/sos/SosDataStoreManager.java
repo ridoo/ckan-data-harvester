@@ -29,17 +29,14 @@
 package org.n52.series.ckan.sos;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import org.n52.series.ckan.beans.DataCollection;
 import org.n52.series.ckan.beans.DataFile;
-import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.da.DataStoreManager;
 import org.n52.series.ckan.table.DataTable;
 import org.n52.sos.ds.hibernate.InsertObservationDAO;
