@@ -60,7 +60,7 @@
         </property>
         <property name="metadataStore" ref="serializingMetadataStore" />
         <property name="dataStoreManager">
-            <bean class="org.n52.series.ckan.sos.SosDataStoreManager">
+            <bean class="org.n52.series.ckan.sos.ResourceTableDataStoreManager">
                 <constructor-arg index="0" ref="serializingMetadataStore" />
             </bean>
         </property>

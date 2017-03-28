@@ -59,9 +59,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 //@Ignore("currently toooooo slooooooooooow for unit testing")
-public class SosInsertionTest extends HibernateTestCase {
+public class SosDataStoreManagerTest extends HibernateTestCase {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SosInsertionTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SosDataStoreManagerTest.class);
 
     private FileBasedCkanHarvestingService service;
 
@@ -78,7 +78,7 @@ public class SosInsertionTest extends HibernateTestCase {
     public void setUp() throws IOException, URISyntaxException {
         service = new FileBasedCkanHarvestingService(testFolder.getRoot());
         ckanDataMgr = service.getCkanDataStoreManager();
-        sosDataMgr = new SosDataStoreManager();
+        sosDataMgr = new ResourceTableDataStoreManager();
         database = new H2DatabaseAccessor();
         // empty database before each test
         H2Configuration.recreate();
