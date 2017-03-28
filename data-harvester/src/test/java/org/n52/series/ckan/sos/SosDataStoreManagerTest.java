@@ -231,7 +231,7 @@ public class SosDataStoreManagerTest extends HibernateTestCase {
         // 1) a mobile platform (car) which is declared as observation --> observation_with_geometry
         // 2) the track must be identifiable ... can be artificially differentiated by combining columns
         //    --> e.g. timestamp (using raw, or an aggregating pattern)
-        insertDataset("30bdf3a2-74ba-43e0-9b31-50e5f5414402");
+        insertDataset("9f064e17-799e-4261-8599-d3ee31b5392b");
         assertThat(database, hasObservationsAvailable());
     }
 
