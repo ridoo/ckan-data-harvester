@@ -80,6 +80,8 @@
                                 <exclude>WEB-INF/classes/logback.xml</exclude>
                                 <exclude>WEB-INF/classes/config-*.json</exclude>
                                 <exclude>WEB-INF/spring/*.xml</exclude>
+                                <!-- exclude until webapp-bundle ships newest mapping files
+                                <exclude>WEB-INF/classes/mapping/extension/readonly/**</exclude> -->
                                 <exclude>WEB-INF/web.xml</exclude>
                             </excludes>
                         </overlay>
