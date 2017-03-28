@@ -121,7 +121,7 @@ public class H2DatabaseAccessor {
             return null;
         }
     }
-    
+
     GetFeatureOfInterestResponse getFeatures(String... featureIds) {
         try {
             GetFeatureOfInterestDAO getFeature = new GetFeatureOfInterestDAO();

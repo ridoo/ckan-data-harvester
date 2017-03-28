@@ -140,7 +140,7 @@ public class DataTable {
         final long start = System.currentTimeMillis();
         final Set<ResourceKey> doneJoinOnCells = new HashSet<>();
         final Set<ResourceKey> doneToJoinCells = new HashSet<>();
-        
+
         final int interval = 10;
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
         executor.scheduleAtFixedRate(new Runnable() {
@@ -155,7 +155,7 @@ public class DataTable {
                     return (now - start)/1000;
                 }
             }, interval, interval, TimeUnit.SECONDS);
-        
+
         ForkJoinPool pool = new ForkJoinPool(2);
         for (ResourceField field : joinFields) {
             // XXX does not consider AND in joinFields, but rather joins multiple times!
@@ -173,7 +173,7 @@ public class DataTable {
                                         final ResourceKey otherKey = toJoinCell.getKey();
                                         final String newId = otherKey.getKeyId() + "_" + outputTable.rowSize();
                                         ResourceKey newKey = new ResourceKey(newId, outputTable.resourceMember);
-        
+
                                         // add other's values
                                         final Map<ResourceField, String> toJoinRow = other.table.row(otherKey);
                                         for (Map.Entry<ResourceField, String> otherValue : toJoinRow.entrySet()) {
@@ -182,13 +182,13 @@ public class DataTable {
                                                     .withQualifier(otherKey.getMember());
                                             outputTable.table.put(newKey, joinedField, otherValue.getValue());
                                         }
-        
+
                                         // add this instance's values
                                         Map<ResourceField, String> joinOnRow = table.row(joinOnCell.getKey());
                                         for (Map.Entry<ResourceField, String> value : joinOnRow.entrySet()) {
                                             outputTable.table.put(newKey, value.getKey(), value.getValue());
                                         }
-                                        
+
                                         // filter in next iteration
                                         doneJoinOnCells.add(joinOnCell.getKey());
                                         doneToJoinCells.add(toJoinCell.getKey());

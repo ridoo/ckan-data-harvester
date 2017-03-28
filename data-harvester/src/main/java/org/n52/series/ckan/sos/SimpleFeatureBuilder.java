@@ -83,7 +83,7 @@ public class SimpleFeatureBuilder extends AbstractRowVisitor<SamplingFeature> {
             geometryBuilder.visit(field, value);
         }
     }
-    
+
 
     @Override
     public boolean hasResult() {

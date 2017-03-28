@@ -31,6 +31,7 @@ package org.n52.series.ckan.beans;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+
 import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.da.CkanMapping;
 import org.n52.series.ckan.util.FieldVisitor;
@@ -112,7 +113,7 @@ public class ResourceField implements VisitableField {
     public String getLowerCasedFieldId() {
         return fieldId.toLowerCase(Locale.ROOT);
     }
-    
+
     public boolean matchesIndex(int i) {
         return index == i;
     }
