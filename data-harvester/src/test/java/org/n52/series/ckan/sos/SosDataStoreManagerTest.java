@@ -225,7 +225,7 @@ public class SosDataStoreManagerTest extends HibernateTestCase {
     }
 
     @Test
-//    @Ignore("this dataset needs some discussion first")
+    @Ignore("this dataset needs some discussion first")
     public void when_inserting_emmissionSimulation_dataset_then_getObservationNotEmpty() {
         // TODO simulation results need discussion
         // 1) a mobile platform (car) which is declared as observation --> observation_with_geometry
