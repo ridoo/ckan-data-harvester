@@ -172,20 +172,6 @@ public abstract class SosDataStoreManager implements DataStoreManager {
         return ckanSosReferenceCache == null;
     }
 
-    protected Set<String> getStationaryObservationTypes() {
-        return new HashSet<>(Arrays.<String>asList(new String[] {
-                CkanConstants.ResourceType.PLATFORMS,
-                CkanConstants.ResourceType.OBSERVATIONS,
-                CkanConstants.ResourceType.OBSERVED_GEOMETRIES // since 0.3
-        }));
-    }
-
-    protected Set<String> getMobileObservationTypes() {
-        return new HashSet<>(Arrays.<String>asList(new String[] {
-                CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES // since 0.3
-        }));
-    }
-
     private boolean storeDataInsertions(Map<String, DataInsertion> dataInsertionByProcedure) {
         boolean dataInserted = false;
         LOGGER.debug("#{} data insertions: {}", dataInsertionByProcedure.size(), dataInsertionByProcedure);
