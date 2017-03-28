@@ -32,9 +32,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -134,6 +138,8 @@ public class DataTable {
     private void joinTable(final DataTable other, final DataTable outputTable, Collection<ResourceField> joinFields) {
         LOGGER.debug("joining (on fields {}) {} with {}.", joinFields, this, other);
         final long start = System.currentTimeMillis();
+        final Set<ResourceKey> doneJoinOnCells = new HashSet<>();
+        final Set<ResourceKey> doneToJoinCells = new HashSet<>();
         
         final int interval = 10;
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
@@ -150,36 +156,46 @@ public class DataTable {
                 }
             }, interval, interval, TimeUnit.SECONDS);
         
+        ForkJoinPool pool = new ForkJoinPool(2);
         for (ResourceField field : joinFields) {
+            // XXX does not consider AND in joinFields, but rather joins multiple times!
             final Map<ResourceKey, String> joinOnIndex = table.column(field);
             final Map<ResourceKey, String> toJoinIndex = other.table.column(field);
-            joinOnIndex.entrySet()
-                    .stream()
-                    .forEach(joinOnCell -> toJoinIndex.entrySet()
-                            .stream()
-                            .filter(toJoinCell -> field.equalsValues(joinOnCell.getValue(), toJoinCell.getValue()))
-                            .forEach(toJoinCell -> {
-                                            final ResourceKey otherKey = toJoinCell.getKey();
-                                            final String newId = otherKey.getKeyId() + "_" + outputTable.rowSize();
-                                            ResourceKey newKey = new ResourceKey(newId, outputTable.resourceMember);
-
-                                            // add other's values
-                                            final Map<ResourceField, String> toJoinRow = other.table.row(otherKey);
-                                            for (Map.Entry<ResourceField, String> otherValue : toJoinRow.entrySet()) {
-                                                final ResourceField rightField = otherValue.getKey();
-                                                ResourceField joinedField = ResourceField.copy(rightField)
-                                                        .withQualifier(otherKey.getMember());
-                                                outputTable.table.put(newKey, joinedField, otherValue.getValue());
-                                            }
-                                            
-                                            // TODO remove rows after join
-
-                                            // add this instance's values
-                                            Map<ResourceField, String> joinOnRow = table.row(joinOnCell.getKey());
-                                            for (Map.Entry<ResourceField, String> value : joinOnRow.entrySet()) {
-                                                outputTable.table.put(newKey, value.getKey(), value.getValue());
-                                            }
-                                    }));
+            try {
+                pool.submit(() -> joinOnIndex.entrySet()
+                        .parallelStream()
+                        .forEach(joinOnCell -> toJoinIndex.entrySet()
+                                .parallelStream()
+                                .filter(toJoinCell -> // !doneToJoinCells.contains(toJoinCell.getKey()) &&
+//                                        !doneJoinOnCells.contains(joinOnCell.getKey()) &&
+                                        field.equalsValues(joinOnCell.getValue(), toJoinCell.getValue()))
+                                .forEach(toJoinCell -> {
+                                        final ResourceKey otherKey = toJoinCell.getKey();
+                                        final String newId = otherKey.getKeyId() + "_" + outputTable.rowSize();
+                                        ResourceKey newKey = new ResourceKey(newId, outputTable.resourceMember);
+        
+                                        // add other's values
+                                        final Map<ResourceField, String> toJoinRow = other.table.row(otherKey);
+                                        for (Map.Entry<ResourceField, String> otherValue : toJoinRow.entrySet()) {
+                                            final ResourceField rightField = otherValue.getKey();
+                                            ResourceField joinedField = ResourceField.copy(rightField)
+                                                    .withQualifier(otherKey.getMember());
+                                            outputTable.table.put(newKey, joinedField, otherValue.getValue());
+                                        }
+        
+                                        // add this instance's values
+                                        Map<ResourceField, String> joinOnRow = table.row(joinOnCell.getKey());
+                                        for (Map.Entry<ResourceField, String> value : joinOnRow.entrySet()) {
+                                            outputTable.table.put(newKey, value.getKey(), value.getValue());
+                                        }
+                                        
+                                        // filter in next iteration
+                                        doneJoinOnCells.add(joinOnCell.getKey());
+                                        doneToJoinCells.add(toJoinCell.getKey());
+                                    }))).get();
+            } catch (InterruptedException | ExecutionException e) {
+                LOGGER.warn("Unable to join tables", e);
+            }
         }
         LOGGER.debug("joined table has #{} rows and #{} columns, took {}s",
                 outputTable.rowSize(),
