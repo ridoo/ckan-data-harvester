@@ -80,6 +80,14 @@ public interface CkanConstants {
 
     // TODO refactor to only contain ids mapping to ckan-mapping-ids
 
+    /**
+     * Known <code>fieldId</code> values, e.g. <pre>
+     *   {
+     *     "fieldId": "platformId"
+     *   }
+     * </pre>
+     *
+     */
     public interface KnownFieldIdValue {
         public static final String PLATFORM_ID = "platform_id";
         public static final String CRS = "crs";
