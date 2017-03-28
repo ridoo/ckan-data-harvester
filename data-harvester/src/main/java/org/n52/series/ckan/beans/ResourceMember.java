@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import org.n52.series.ckan.da.CkanMapping;
+import org.n52.series.ckan.table.ResourceKey;
 
 public class ResourceMember {
 
@@ -242,6 +243,8 @@ public class ResourceMember {
                 .toString();
     }
 
-
+    public ResourceKey createResourceKey(int lineNbr) {
+        return new ResourceKey("" + lineNbr++, this);
+    }
 }
 

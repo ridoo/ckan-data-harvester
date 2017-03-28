@@ -81,7 +81,7 @@ public class CsvTableLoader extends TableLoader {
                     ignoredCount++;
                     continue;
                 }
-                ResourceKey id = new ResourceKey("" + lineNbr++, resourceMember);
+                ResourceKey id = resourceMember.createResourceKey(lineNbr++);
                 for (int j = 0 ; j < columnHeaders.size() ; j++) {
                     final ResourceField field = resourceMember.getField(j);
                     final String value = line.get(j);
