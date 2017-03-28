@@ -40,6 +40,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.n52.series.ckan.beans.ResourceField;
@@ -143,7 +144,7 @@ public class DataTable {
 
         final int interval = 10;
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-        executor.scheduleAtFixedRate(new Runnable() {
+        ScheduledFuture<?> processLogger = executor.scheduleAtFixedRate(new Runnable() {
                 @Override
                 public void run() {
                     int rows = outputTable.rowSize();
@@ -197,6 +198,7 @@ public class DataTable {
                 LOGGER.warn("Unable to join tables", e);
             }
         }
+        processLogger.cancel(true);
         LOGGER.debug("joined table has #{} rows and #{} columns, took {}s",
                 outputTable.rowSize(),
                 outputTable.columnSize(),
