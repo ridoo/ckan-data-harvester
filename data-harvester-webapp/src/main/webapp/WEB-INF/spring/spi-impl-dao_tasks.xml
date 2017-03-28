@@ -39,7 +39,7 @@
         <property name="triggerName" value="ckanHarvesting_everyHalfHour" />
         <!-- http://quartz-scheduler.org/documentation/quartz-2.1.x/tutorials/tutorial-lesson-06 -->
         <property name="cronExpression" value="* * 12 ? * SUN" />
-        <property name="triggerAtStartup" value="true" />
+        <property name="triggerAtStartup" value="false" />
         <property name="enabled" value="true" />
 
         <property name="harvestingService" ref="ckanHarvestingService" />
@@ -63,6 +63,12 @@
             <bean class="org.n52.series.ckan.sos.ResourceTableDataStoreManager">
                 <constructor-arg index="0" ref="serializingMetadataStore" />
             </bean>
+<!--             <bean class="org.n52.series.ckan.sos.H2DataStoreManager"> -->
+<!--                 <constructor-arg index="0" ref="serializingMetadataStore" /> -->
+<!--                 <property name="h2ConnectionString" value="jdbc:h2:/tmp/ckan-datasets.h2" /> -->
+<!--                 <property name="h2User" value="sa" /> -->
+<!--                 <property name="h2Password" value="" /> -->
+<!--             </bean> -->
         </property>
         <property name="resourceClient">
             <bean class="org.n52.series.ckan.util.ResourceClient">
