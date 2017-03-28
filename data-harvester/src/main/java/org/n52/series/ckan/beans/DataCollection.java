@@ -31,6 +31,7 @@ package org.n52.series.ckan.beans;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +42,7 @@ import org.n52.series.ckan.da.CkanMapping;
 
 import eu.trentorise.opendata.jackan.model.CkanDataset;
 
-public class DataCollection {
+public class DataCollection implements Iterable<Map.Entry<ResourceMember, DataFile>>{
 
     private final CkanDataset dataset;
 
@@ -98,37 +99,6 @@ public class DataCollection {
                 : Collections.<ResourceMember, DataFile>emptyMap();
     }
 
-//    public Map<ResourceMember, DataFile> getMetadataCollection() {
-//        Map<ResourceMember, DataFile> typedCollection = new HashMap<>();
-//        for (Map.Entry<ResourceMember, DataFile> entry : getDataCollection().entrySet()) {
-//            ResourceMember member = entry.getKey();
-//            final String resourceType = member.getResourceType();
-//            if ( !getObservationTypes().contains(resourceType)) {
-//                typedCollection.put(member, entry.getValue());
-//            }
-//        }
-//        return typedCollection;
-//    }
-//
-//    public Map<ResourceMember, DataFile> getObservationDataCollections() {
-//        Set<String> observationTypes = getObservationTypes();
-//        return getDataCollectionsOfType(observationTypes);
-//    }
-//
-//    private Set<String> getObservationTypes() {
-//        Set<String> observationTypes = getCkanMapping().getResourceTypeMappings(CkanConstants.ResourceType.OBSERVATIONS);
-//        if (getDescriptorVersion().isGreaterOrEquals("0.3")) {
-//            observationTypes.addAll(getCkanMapping().getResourceTypeMappings(CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES));
-//        }
-//        return observationTypes;
-//    }
-//
-//    public Map<ResourceMember, DataFile> getPlatformDataCollections() {
-//        Set<String> types = getDescriptorVersion().isGreaterOrEquals("0.3")
-//                ? getCkanMapping().getResourceTypeMappings(CkanConstants.ResourceType.OBSERVED_GEOMETRIES)
-//                : getCkanMapping().getResourceTypeMappings(CkanConstants.ResourceType.PLATFORMS);
-//        return getDataCollectionsOfType(types);
-//    }
 
   public CkanMapping getCkanMapping() {
       SchemaDescriptor descriptor = schemaDescriptor.getSchemaDescription();
@@ -157,15 +127,6 @@ public class DataCollection {
         }
         return resourceMembersByType;
     }
-//    public Map<ResourceMember, DataFile> getDataCollectionsOfType(Set<String> types) {
-//        Map<ResourceMember, DataFile> typedCollection = new HashMap<>();
-//        for (Map.Entry<ResourceMember, DataFile> entry : dataCollection.entrySet()) {
-//            ResourceMember member = entry.getKey();
-//            if (types.contains(member.getResourceType())) {
-//                typedCollection.put(member, entry.getValue());
-//            }
-//        }
-//        return typedCollection;
 
     public Set<ResourceField> getJoinFieldIds(Set<ResourceMember> members) {
         List<ResourceField> allFields = new ArrayList<>();
@@ -188,6 +149,13 @@ public class DataCollection {
             }
         }
         return joinColumns;
+    }
+    
+    @Override
+    public Iterator<Entry<ResourceMember, DataFile>> iterator() {
+        return dataCollection != null
+                ? dataCollection.entrySet().iterator()
+                : Collections.<ResourceMember, DataFile>emptyMap().entrySet().iterator();
     }
 
     private class FieldCounter {
