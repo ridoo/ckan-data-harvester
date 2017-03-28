@@ -28,8 +28,6 @@
  */
 package org.n52.series.ckan.beans;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.MissingNode;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
@@ -40,6 +38,9 @@ import org.n52.series.ckan.util.JsonUtil;
 import org.n52.series.ckan.util.VisitableField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.MissingNode;
 
 public class ResourceField implements VisitableField {
 
