@@ -63,7 +63,9 @@ public class ResourceTableDataStoreManager extends SosDataStoreManager {
             }
             String resourceType = membersWithCommonResourceTypes.get(0).getResourceType();
             LOGGER.debug("Fully extended table for resource '{}': '{}'", resourceType, dataTable);
-            fullTable = fullTable.innerJoin(dataTable);
+            fullTable = fullTable.rowSize() > dataTable.rowSize()
+                    ? dataTable.innerJoin(fullTable)
+                    : fullTable.innerJoin(dataTable);
         }
         LOGGER.debug("Fully joined table: '{}'", fullTable);
         return fullTable;
