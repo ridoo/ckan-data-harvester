@@ -110,7 +110,7 @@ public class GeometryBuilder implements FieldVisitor<GeometryValue> {
             parseGeometryField(field, value);
         }
     }
-    
+
     private void parseGeometryField(ResourceField field, String value) {
         if (field.isOfType("JsonObject")) {
             withGeoJson(value);

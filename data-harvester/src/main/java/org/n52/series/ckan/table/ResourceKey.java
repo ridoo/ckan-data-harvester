@@ -37,7 +37,7 @@ public class ResourceKey {
     private final String keyId;
 
     private final ResourceMember member;
-    
+
     public ResourceKey() {
         this.keyId = "";
         this.member = null;

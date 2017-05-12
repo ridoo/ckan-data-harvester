@@ -44,21 +44,21 @@ import com.vividsolutions.jts.geom.Point;
 public class WriteSimulationResultStations {
 
     private static final String EMISSION_SIMULATION_DATASET_ID = "9f064e17-799e-4261-8599-d3ee31b5392b";
-    
+
     public static void main(String[] args) throws URISyntaxException, IOException, NumberFormatException, SchemaException {
 
         new ShpWriter().write();
-        
+
     }
-    
+
     private static class ShpWriter {
-        
+
         private static final URL OUTPUT_ROOT = WriteSimulationResultStations.class.getResource("/");
 
         private final InMemoryDataStoreManager dataManager;
-        
+
         private final DataCollection dataCollection;
-        
+
         private final Path exportPath;
 
         public ShpWriter() throws URISyntaxException, IOException, NumberFormatException, SchemaException {
@@ -67,11 +67,11 @@ public class WriteSimulationResultStations {
             if ( !folder.exists() && !folder.mkdir()) {
                 throw new IllegalStateException("Unable to create output folder");
             }
-            
+
             dataManager = new FileBasedCkanHarvestingService(folder).getCkanDataStoreManager();
             dataCollection = dataManager.getCollection(EMISSION_SIMULATION_DATASET_ID);
         }
-        
+
         void write() throws NumberFormatException, IOException, SchemaException {
             Set<String> types = dataManager.getStationaryObservationTypes();
             Map<String, List<ResourceMember>> resourceMembersByType = dataCollection.getResourceMembersByType(types);
@@ -86,10 +86,10 @@ public class WriteSimulationResultStations {
             }
         }
     }
-    
+
     /**
      * Lent from http://docs.geotools.org/latest/userguide/tutorial/feature/csv2shp.html
-     * 
+     *
      * @param input CSV file
      * @param output SHP target file
      * @throws NumberFormatException
@@ -97,14 +97,14 @@ public class WriteSimulationResultStations {
      * @throws SchemaException
      */
     private static void writeLocations(File input, File output) throws NumberFormatException, IOException, SchemaException {
-        
+
         SimpleFeatureType type = DataUtilities.createType("Location",
                 "name:String," +    // <- ID
                 "laenge:Double," +   // <- Laenge
                 "flaeche:Double," +   // <- Flaeche
                 "the_geom:Point:srid=4326,"// <- the geometry attribute: Point type
         );
-        
+
         List<SimpleFeature> features = new ArrayList<>();
         GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
         SimpleFeatureBuilder featureBuilder = new SimpleFeatureBuilder(type);
@@ -146,7 +146,7 @@ public class WriteSimulationResultStations {
          * TYPE is used as a template to describe the file contents
          */
         newDataStore.createSchema(type);
-        
+
         /*
          * Write the features to the shapefile
          */
@@ -159,9 +159,9 @@ public class WriteSimulationResultStations {
          * The Shapefile format has a couple limitations:
          * - "the_geom" is always first, and used for the geometry attribute name
          * - "the_geom" must be of type Point, MultiPoint, MuiltiLineString, MultiPolygon
-         * - Attribute names are limited in length 
+         * - Attribute names are limited in length
          * - Not all data types are supported (example Timestamp represented as Date)
-         * 
+         *
          * Each data store has different limitations so check the resulting SimpleFeatureType.
          */
         System.out.println("SHAPE:"+SHAPE_TYPE);

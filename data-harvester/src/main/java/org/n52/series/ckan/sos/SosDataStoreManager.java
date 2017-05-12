@@ -118,7 +118,7 @@ public abstract class SosDataStoreManager implements DataStoreManager {
     }
 
     protected abstract DataTable loadData(DataCollection dataCollection, Set<String> resourceTypesToInsert);
-    
+
     protected boolean isUpdateNeeded(CkanResource resource, DataFile dataFile) {
         if (hasReferenceCache()) {
             return true;

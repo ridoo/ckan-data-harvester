@@ -92,7 +92,7 @@ public class SosDataStoreManagerTest extends HibernateTestCase {
     @Test
     public void when_inserting_DWDWind_dataset_then_getObservationNotEmpty() {
         String datasetId = "12c3c8f1-bf44-47e1-b294-b6fc889873fc";
-        
+
         insertDataset(datasetId);
         List<DataAvailability> dataAvailability = database.getDataAvailability();
         MatcherAssert.assertThat("Wrong dataset count", dataAvailability.size(), is(3));
@@ -103,7 +103,7 @@ public class SosDataStoreManagerTest extends HibernateTestCase {
         GetFeatureOfInterestResponse allFeatures = database.getFeatures();
         MatcherAssert.assertThat(allFeatures, FeatureOfInterestMatcher.contains("dwd-1048"));
         MatcherAssert.assertThat(allFeatures, FeatureOfInterestMatcher.isSamplingPoint("dwd-1048"));
-        
+
         assertThat(database, hasObservationsAvailable());
     }
 
@@ -187,7 +187,7 @@ public class SosDataStoreManagerTest extends HibernateTestCase {
     @Test
     public void when_inserting_heavyMetalSamples_dataset_then_getObservationNotEmpty() {
         String datasetId = "3eb54ee2-6ec5-4ad9-af96-264159008aa7";
-        
+
         insertDataset(datasetId);
         List<DataAvailability> dataAvailability = database.getDataAvailability();
         MatcherAssert.assertThat("Wrong dataset count", dataAvailability.size(), is(90));

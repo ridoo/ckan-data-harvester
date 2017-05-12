@@ -45,7 +45,7 @@ public class ObservationBuilderTest {
         Phenomenon phenomenon = new Phenomenon("temperature", "Temperature", 0, "°K");
         ObservationBuilder builder = ObservationBuilder.create(phenomenon, new ResourceKey());
         SingleObservationValueBuilder valueBuilder = builder.new SingleObservationValueBuilder();
-        
+
         ResourceField field = new FieldBuilder()
                 .createViaTemplate("{"
                         + " \"field_id\" : \"value\", "
@@ -55,7 +55,7 @@ public class ObservationBuilderTest {
                         + " \"uom\" : \"°K\","
                         + " \"field_type\" : \"Float\" }");
         SingleObservationValue<Double> value = valueBuilder.createQuantityValue(field, "25.0");
-        
+
         Assert.assertNotNull(value);
         Assert.assertThat(value.getValue(), CoreMatchers.instanceOf(QuantityValue.class));
         Assert.assertThat(value.getValue().getValue(), CoreMatchers.is(25.0));

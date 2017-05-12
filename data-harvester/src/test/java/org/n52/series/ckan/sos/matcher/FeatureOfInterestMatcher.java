@@ -38,7 +38,7 @@ import org.n52.sos.ogc.om.features.samplingFeatures.AbstractSamplingFeature;
 import org.n52.sos.response.GetFeatureOfInterestResponse;
 
 public class FeatureOfInterestMatcher {
-    
+
     public static Matcher<GetFeatureOfInterestResponse> isSamplingPoint(String featureId) {
         return new SampleFeatureMatcher() {
             @Override
@@ -72,7 +72,7 @@ public class FeatureOfInterestMatcher {
             }
         };
     }
-    
+
     private static abstract class SampleFeatureMatcher extends GetFoiResponseMatcher {
         private AbstractSamplingFeature feature;
         @Override
@@ -92,7 +92,7 @@ public class FeatureOfInterestMatcher {
             AbstractSamplingFeature feature = getSamplingFeature(featureId, response);
             return isOfSamplingType(feature, SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_CURVE);
         }
-        
+
         private boolean isOfSamplingType(AbstractSamplingFeature feature, String type) {
             return feature != null && feature.getFeatureType().equals(type);
         }
@@ -100,7 +100,7 @@ public class FeatureOfInterestMatcher {
         protected boolean isSamplingFeature(AbstractFeature feature) {
             return feature != null && AbstractSamplingFeature.class.isAssignableFrom(feature.getClass());
         }
-        
+
         protected AbstractSamplingFeature getSamplingFeature(String featureId, GetFeatureOfInterestResponse response) {
             AbstractFeature abstractFeature = super.getFeature(featureId, response);
             feature = isSamplingFeature(abstractFeature)
@@ -111,7 +111,7 @@ public class FeatureOfInterestMatcher {
     }
 
     private static abstract class GetFoiResponseMatcher extends TypeSafeMatcher<GetFeatureOfInterestResponse> {
-        
+
         protected AbstractFeature getFeature(String featureId, GetFeatureOfInterestResponse response) {
             AbstractFeature feature = response.getAbstractFeature();
             if (feature == null) {
