@@ -4,7 +4,7 @@
   "extras" : [
     {
       "key" : "schema_descriptor",
-      "value" : "{\r\n  \"schema_descriptor_version\" : 0.1,\r\n  \"resource_type\" : \"csv-observations-collection\",\r\n  \"members\" : [ {\r\n    \"resource_name\" : [ \"9249079b-6127-4cb0-be64-99b44f906c2c\" ],\r\n    \"resource_type\" : \"platforms\",\r\n    \"fields\" : [ {\r\n      \"field_id\" : \"station_id\",\r\n      \"field_type\" : \"String\",\r\n      \"short_name\" : \"station_id\",\r\n      \"long_name\" : \"station_id\"\r\n    }, {\r\n      \"field_id\" : \"sensor_name\",\r\n      \"field_type\" : \"String\",\r\n      \"short_name\" : \"sensor_name\",\r\n      \"long_name\" : \"sensor_name\"\r\n    } ]\r\n  }, {\r\n    \"resource_name\" : [ \"5122be8e-72a3-4182-b67d-5ffe709c70ea\" ],\r\n    \"resource_type\" : \"observations\",\r\n    \"fields\" : [ {\r\n      \"field_id\" : \"datetime\",\r\n      \"field_type\" : \"Date\",\r\n      \"date_format\" : \"YYYY-MM-DD'T'HH:mm:ss.SSSZ\",\r\n      \"short_name\" : \"datetime\",\r\n      \"long_name\" : \"datetime\"\r\n    }, {\r\n      \"field_id\" : \"value\",\r\n      \"phenomenon\" : \"location\",\r\n      \"uom\" : \"geojson\",\r\n      \"field_type\" : \"JsonObject\",\r\n      \"short_name\" : \"coord\",\r\n      \"long_name\" : \"location\"\r\n    }, {\r\n      \"field_id\" : \"timestamp\",\r\n      \"field_type\" : \"String\",\r\n      \"short_name\" : \"timestamp\",\r\n      \"long_name\" : \"timestamp\"\r\n    }, {\r\n      \"field_id\" : \"station_id\",\r\n      \"field_type\" : \"String\",\r\n      \"short_name\" : \"station_id\",\r\n      \"long_name\" : \"station_id\"\r\n    } ]\r\n  } ]\r\n}"
+      "value" : "{  \"schema_descriptor_version\" : 0.1,  \"resource_type\" : \"csv-observations-collection\",  \"members\" : [ {    \"resource_name\" : [ \"9249079b-6127-4cb0-be64-99b44f906c2c\" ],    \"resource_type\" : \"platforms\",    \"fields\" : [ {      \"field_id\" : \"station_id\",      \"field_type\" : \"String\",      \"short_name\" : \"station_id\",      \"long_name\" : \"station_id\"    }, {      \"field_id\" : \"sensor_name\",      \"field_type\" : \"String\",      \"short_name\" : \"sensor_name\",      \"long_name\" : \"sensor_name\"    } ]  }, {    \"resource_name\" : [ \"5122be8e-72a3-4182-b67d-5ffe709c70ea\" ],    \"resource_type\" : \"observations\",    \"fields\" : [ {      \"field_id\" : \"datetime\",      \"field_type\" : \"Date\",      \"date_format\" : \"YYYY-MM-DD'T'HH:mm:ss.SSSZ\",      \"short_name\" : \"datetime\",      \"long_name\" : \"datetime\"    }, {      \"field_id\" : \"value\",      \"phenomenon\" : \"location\",      \"uom\" : \"geojson\",      \"field_type\" : \"JsonObject\",      \"short_name\" : \"coord\",      \"long_name\" : \"location\"    }, {      \"field_id\" : \"timestamp\",      \"field_type\" : \"String\",      \"short_name\" : \"timestamp\",      \"long_name\" : \"timestamp\"    }, {      \"field_id\" : \"station_id\",      \"field_type\" : \"String\",      \"short_name\" : \"station_id\",      \"long_name\" : \"station_id\"    } ]  } ]}"
     }
   ],
   "groups" : [ ],
@@ -85,7 +85,7 @@
   "license_url" : "http://www.opendefinition.org/licenses/cc-by-sa",
   "license_title" : "Creative Commons Attribution Share-Alike",
   "metadata_created" : "2016-02-15T12:50:38.704035",
-  "metadata_modified" : "2016-02-29T12:03:12.782747",
+  "metadata_modified" : "2017-04-06T15:15:15.562425",
   "num_resources" : 2,
   "tracking_summary" : null,
   "num_tags" : 0,
@@ -111,7 +111,7 @@
     "revision_id" : "320768aa-3dfc-4e24-992e-4473859c75e1",
     "is_organization" : true
   },
-  "revision_id" : "d8830fbd-ec7c-41c1-8b6a-da852d5f5b50",
+  "revision_id" : "53b2d761-a3a6-4268-8aac-f14186872478",
   "revision_timestamp" : null,
   "isopen" : true,
   "private" : false
