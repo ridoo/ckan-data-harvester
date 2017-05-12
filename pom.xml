@@ -24,7 +24,7 @@
     <properties>
         <!-- disabled during development -->
         <enforcer.skip>true</enforcer.skip>
-        <sos.version>4.4.0-SNAPSHOT</sos.version>
+        <sos.version>4.4.0-M12</sos.version>
         <series.api.version>2.0.0-SNAPSHOT</series.api.version>
 
         <java.compiler.source>1.8</java.compiler.source>
