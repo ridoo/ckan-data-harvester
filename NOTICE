@@ -33,6 +33,7 @@ This project includes:
   AOP alliance under Public Domain
   Apache Commons Codec under Apache License, Version 2.0
   Apache Commons CSV under Apache License, Version 2.0
+  Apache Commons Logging under The Apache Software License, Version 2.0
   Apache FOP under The Apache Software License, Version 2.0
   Apache Tika core under Apache License, Version 2.0
   Apache XML Graphics Commons under The Apache Software License, Version 2.0
@@ -139,6 +140,7 @@ This project includes:
   SaxonB under Mozilla Public License Version 1.0
   Series REST API - DAO Mappings module under GNU General Public License, Version 2.0
   Series REST API - IO module under GNU General Public License, Version 2.0
+  Series REST API - SPI module under GNU General Public License, Version 2.0
   servlet-api under CDDL 1.1 or GPL2 w/ CPE
   Shapefile module under Lesser General Public License (LGPL)
   SLF4J API Module under MIT License
