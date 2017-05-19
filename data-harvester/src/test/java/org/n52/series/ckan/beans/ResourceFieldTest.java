@@ -62,7 +62,7 @@ public class ResourceFieldTest {
         fieldNode.putArray("field_type")
                 .add("TYPE_A")
                 .add("TYPE_B");
-        JsonNode mapping = factory.objectNode().put("field", fieldNode);
+        JsonNode mapping = factory.objectNode().set("field", fieldNode);
         this.ckanMapping = new CkanMapping(mapping);
     }
 
