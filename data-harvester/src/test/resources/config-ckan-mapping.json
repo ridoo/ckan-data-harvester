@@ -91,7 +91,8 @@
         "date_format": [],
         "description": [],
         "field_id": [
-            "fieldid"
+            "fieldid",
+            "some_weird_fieldid"
         ],
         "field_role": [],
         "field_type": [
