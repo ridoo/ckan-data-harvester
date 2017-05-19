@@ -93,7 +93,7 @@ public class SchemaDescriptor {
     public String getSchemaDescriptionType() {
         return getSchemaDescriptionType(node);
     }
-    
+
     public String getSchemaDescriptionType(JsonNode jsonNode) {
         return getStringValueOf(jsonNode, CkanConstants.SchemaDescriptor.RESOURCE_TYPE);
     }

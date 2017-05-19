@@ -32,6 +32,7 @@ This project includes:
   AOP alliance under Public Domain
   Apache Commons Codec under Apache License, Version 2.0
   Apache Commons CSV under Apache License, Version 2.0
+  Apache Commons IO under Apache License, Version 2.0
   Apache Commons Logging under The Apache Software License, Version 2.0
   Apache FOP under The Apache Software License, Version 2.0
   Apache Tika core under Apache License, Version 2.0
@@ -60,7 +61,6 @@ This project includes:
   CKAN Data Harvester Module under The Apache Software License, Version 2.0
   CKAN Data Harvester Webapp Module under The Apache Software License, Version 2.0
   ClassLoader leak prevention under Apache 2
-  Commons IO under The Apache Software License, Version 2.0
   Commons Lang under The Apache Software License, Version 2.0
   Commons Pool under The Apache Software License, Version 2.0
   Core Hibernate O/RM functionality under GNU Lesser General Public License
