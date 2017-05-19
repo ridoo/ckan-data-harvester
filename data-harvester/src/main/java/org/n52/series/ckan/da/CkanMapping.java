@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.da;
 
 import java.io.File;
@@ -149,7 +150,8 @@ public class CkanMapping {
         }
         List<String> values = new ArrayList<>();
         for (JsonNode node : mappingArray) {
-            values.add(node.asText().toLowerCase(Locale.ROOT));
+            values.add(node.asText()
+                           .toLowerCase(Locale.ROOT));
         }
         values.add(lowerCasedName); // add self
         return new HashSet<>(values);
@@ -191,8 +193,7 @@ public class CkanMapping {
         private CkanMapping loadConfig(String configFile) {
             try {
                 return loadConfig(createStreamFrom(configFile));
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 LOGGER.error("Could not load from '{}'. Using empty config.", configFile, e);
                 return new CkanMapping();
             }
@@ -229,8 +230,10 @@ public class CkanMapping {
 
         private File getConfigFile(String configFile) {
             try {
-                Path path = Paths.get(CkanMapping.CkanMappingLoader.class.getResource("/").toURI());
-                File file = path.resolve(configFile).toFile();
+                Path path = Paths.get(CkanMapping.CkanMappingLoader.class.getResource("/")
+                                                                         .toURI());
+                File file = path.resolve(configFile)
+                                .toFile();
                 LOGGER.trace("Loading config from '{}'", file.getAbsolutePath());
                 return file;
             } catch (URISyntaxException e) {
