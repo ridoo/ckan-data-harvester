@@ -84,7 +84,7 @@ public class JsonUtil {
                 ? field.asInt()
                 : -1;
     }
-    public static List<String> parseMissingToEmptyArray(JsonNode node, Set<String> alternateFieldNames) {
+    public static List<String> parseToList(JsonNode node, Set<String> alternateFieldNames) {
         List<String> values = new ArrayList<>();
         JsonNode field = findField(node, alternateFieldNames);
         if ( !field.isMissingNode() && field.isArray()) {
