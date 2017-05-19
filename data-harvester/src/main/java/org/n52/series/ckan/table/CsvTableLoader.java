@@ -31,6 +31,7 @@ package org.n52.series.ckan.table;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
@@ -99,12 +100,16 @@ public class CsvTableLoader extends TableLoader {
         }
     }
 
-    private CSVParser createCsvParser(final DataFile dataFile) throws FileNotFoundException, IOException {
+    protected CSVParser createCsvParser(final DataFile dataFile) throws FileNotFoundException, IOException {
         Charset encoding = dataFile.getEncoding();
         final Path filePath = dataFile.getFile().toPath();
         int headerRows = getResourceMember().getHeaderRows();
         FileInputStream fis = new FileInputStream(filePath.toFile());
-        InputStreamReader fileReader = new InputStreamReader(fis, encoding);
+        return createCsvParser(headerRows, fis, encoding);
+    }
+
+    protected CSVParser createCsvParser(int headerRows, InputStream stream, Charset encoding) throws IOException {
+        InputStreamReader fileReader = new InputStreamReader(stream, encoding);
         return new CSVParser(fileReader, CSVFormat.DEFAULT, headerRows, 0);
     }
 }
