@@ -44,6 +44,7 @@ public interface CkanConstants {
         public static final String RESOURCE_TYPE = "resource_type";
         public static final String DESCRIPTION = "description";
         public static final String VERSION = "version";
+        public static final String FIELDS = "fields";
         public static final String ID = "id";
     }
 

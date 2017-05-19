@@ -77,14 +77,14 @@ public class JsonUtilTest {
     public void when_parseMissingArrayNode_then_returnEmptyList() throws IOException {
         JsonNode node = om.readTree(TEST_TEMPLATE);
         Set<String> names = Collections.singleton("missingList");
-        assertThat(JsonUtil.parseMissingToEmptyArray(node, names), is(empty()));
+        assertThat(JsonUtil.parseToList(node, names), is(empty()));
     }
 
     @Test
     public void when_parseAvailableArrayNode_then_returnList() throws IOException {
         JsonNode node = om.readTree(TEST_TEMPLATE);
         Set<String> names = Collections.singleton("list");
-        assertThat(JsonUtil.parseMissingToEmptyArray(node, names).size(), is(2));
+        assertThat(JsonUtil.parseToList(node, names).size(), is(2));
     }
 
     @Test
