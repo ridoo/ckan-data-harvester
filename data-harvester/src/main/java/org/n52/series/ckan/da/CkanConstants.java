@@ -68,16 +68,16 @@ public interface CkanConstants {
      * terms, a {@link CkanMapping} is used to map alternate property names from either global mapping file or
      * for each dataset individually. A schema descriptor which uses <tt>my_field_id</tt> instead
      * of {@value #FIELD_ID} like here
-     * 
+     *
      * <pre>
      *  {
      *    "my_field_id" : "name",
      *    "field_type" : "String"
      *  }
      * </pre>
-     * 
+     *
      * can be recognized as {@link #FIELD_ID} when having a mapping as the following:
-     * 
+     *
      * <pre>
      *   property {
      *     "field_id": [
@@ -110,7 +110,7 @@ public interface CkanConstants {
      * different terms, a {@link CkanMapping} is used to map alternate field id values from either global
      * mapping file or for each dataset individually. For example, internal <tt>platform_id</tt> might be
      * mapped in the mapping file to alternate names via
-     * 
+     *
      * <pre>
      *   field {
      *     "platform_id": [
@@ -144,7 +144,7 @@ public interface CkanConstants {
      * a {@link CkanMapping} is used to map alternate role values from either global mapping file or for each
      * dataset individually. For example, internal role value <tt>location</tt> might be mapped in the mapping
      * file to alternate names via
-     * 
+     *
      * <pre>
      *   role {
      *     "location": [
@@ -169,7 +169,7 @@ public interface CkanConstants {
      * {@link CkanMapping} is used to map alternate data types from either global mapping file or for each
      * dataset individually. For example, internal datatype value <tt>double</tt> might be mapped in the
      * mapping file to alternate names via
-     * 
+     *
      * <pre>
      *   datatype {
      *     "double": [
