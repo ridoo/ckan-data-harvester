@@ -34,6 +34,7 @@ import static org.hamcrest.Matchers.is;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -134,4 +135,13 @@ public class ResourceMemberTest {
         return resourceHelper.getResourceMember(DWD_TEMPERATUR_DATASET_ID, resourceMember);
     }
 
+    @Test
+    public void when_columnHasNoShortName_then_fieldIdIsColumnHeader() {
+        ResourceMember resourceMember = new ResourceMember();
+        ResourceField field = FieldBuilder.aField().createSimple("foo");
+        resourceMember.setResourceFields(Collections.singletonList(field));
+        List<String> columnHeaders = resourceMember.getColumnHeaders();
+        assertThat(columnHeaders.size(), is(1));
+        assertThat(columnHeaders.get(0), is("foo"));
+    }
 }
