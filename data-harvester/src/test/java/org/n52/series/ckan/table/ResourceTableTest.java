@@ -26,17 +26,21 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.table;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -45,6 +49,7 @@ import org.n52.series.ckan.beans.DataFile;
 import org.n52.series.ckan.beans.FieldBuilder;
 import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.beans.ResourceMember;
+import org.n52.series.ckan.da.CkanMapping;
 import org.n52.series.ckan.sos.Phenomenon;
 import org.n52.series.ckan.sos.PhenomenonParser;
 
@@ -81,29 +86,39 @@ public class ResourceTableTest {
         ResourceTable other = new ResourceTable();
         DataTable joinedTable = table.innerJoin(other);
         assertThat(joinedTable.getTable(), is(notNullValue(Table.class)));
-        assertThat(joinedTable.getTable().size(), is(0));
+        assertThat(joinedTable.getTable()
+                              .size(),
+                   is(0));
     }
 
     @Test
     public void when_joinNonTrivialWithTrivial_outputHasRowsOfNonTrivial() {
         ResourceTable nonTrivial = tableHelper.readObservationTable(DWD_TEMPERATUR_DATASET_ID, OBSERVATION_DATA_ID_1);
 
-        List<String> expectedColumns = nonTrivial.getResourceMember().getColumnHeaders();
+        List<String> expectedColumns = nonTrivial.getResourceMember()
+                                                 .getColumnHeaders();
         DataTable joined = nonTrivial.innerJoin(new ResourceTable());
         assertThat(nonTrivial.rowSize(), is(joined.rowSize()));
-        assertThat(expectedColumns, is(joined.getResourceMember().getColumnHeaders()));
-        assertThat(joined.getResourceMember().getResourceType(), is("observations"));
+        assertThat(expectedColumns, is(joined.getResourceMember()
+                                             .getColumnHeaders()));
+        assertThat(joined.getResourceMember()
+                         .getResourceType(),
+                   is("observations"));
     }
 
     @Test
     public void when_joiningTrivialWithNonTrivial_outputHasRowsOfNonTrivial() {
         ResourceTable nonTrivial = tableHelper.readObservationTable(DWD_TEMPERATUR_DATASET_ID, OBSERVATION_DATA_ID_1);
 
-        List<String> expectedHeaders = nonTrivial.getResourceMember().getColumnHeaders();
+        List<String> expectedHeaders = nonTrivial.getResourceMember()
+                                                 .getColumnHeaders();
         DataTable joined = new ResourceTable().innerJoin(nonTrivial);
         assertThat(nonTrivial.rowSize(), is(joined.rowSize()));
-        assertThat(expectedHeaders, is(joined.getResourceMember().getColumnHeaders()));
-        assertThat(joined.getResourceMember().getResourceType(), is("observations"));
+        assertThat(expectedHeaders, is(joined.getResourceMember()
+                                             .getColumnHeaders()));
+        assertThat(joined.getResourceMember()
+                         .getResourceType(),
+                   is("observations"));
     }
 
     @Test
@@ -111,7 +126,9 @@ public class ResourceTableTest {
         ResourceTable nonTrivial1 = tableHelper.readObservationTable(DWD_TEMPERATUR_DATASET_ID, OBSERVATION_DATA_ID_1);
         ResourceTable nonTrivial2 = tableHelper.readObservationTable(DWD_TEMPERATUR_DATASET_ID, OBSERVATION_DATA_ID_2);
         DataTable output = nonTrivial1.extendWith(nonTrivial2);
-        assertThat(output.getResourceMember().getResourceType(), is("observations"));
+        assertThat(output.getResourceMember()
+                         .getResourceType(),
+                   is("observations"));
 
         ResourceMember member1 = nonTrivial1.getResourceMember();
         ResourceMember member2 = nonTrivial2.getResourceMember();
@@ -120,7 +137,8 @@ public class ResourceTableTest {
         int expectedRowSize = nonTrivial1.rowSize() + nonTrivial2.rowSize();
         assertThat(output.rowSize(), is(expectedRowSize));
 
-        List<String> actualColumnHeaders = output.getResourceMember().getColumnHeaders();
+        List<String> actualColumnHeaders = output.getResourceMember()
+                                                 .getColumnHeaders();
         List<String> expectedColumnHeaders = member1.getColumnHeaders();
         assertThat(actualColumnHeaders, is(expectedColumnHeaders));
     }
@@ -133,7 +151,8 @@ public class ResourceTableTest {
 
         ResourceMember member1 = nonTrivial1.getResourceMember();
         ResourceMember member2 = nonTrivial2.getResourceMember();
-        int joinColumnSize = member1.getJoinableFields(member2).size();
+        int joinColumnSize = member1.getJoinableFields(member2)
+                                    .size();
 
         int allColumnSize = nonTrivial1.columnSize() + nonTrivial2.columnSize();
         assertThat(output.columnSize(), is(allColumnSize - joinColumnSize));
@@ -154,16 +173,17 @@ public class ResourceTableTest {
 
     @Test
     public void when_twoJoinColumnsWithSwitchedValues_then_noRowsGetsJoined() {
-        ResourceMember first = new ResourceMember("TABLE_A", "aType");
-        ResourceField firstA = FieldBuilder.aFieldAt(0).createSimple("A");
-        ResourceField firstB = FieldBuilder.aFieldAt(1).createSimple("B");
-        ResourceTable table = prepareTable(firstA, firstB, first);
+        ResourceTable table = prepareTable(FieldBuilder.aFieldAt(0)
+                                                       .createSimple("A"),
+                                           FieldBuilder.aFieldAt(1)
+                                                       .createSimple("B"),
+                                           new ResourceMember("TABLE_A", "aType"));
 
-
-        ResourceMember second = new ResourceMember("TABLE_B", "bType");
-        ResourceField secondA = FieldBuilder.aFieldAt(0).createSimple("A");
-        ResourceField secondB = FieldBuilder.aFieldAt(1).createSimple("B");
-        ResourceTable other = prepareTable(secondB, secondA, second);
+        ResourceTable other = prepareTable(FieldBuilder.aFieldAt(1)
+                                                       .createSimple("B"),
+                                           FieldBuilder.aFieldAt(0)
+                                                       .createSimple("A"),
+                                           new ResourceMember("TABLE_B", "bType"));
 
         DataTable joinedTable = table.innerJoin(other);
         assertThat(joinedTable.rowSize(), is(0));
@@ -172,9 +192,41 @@ public class ResourceTableTest {
     private ResourceTable prepareTable(ResourceField first, ResourceField second, ResourceMember member) {
         member.setResourceFields(Arrays.asList(first, second));
         ResourceTable table = new ResourceTable(member, new DataFile());
-        table.setCellValue(member.createResourceKey(first.getIndex()), first , "A");
-        table.setCellValue(member.createResourceKey(second.getIndex()), second , "B");
+        table.setCellValue(member.createResourceKey(first.getIndex()), first, "A");
+        table.setCellValue(member.createResourceKey(second.getIndex()), second, "B");
         return table;
+    }
+
+    @Test
+    public void when_tablesHaveMappedFieldIdProperty_then_tablesGetJoined() {
+        String rawMapping = "{"
+                + "  \"property\": {"
+                + "    \"field_id\": ["
+                + "      \"A\","
+                + "      \"B\""
+                + "    ]"
+                + "  }"
+                + "}";
+        ByteArrayInputStream stream = new ByteArrayInputStream(rawMapping.getBytes());
+        CkanMapping ckanMapping = CkanMapping.loadCkanMapping(stream);
+
+        String template = "{"
+                + "  \"%s\": \"foo\","
+                + "  \"field_type\": \"string\""
+                + "}";
+        ResourceMember firstMember = new ResourceMember("TABLE_A", "aType");
+        firstMember.setResourceFields(Collections.singletonList(FieldBuilder.aFieldAt(0)
+                                                                            .withCkanMapping(ckanMapping)
+                                                                            .createViaTemplate(template, "A")));
+        ResourceMember secondMember = new ResourceMember("TABLE_B", "bType");
+        secondMember.setResourceFields(Collections.singletonList(FieldBuilder.aFieldAt(0)
+                                                                             .withCkanMapping(ckanMapping)
+                                                                             .createViaTemplate(template, "B")));
+
+        ResourceTable table = new ResourceTable(firstMember, new DataFile());
+        ResourceTable other = new ResourceTable(secondMember, new DataFile());
+        DataTable joinedTable = table.innerJoin(other);
+        Assert.assertTrue(joinedTable.hasJoinedMembers());
     }
 
 }

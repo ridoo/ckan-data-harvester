@@ -217,6 +217,16 @@ public class DataTable {
         return table.columnKeySet().size();
     }
 
+    public List<ResourceMember> getJoinedMembers() {
+        return hasJoinedMembers()
+                ? Collections.unmodifiableList(joinedMembers)
+                : Collections.emptyList();
+    }
+
+    public boolean hasJoinedMembers() {
+        return joinedMembers != null && !joinedMembers.isEmpty();
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
