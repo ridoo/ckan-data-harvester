@@ -37,9 +37,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -83,78 +81,90 @@ public class CkanMapping {
                 : fallbackMapping;
     }
 
-    public boolean hasDataTypeMappings(String name, String mapping) {
-        return hasMappings("datatype", name, mapping);
+    public boolean hasDataTypeMappings(String datatypeValue, String mapping) {
+        return hasMappings("datatype", datatypeValue, mapping);
     }
 
-    public boolean hasFieldMappings(String name, String mapping) {
-        return hasMappings("field", name, mapping);
+    public boolean hasFieldMappings(String fieldValue, String mapping) {
+        return hasMappings("field", fieldValue, mapping);
     }
 
-    public boolean hasPropertyMappings(String name, String mapping) {
-        return hasMappings("property", name, mapping);
+    public boolean hasPropertyMappings(String property, String mapping) {
+        return hasMappings("property", property, mapping);
     }
 
-    public boolean hasResourceTypeMappings(String name, String mapping) {
-        return hasMappings("resource_type", name, mapping);
+    public boolean hasResourceTypeMappings(String resourceTypeValue, String mapping) {
+        return hasMappings("resource_type", resourceTypeValue, mapping);
     }
 
-    public boolean hasRoleMappings(String name, String mapping) {
-        return hasMappings("role", name, mapping);
+    public boolean hasRoleMappings(String roleValue, String mapping) {
+        return hasMappings("role", roleValue, mapping);
     }
 
-    public boolean hasSchemaDescriptionMappings(String name, String mapping) {
-        return hasMappings("schema_descriptor", name, mapping);
+    public boolean hasSchemaDescriptionMappings(String schemaDescriptionValue, String mapping) {
+        return hasMappings("schema_descriptor", schemaDescriptionValue, mapping);
     }
 
     public boolean hasMappings(String group, String name, String mapping) {
-        return getMappings(group, name).contains(mapping.toLowerCase(Locale.ROOT));
-    }
-
-    public Set<String> getDatatypeMappings(String name) {
-        return getMappings("datatype", name);
-    }
-
-    public Set<String> getFieldMappings(String name) {
-        return getMappings("field", name);
+        return getValueMappings(group, name).contains(mapping.toLowerCase(Locale.ROOT));
     }
 
     public Set<String> getPropertyMappings(String name) {
-        return getMappings("property", name);
+        return getValueMappings("property", name);
+    }
+
+    public Set<String> getDatatypeMappings(String name) {
+        return getValueMappings("datatype", getPropertyMappings(name));
+    }
+
+    public Set<String> getFieldMappings(String name) {
+        return getValueMappings("field", getPropertyMappings(name));
     }
 
     public Set<String> getResourceTypeMappings(String name) {
-        return getMappings("resource_type", name);
+        return getValueMappings("resource_type", getPropertyMappings(name));
     }
 
     public Set<String> getRoleMappings(String name) {
-        return getMappings("role", name);
+        return getValueMappings("role", getPropertyMappings(name));
     }
 
     public Set<String> getSchemaDescriptionMappings(String name) {
-        return getMappings("schema_descriptor", name);
+        // schema_descriptor group only maps properties actually
+        return getValueMappings("schema_descriptor", name);
     }
 
-    public Set<String> getMappings(String group, String name) {
+    private Set<String> getValueMappings(String group, Set<String> properties) {
+        /*
+         * a known property is mapped to alternates, e.g. { "field_id": "foo" } can now be { "A" : "foo" }
+         */
+        Set<String> mappedValues = new HashSet<>();
+        for (String mappedProperty : properties) {
+            mappedValues.addAll(getValueMappings("field", mappedProperty));
+        }
+        return mappedValues;
+    }
+
+    protected Set<String> getValueMappings(String group, String property) {
+        String lowerCasedProperty = property != null
+                ? property.toLowerCase(Locale.ROOT)
+                : property;
         String lowerCasedGroup = !(group == null || group.isEmpty())
                 ? "/" + group.toLowerCase(Locale.ROOT)
                 : "";
-        String lowerCasedName = name != null
-                ? name.toLowerCase(Locale.ROOT)
-                : name;
-        String path = lowerCasedGroup + "/" + lowerCasedName;
+        String path = lowerCasedGroup + "/" + lowerCasedProperty;
         JsonNode mappingArray = getConfigValueAt(path);
         if (mappingArray.isMissingNode()) {
             LOGGER.trace("try to get '{}' from fallback mapping.", path);
             mappingArray = fallbackMapping.at(path);
         }
-        List<String> values = new ArrayList<>();
+        Set<String> mappingValues = new HashSet<>();
         for (JsonNode node : mappingArray) {
-            values.add(node.asText()
-                           .toLowerCase(Locale.ROOT));
+            mappingValues.add(node.asText()
+                                  .toLowerCase(Locale.ROOT));
         }
-        values.add(lowerCasedName); // add self
-        return new HashSet<>(values);
+        mappingValues.add(lowerCasedProperty); // add self
+        return new HashSet<>(mappingValues);
     }
 
     public JsonNode getConfigValueAt(String path) {
