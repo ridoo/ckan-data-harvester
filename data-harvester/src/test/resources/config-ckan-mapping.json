@@ -116,7 +116,8 @@
             "Einheit",
             "unit",
             "unitOfMeasure"
-        ]
+        ],
+        "phenomenon_ref": []
     },
     "resource_type": {
         "csv-observations-collection": [

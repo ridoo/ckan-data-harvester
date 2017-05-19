@@ -99,6 +99,7 @@ public interface CkanConstants {
         public static final String NO_DATA = "no_data";
         public static final String FIELD_ROLE = "field_role";
         public static final String PHENOMENON = "phenomenon";
+        public static final String PHENOMENON_REF = "phenomenon_ref";
         public static final String UOM = "uom";
         public static final String CRS = "crs";
         public static final String DATE_FORMAT = "date_format";

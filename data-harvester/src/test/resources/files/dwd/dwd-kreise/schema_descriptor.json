@@ -145,7 +145,8 @@
         },
         {
           "field_type" : "String",
-          "field_id" : "SEVERITY"
+          "field_id" : "SEVERITY",
+          "phenomenon_ref" : "event"
         },
         {
           "field_type" : "String",
