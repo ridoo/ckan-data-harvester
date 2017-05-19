@@ -50,6 +50,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.MissingNode;
 import com.google.common.base.Strings;
 
+/**
+ * Allows to map a common set of identifiers ({@link CkanConstants}) to an alternate set of terms. By default
+ * <tt>config-ckan-mapping.json</tt> read from classpath. Defaults can be overridden by passing a different
+ * mapping file to one of the overloaded {@link CkanMapping#loadCkanMapping()}.
+ */
 public class CkanMapping {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CkanMapping.class);

@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.da;
 
 import java.nio.charset.Charset;
@@ -62,10 +63,34 @@ public interface CkanConstants {
         public static final String OBSERVATIONS = "observations";
     }
 
+    /**
+     * Internal property names which indicate a property being parsed. As actual descriptors may use different
+     * terms, a {@link CkanMapping} is used to map alternate property names from either global mapping file or
+     * for each dataset individually. A schema descriptor which uses <tt>my_field_id</tt> instead
+     * of {@value #FIELD_ID} like here
+     * 
+     * <pre>
+     *  {
+     *    "my_field_id" : "name",
+     *    "field_type" : "String"
+     *  }
+     * </pre>
+     * 
+     * can be recognized as {@link #FIELD_ID} when having a mapping as the following:
+     * 
+     * <pre>
+     *   property {
+     *     "field_id": [
+     *       "my_field_id"
+     *     ]
+     *   }
+     * </pre>
+     */
     public interface FieldPropertyName {
         public static final String RESOURCE_NAME = "resource_name";
         public static final String RESOURCE_TYPE = "resource_type";
         public static final String HEADER_ROWS = "headerrows";
+        /** {@value} */
         public static final String FIELD_ID = "field_id";
         public static final String SHORT_NAME = "short_name";
         public static final String LONG_NAME = "long_name";
@@ -79,15 +104,20 @@ public interface CkanConstants {
         public static final String DATE_FORMAT = "date_format";
     }
 
-    // TODO refactor to only contain ids mapping to ckan-mapping-ids
-
     /**
-     * Known <code>fieldId</code> values, e.g. <pre>
-     *   {
-     *     "fieldId": "platformId"
+     * Internal <code>fieldId</code> valuess which indicate a specific field. As actual descriptors may use
+     * different terms, a {@link CkanMapping} is used to map alternate field id values from either global
+     * mapping file or for each dataset individually. For example, internal <tt>platform_id</tt> might be
+     * mapped in the mapping file to alternate names via
+     * 
+     * <pre>
+     *   field {
+     *     "platform_id": [
+     *       "my_custom_platform_id",
+     *       "another_id"
+     *     ]
      *   }
      * </pre>
-     *
      */
     public interface KnownFieldIdValue {
         public static final String PLATFORM_ID = "platform_id";
@@ -108,6 +138,21 @@ public interface CkanConstants {
         public static final String TRACK_POINT = "track_point";
     }
 
+    /**
+     * Internal specific <code>role</code> values being parsed. As actual descriptors may use different terms,
+     * a {@link CkanMapping} is used to map alternate role values from either global mapping file or for each
+     * dataset individually. For example, internal role value <tt>location</tt> might be mapped in the mapping
+     * file to alternate names via
+     * 
+     * <pre>
+     *   role {
+     *     "location": [
+     *       "place",
+     *       "station"
+     *     ]
+     *   }
+     * </pre>
+     */
     public interface KnownFieldRoleValue {
         public static final String LATITUDE = "latitude";
         public static final String LONGITUDE = "longitude";
@@ -118,6 +163,21 @@ public interface CkanConstants {
         public static final String LOCATION = "location";
     }
 
+    /**
+     * Internal specific <code>datatype</code> being parsed. As actual descriptors may use different terms, a
+     * {@link CkanMapping} is used to map alternate data types from either global mapping file or for each
+     * dataset individually. For example, internal datatype value <tt>double</tt> might be mapped in the
+     * mapping file to alternate names via
+     * 
+     * <pre>
+     *   datatype {
+     *     "double": [
+     *       "float",
+     *       "decimal"
+     *     ]
+     *   }
+     * </pre>
+     */
     public interface DataType {
         public static final String INTEGER = "integer";
         public static final String BOOLEAN = "boolean";
@@ -126,7 +186,10 @@ public interface CkanConstants {
         public static final String STRING = "string";
         public static final String DATE = "date";
         public static final String JSON = "json";
-        public static final String[] QUANTITY = { INTEGER, DOUBLE };
+        public static final String[] QUANTITY = {
+            INTEGER,
+            DOUBLE
+        };
     }
 
 }
