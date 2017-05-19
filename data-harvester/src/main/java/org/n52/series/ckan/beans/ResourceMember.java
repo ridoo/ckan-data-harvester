@@ -34,6 +34,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+
 import org.n52.series.ckan.da.CkanMapping;
 import org.n52.series.ckan.table.ResourceKey;
 
@@ -135,7 +136,11 @@ public class ResourceMember {
     public List<String> getColumnHeaders() {
         List<String> headers = new ArrayList<>();
         for (ResourceField field : getResourceFields()) {
-            headers.add(field.getShortName());
+            String shortName = field.getShortName();
+            String header = shortName == null || shortName.isEmpty()
+                    ? field.getFieldId()
+                    : shortName;
+            headers.add(header);
         }
         return headers;
     }
