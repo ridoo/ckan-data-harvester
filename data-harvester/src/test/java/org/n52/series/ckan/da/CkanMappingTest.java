@@ -69,5 +69,12 @@ public class CkanMappingTest {
         CkanMapping mappings = CkanMapping.loadCkanMapping();
         assertTrue(mappings.hasMappings("", "default", "default"));
     }
-
+    
+    @Test
+    public void when_fieldIdPropertyIsMapped_thenFieldIdHasPropertyMappings() {
+        CkanMapping mappings = CkanMapping.loadCkanMapping("config-ckan-mapping.json");
+        String fieldId = CkanConstants.FieldPropertyName.FIELD_ID;
+        assertTrue(mappings.hasPropertyMappings(fieldId, "some_weird_fieldid"));
+    }
+    
 }
