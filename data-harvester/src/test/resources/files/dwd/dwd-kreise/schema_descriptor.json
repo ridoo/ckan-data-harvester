@@ -29,7 +29,7 @@
         },
         {
           "field_type" : "Integer",
-          "field_id" : "WARNCELLID"
+          "field_id" : "GC_WARNCELLID"
         }
       ],
       "resource_name" : [
