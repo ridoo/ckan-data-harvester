@@ -154,5 +154,12 @@ public class ResourceFieldTest {
         ResourceField intField = fieldCreator.createViaTemplate(json);
         Assert.assertTrue(intField.equalsValues("100", "0100"));
     }
+    
+    @Test
+    public void when_resourceFieldsMappedAlternateIds_then_bothConsideredEqualFields() {
+        ResourceField first = fieldCreator.createSimple("id_value");
+        ResourceField second = fieldCreator.createSimple("alternate_id_value");
+        assertThat("fields with mapped id values are not considered equal", first, is(second));
+    }
 
 }

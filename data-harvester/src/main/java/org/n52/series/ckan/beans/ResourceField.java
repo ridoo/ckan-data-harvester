@@ -247,10 +247,9 @@ public class ResourceField implements VisitableField {
             return false;
         }
         final ResourceField other = (ResourceField) obj;
-        if (!Objects.equals(this.getLowerCasedFieldId(), other.getLowerCasedFieldId())) {
-            return false;
-        }
-        return true;
+        Set<String> mappings = this.ckanMapping.getFieldMappings(CkanConstants.FieldPropertyName.FIELD_ID);
+        return mappings.contains(this.getLowerCasedFieldId())
+                && mappings.contains(other.getLowerCasedFieldId());
     }
 
     @Override
