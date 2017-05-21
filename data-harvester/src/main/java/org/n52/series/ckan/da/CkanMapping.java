@@ -114,45 +114,34 @@ public class CkanMapping {
     }
 
     public Set<String> getDatatypeMappings(String name) {
-        return getValueMappings("datatype", getPropertyMappings(name));
+        return getValueMappings("datatype", name);
     }
 
     public Set<String> getFieldMappings(String name) {
-        return getValueMappings("field", getPropertyMappings(name));
+        return getValueMappings("field", name);
     }
 
     public Set<String> getResourceTypeMappings(String name) {
-        return getValueMappings("resource_type", getPropertyMappings(name));
+        return getValueMappings("resource_type", name);
     }
 
     public Set<String> getRoleMappings(String name) {
-        return getValueMappings("role", getPropertyMappings(name));
+        return getValueMappings("role", name);
     }
 
     public Set<String> getSchemaDescriptionMappings(String name) {
-        // schema_descriptor group only maps properties actually
         return getValueMappings("schema_descriptor", name);
     }
-
-    private Set<String> getValueMappings(String group, Set<String> properties) {
-        /*
-         * a known property is mapped to alternates, e.g. { "field_id": "foo" } can now be { "A" : "foo" }
-         */
-        Set<String> mappedValues = new HashSet<>();
-        for (String mappedProperty : properties) {
-            mappedValues.addAll(getValueMappings("field", mappedProperty));
-        }
-        return mappedValues;
     }
 
-    protected Set<String> getValueMappings(String group, String property) {
-        String lowerCasedProperty = property != null
-                ? property.toLowerCase(Locale.ROOT)
-                : property;
+    protected Set<String> getValueMappings(String group, String name) {
+        String lowerCasedName = name != null
+                ? name.toLowerCase(Locale.ROOT)
+                : name;
         String lowerCasedGroup = !(group == null || group.isEmpty())
                 ? "/" + group.toLowerCase(Locale.ROOT)
                 : "";
-        String path = lowerCasedGroup + "/" + lowerCasedProperty;
+        String path = lowerCasedGroup + "/" + lowerCasedName;
         JsonNode mappingArray = getConfigValueAt(path);
         if (mappingArray.isMissingNode()) {
             LOGGER.trace("try to get '{}' from fallback mapping.", path);
@@ -163,7 +152,7 @@ public class CkanMapping {
             mappingValues.add(node.asText()
                                   .toLowerCase(Locale.ROOT));
         }
-        mappingValues.add(lowerCasedProperty); // add self
+        mappingValues.add(lowerCasedName);
         return new HashSet<>(mappingValues);
     }
 
