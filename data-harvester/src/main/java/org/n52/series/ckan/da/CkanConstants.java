@@ -66,8 +66,8 @@ public interface CkanConstants {
     /**
      * Internal property names which indicate a property being parsed. As actual descriptors may use different
      * terms, a {@link CkanMapping} is used to map alternate property names from either global mapping file or
-     * for each dataset individually. A schema descriptor which uses <tt>my_field_id</tt> instead
-     * of {@value #FIELD_ID} like here
+     * for each dataset individually. A schema descriptor which uses <tt>my_field_id</tt> instead of
+     * {@value #FIELD_ID} like here
      *
      * <pre>
      *  {
@@ -85,12 +85,14 @@ public interface CkanConstants {
      *     ]
      *   }
      * </pre>
+     * 
+     * However, configuring alternate values have to be done like described in
+     * {@link CkanConstants.KnownFieldIdValue}.
      */
     public interface FieldPropertyName {
         public static final String RESOURCE_NAME = "resource_name";
         public static final String RESOURCE_TYPE = "resource_type";
         public static final String HEADER_ROWS = "headerrows";
-        /** {@value} */
         public static final String FIELD_ID = "field_id";
         public static final String SHORT_NAME = "short_name";
         public static final String LONG_NAME = "long_name";
