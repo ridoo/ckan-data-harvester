@@ -149,7 +149,7 @@ public class DataTable {
                 public void run() {
                     int rows = outputTable.rowSize();
                     long rowsPer = rows * interval / getSeconds(start);
-                    LOGGER.debug("join performs #{} rows per {}s (#{} total)", rowsPer, interval, rows);
+                    LOGGER.trace("join performs #{} output rows per {}s (#{} total)", rowsPer, interval, rows);
                 };
                 private long getSeconds(long startTime) {
                     long now = System.currentTimeMillis();
