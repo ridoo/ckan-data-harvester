@@ -26,8 +26,8 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
-package org.n52.series.ckan.beans;
 
+package org.n52.series.ckan.beans;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -35,36 +35,14 @@ import static org.junit.Assert.assertThat;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.n52.series.ckan.da.CkanConstants;
-import org.n52.series.ckan.da.CkanMapping;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class ResourceFieldTest {
 
-    private FieldBuilder fieldCreator;
+    private static final String ID_VALUE = "IDENTIFIER_A";
 
-    private CkanMapping ckanMapping;
-
-    @Before
-    public void setUp() {
-        this.fieldCreator = new FieldBuilder();
-        JsonNodeFactory factory = JsonNodeFactory.instance;
-
-        ObjectNode fieldNode = factory.objectNode();
-        fieldNode.putArray("field_id")
-                .add("IDENTIFIER_A")
-                .add("IDENTIFIER_B");
-        fieldNode.putArray("field_type")
-                .add("TYPE_A")
-                .add("TYPE_B");
-        JsonNode mapping = factory.objectNode().set("field", fieldNode);
-        this.ckanMapping = new CkanMapping(mapping);
-    }
+    private static final String ID_VALUE_MAPPED = "IDENTIFIER_B";
 
     @Test
     public void when_simpleCreation_then_noExceptions() {
@@ -113,53 +91,74 @@ public class ResourceFieldTest {
 
     @Test
     public void when_fieldWithFieldType_then_detectFieldType() {
-        ResourceField testField = fieldCreator
-                .withFieldId("float_field")
-                .withFieldType("Float")
-                .create();
+        ResourceField testField = FieldBuilder.aField()
+                                              .withFieldId("float_field")
+                                              .withFieldType("Float")
+                                              .create();
         Assert.assertTrue(testField.isOfType(CkanConstants.DataType.DOUBLE));
     }
 
     @Test
     public void when_checkingFieldType_then_fieldRecognizesMappings() {
-        ResourceField testField = fieldCreator
-                .withCkanMapping(ckanMapping)
-                .createSimple("IDENTIFIER_A");
-        assertThat(testField.isField("IDENTIFIER_A"), is(true));
+        ResourceField testField = FieldBuilder.aField()
+                                              .withFieldMappings("field_id", ID_VALUE, ID_VALUE_MAPPED)
+                                              .createSimple(ID_VALUE);
+        assertThat(testField.isField(ID_VALUE), is(true));
     }
 
     @Test
     public void testEqualityUsingId() {
-        ResourceField first = fieldCreator.createSimple("test42");
-        MatcherAssert.assertThat(first.equals(fieldCreator.createSimple("test42")), CoreMatchers.is(true));
+        ResourceField first = FieldBuilder.aField()
+                                          .createSimple("test42");
+        ResourceField second = FieldBuilder.aField()
+                                           .createSimple("test42");
+        MatcherAssert.assertThat(first.equals(second), CoreMatchers.is(true));
     }
 
     @Test
     public void testIdEqualityIgnoringCase() {
-        ResourceField expected = fieldCreator.createSimple("Test42");
-        ResourceField actual = fieldCreator.createSimple("test42");
+        ResourceField expected = FieldBuilder.aField()
+                                             .createSimple("Test42");
+        ResourceField actual = FieldBuilder.aField()
+                                           .createSimple("test42");
         MatcherAssert.assertThat(actual, is(expected));
     }
 
     @Test
     public void testEqualValues() {
         String json = ""
-                + "{" +
-                "    \"field_id\": \"Stations_id\"," +
-                "    \"short_name\": \"station ID\"," +
-                "    \"long_name\": \"Station identifier\"," +
-                "    \"description\": \"The Identifier for the station declared by the German weather service (DWD)\"," +
-                "    \"field_type\": \"Integer\"" +
-                "}";
-        ResourceField intField = fieldCreator.createViaTemplate(json);
+                + "{"
+                + "    \"field_id\": \"Stations_id\","
+                + "    \"short_name\": \"station ID\","
+                + "    \"long_name\": \"Station identifier\","
+                + "    \"description\": \"The Identifier for the station declared by the German weather service (DWD)\","
+                + "    \"field_type\": \"Integer\""
+                + "}";
+        ResourceField intField = FieldBuilder.aField()
+                                             .createViaTemplate(json);
         Assert.assertTrue(intField.equalsValues("100", "0100"));
     }
-    
+
     @Test
-    public void when_resourceFieldsMappedAlternateIds_then_bothConsideredEqualFields() {
-        ResourceField first = fieldCreator.createSimple("id_value");
-        ResourceField second = fieldCreator.createSimple("alternate_id_value");
+    public void when_havingMappedAlternateIds_then_bothConsideredEqualFields() {
+        ResourceField first = FieldBuilder.aField()
+                                          .withFieldMappings(ID_VALUE, ID_VALUE_MAPPED)
+                                          .createSimple(ID_VALUE);
+        ResourceField second = FieldBuilder.aField()
+                                           .withFieldMappings(ID_VALUE, ID_VALUE_MAPPED)
+                                           .createSimple(ID_VALUE_MAPPED);
         assertThat("fields with mapped id values are not considered equal", first, is(second));
     }
 
+    @Test
+    public void when_havingMappedAlternateIds_then_hashCodeRespectsAllMappings() {
+        ResourceField first = FieldBuilder.aField()
+                                          .withFieldMappings("field", ID_VALUE, ID_VALUE_MAPPED)
+                                          .createSimple(ID_VALUE);
+        ResourceField second = FieldBuilder.aField()
+                                           .withFieldMappings("field", ID_VALUE, ID_VALUE_MAPPED)
+                                           .createSimple(ID_VALUE_MAPPED);
+        assertThat("hashCode is not equal of fields with mapped ids.", first.hashCode(), is(second.hashCode()));
+
+    }
 }

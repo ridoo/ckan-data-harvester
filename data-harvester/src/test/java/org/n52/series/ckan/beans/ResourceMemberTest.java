@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.beans;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -122,7 +123,10 @@ public class ResourceMemberTest {
         ResourceMember observationDescription = members.get(1);
         Set<ResourceField> joinableFields = platformDescription.getJoinableFields(observationDescription);
         assertThat(joinableFields.size(), is(1));
-        assertThat(joinableFields.iterator().next().getFieldId(), is("STATIONS_ID"));
+        assertThat(joinableFields.iterator()
+                                 .next()
+                                 .getFieldId(),
+                   is("STATIONS_ID"));
     }
 
     private ResourceMember getObservationResource(String resourceId) {
@@ -138,10 +142,21 @@ public class ResourceMemberTest {
     @Test
     public void when_columnHasNoShortName_then_fieldIdIsColumnHeader() {
         ResourceMember resourceMember = new ResourceMember();
-        ResourceField field = FieldBuilder.aField().createSimple("foo");
+        ResourceField field = FieldBuilder.aField()
+                                          .createSimple("foo");
         resourceMember.setResourceFields(Collections.singletonList(field));
         List<String> columnHeaders = resourceMember.getColumnHeaders();
         assertThat(columnHeaders.size(), is(1));
         assertThat(columnHeaders.get(0), is("foo"));
+    }
+
+    @Test
+    public void when_fieldHasMappedIdValues_then_containsEvaluatesTrueInCaseOfAlternateValues() {
+        ResourceMember resourceMember = new ResourceMember();
+        ResourceField first = FieldBuilder.aField()
+                                          .withFieldMappings("foo", "bar")
+                                          .createSimple("foo");
+        resourceMember.setResourceFields(Collections.singletonList(first));
+        assertThat(resourceMember.containsField("bar"), is(true));
     }
 }

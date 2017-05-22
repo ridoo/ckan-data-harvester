@@ -126,7 +126,7 @@ public class ResourceMember {
 
     public boolean containsField(String fieldId) {
         for (ResourceField field : resourceFields) {
-            if (field.getFieldId().equalsIgnoreCase(fieldId)) {
+            if (field.isField(fieldId.toLowerCase())) {
                 return true;
             }
         }
