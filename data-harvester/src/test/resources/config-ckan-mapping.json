@@ -34,8 +34,7 @@
         ]
     },
     "field": {
-        "field_id": [
-            "id_value",
+        "id_value": [
             "alternate_id_value"
         ],
         "altitude": [
