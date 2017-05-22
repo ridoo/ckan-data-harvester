@@ -71,8 +71,7 @@ public class CsvTableLoader extends TableLoader {
             while (iterator.hasNext()) {
                 CSVRecord line = iterator.next();
                 LOGGER.trace("parsing line '{}'", line.toString());
-//                if (line.size() != columnHeaders.size()) {
-                if ( !line.isConsistent()) {
+                if ( !line.isConsistent() || line.size() != columnHeaders.size()) {
 
                     // TODO choose csv parsing strategy
 
@@ -86,6 +85,9 @@ public class CsvTableLoader extends TableLoader {
                 for (int j = 0 ; j < columnHeaders.size() ; j++) {
                     final ResourceField field = resourceMember.getField(j);
                     final String value = line.get(j);
+                    if (value == null || value.isEmpty()) {
+                        LOGGER.trace("Empty value for field {}", field);
+                    }
                     setCellValue(id, field, value);
                 }
             }
