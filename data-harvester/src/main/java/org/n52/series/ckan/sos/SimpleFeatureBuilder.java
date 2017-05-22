@@ -32,6 +32,7 @@ import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.da.CkanMapping;
 import org.n52.series.ckan.util.AbstractRowVisitor;
+import org.n52.series.ckan.util.FieldVisitor;
 import org.n52.series.ckan.util.GeometryBuilder;
 import org.n52.sos.exception.ows.concrete.InvalidSridException;
 import org.n52.sos.ogc.om.features.samplingFeatures.SamplingFeature;
@@ -71,7 +72,7 @@ public class SimpleFeatureBuilder extends AbstractRowVisitor<SamplingFeature> {
     }
 
     @Override
-    public void visit(ResourceField field, String value) {
+    public FieldVisitor<SamplingFeature> visit(ResourceField field, String value) {
         if (field.isField(CkanConstants.KnownFieldIdValue.PLATFORM_ID)) {
             String orgaName = dataset.getOrganization().getName();
             feature.setIdentifier(orgaName + "-" + value);
@@ -82,6 +83,7 @@ public class SimpleFeatureBuilder extends AbstractRowVisitor<SamplingFeature> {
         if ( !field.isOfResourceType(CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES)) {
             geometryBuilder.visit(field, value);
         }
+        return this;
     }
 
 

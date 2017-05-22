@@ -32,6 +32,7 @@ import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.sos.TrackPointCollector.TrackPoint;
 import org.n52.series.ckan.util.AbstractRowVisitor;
+import org.n52.series.ckan.util.FieldVisitor;
 import org.n52.series.ckan.util.GeometryBuilder;
 
 public class TrackPointBuilder extends AbstractRowVisitor<String> {
@@ -53,7 +54,7 @@ public class TrackPointBuilder extends AbstractRowVisitor<String> {
     }
 
     @Override
-    public void visit(ResourceField field, String value) {
+    public FieldVisitor<String> visit(ResourceField field, String value) {
         if (field.isField(CkanConstants.KnownFieldIdValue.OBSERVATION_TIME)) {
             trackPoint.withProperty(field, value);
         }
@@ -66,6 +67,7 @@ public class TrackPointBuilder extends AbstractRowVisitor<String> {
             trackPoint.withProperty(field, value);
         }
         geometryBuilder.visit(field, value);
+        return this;
     }
 
     @Override

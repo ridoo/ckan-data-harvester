@@ -89,7 +89,7 @@ public class GeometryBuilder implements FieldVisitor<GeometryValue> {
     }
 
     @Override
-    public void visit(ResourceField field, String value) {
+    public FieldVisitor<GeometryValue> visit(ResourceField field, String value) {
         if (field.isField(CkanConstants.KnownFieldIdValue.LATITUDE)) {
             setLatitude(value);
         }
@@ -109,6 +109,7 @@ public class GeometryBuilder implements FieldVisitor<GeometryValue> {
             // in case of geometry observations
             parseGeometryField(field, value);
         }
+        return this;
     }
 
     private void parseGeometryField(ResourceField field, String value) {
