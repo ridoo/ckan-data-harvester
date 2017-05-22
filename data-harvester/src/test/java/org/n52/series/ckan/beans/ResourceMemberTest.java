@@ -35,7 +35,9 @@ import static org.hamcrest.Matchers.is;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -50,6 +52,8 @@ import org.n52.series.ckan.table.ResourceTestHelper;
 public class ResourceMemberTest {
 
     private static final String DWD_TEMPERATUR_DATASET_ID = "eab53bfe-fce7-4fd8-8325-a0fe5cdb23c8";
+
+    private static final String DWDKREISE_DATASET_ID = "2518529a-fbf1-4940-8270-a1d4d0fa8c4d";
 
     private static final String PLATFORM_DATA_ID_1 = "8f0637bc-c15e-4f74-b7d8-bfc4ed2ac2f9";
 
@@ -129,6 +133,24 @@ public class ResourceMemberTest {
                    is("STATIONS_ID"));
     }
 
+    @Test
+    public void findJoinableFieldsHavingMappedIds() {
+        SchemaDescriptor schemaDescriptor = resourceHelper.getSchemaDescriptor(DWDKREISE_DATASET_ID);
+        List<ResourceMember> members = schemaDescriptor.getMembers();
+
+        ResourceMember firstMember = members.get(0);
+        ResourceMember secondMember = members.get(1);
+        Set<ResourceField> joinableFields = firstMember.getJoinableFields(secondMember);
+        assertThat(joinableFields.size(), is(1));
+        FieldBuilder builder = FieldBuilder.aField();
+        ResourceField expectedField = builder.createSimple("warncellid");
+        ResourceField expectedAlternateField = builder.createSimple("gc_warncellid");
+        Iterator<ResourceField> iterator = joinableFields.iterator();
+        ResourceField firstField = iterator.next();
+        assertThat(firstField, is(expectedField));
+        assertThat(firstField, is(expectedAlternateField));
+    }
+
     private ResourceMember getObservationResource(String resourceId) {
         ResourceMember resourceMember = new ResourceMember(resourceId, "observations");
         return resourceHelper.getResourceMember(DWD_TEMPERATUR_DATASET_ID, resourceMember);
@@ -158,5 +180,29 @@ public class ResourceMemberTest {
                                           .createSimple("foo");
         resourceMember.setResourceFields(Collections.singletonList(first));
         assertThat(resourceMember.containsField("bar"), is(true));
+    }
+
+    @Test
+    public void when_joinFieldsWithMappedValues_then_detectIfJoinable() {
+        ResourceMember resourceMemberA = new ResourceMember("id_A", "type_A");
+        ResourceField[] fieldsA = {
+            FieldBuilder.aField()
+                        .withFieldMappings("foo", "bar")
+                        .createSimple("foo"),
+            FieldBuilder.aField()
+                        .createSimple("blah")
+        };
+        resourceMemberA.setResourceFields(Arrays.asList(fieldsA));
+
+        ResourceMember resourceMemberB = new ResourceMember("id_B", "type_B");
+        ResourceField[] fieldsB = {
+            FieldBuilder.aField()
+                        .withFieldMappings("foo", "bar")
+                        .createSimple("bar"),
+        };
+        resourceMemberB.setResourceFields(Arrays.asList(fieldsB));
+        assertThat("resource members with mapped join columns must be joinable",
+                   resourceMemberA.isJoinable(resourceMemberB),
+                   is(true));
     }
 }

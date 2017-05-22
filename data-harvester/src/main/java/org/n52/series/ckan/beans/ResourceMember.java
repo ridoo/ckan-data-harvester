@@ -108,7 +108,7 @@ public class ResourceMember {
                 ? Collections.unmodifiableList(resourceFields)
                 : Collections.<ResourceField>emptyList();
     }
-
+    
     public ResourceField getField(String fieldId) {
         for (ResourceField field : resourceFields) {
             if (field.getFieldId().equalsIgnoreCase(fieldId)) {
@@ -154,16 +154,9 @@ public class ResourceMember {
     }
 
     public Set<ResourceField> getJoinableFields(ResourceMember other) {
-        if ( !isJoinable(other)) {
-            return Collections.<ResourceField>emptySet();
-        }
-        Set<ResourceField> fields = new HashSet<>();
-        for (ResourceField possibleJoinColumn : other.resourceFields) {
-            if (resourceFields.contains(possibleJoinColumn)) {
-                fields.add(ResourceField.copy(possibleJoinColumn));
-            }
-        }
-        return Collections.unmodifiableSet(fields);
+        Set<ResourceField> fields = new HashSet<>(resourceFields);
+        fields.retainAll(other.resourceFields);
+        return fields;
     }
 
     public boolean isJoinable(ResourceMember other) {
@@ -173,12 +166,7 @@ public class ResourceMember {
         if (this == other || isOfSameType(other)) {
             return false;
         }
-        for (ResourceField otherField : other.resourceFields) {
-            if (resourceFields.contains(otherField)) {
-                return true;
-            }
-        }
-        return false;
+        return !getJoinableFields(other).isEmpty();
     }
 
     public boolean isExtensible(ResourceMember other) {
