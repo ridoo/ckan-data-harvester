@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.sos;
 
 import static org.n52.series.ckan.da.CkanConstants.DEFAULT_CHARSET;
@@ -102,7 +103,7 @@ class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
 
     @Override
     public void visit(ResourceField field, String value) {
-        if ( !field.isObservationField()) {
+        if (!field.isObservationField()) {
             return;
         }
         field.accept(observationValueBuilder, value);
@@ -116,7 +117,7 @@ class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
         if (timeBuilder.hasResult()) {
             LOGGER.debug("ignore observation having no time.");
             return false;
-        } else if ( !observationValueBuilder.hasResult()
+        } else if (!observationValueBuilder.hasResult()
                 && !geometryBuilder.hasResult()) {
             LOGGER.debug("no value or geometry present to create obseration.");
             return false;
@@ -129,13 +130,14 @@ class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
         SingleObservationValue< ? > result = observationValueBuilder.hasResult()
                 ? observationValueBuilder.getResult()
                 : null;
-        if ( !observationValueBuilder.hasResult() && geometryBuilder.hasResult()) {
+        if (!observationValueBuilder.hasResult() && geometryBuilder.hasResult()) {
             // pure geometry observation w/o any other value
             observationType = OmConstants.OBS_TYPE_GEOMETRY_OBSERVATION;
             SingleObservationValue<Geometry> obsValue = new SingleObservationValue<>();
             obsValue.setValue(geometryBuilder.getResult());
             result = obsValue;
-        } if (geometryBuilder.hasResult()) {
+        }
+        if (geometryBuilder.hasResult()) {
             // geometry is meta info of an actual observation value
             final NamedValue<Geometry> namedValue = new NamedValue<>();
             namedValue.setName(new ReferenceType(OmConstants.PARAM_NAME_SAMPLING_GEOMETRY));
@@ -205,8 +207,7 @@ class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
                     obsValue.setValue(quantityValue);
                     return obsValue;
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 LOGGER.error("could not parse value {}", value, e);
             }
             return null;
@@ -218,7 +219,7 @@ class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
         }
 
         @Override
-        public SingleObservationValue<?> getResult() {
+        public SingleObservationValue< ? > getResult() {
             return result;
         }
     }

@@ -89,7 +89,7 @@ public class Phenomenon {
     public void setSoftTyped(boolean softTyped) {
         this.softTyped = softTyped;
     }
-//
+
     @Override
     public int hashCode() {
         int hash = 5;
