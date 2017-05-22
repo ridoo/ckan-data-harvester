@@ -28,8 +28,8 @@
  */
 package org.n52.series.ckan.sos;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -58,7 +58,7 @@ class StationaryInsertStrategy extends AbstractInsertStrategy {
 
     @Override
     public Map<String, DataInsertion> createDataInsertions(DataTable dataTable, DataCollection dataCollection) {
-        final List<Phenomenon> phenomena = parsePhenomena(dataTable);
+        final Collection<Phenomenon> phenomena = parsePhenomena(dataTable);
 
         LOGGER.debug("Create stationary insertions ...");
         Map<String, DataInsertion> dataInsertions = new HashMap<>();
