@@ -83,11 +83,11 @@ public class DataTable {
     }
 
     public Collection<ResourceField> getResourceFields() {
-        List<ResourceField> fields = new ArrayList<>(resourceMember.getResourceFields());
+        Set<ResourceField> fields = new HashSet<>(resourceMember.getResourceFields());
         for (ResourceMember joinedMember : joinedMembers) {
             fields.addAll(joinedMember.getResourceFields());
         }
-        return Collections.unmodifiableList(fields);
+        return Collections.unmodifiableSet(fields);
     }
 
     public DataTable extendWith(DataTable other) {

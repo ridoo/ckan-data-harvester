@@ -180,7 +180,7 @@ class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
 
         @Override
         public void visitObservationField(ResourceField field, String value) {
-            if (field.matchesIndex(phenomenon.getFieldIdx())) {
+            if (field.matchesIndex(phenomenon.getValueFieldIdx())) {
                 String phenomenonId = phenomenon.getId();
                 String omIdentifier = qualifier.getKeyId() + "_" + phenomenonId;
                 omObservation.setIdentifier(omIdentifier);
