@@ -47,6 +47,7 @@ import org.n52.sos.ogc.om.OmObservation;
 import org.n52.sos.ogc.om.OmObservationConstellation;
 import org.n52.sos.ogc.om.SingleObservationValue;
 import org.n52.sos.ogc.om.values.QuantityValue;
+import org.n52.sos.ogc.om.values.TextValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,7 +133,7 @@ class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
                 : null;
         if (!observationValueBuilder.hasResult() && geometryBuilder.hasResult()) {
             // pure geometry observation w/o any other value
-            observationType = OmConstants.OBS_TYPE_GEOMETRY_OBSERVATION;
+            observationType = phenomenon.getObservationType();
             SingleObservationValue<Geometry> obsValue = new SingleObservationValue<>();
             obsValue.setValue(geometryBuilder.getResult());
             result = obsValue;
@@ -172,7 +173,7 @@ class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
     private OmObservationConstellation createConstellation(Phenomenon phenomenon) {
         OmObservationConstellation constellation = new OmObservationConstellation();
         constellation.setObservableProperty(phenomenon.toObservableProperty());
-        constellation.setObservationType(OmConstants.OBS_TYPE_MEASUREMENT);
+        constellation.setObservationType(phenomenon.getObservationType());
         return constellation;
     }
 
@@ -189,6 +190,9 @@ class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
                 // TODO support NO_DATA
                 if (field.isOneOfType(CkanConstants.DataType.QUANTITY)) {
                     result = createQuantityValue(field, value);
+                }
+                if (field.isOfType(CkanConstants.DataType.STRING)) {
+                    result = createTextValue(field, value);
                 } else if (field.isOfType(CkanConstants.DataType.GEOMETRY)) {
                     observationType = OmConstants.OBS_TYPE_GEOMETRY_OBSERVATION;
                 }
@@ -211,6 +215,12 @@ class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
                 LOGGER.error("could not parse value {}", value, e);
             }
             return null;
+        }
+
+        protected SingleObservationValue<String> createTextValue(ResourceField field, String value) {
+            return field.isOfType(String.class)
+                    ? new SingleObservationValue<>(new TextValue(value))
+                    : null;
         }
 
         @Override
