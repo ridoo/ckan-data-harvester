@@ -30,6 +30,8 @@ package org.n52.series.ckan.sos;
 
 import java.util.Objects;
 
+import org.n52.series.ckan.beans.ResourceField;
+import org.n52.series.ckan.da.CkanConstants;
 import org.n52.sos.ogc.om.OmConstants;
 import org.n52.sos.ogc.om.OmObservableProperty;
 
@@ -47,17 +49,15 @@ public class Phenomenon {
     
     private String label;
 
-    public Phenomenon(String id, String label, int valueFieldIdx) {
-        this(id, label, valueFieldIdx, null);
-    }
-
-    public Phenomenon(String id, String label, int valueFieldIdx, String uom) {
+    public Phenomenon(String id, String label, ResourceField valueField, String uom) {
+        this.valueFieldIdx = valueField.getIndex();
         this.id = id;
+        this.label = label;
         this.observationType = parseObservationType(valueField);
         // TODO String phenomenonDescription = parseDescription(field);
         this.uom = uom;
-        this.label = label;
-        this.valueFieldIdx = valueFieldIdx;
+    }
+
     private String parseObservationType(ResourceField valueField) {
         if (valueField.isOneOfType(CkanConstants.DataType.QUANTITY)) {
             return OmConstants.OBS_TYPE_MEASUREMENT;

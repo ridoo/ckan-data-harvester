@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.sos;
 
 import org.hamcrest.CoreMatchers;
@@ -37,29 +38,30 @@ import org.n52.series.ckan.sos.ObservationBuilder.SingleObservationValueBuilder;
 import org.n52.series.ckan.table.ResourceKey;
 import org.n52.sos.ogc.om.SingleObservationValue;
 import org.n52.sos.ogc.om.values.QuantityValue;
+import org.n52.sos.ogc.om.values.Value;
 
 public class ObservationBuilderTest {
 
     @Test
     public void when_floatTypedValue_then_createQuantityObservation() {
-        Phenomenon phenomenon = new Phenomenon("temperature", "Temperature", 0, "°K");
+        ResourceField field = FieldBuilder.aField()
+                                          .createViaTemplate("{"
+                                                  + " \"field_id\" : \"value\", "
+                                                  + " \"short_name\" : \"value\", "
+                                                  + " \"long_name\" : \"value\","
+                                                  + " \"phenomenon\" : \"temperature\","
+                                                  + " \"uom\" : \"°K\","
+                                                  + " \"field_type\" : \"Float\" }");
+        Phenomenon phenomenon = new Phenomenon("temperature", "Temperature", field, "°K");
         ObservationBuilder builder = ObservationBuilder.create(phenomenon, new ResourceKey());
         SingleObservationValueBuilder valueBuilder = builder.new SingleObservationValueBuilder();
-
-        ResourceField field = new FieldBuilder()
-                .createViaTemplate("{"
-                        + " \"field_id\" : \"value\", "
-                        + " \"short_name\" : \"value\", "
-                        + " \"long_name\" : \"value\","
-                        + " \"phenomenon\" : \"temperature\","
-                        + " \"uom\" : \"°K\","
-                        + " \"field_type\" : \"Float\" }");
         SingleObservationValue<Double> value = valueBuilder.createQuantityValue(field, "25.0");
 
         Assert.assertNotNull(value);
-        Assert.assertThat(value.getValue(), CoreMatchers.instanceOf(QuantityValue.class));
-        Assert.assertThat(value.getValue().getValue(), CoreMatchers.is(25.0));
-        Assert.assertThat(value.getValue().getUnit(), CoreMatchers.is("°K"));
+        Value<Double> actualValue = value.getValue();
+        Assert.assertThat(actualValue, CoreMatchers.instanceOf(QuantityValue.class));
+        Assert.assertThat(actualValue.getValue(), CoreMatchers.is(25.0));
+        Assert.assertThat(actualValue.getUnit(), CoreMatchers.is("°K"));
     }
 
 }

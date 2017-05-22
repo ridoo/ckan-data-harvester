@@ -82,11 +82,10 @@ public class PhenomenonParser {
                                                                        ResourceField valueField,
                                                                        HashSet<String> values) {
         Function< ? super String, ? extends Phenomenon> parseReferencedPhenomenon = e -> {
+            String uom = uomParser.parse(phenomenonField);
             String id = e;
             String label = phenomenonField.getFieldId() + "_" + e;
-            String uom = uomParser.parse(phenomenonField);
-            int index = valueField.getIndex();
-            Phenomenon phenomenon = new Phenomenon(id, label, index, uom);
+            Phenomenon phenomenon = new Phenomenon(id, label, valueField, uom);
             phenomenon.setSoftTyped(true);
             return phenomenon;
         };
@@ -106,6 +105,13 @@ public class PhenomenonParser {
                              .filter(filter)
                              .map(e -> parsePhenomenon(e))
                              .collect(Collectors.toSet());
+    }
+
+    private Phenomenon parsePhenomenon(ResourceField field) {
+        String uom = uomParser.parse(field);
+        String id = parsePhenomenonId(field);
+        String label = parsePhenomenonName(field);
+        return new Phenomenon(id, label, field, uom);
     }
 
     private List<ResourceField> filterFields(Collection<ResourceField> fields, Predicate<ResourceField> filter) {
@@ -131,15 +137,6 @@ public class PhenomenonParser {
 
     private boolean isValueFieldWithPhenomenonReference(ResourceField field) {
         return field.hasProperty(CkanConstants.FieldPropertyName.PHENOMENON_REF);
-    }
-
-    private Phenomenon parsePhenomenon(ResourceField field) {
-        int index = field.getIndex();
-        String uom = uomParser.parse(field);
-        String phenomenonId = parsePhenomenonId(field);
-        String phenomenonName = parsePhenomenonName(field);
-        // TODO String phenomenonDescription = parseDescription(field);
-        return new Phenomenon(phenomenonId, phenomenonName, index, uom);
     }
 
     private String parsePhenomenonId(ResourceField field) {
