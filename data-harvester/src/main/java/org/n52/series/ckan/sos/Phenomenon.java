@@ -30,6 +30,7 @@ package org.n52.series.ckan.sos;
 
 import java.util.Objects;
 
+import org.n52.sos.ogc.om.OmConstants;
 import org.n52.sos.ogc.om.OmObservableProperty;
 
 public class Phenomenon {
@@ -38,11 +39,13 @@ public class Phenomenon {
 
     private final int valueFieldIdx;
 
+    private final String observationType;
+    
     private final String uom;
 
-    private String label;
-
     private boolean softTyped;
+    
+    private String label;
 
     public Phenomenon(String id, String label, int valueFieldIdx) {
         this(id, label, valueFieldIdx, null);
@@ -50,9 +53,17 @@ public class Phenomenon {
 
     public Phenomenon(String id, String label, int valueFieldIdx, String uom) {
         this.id = id;
+        this.observationType = parseObservationType(valueField);
+        // TODO String phenomenonDescription = parseDescription(field);
         this.uom = uom;
         this.label = label;
         this.valueFieldIdx = valueFieldIdx;
+    private String parseObservationType(ResourceField valueField) {
+        if (valueField.isOneOfType(CkanConstants.DataType.QUANTITY)) {
+            return OmConstants.OBS_TYPE_MEASUREMENT;
+        }
+        // fallback
+        return OmConstants.OBS_TYPE_TEXT_OBSERVATION;
     }
 
     public String getId() {
@@ -80,6 +91,10 @@ public class Phenomenon {
         observableProperty.setHumanReadableIdentifier(getLabel());
         observableProperty.setUnit(getUom());
         return observableProperty;
+    }
+
+    public String getObservationType() {
+        return observationType;
     }
 
     public boolean isSoftTyped() {
