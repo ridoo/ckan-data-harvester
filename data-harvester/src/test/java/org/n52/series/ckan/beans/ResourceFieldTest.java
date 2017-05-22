@@ -147,7 +147,8 @@ public class ResourceFieldTest {
         ResourceField second = FieldBuilder.aField()
                                            .withFieldMappings(ID_VALUE, ID_VALUE_MAPPED)
                                            .createSimple(ID_VALUE_MAPPED);
-        assertThat("fields with mapped id values are not considered equal", first, is(second));
+        assertThat("first field is not considered equal with second field having mapped id value", first, is(second));
+        assertThat("second field is not considered equal with other first field having mapped id value", second, is(first));
     }
 
     @Test
