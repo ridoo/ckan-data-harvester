@@ -2,6 +2,21 @@
     "field": {
         "warncellid" : [
             "gc_warncellid"
+        ],
+        "platform_id": [
+            "name"
+        ],
+        "platform_name": [
+            "name"
+        ],
+        "observation_time": [
+            "effective"
+        ],
+        "valid_time_start": [
+            "sent"
+        ],
+        "valid_time_end": [
+            "expires"
         ]
     }
 }
