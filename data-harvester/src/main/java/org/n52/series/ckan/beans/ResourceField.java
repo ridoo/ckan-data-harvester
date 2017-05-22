@@ -179,7 +179,8 @@ public class ResourceField implements VisitableField {
         if (otherValue != null) {
             try {
                 if (this.isOfType(Integer.class)) {
-                    return new Integer(thisValue).equals(new Integer(otherValue));
+                    Integer value = parseToInteger(thisValue);
+                    return value != null && value.equals(parseToInteger(otherValue));
                 }
                 if (this.isOfType(String.class)) {
                     return thisValue.equals(otherValue);
@@ -191,10 +192,18 @@ public class ResourceField implements VisitableField {
         return false;
     }
 
-    public boolean isOfType(Class<?> clazz) {
-        return isOfType(clazz.getSimpleName());
+    private Integer parseToInteger(String toParse) {
+        try {
+            return new Integer(toParse);
+        } catch (NumberFormatException e) {
+            LOGGER.trace("Invalid integer: '{}'", toParse);
+            return null;
+        }
     }
 
+    public boolean isOfType(Class< ? > clazz) {
+        return isOfType(clazz.getSimpleName());
+    }
 
     public boolean isOneOfType(String[] types) {
         for (String type : types) {
@@ -222,7 +231,7 @@ public class ResourceField implements VisitableField {
         if (value != null) {
             try {
                 if (this.isOfType(Integer.class)) {
-                    value = new Integer(value).toString();
+                    value = parseToInteger(value).toString();
                 } else if (this.isOfType(Double.class)) {
                     value = new Double(value).toString();
                 }
