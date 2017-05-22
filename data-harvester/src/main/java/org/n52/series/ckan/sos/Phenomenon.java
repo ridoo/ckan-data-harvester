@@ -36,21 +36,23 @@ public class Phenomenon {
 
     private final String id;
 
-    private final int fieldIdx;
-
-    private final String label;
+    private final int valueFieldIdx;
 
     private final String uom;
 
-    public Phenomenon(String id, String label, int fieldIdx) {
-        this(id, label, fieldIdx, null);
+    private String label;
+
+    private boolean softTyped;
+
+    public Phenomenon(String id, String label, int valueFieldIdx) {
+        this(id, label, valueFieldIdx, null);
     }
 
-    public Phenomenon(String id, String label, int fieldIdx, String uom) {
+    public Phenomenon(String id, String label, int valueFieldIdx, String uom) {
         this.id = id;
         this.uom = uom;
         this.label = label;
-        this.fieldIdx = fieldIdx;
+        this.valueFieldIdx = valueFieldIdx;
     }
 
     public String getId() {
@@ -61,23 +63,39 @@ public class Phenomenon {
         return label;
     }
 
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
     public String getUom() {
         return uom;
     }
 
-    public int getFieldIdx() {
-        return fieldIdx;
+    public int getValueFieldIdx() {
+        return valueFieldIdx;
     }
 
     public OmObservableProperty toObservableProperty() {
-        return new OmObservableProperty(getId());
+        OmObservableProperty observableProperty = new OmObservableProperty(getId());
+        observableProperty.setHumanReadableIdentifier(getLabel());
+        observableProperty.setUnit(getUom());
+        return observableProperty;
     }
 
+    public boolean isSoftTyped() {
+        return softTyped;
+    }
+
+    public void setSoftTyped(boolean softTyped) {
+        this.softTyped = softTyped;
+    }
+//
     @Override
     public int hashCode() {
         int hash = 5;
         hash = 37 * hash + Objects.hashCode(this.id);
-        hash = 37 * hash + this.fieldIdx;
+        hash = 37 * hash + this.valueFieldIdx;
+        hash = 37 * hash + (softTyped ? 1231 : 1237);
         hash = 37 * hash + Objects.hashCode(this.label);
         hash = 37 * hash + Objects.hashCode(this.uom);
         return hash;
@@ -95,10 +113,13 @@ public class Phenomenon {
         if (!Objects.equals(this.id, other.id)) {
             return false;
         }
-        if (this.fieldIdx != other.fieldIdx) {
+        if (this.valueFieldIdx != other.valueFieldIdx) {
             return false;
         }
         if (!Objects.equals(this.label, other.label)) {
+            return false;
+        }
+        if (softTyped != other.softTyped) {
             return false;
         }
         if (!Objects.equals(this.uom, other.uom)) {
@@ -113,7 +134,8 @@ public class Phenomenon {
                 .append("[id=").append(id)
                 .append(", label=").append(label)
                 .append(", uom=").append(uom)
-                .append(", fieldIdx=").append(fieldIdx)
+                .append(", fieldIdx=").append(valueFieldIdx)
+                .append(", softTyped=").append(softTyped)
                 .append("]")
                 .toString();
     }
