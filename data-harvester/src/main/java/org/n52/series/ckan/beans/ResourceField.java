@@ -235,7 +235,9 @@ public class ResourceField implements VisitableField {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.getLowerCasedFieldId(), 7);
+        String idProperty = CkanConstants.FieldPropertyName.FIELD_ID;
+        return this.ckanMapping.getFieldMappings(idProperty)
+                               .hashCode();
     }
 
     @Override
@@ -247,9 +249,8 @@ public class ResourceField implements VisitableField {
             return false;
         }
         final ResourceField other = (ResourceField) obj;
-        Set<String> mappings = this.ckanMapping.getFieldMappings(CkanConstants.FieldPropertyName.FIELD_ID);
-        return mappings.contains(this.getLowerCasedFieldId())
-                && mappings.contains(other.getLowerCasedFieldId());
+        Set<String> mappings = this.ckanMapping.getFieldMappings(this.getLowerCasedFieldId());
+        return mappings.contains(other.getLowerCasedFieldId());
     }
 
     @Override

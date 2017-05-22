@@ -85,7 +85,7 @@ public interface CkanConstants {
      *     ]
      *   }
      * </pre>
-     * 
+     *
      * However, configuring alternate values have to be done like described in
      * {@link CkanConstants.KnownFieldIdValue}.
      */

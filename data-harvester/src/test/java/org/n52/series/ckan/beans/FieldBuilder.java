@@ -32,9 +32,13 @@ package org.n52.series.ckan.beans;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IllegalFormatException;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.da.CkanMapping;
@@ -43,6 +47,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -53,6 +58,8 @@ public class FieldBuilder {
     private static final JsonNodeFactory JSON_FACTORY = JsonNodeFactory.instance;
 
     private final Map<String, JsonNode> valuesByField;
+
+    private Map<String, Map<String, Set<String>>> mappingsByGroup;
 
     private CkanMapping ckanMapping;
 
@@ -71,10 +78,30 @@ public class FieldBuilder {
     public FieldBuilder(String id, int index) {
         this.index = index;
         this.valuesByField = new HashMap<>();
-        this.ckanMapping = CkanMapping.loadCkanMapping();
         if (id != null) {
             this.valuesByField.put("field_id", JSON_FACTORY.textNode(id));
         }
+    }
+
+
+    public FieldBuilder withFieldMappings(String name, String... mappings) {
+        Set<String> mappedValues = getMappedValues("field", name);
+        mappedValues.addAll(Arrays.asList(mappings));
+        return this;
+    }
+
+    private Set<String> getMappedValues(String group, String name) {
+        if (mappingsByGroup == null) {
+            mappingsByGroup = new HashMap<>();
+        }
+        if (!mappingsByGroup.containsKey(group)) {
+            mappingsByGroup.put(group, new HashMap<>());
+        }
+        Map<String, Set<String>> mappingsByName = mappingsByGroup.get(group);
+        if (!mappingsByName.containsKey(name))  {
+            mappingsByName.put(name, new HashSet<>());
+        }
+        return mappingsByName.get(name);
     }
 
     public static FieldBuilder aField() {
@@ -191,9 +218,10 @@ public class FieldBuilder {
     public ResourceField create() {
         ObjectNode field = JSON_FACTORY.objectNode();
         for (Map.Entry<String, JsonNode> property : valuesByField.entrySet()) {
-            field.put(property.getKey(), property.getValue());
+            field.set(property.getKey(), property.getValue());
         }
-        return new ResourceField(field, index, ckanMapping)
+        CkanMapping mappings = createCkanMapping();
+        return new ResourceField(field, index, mappings)
                 .withResourceType(resourceType);
     }
     public ResourceField createSimple(String id) {
@@ -204,12 +232,38 @@ public class FieldBuilder {
         try {
             jsonTemplate = String.format(jsonTemplate, args);
             JsonNode node = new ObjectMapper().readTree(jsonTemplate);
-            return new ResourceField(node, index, ckanMapping);
+            return new ResourceField(node, index, createCkanMapping());
         } catch (IllegalFormatException | IOException e) {
             LOGGER.error("Failed to create ResourceField", e);
             fail("Could not create field!");
             return null;
         }
+    }
+
+    private CkanMapping createCkanMapping() {
+        if (ckanMapping != null) {
+            return ckanMapping;
+        }
+        if (mappingsByGroup == null) {
+            return CkanMapping.loadCkanMapping();
+        }
+        JsonNodeFactory factory = JsonNodeFactory.instance;
+        ObjectNode allMappings = factory.objectNode();
+        for (Entry<String, Map<String, Set<String>>> mapGroup : mappingsByGroup.entrySet()) {
+            if (mapGroup.getValue() != null) {
+                String lowerCasedGroup = mapGroup.getKey().toLowerCase();
+                ObjectNode groupMappings = allMappings.putObject(lowerCasedGroup);
+                Map<String, Set<String>> mappings = mapGroup.getValue();
+                for (Entry<String, Set<String>> mapping : mappings.entrySet()) {
+                    String lowerCasedValueName = mapping.getKey().toLowerCase();
+                    ArrayNode values = groupMappings.putArray(lowerCasedValueName);
+                    for (String valueMapping : mapping.getValue()) {
+                        values.add(valueMapping.toLowerCase());
+                    }
+                }
+            }
+        }
+        return new CkanMapping(allMappings);
     }
 
 }

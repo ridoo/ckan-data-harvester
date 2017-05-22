@@ -106,7 +106,8 @@ public class CkanMapping {
     }
 
     public boolean hasMappings(String group, String name, String mapping) {
-        return getValueMappings(group, name).contains(mapping.toLowerCase(Locale.ROOT));
+        return getValueMappings(group, name).contains(mapping.toLowerCase(Locale.ROOT))
+                || getValueMappings(group, mapping).contains(name.toLowerCase(Locale.ROOT));
     }
 
     public Set<String> getPropertyMappings(String name) {
@@ -131,7 +132,6 @@ public class CkanMapping {
 
     public Set<String> getSchemaDescriptionMappings(String name) {
         return getValueMappings("schema_descriptor", name);
-    }
     }
 
     protected Set<String> getValueMappings(String group, String name) {
