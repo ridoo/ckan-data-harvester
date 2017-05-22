@@ -103,14 +103,15 @@ class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
     }
 
     @Override
-    public void visit(ResourceField field, String value) {
+    public ObservationBuilder visit(ResourceField field, String value) {
         if (!field.isObservationField()) {
-            return;
+            return this;
         }
         field.accept(observationValueBuilder, value);
         field.accept(geometryBuilder, value);
         field.accept(validTimeBuilder, value);
         field.accept(timeBuilder, value);
+        return this;
     }
 
     @Override
