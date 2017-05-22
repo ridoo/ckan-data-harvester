@@ -108,7 +108,7 @@ public class ResourceMember {
                 ? Collections.unmodifiableList(resourceFields)
                 : Collections.<ResourceField>emptyList();
     }
-    
+
     public ResourceField getField(String fieldId) {
         for (ResourceField field : resourceFields) {
             if (field.getFieldId().equalsIgnoreCase(fieldId)) {
