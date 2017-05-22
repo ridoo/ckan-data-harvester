@@ -39,20 +39,29 @@ public class Phenomenon {
 
     private final String id;
 
+    private final String uom;
+    
+    private final String observationType;
+
     private final ResourceField valueField;
 
-    private final String observationType;
-    
-    private final String uom;
+    private ResourceField phenomenonField;
 
     private boolean softTyped;
     
     private String label;
 
+    public Phenomenon(String id, String label, Phenomenon phenomenon) {
+        this(id, label, phenomenon.getValueField(), phenomenon.getUom());
+        this.phenomenonField = phenomenon.getPhenomenonField();
+        this.softTyped = phenomenon.isSoftTyped();
+    }
+
     public Phenomenon(String id, String label, ResourceField valueField, String uom) {
-        this.valueField = valueField;
         this.id = id;
         this.label = label;
+        this.valueField = valueField;
+        this.phenomenonField = valueField;
         this.observationType = parseObservationType(valueField);
         // TODO String phenomenonDescription = parseDescription(field);
         this.uom = uom;
@@ -82,6 +91,14 @@ public class Phenomenon {
         return uom;
     }
     
+    public void setPhenomenonField(ResourceField phenomenonField) {
+        this.phenomenonField = phenomenonField;
+    }
+
+    public ResourceField getPhenomenonField() {
+        return phenomenonField;
+    }
+
     public ResourceField getValueField() {
         return valueField;
     }

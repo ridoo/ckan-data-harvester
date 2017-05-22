@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.sos;
 
 import java.util.Collection;
@@ -74,18 +75,30 @@ class StationaryInsertStrategy extends AbstractInsertStrategy {
 
             SensorBuilder sensorBuilder = SensorBuilder.create()
                     .withFeature(foiBuilder.getResult())
+                    .addPhenomena(phenomena)
                     .withDataset(dataset)
                     .setMobile(false);
             
             for (Phenomenon phenomenon : phenomena) {
-                sensorBuilder.addPhenomenon(phenomenon);
+                ResourceField valueField = phenomenon.getValueField();
+                String value = values.get(valueField);
                 
-                // XXX iterating over all phenomena would create n*row observations
-                // for softtyped (referenced) phenomena which is WRONG .. find a way
-                // to detect which phenomena is referenced and create an observation
-                // value for just that one phenomenon (which has to be picked from 
-                // the current row as well?!
+                ObservationBuilder observationBuilder = ObservationBuilder
+                        .create(phenomenon, rowEntry.getKey())
+                        .withUomParser(getUomParser())
+                        .withSensorBuilder(sensorBuilder);
 
+                if (phenomenon.isSoftTyped()) {
+                    // XXX iterating over all phenomena would create n*row observations
+                    // for softtyped (referenced) phenomena which is WRONG .. find a way
+                    // to detect which phenomena is referenced and create an observation
+                    // value for just that one phenomenon (which has to be picked from 
+                    // the current row as well?!
+                    
+                    String phenomenonValue = values.get(phenomenon.getPhenomenonField());
+                    phenomenon = new Phenomenon(phenomenonValue, phenomenonValue, phenomenon);
+                } 
+                    
                 String procedureId = sensorBuilder.getProcedureId();
                 if ( !dataInsertions.containsKey(procedureId)) {
                     LOGGER.debug("Building sensor with: procedure '{}', phenomenon '{}' (unit '{}')",
@@ -98,19 +111,13 @@ class StationaryInsertStrategy extends AbstractInsertStrategy {
                 }
 
                 DataInsertion dataInsertion = dataInsertions.get(procedureId);
-
-                ObservationBuilder observationBuilder = ObservationBuilder
-                        .create(phenomenon, rowEntry.getKey())
-                        .withUomParser(getUomParser())
-                        .withSensorBuilder(sensorBuilder);
-                ResourceField valueField = phenomenon.getValueField();
-                String value = values.get(valueField);
                 final SosObservation observation = phenomenon.isSoftTyped()
                         ? observationBuilder.visit(valueField, value).getResult()
                         : observationBuilder.visit(values).getResult();
                 if (observation != null) {
                     dataInsertion.addObservation(observation);
                 }
+
             }
         }
         return dataInsertions;

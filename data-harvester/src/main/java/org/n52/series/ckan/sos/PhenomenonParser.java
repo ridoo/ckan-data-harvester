@@ -86,6 +86,7 @@ public class PhenomenonParser {
             String id = e;
             String label = phenomenonField.getFieldId() + "_" + e;
             Phenomenon phenomenon = new Phenomenon(id, label, valueField, uom);
+            phenomenon.setPhenomenonField(phenomenonField);
             phenomenon.setSoftTyped(true);
             return phenomenon;
         };
