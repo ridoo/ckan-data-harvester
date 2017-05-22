@@ -118,6 +118,16 @@ public class ResourceMemberTest {
         assertThat(obs1.isExtensible(obs2), is(false));
     }
 
+    private ResourceMember getObservationResource(String resourceId) {
+        ResourceMember resourceMember = new ResourceMember(resourceId, "observations");
+        return resourceHelper.getResourceMember(DWD_TEMPERATUR_DATASET_ID, resourceMember);
+    }
+
+    private ResourceMember getPlatformResource(String resourceId) {
+        ResourceMember resourceMember = new ResourceMember(resourceId, "platforms");
+        return resourceHelper.getResourceMember(DWD_TEMPERATUR_DATASET_ID, resourceMember);
+    }
+
     @Test
     public void findJoinableFields() {
         SchemaDescriptor schemaDescriptor = resourceHelper.getSchemaDescriptor(DWD_TEMPERATUR_DATASET_ID);
@@ -127,10 +137,11 @@ public class ResourceMemberTest {
         ResourceMember observationDescription = members.get(1);
         Set<ResourceField> joinableFields = platformDescription.getJoinableFields(observationDescription);
         assertThat(joinableFields.size(), is(1));
-        assertThat(joinableFields.iterator()
-                                 .next()
-                                 .getFieldId(),
-                   is("STATIONS_ID"));
+        FieldBuilder builder = FieldBuilder.aField();
+        ResourceField expectedField = builder.createSimple("STATIONS_ID");
+        Iterator<ResourceField> iterator = joinableFields.iterator();
+        ResourceField firstField = iterator.next();
+        assertThat(firstField, is(expectedField));
     }
 
     @Test
@@ -149,16 +160,6 @@ public class ResourceMemberTest {
         ResourceField firstField = iterator.next();
         assertThat(firstField, is(expectedField));
         assertThat(firstField, is(expectedAlternateField));
-    }
-
-    private ResourceMember getObservationResource(String resourceId) {
-        ResourceMember resourceMember = new ResourceMember(resourceId, "observations");
-        return resourceHelper.getResourceMember(DWD_TEMPERATUR_DATASET_ID, resourceMember);
-    }
-
-    private ResourceMember getPlatformResource(String resourceId) {
-        ResourceMember resourceMember = new ResourceMember(resourceId, "platforms");
-        return resourceHelper.getResourceMember(DWD_TEMPERATUR_DATASET_ID, resourceMember);
     }
 
     @Test
