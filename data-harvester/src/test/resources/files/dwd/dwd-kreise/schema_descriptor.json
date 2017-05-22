@@ -84,6 +84,10 @@
           "field_id" : "EXPIRES"
         },
         {
+          "field_type" : "Float",
+          "field_id" : "lon"
+        },
+        {
           "field_type" : "String",
           "field_id" : "SOURCE"
         },
@@ -130,6 +134,10 @@
         {
           "field_type" : "String",
           "field_id" : "bbox"
+        },
+        {
+          "field_type" : "float",
+          "field_id" : "lat"
         },
         {
           "field_type" : "String",
