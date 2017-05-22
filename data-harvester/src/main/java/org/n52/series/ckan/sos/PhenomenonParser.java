@@ -58,9 +58,9 @@ public class PhenomenonParser {
         this.uomParser = uomParser;
     }
 
-    public List<Phenomenon> parse(DataTable dataTable) {
+    public Collection<Phenomenon> parse(DataTable dataTable) {
         Collection<ResourceField> resourceFields = dataTable.getResourceFields();
-        List<Phenomenon> phenomena = parse(resourceFields);
+        Collection<Phenomenon> phenomena = parse(resourceFields);
         Predicate<ResourceField> filter = new Predicate<ResourceField>() {
             @Override
             public boolean test(ResourceField field) {
@@ -92,10 +92,10 @@ public class PhenomenonParser {
         };
         return values.stream()
                      .map(parseReferencedPhenomenon)
-                     .collect(Collectors.toList());
+                     .collect(Collectors.toSet());
     }
 
-    public List<Phenomenon> parse(Collection<ResourceField> resourceFields) {
+    public Collection<Phenomenon> parse(Collection<ResourceField> resourceFields) {
         Predicate<ResourceField> filter = new Predicate<ResourceField>() {
             @Override
             public boolean test(ResourceField field) {
@@ -105,7 +105,7 @@ public class PhenomenonParser {
         return resourceFields.stream()
                              .filter(filter)
                              .map(e -> parsePhenomenon(e))
-                             .collect(Collectors.toList());
+                             .collect(Collectors.toSet());
     }
 
     private List<ResourceField> filterFields(Collection<ResourceField> fields, Predicate<ResourceField> filter) {

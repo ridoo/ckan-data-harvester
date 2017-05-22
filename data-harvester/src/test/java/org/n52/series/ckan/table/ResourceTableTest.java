@@ -37,6 +37,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -165,9 +166,9 @@ public class ResourceTableTest {
         DataTable output = nonTrivial1.innerJoin(nonTrivial2);
 
         PhenomenonParser parser = new PhenomenonParser();
-        List<Phenomenon> phenomenaObservations = parser.parse(nonTrivial1.getResourceFields());
-        List<Phenomenon> phenomenaPlatforms = parser.parse(nonTrivial2.getResourceFields());
-        List<Phenomenon> allPhenomena = parser.parse(output.getResourceFields());
+        Collection<Phenomenon> phenomenaObservations = parser.parse(nonTrivial1.getResourceFields());
+        Collection<Phenomenon> phenomenaPlatforms = parser.parse(nonTrivial2.getResourceFields());
+        Collection<Phenomenon> allPhenomena = parser.parse(output.getResourceFields());
         assertThat(allPhenomena.size(), is(phenomenaObservations.size() + phenomenaPlatforms.size()));
     }
 

@@ -28,8 +28,8 @@
  */
 package org.n52.series.ckan.sos;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -60,7 +60,7 @@ public class MobileInsertStrategy extends AbstractInsertStrategy {
 
     @Override
     public Map<String, DataInsertion> createDataInsertions(DataTable dataTable, DataCollection dataCollection) {
-        List<Phenomenon> phenomena = parsePhenomena(dataTable);
+        Collection<Phenomenon> phenomena = parsePhenomena(dataTable);
 
         ResourceMember member = dataTable.getResourceMember();
         CkanDataset dataset = dataCollection.getDataset();
