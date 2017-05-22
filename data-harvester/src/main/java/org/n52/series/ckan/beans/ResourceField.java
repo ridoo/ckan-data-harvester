@@ -26,10 +26,10 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.beans;
 
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Set;
 
 import org.n52.series.ckan.da.CkanConstants;
@@ -168,11 +168,13 @@ public class ResourceField implements VisitableField {
 
     public boolean hasProperty(String property) {
         // TODO move to JsonUtil and involve ckanMapping
-        return !node.at("/" + property).isMissingNode();
+        return !node.at("/" + property)
+                    .isMissingNode();
     }
 
     public String getOther(String name) {
-        return node.at("/" + name).asText();
+        return node.at("/" + name)
+                   .asText();
     }
 
     public boolean equalsValues(String thisValue, String otherValue) {
@@ -264,7 +266,13 @@ public class ResourceField implements VisitableField {
 
     @Override
     public String toString() {
-        return "ResourceField{fieldId=" + getFieldId() + ", qualifier=" + getQualifier() + ", index=" + getIndex() + '}';
+        return "ResourceField{fieldId="
+                + getFieldId()
+                + ", qualifier="
+                + getQualifier()
+                + ", index="
+                + getIndex()
+                + '}';
     }
 
 }
