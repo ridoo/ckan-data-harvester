@@ -29,7 +29,7 @@
         },
         {
           "field_type" : "Integer",
-          "field_id" : "GC_WARNCELLID"
+          "field_id" : "WARNCELLID"
         }
       ],
       "resource_name" : [
@@ -85,7 +85,7 @@
         },
         {
           "field_type" : "Float",
-          "field_id" : "lon"
+          "field_id" : "gc_lon"
         },
         {
           "field_type" : "String",
@@ -125,7 +125,7 @@
         },
         {
           "field_type" : "Integer",
-          "field_id" : "GC_WARNCELLID"
+          "field_id" : "WARNCELLID"
         },
         {
           "field_type" : "String",
@@ -133,11 +133,11 @@
         },
         {
           "field_type" : "String",
-          "field_id" : "bbox"
+          "field_id" : "gc_bbox"
         },
         {
           "field_type" : "float",
-          "field_id" : "lat"
+          "field_id" : "gc_lat"
         },
         {
           "field_type" : "String",

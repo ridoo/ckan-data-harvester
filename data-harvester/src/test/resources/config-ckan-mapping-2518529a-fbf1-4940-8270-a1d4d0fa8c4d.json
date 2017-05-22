@@ -1,7 +1,7 @@
 {
     "field": {
-        "WARNCELLID" : [
-            "GC_WARNCELLID"
+        "warncellid" : [
+            "gc_warncellid"
         ]
     }
 }
