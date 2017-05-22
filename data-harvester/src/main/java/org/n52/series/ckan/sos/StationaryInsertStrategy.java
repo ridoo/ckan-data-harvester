@@ -79,6 +79,13 @@ class StationaryInsertStrategy extends AbstractInsertStrategy {
             
             for (Phenomenon phenomenon : phenomena) {
                 sensorBuilder.addPhenomenon(phenomenon);
+                
+                // XXX iterating over all phenomena would create n*row observations
+                // for softtyped (referenced) phenomena which is WRONG .. find a way
+                // to detect which phenomena is referenced and create an observation
+                // value for just that one phenomenon (which has to be picked from 
+                // the current row as well?!
+
                 String procedureId = sensorBuilder.getProcedureId();
                 if ( !dataInsertions.containsKey(procedureId)) {
                     LOGGER.debug("Building sensor with: procedure '{}', phenomenon '{}' (unit '{}')",
