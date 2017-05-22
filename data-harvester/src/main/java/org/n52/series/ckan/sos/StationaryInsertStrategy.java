@@ -69,13 +69,14 @@ class StationaryInsertStrategy extends AbstractInsertStrategy {
             CkanDataset dataset = dataCollection.getDataset();
             ResourceMember member = rowEntry.getKey().getMember();
             SimpleFeatureBuilder foiBuilder = new SimpleFeatureBuilder(dataset);
-            foiBuilder.visit(rowEntry.getValue());
+            Map<ResourceField, String> values = rowEntry.getValue();
+            foiBuilder.visit(values);
 
             SensorBuilder sensorBuilder = SensorBuilder.create()
                     .withFeature(foiBuilder.getResult())
                     .withDataset(dataset)
                     .setMobile(false);
-
+            
             for (Phenomenon phenomenon : phenomena) {
                 sensorBuilder.addPhenomenon(phenomenon);
                 String procedureId = sensorBuilder.getProcedureId();
@@ -90,12 +91,16 @@ class StationaryInsertStrategy extends AbstractInsertStrategy {
                 }
 
                 DataInsertion dataInsertion = dataInsertions.get(procedureId);
-                final SosObservation observation = ObservationBuilder
+
+                ObservationBuilder observationBuilder = ObservationBuilder
                         .create(phenomenon, rowEntry.getKey())
                         .withUomParser(getUomParser())
-                        .withSensorBuilder(sensorBuilder)
-                        .visit(rowEntry.getValue())
-                        .getResult();
+                        .withSensorBuilder(sensorBuilder);
+                ResourceField valueField = phenomenon.getValueField();
+                String value = values.get(valueField);
+                final SosObservation observation = phenomenon.isSoftTyped()
+                        ? observationBuilder.visit(valueField, value).getResult()
+                        : observationBuilder.visit(values).getResult();
                 if (observation != null) {
                     dataInsertion.addObservation(observation);
                 }

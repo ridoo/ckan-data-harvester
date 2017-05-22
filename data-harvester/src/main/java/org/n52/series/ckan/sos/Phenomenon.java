@@ -39,7 +39,7 @@ public class Phenomenon {
 
     private final String id;
 
-    private final int valueFieldIdx;
+    private final ResourceField valueField;
 
     private final String observationType;
     
@@ -50,7 +50,7 @@ public class Phenomenon {
     private String label;
 
     public Phenomenon(String id, String label, ResourceField valueField, String uom) {
-        this.valueFieldIdx = valueField.getIndex();
+        this.valueField = valueField;
         this.id = id;
         this.label = label;
         this.observationType = parseObservationType(valueField);
@@ -81,9 +81,13 @@ public class Phenomenon {
     public String getUom() {
         return uom;
     }
+    
+    public ResourceField getValueField() {
+        return valueField;
+    }
 
     public int getValueFieldIdx() {
-        return valueFieldIdx;
+        return valueField.getIndex();
     }
 
     public OmObservableProperty toObservableProperty() {
@@ -109,7 +113,7 @@ public class Phenomenon {
     public int hashCode() {
         int hash = 5;
         hash = 37 * hash + Objects.hashCode(this.id);
-        hash = 37 * hash + this.valueFieldIdx;
+        hash = 37 * hash + Objects.hashCode(valueField);
         hash = 37 * hash + (softTyped ? 1231 : 1237);
         hash = 37 * hash + Objects.hashCode(this.label);
         hash = 37 * hash + Objects.hashCode(this.uom);
@@ -128,7 +132,7 @@ public class Phenomenon {
         if (!Objects.equals(this.id, other.id)) {
             return false;
         }
-        if (this.valueFieldIdx != other.valueFieldIdx) {
+        if (!Objects.equals(valueField, other.valueField)) {
             return false;
         }
         if (!Objects.equals(this.label, other.label)) {
@@ -149,7 +153,7 @@ public class Phenomenon {
                 .append("[id=").append(id)
                 .append(", label=").append(label)
                 .append(", uom=").append(uom)
-                .append(", fieldIdx=").append(valueFieldIdx)
+                .append(", fieldIdx=").append(valueField.getIndex())
                 .append(", softTyped=").append(softTyped)
                 .append("]")
                 .toString();
