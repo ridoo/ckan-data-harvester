@@ -10,10 +10,10 @@
             "name"
         ],
         "observation_time": [
-            "effective"
+            "sent"
         ],
         "valid_time_start": [
-            "sent"
+            "onset"
         ],
         "valid_time_end": [
             "expires"
