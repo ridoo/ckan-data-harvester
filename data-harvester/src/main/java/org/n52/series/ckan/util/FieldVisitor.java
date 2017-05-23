@@ -32,10 +32,10 @@ import org.n52.series.ckan.beans.ResourceField;
 
 public interface FieldVisitor<T> {
 
-    public FieldVisitor<T> visit(ResourceField field, String value);
+    FieldVisitor<T> visit(ResourceField field, String value);
 
-    public boolean hasResult();
+    boolean hasResult();
 
-    public T getResult();
+    T getResult();
 
 }
