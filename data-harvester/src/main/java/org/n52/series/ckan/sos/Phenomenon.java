@@ -40,7 +40,7 @@ public class Phenomenon {
     private final String id;
 
     private final String uom;
-    
+
     private final String observationType;
 
     private final ResourceField valueField;
@@ -48,7 +48,7 @@ public class Phenomenon {
     private ResourceField phenomenonField;
 
     private boolean softTyped;
-    
+
     private String label;
 
     public Phenomenon(String id, String label, Phenomenon phenomenon) {
@@ -71,6 +71,9 @@ public class Phenomenon {
         if (valueField.isOneOfType(CkanConstants.DataType.QUANTITY)) {
             return OmConstants.OBS_TYPE_MEASUREMENT;
         }
+        if (valueField.isOfType(CkanConstants.DataType.GEOMETRY)) {
+            return OmConstants.OBS_TYPE_GEOMETRY_OBSERVATION;
+        }
         // fallback
         return OmConstants.OBS_TYPE_TEXT_OBSERVATION;
     }
@@ -90,7 +93,7 @@ public class Phenomenon {
     public String getUom() {
         return uom;
     }
-    
+
     public void setPhenomenonField(ResourceField phenomenonField) {
         this.phenomenonField = phenomenonField;
     }
