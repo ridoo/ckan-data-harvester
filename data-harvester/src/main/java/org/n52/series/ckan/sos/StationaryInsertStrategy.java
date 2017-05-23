@@ -78,7 +78,7 @@ class StationaryInsertStrategy extends AbstractInsertStrategy {
                     .addPhenomena(phenomena)
                     .withDataset(dataset)
                     .setMobile(false);
-            
+
             for (Phenomenon phenomenon : phenomena) {
                 ResourceField valueField = phenomenon.getValueField();
                 String value = values.get(valueField);
@@ -92,13 +92,13 @@ class StationaryInsertStrategy extends AbstractInsertStrategy {
                     // XXX iterating over all phenomena would create n*row observations
                     // for softtyped (referenced) phenomena which is WRONG .. find a way
                     // to detect which phenomena is referenced and create an observation
-                    // value for just that one phenomenon (which has to be picked from 
+                    // value for just that one phenomenon (which has to be picked from
                     // the current row as well?!
-                    
+
                     String phenomenonValue = values.get(phenomenon.getPhenomenonField());
                     phenomenon = new Phenomenon(phenomenonValue, phenomenonValue, phenomenon);
-                } 
-                    
+                }
+
                 String procedureId = sensorBuilder.getProcedureId();
                 if ( !dataInsertions.containsKey(procedureId)) {
                     LOGGER.debug("Building sensor with: procedure '{}', phenomenon '{}' (unit '{}')",

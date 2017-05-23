@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.sos;
 
 import java.util.ArrayList;
@@ -73,12 +74,6 @@ class DataInsertion {
     public AbstractFeature getFeature() {
         return sensorBuilder.getFeature();
     }
-
-//    public Set<String> getFeaturesCharacteristics() {
-//        return isMovingPlatform() // XXX
-//                ? Collections.singleton(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_CURVE)
-//                : Collections.singleton(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_FEATURE);
-//    }
 
     void setReference(CkanSosObservationReference reference) {
         this.reference = reference;
@@ -153,4 +148,3 @@ class DataInsertion {
     }
 
 }
-
