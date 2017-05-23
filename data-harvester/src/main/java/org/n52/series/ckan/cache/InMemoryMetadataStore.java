@@ -82,7 +82,7 @@ public class InMemoryMetadataStore implements CkanMetadataStore {
 
     private List<String> readBlacklistedDatasetIds(String resource) {
         List<String> blacklistedIds = new ArrayList<>();
-        URL url = getClass().getResource(resource);
+        URL url = InMemoryMetadataStore.class.getResource(resource);
         if (url == null) {
             LOGGER.warn("Could not find file via '{}'", resource);
         } else {
@@ -98,15 +98,15 @@ public class InMemoryMetadataStore implements CkanMetadataStore {
 
     private List<String> readLinesFromFile(File file) {
         List<String> blacklistedIds = new ArrayList<>();
-        try(Scanner scanner = new Scanner(file)) {
+        try(Scanner scanner = new Scanner(file, "UTF-8")) {
             while (scanner.hasNext()) {
                 String line = scanner.nextLine();
                 line = line != null ? line.trim() : line;
-                if ( !isComment(line)) {
+                if (line != null && !isComment(line)) {
                     blacklistedIds.add(line);
                 }
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LOGGER.warn("Could not read blacklisted dataset ids! Check file at '{}'", file.getAbsolutePath());
         }
         return blacklistedIds;
@@ -232,7 +232,7 @@ public class InMemoryMetadataStore implements CkanMetadataStore {
     private CkanMapping loadCkanMapping(CkanDataset dataset) {
         if (dataset != null) {
         String customMappingPath = "/config-ckan-mapping-" + dataset.getId() + ".json";
-            InputStream is = getClass().getResourceAsStream(customMappingPath);
+            InputStream is = InMemoryMetadataStore.class.getResourceAsStream(customMappingPath);
             return is != null
                     ? CkanMapping.loadCkanMapping(is)
                     : CkanMapping.loadCkanMapping();

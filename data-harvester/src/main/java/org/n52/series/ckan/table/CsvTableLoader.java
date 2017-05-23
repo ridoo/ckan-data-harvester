@@ -45,6 +45,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.n52.series.ckan.beans.DataFile;
 import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.beans.ResourceMember;
+import org.n52.series.ckan.da.CkanConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,9 +85,10 @@ public class CsvTableLoader extends TableLoader {
                 ResourceKey id = resourceMember.createResourceKey(lineNbr++);
                 for (int j = 0 ; j < columnHeaders.size() ; j++) {
                     final ResourceField field = resourceMember.getField(j);
-                    final String value = line.get(j);
+                    String value = line.get(j);
                     if (value == null || value.isEmpty()) {
                         LOGGER.trace("Empty value for field {}", field);
+                        value = field.getOther(CkanConstants.FieldPropertyName.NO_DATA);
                     }
                     setCellValue(id, field, value);
                 }
@@ -106,8 +108,9 @@ public class CsvTableLoader extends TableLoader {
         Charset encoding = dataFile.getEncoding();
         final Path filePath = dataFile.getFile().toPath();
         int headerRows = getResourceMember().getHeaderRows();
-        FileInputStream fis = new FileInputStream(filePath.toFile());
-        return createCsvParser(headerRows, fis, encoding);
+        try (FileInputStream fis = new FileInputStream(filePath.toFile())) {
+            return createCsvParser(headerRows, fis, encoding);
+        }
     }
 
     protected CSVParser createCsvParser(int headerRows, InputStream stream, Charset encoding) throws IOException {

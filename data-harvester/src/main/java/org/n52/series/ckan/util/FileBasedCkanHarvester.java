@@ -72,10 +72,12 @@ public class FileBasedCkanHarvester extends CkanHarvestingService {
         List<File> datasets = new ArrayList<>();
         File folder = getSourceDataFolder();
         File[] datasetFiles = folder.listFiles();
-        for (File file : datasetFiles) {
-            if (file.isDirectory()) {
-                Path datasetPath = file.toPath().resolve("dataset.json");
-                datasets.add(datasetPath.toFile());
+        if (datasetFiles != null) {
+            for (File file : datasetFiles) {
+                if (file.isDirectory()) {
+                    Path datasetPath = file.toPath().resolve("dataset.json");
+                    datasets.add(datasetPath.toFile());
+                }
             }
         }
         return datasets;
@@ -104,15 +106,17 @@ public class FileBasedCkanHarvester extends CkanHarvestingService {
     @Override
     protected DataFile downloadFile(CkanResource resource, Path datasetDownloadFolder) throws IOException {
         File folder = getSourceDataFolder();
-        File[] dataFolders = folder.listFiles();
         String id = resource.getId();
         String format = resource.getFormat();
-        for (File file : dataFolders) {
-            if (file.isDirectory()) {
-                String fileName = id + "." + format.toLowerCase();
-                Path datapath = file.toPath().resolve(fileName);
-                if (datapath.toFile().exists()) {
-                    return new DataFile(resource, format, datapath.toFile());
+        File[] dataFolders = folder.listFiles();
+        if (dataFolders != null) {
+            for (File file : dataFolders) {
+                if (file.isDirectory()) {
+                    String fileName = id + "." + format.toLowerCase();
+                    Path datapath = file.toPath().resolve(fileName);
+                    if (datapath.toFile().exists()) {
+                        return new DataFile(resource, format, datapath.toFile());
+                    }
                 }
             }
         }

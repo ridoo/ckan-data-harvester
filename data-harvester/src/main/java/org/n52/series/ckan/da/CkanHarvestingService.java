@@ -32,6 +32,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -234,7 +235,8 @@ public class CkanHarvestingService implements ServletContextAware {
 
     protected final Path resolveDownloadFolder(String folder) {
         try {
-            return Paths.get(getClass().getResource("/").toURI()).resolve(folder);
+            URL resource = CkanHarvestingService.class.getResource("/");
+            return Paths.get(resource.toURI()).resolve(folder);
         }catch (URISyntaxException e) {
             LOGGER.error("Could not set download base folder!", e);
             return null;

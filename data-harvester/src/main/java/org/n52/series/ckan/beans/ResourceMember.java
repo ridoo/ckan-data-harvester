@@ -237,7 +237,8 @@ public class ResourceMember {
     }
 
     public ResourceKey createResourceKey(int lineNbr) {
-        return new ResourceKey("" + lineNbr++, this);
+        int next = lineNbr++;
+        return new ResourceKey("" + next, this);
     }
 }
 

@@ -29,6 +29,7 @@
 
 package org.n52.series.ckan.beans;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -196,7 +197,7 @@ public class ResourceField implements VisitableField {
 
     private Integer parseToInteger(String toParse) {
         try {
-            return new Integer(toParse);
+            return Integer.valueOf(toParse);
         } catch (NumberFormatException e) {
             LOGGER.trace("Invalid integer: '{}'", toParse);
             return null;
@@ -207,7 +208,7 @@ public class ResourceField implements VisitableField {
         return isOfType(clazz.getSimpleName());
     }
 
-    public boolean isOneOfType(String[] types) {
+    public boolean isOneOfType(List<String> types) {
         for (String type : types) {
             if (isOfType(type)) {
                 return true;

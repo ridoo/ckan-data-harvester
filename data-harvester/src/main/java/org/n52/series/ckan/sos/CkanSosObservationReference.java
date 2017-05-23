@@ -82,9 +82,7 @@ public class CkanSosObservationReference implements Serializable {
     }
 
     public boolean hasReference(String identifier) {
-        return identifier != null
-                ? hasReference(identifier)
-                : false;
+        return observationIdentifiers.contains(identifier);
     }
 
     public SerializableCkanResource getResource() {

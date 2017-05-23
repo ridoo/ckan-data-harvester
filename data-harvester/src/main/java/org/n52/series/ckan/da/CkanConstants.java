@@ -30,15 +30,15 @@
 package org.n52.series.ckan.da;
 
 import java.nio.charset.Charset;
-import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public interface CkanConstants {
 
     public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
     public static final String DEFAULT_DATE_TIME_FORMAT_STRING = "YYYY-MM-dd'T'HH:mm:ssZ";
-
-    public static final SimpleDateFormat DEFAULT_DATE_TIME_FORMAT = new SimpleDateFormat(DEFAULT_DATE_TIME_FORMAT_STRING);
 
     public interface SchemaDescriptor {
         public static final String SCHEMA_DESCRIPTOR = "schema_descriptor";
@@ -190,10 +190,10 @@ public interface CkanConstants {
         public static final String STRING = "string";
         public static final String DATE = "date";
         public static final String JSON = "json";
-        public static final String[] QUANTITY = {
+        public static final List<String> QUANTITY = Collections.unmodifiableList(Arrays.<String>asList(
             INTEGER,
             DOUBLE
-        };
+        ));
     }
 
 }

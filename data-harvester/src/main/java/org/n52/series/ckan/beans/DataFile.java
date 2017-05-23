@@ -94,9 +94,6 @@ public class DataFile {
         String thisId = this.resource.getId();
         String otherLastModified = resource.getLastModified();
         String thisLastModified = this.resource.getLastModified();
-        if (otherId == null || otherLastModified == null) {
-            return true;
-        }
         if (thisId == null || otherLastModified == null) {
             return false;
         }

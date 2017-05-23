@@ -35,10 +35,9 @@ public class DescriptorVersion implements Comparable<DescriptorVersion> {
     private String[] versionParts;
 
     public DescriptorVersion(String versionString) {
-        if (versionString == null || versionString.isEmpty()) {
-            versionParts = new String[] {"0"};
-        }
-        this.versionParts = validateParts(versionString);
+        this.versionParts = versionString != null && !versionString.isEmpty()
+                ? validateParts(versionString)
+                : new String[] {"0"};
     }
 
     private String[] validateParts(String versionString) {

@@ -63,8 +63,6 @@ public class TrackPointBuilder extends AbstractRowVisitor<String> {
         }
         if (field.isField(CkanConstants.KnownFieldIdValue.TRACK_POINT)) {
             trackPoint.withProperty(field, value);
-        } else {
-            trackPoint.withProperty(field, value);
         }
         geometryBuilder.visit(field, value);
         return this;

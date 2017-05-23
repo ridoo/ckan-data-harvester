@@ -61,7 +61,7 @@ public class DataCollection implements Iterable<Map.Entry<ResourceMember, DataFi
         this.schemaDescriptor = description == null
                 ? new DescriptionFile()
                 : description;
-        SchemaDescriptor descriptor = description.getSchemaDescription();
+        SchemaDescriptor descriptor = schemaDescriptor.getSchemaDescription();
         this.dataCollection = descriptor.relateWithDataFiles(csvContents);
     }
 
@@ -158,7 +158,7 @@ public class DataCollection implements Iterable<Map.Entry<ResourceMember, DataFi
                 : Collections.<ResourceMember, DataFile>emptyMap().entrySet().iterator();
     }
 
-    private class FieldCounter {
+    private static class FieldCounter {
         private final Map<ResourceField, FieldCount> counts = new HashMap<>();
         void updateWith(List<ResourceField> fields) {
             for (ResourceField field : fields) {
@@ -174,7 +174,7 @@ public class DataCollection implements Iterable<Map.Entry<ResourceMember, DataFi
         }
     }
 
-    private class FieldCount {
+    private static class FieldCount {
         private int count;
         public FieldCount() {
             count++;

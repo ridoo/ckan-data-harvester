@@ -139,10 +139,11 @@ public class HarvestingJob extends ScheduledJob implements InterruptableJob {
         URL resource = getClass().getResource("/");
         Path baseFolder = Paths.get(resource.toURI());
         File outputDir = baseFolder.resolve(outputPath).toFile();
-        if ( !outputDir.exists()) {
-            outputDir.mkdirs();
+        String absolutePath = outputDir.getAbsolutePath();
+        if ( !outputDir.exists() && !outputDir.mkdirs()) {
+            LOGGER.warn("unable to create output dir at '{}'", absolutePath);
         }
-        return outputDir.getAbsolutePath();
+        return absolutePath;
     }
 
     public CkanHarvestingService getHarvestingService() {

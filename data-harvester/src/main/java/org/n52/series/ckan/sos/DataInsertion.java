@@ -113,8 +113,6 @@ class DataInsertion {
         }
 
         observationTypes.add(sosObservation.getObservationType());
-        OmObservation observation = sosObservation.getObservation();
-        OmObservationConstellation constellation = observation.getObservationConstellation();
         observationsByTime.put(new ObservationDiscriminator(sosObservation), sosObservation);
     }
 
