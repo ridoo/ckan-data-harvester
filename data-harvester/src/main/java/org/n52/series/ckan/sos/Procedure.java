@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.sos;
 
 import java.util.ArrayList;
@@ -55,20 +56,17 @@ public class Procedure {
 
     List<SmlIdentifier> createIdentifierList() {
         List<SmlIdentifier> idents = new ArrayList<>();
-        SmlIdentifier uniqueId = new SmlIdentifier(
-                OGCConstants.UNIQUE_ID,
-                OGCConstants.URN_UNIQUE_IDENTIFIER,
-                id);
-        idents.add(uniqueId);
+        idents.add(createSmlId(OGCConstants.UNIQUE_ID, OGCConstants.URN_UNIQUE_IDENTIFIER, id));
 
         if (longName != null) {
-            SmlIdentifier longName = new SmlIdentifier(
-                    "longName",
-                    "urn:ogc:def:identifier:OGC:1.0:longName",
-                    this.longName);
-            idents.add(longName);
+            String urn = "urn:ogc:def:identifier:OGC:1.0:longName";
+            idents.add(new SmlIdentifier("longName", urn, longName));
         }
         return idents;
+    }
+
+    private SmlIdentifier createSmlId(String name, String urn, String idValue) {
+        return new SmlIdentifier(name, urn, idValue);
     }
 
 }

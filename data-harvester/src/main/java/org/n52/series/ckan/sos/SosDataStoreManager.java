@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.sos;
 
 import java.io.IOException;
@@ -74,9 +75,9 @@ public abstract class SosDataStoreManager implements DataStoreManager {
     }
 
     public SosDataStoreManager(InsertSensorDAO insertSensorDao,
-            InsertObservationDAO insertObservationDao,
-            DeleteObservationDAO deleteObservationDao,
-            CkanSosReferenceCache ckanSosReferenceCache) {
+                               InsertObservationDAO insertObservationDao,
+                               DeleteObservationDAO deleteObservationDao,
+                               CkanSosReferenceCache ckanSosReferenceCache) {
         this.insertSensorDao = insertSensorDao;
         this.insertObservationDao = insertObservationDao;
         this.deleteObservationDao = deleteObservationDao;
@@ -89,10 +90,11 @@ public abstract class SosDataStoreManager implements DataStoreManager {
             Map<String, DataInsertion> datainsertions = getDataInsertions(dataCollection);
             if (storeDataInsertions(datainsertions)) {
                 // Trigger SOS Capabilities cache reloading after insertion
-                Configurator.getInstance().getCacheController().update();
+                Configurator.getInstance()
+                            .getCacheController()
+                            .update();
             }
-        }
-        catch (OwsExceptionReport e) {
+        } catch (OwsExceptionReport e) {
             LOGGER.warn("Error while reloading SOS Capabilities cache", e);
         }
     }
@@ -125,15 +127,16 @@ public abstract class SosDataStoreManager implements DataStoreManager {
         }
 
         try {
-            if ( !ckanSosReferenceCache.exists(resource)) {
+            if (!ckanSosReferenceCache.exists(resource)) {
                 CkanSosObservationReference reference = new CkanSosObservationReference(resource);
                 ckanSosReferenceCache.addOrUpdate(reference);
                 return true;
             }
             CkanSosObservationReference reference = ckanSosReferenceCache.getReference(resource);
-            final CkanResource ckanResource = reference.getResource().getCkanResource();
+            final CkanResource ckanResource = reference.getResource()
+                                                       .getCkanResource();
 
-            if ( !dataFile.isNewerThan(ckanResource)) {
+            if (!dataFile.isNewerThan(ckanResource)) {
                 LOGGER.debug("Resource with id '{}' has no data update since {}.",
                              ckanResource.getId(),
                              ckanResource.getLastModified());
@@ -152,14 +155,12 @@ public abstract class SosDataStoreManager implements DataStoreManager {
                     doRequest.addObservationIdentifier(observationIdentifier);
                     deleteObservationDao.deleteObservation(doRequest);
                     count++;
-                }
-                catch (OwsExceptionReport e) {
+                } catch (OwsExceptionReport e) {
                     LOGGER.error("could not delete observation with id '{}'", observationIdentifier, e);
                 }
             }
             LOGGER.debug("deleted #{} observations.", count);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LOGGER.error("Serialization error:  resource with id '{}'", resource.getId(), e);
         }
         return true;
@@ -192,8 +193,7 @@ public abstract class SosDataStoreManager implements DataStoreManager {
                 if (ckanSosReferenceCache != null && dataInsertion.hasObservationsReference()) {
                     ckanSosReferenceCache.addOrUpdate(dataInsertion.getObservationsReference());
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 LOGGER.error("Could not insert: {}", entry.getValue(), e);
             }
         }
@@ -202,7 +202,7 @@ public abstract class SosDataStoreManager implements DataStoreManager {
 
     private SosInsertionMetadata createSosInsertionMetadata(DataInsertion dataInsertion) {
         SosInsertionMetadata metadata = new SosInsertionMetadata();
-        metadata.setFeatureOfInterestTypes(Collections.<String>emptyList());
+        metadata.setFeatureOfInterestTypes(Collections.<String> emptyList());
         metadata.setObservationTypes(dataInsertion.getObservationTypes());
         return metadata;
     }

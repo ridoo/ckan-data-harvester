@@ -26,9 +26,8 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
-package org.n52.series.ckan.beans;
 
-import static org.n52.series.ckan.util.JsonUtil.parseMissingToNegativeInt;
+package org.n52.series.ckan.beans;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -147,8 +146,11 @@ public class SchemaDescriptor {
                 ResourceMember member = new ResourceMember(resourceId, resourceType, ckanMapping);
                 member.setDatasetName(dataset.getName());
                 Set<String> headerRowNames = ckanMapping.getFieldMappings(CkanConstants.FieldPropertyName.HEADER_ROWS);
-                final int headerRows = parseMissingToNegativeInt(memberNode, headerRowNames);
-                member.setHeaderRows(headerRows < 0 ? 1 : headerRows); // assume 1 header row by default
+                final int headerRows = JsonUtil.parseMissingToNegativeInt(memberNode, headerRowNames);
+                member.setHeaderRows(headerRows < 0
+                        // assume 1 header row by default
+                        ? 1
+                        : headerRows);
                 member.setResourceFields(parseResourceFields(member, memberNode));
                 resourceMembers.add(member);
             }
@@ -165,8 +167,8 @@ public class SchemaDescriptor {
         while (iter.hasNext()) {
             JsonNode fieldNode = iter.next();
             fields.add(new ResourceField(fieldNode, index, ckanMapping)
-                    .withResourceType(resourceType.asText())
-                    .withQualifier(qualifier));
+                                                                       .setResourceType(resourceType.asText())
+                                                                       .setQualifier(qualifier));
             index++;
         }
         return fields;
@@ -175,6 +177,5 @@ public class SchemaDescriptor {
     public CkanMapping getCkanMapping() {
         return ckanMapping;
     }
-
 
 }

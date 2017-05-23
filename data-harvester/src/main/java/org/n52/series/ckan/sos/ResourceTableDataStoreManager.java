@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.sos;
 
 import java.util.List;
@@ -59,13 +60,14 @@ public class ResourceTableDataStoreManager extends SosDataStoreManager {
     }
 
     public ResourceTableDataStoreManager(InsertSensorDAO insertSensorDao,
-            InsertObservationDAO insertObservationDao,
-            DeleteObservationDAO deleteObservationDao,
-            CkanSosReferenceCache ckanSosReferenceCache) {
+                                         InsertObservationDAO insertObservationDao,
+                                         DeleteObservationDAO deleteObservationDao,
+                                         CkanSosReferenceCache ckanSosReferenceCache) {
         super(insertSensorDao, insertObservationDao, deleteObservationDao, ckanSosReferenceCache);
     }
 
-    protected DataTable loadData(DataCollection dataCollection, Set<String> resourceTypesToInsert) {
+    @Override
+    protected DataTable loadData(DataCollection dataCollection, Set<String> typesToInsert) {
         CkanDataset dataset = dataCollection.getDataset();
         LOGGER.debug("load data for dataset '{}'", dataset.getName());
         DataTable fullTable = new ResourceTable();
@@ -73,8 +75,8 @@ public class ResourceTableDataStoreManager extends SosDataStoreManager {
         // TODO write test for it
         // TODO if dataset is newer than in cache -> set flag to re-insert whole datacollection
 
-        Map<String, List<ResourceMember>> resourceMembersByType = dataCollection.getResourceMembersByType(resourceTypesToInsert);
-        for (List<ResourceMember> membersWithCommonResourceTypes : resourceMembersByType.values()) {
+        Map<String, List<ResourceMember>> membersByType = dataCollection.getResourceMembersByType(typesToInsert);
+        for (List<ResourceMember> membersWithCommonResourceTypes : membersByType.values()) {
             DataTable dataTable = new ResourceTable();
             for (ResourceMember member : membersWithCommonResourceTypes) {
 
@@ -89,7 +91,8 @@ public class ResourceTableDataStoreManager extends SosDataStoreManager {
                     dataTable = dataTable.extendWith(singleDatatable);
                 }
             }
-            String resourceType = membersWithCommonResourceTypes.get(0).getResourceType();
+            String resourceType = membersWithCommonResourceTypes.get(0)
+                                                                .getResourceType();
             LOGGER.debug("Fully extended table for resource '{}': '{}'", resourceType, dataTable);
             fullTable = fullTable.rowSize() > dataTable.rowSize()
                     ? dataTable.innerJoin(fullTable)

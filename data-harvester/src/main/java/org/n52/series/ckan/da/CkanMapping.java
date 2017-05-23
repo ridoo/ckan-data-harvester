@@ -35,7 +35,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.nio.file.Path;
+import java.net.URL;
 import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Locale;
@@ -56,9 +56,21 @@ import com.google.common.base.Strings;
  */
 public class CkanMapping {
 
+    private static final String GROUP_SCHEMA_DESCRIPTOR = "schema_descriptor";
+
+    private static final String GROUP_ROLE = "role";
+
+    private static final String GROUP_RESOURCE_TYPE = "resource_type";
+
+    private static final String GROUP_PROPERTY = "property";
+
+    private static final String GROUP_FIELD = "field";
+
+    private static final String GROUP_DATATYPE = "datatype";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CkanMapping.class);
 
-    private final static String DEFAULT_CKAN_MAPPING_FILE = "config-ckan-mapping.json";
+    private static final String DEFAULT_CKAN_MAPPING_FILE = "config-ckan-mapping.json";
 
     private final JsonNode fallbackMapping;
 
@@ -82,27 +94,27 @@ public class CkanMapping {
     }
 
     public boolean hasDataTypeMappings(String datatypeValue, String mapping) {
-        return hasMappings("datatype", datatypeValue, mapping);
+        return hasMappings(GROUP_DATATYPE, datatypeValue, mapping);
     }
 
     public boolean hasFieldMappings(String fieldValue, String mapping) {
-        return hasMappings("field", fieldValue, mapping);
+        return hasMappings(GROUP_FIELD, fieldValue, mapping);
     }
 
     public boolean hasPropertyMappings(String property, String mapping) {
-        return hasMappings("property", property, mapping);
+        return hasMappings(GROUP_PROPERTY, property, mapping);
     }
 
     public boolean hasResourceTypeMappings(String resourceTypeValue, String mapping) {
-        return hasMappings("resource_type", resourceTypeValue, mapping);
+        return hasMappings(GROUP_RESOURCE_TYPE, resourceTypeValue, mapping);
     }
 
     public boolean hasRoleMappings(String roleValue, String mapping) {
-        return hasMappings("role", roleValue, mapping);
+        return hasMappings(GROUP_ROLE, roleValue, mapping);
     }
 
     public boolean hasSchemaDescriptionMappings(String schemaDescriptionValue, String mapping) {
-        return hasMappings("schema_descriptor", schemaDescriptionValue, mapping);
+        return hasMappings(GROUP_SCHEMA_DESCRIPTOR, schemaDescriptionValue, mapping);
     }
 
     public boolean hasMappings(String group, String name, String mapping) {
@@ -111,27 +123,27 @@ public class CkanMapping {
     }
 
     public Set<String> getPropertyMappings(String name) {
-        return getValueMappings("property", name);
+        return getValueMappings(GROUP_PROPERTY, name);
     }
 
     public Set<String> getDatatypeMappings(String name) {
-        return getValueMappings("datatype", name);
+        return getValueMappings(GROUP_DATATYPE, name);
     }
 
     public Set<String> getFieldMappings(String name) {
-        return getValueMappings("field", name);
+        return getValueMappings(GROUP_FIELD, name);
     }
 
     public Set<String> getResourceTypeMappings(String name) {
-        return getValueMappings("resource_type", name);
+        return getValueMappings(GROUP_RESOURCE_TYPE, name);
     }
 
     public Set<String> getRoleMappings(String name) {
-        return getValueMappings("role", name);
+        return getValueMappings(GROUP_ROLE, name);
     }
 
     public Set<String> getSchemaDescriptionMappings(String name) {
-        return getValueMappings("schema_descriptor", name);
+        return getValueMappings(GROUP_SCHEMA_DESCRIPTOR, name);
     }
 
     protected Set<String> getValueMappings(String group, String name) {
@@ -183,7 +195,7 @@ public class CkanMapping {
 
     private static class CkanMappingLoader {
 
-        private final static Logger LOGGER = LoggerFactory.getLogger(CkanMapping.CkanMappingLoader.class);
+        private static final Logger LOGGER = LoggerFactory.getLogger(CkanMapping.CkanMappingLoader.class);
 
         private CkanMapping loadConfig() {
             return loadConfig((String) null);
@@ -200,7 +212,7 @@ public class CkanMapping {
 
         private CkanMapping loadConfig(File file) {
             try {
-                return loadConfig(createStreamFrom(file));
+                return loadConfig(createStreamFrom(file.getAbsolutePath()));
             } catch (IOException e) {
                 LOGGER.error("Could not load {}. Using empty config.", file.getAbsolutePath(), e);
                 return new CkanMapping();
@@ -218,33 +230,31 @@ public class CkanMapping {
             }
         }
 
-        private InputStream createStreamFrom(String configFile) throws FileNotFoundException {
-            File file = Strings.isNullOrEmpty(configFile)
-                    ? getConfigFile(DEFAULT_CKAN_MAPPING_FILE)
-                    : getConfigFile(configFile);
-            return file.exists()
-                    ? createStreamFrom(file)
-                    : loadDefaults();
-        }
-
         private File getConfigFile(String configFile) {
             try {
-                Path path = Paths.get(CkanMapping.CkanMappingLoader.class.getResource("/")
-                                                                         .toURI());
-                File file = path.resolve(configFile)
-                                .toFile();
-                LOGGER.trace("Loading config from '{}'", file.getAbsolutePath());
-                return file;
+                URL resource = CkanMapping.CkanMappingLoader.class.getResource("/");
+                return Paths.get(resource.toURI())
+                            .resolve(configFile)
+                            .toFile();
             } catch (URISyntaxException e) {
                 LOGGER.info("Could not find config file '{}'. Load from compiled default.", configFile, e);
                 return null;
             }
         }
 
+        private InputStream createStreamFrom(String configFile) throws FileNotFoundException {
+            File file = Strings.isNullOrEmpty(configFile)
+                    ? getConfigFile(DEFAULT_CKAN_MAPPING_FILE)
+                    : getConfigFile(configFile);
+            LOGGER.trace("Loading config from '{}'", file.getAbsolutePath());
+            return file.exists()
+                    ? createStreamFrom(file)
+                    : loadDefaults();
+        }
+
         private InputStream createStreamFrom(File file) {
             if (file != null) {
                 try {
-                    LOGGER.trace("Loading config from '{}'", file.getAbsolutePath());
                     return new FileInputStream(file);
                 } catch (FileNotFoundException e) {
                     LOGGER.warn("Missing config file '{}'! Loading from jar.", file.getAbsolutePath());

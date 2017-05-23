@@ -48,10 +48,6 @@ public class ResourceField implements VisitableField {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceField.class);
 
-    public static ResourceField copy(ResourceField field) {
-        return new ResourceField(field.node, field.index, field.ckanMapping);
-    }
-
     private final String fieldId;
 
     private final JsonNode node;
@@ -84,12 +80,16 @@ public class ResourceField implements VisitableField {
         this.fieldId = JsonUtil.parse(node, alternates);
     }
 
-    public ResourceField withResourceType(String type) {
+    public static ResourceField copy(ResourceField field) {
+        return new ResourceField(field.node, field.index, field.ckanMapping);
+    }
+
+    public ResourceField setResourceType(String type) {
         this.resourceType = type;
         return this;
     }
 
-    public ResourceField withQualifier(ResourceMember qualifier) {
+    public ResourceField setQualifier(ResourceMember qualifier) {
         this.qualifier = qualifier;
         return this;
     }
@@ -125,10 +125,6 @@ public class ResourceField implements VisitableField {
 
     public ResourceMember getQualifier() {
         return qualifier;
-    }
-
-    public void setQualifier(ResourceMember qualifier) {
-        this.qualifier = qualifier;
     }
 
     public String getShortName() {
@@ -234,9 +230,9 @@ public class ResourceField implements VisitableField {
         if (value != null) {
             try {
                 if (this.isOfType(Integer.class)) {
-                    value = parseToInteger(value).toString();
+                    return parseToInteger(value).toString();
                 } else if (this.isOfType(Double.class)) {
-                    value = new Double(value).toString();
+                    return new Double(value).toString();
                 }
             } catch (NumberFormatException e) {
                 LOGGER.error("Could normalize field value '{}' (type {}) ", value, getFieldType(), e);

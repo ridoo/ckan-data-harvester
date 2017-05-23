@@ -200,10 +200,8 @@ class DataInsertion {
                 return false;
             }
             if (timestamp == null) {
-                {
-                    if (other.timestamp != null) {
-                        return false;
-                    }
+                if (other.timestamp != null) {
+                    return false;
                 }
             } else if (!timestamp.equals(other.timestamp)) {
                 return false;

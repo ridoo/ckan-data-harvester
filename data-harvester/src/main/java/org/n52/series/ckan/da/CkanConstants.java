@@ -36,31 +36,40 @@ import java.util.List;
 
 public interface CkanConstants {
 
-    public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+    Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
-    public static final String DEFAULT_DATE_TIME_FORMAT_STRING = "YYYY-MM-dd'T'HH:mm:ssZ";
+    String DEFAULT_DATE_TIME_FORMAT_STRING = "YYYY-MM-dd'T'HH:mm:ssZ";
 
-    public interface SchemaDescriptor {
-        public static final String SCHEMA_DESCRIPTOR = "schema_descriptor";
-        public static final String RESOURCE_TYPE = "resource_type";
-        public static final String DESCRIPTION = "description";
-        public static final String VERSION = "version";
-        public static final String FIELDS = "fields";
-        public static final String ID = "id";
+    String VALID_TIME_START = "valid_time_start";
+    String VALID_TIME_END = "valid_time_end";
+    String RESOURCE_TYPE = "resource_type";
+    String DESCRIPTION = "description";
+    String LONGITUDE = "longitude";
+    String LATITUDE = "latitude";
+    String LOCATION = "location";
+    String CRS = "crs";
+
+    interface SchemaDescriptor {
+        String SCHEMA_DESCRIPTOR = "schema_descriptor";
+        String RESOURCE_TYPE = CkanConstants.RESOURCE_TYPE;
+        String DESCRIPTION = CkanConstants.DESCRIPTION;
+        String VERSION = "version";
+        String FIELDS = "fields";
+        String ID = "id";
     }
 
-    public interface ResourceType {
-        public static final String CSV_OBSERVATIONS_COLLECTION = "csv-observations-collection";
+    interface ResourceType {
+        String CSV_OBSERVATIONS_COLLECTION = "csv-observations-collection";
         /**
          * since schema descriptior version 0.3
          */
-        public static final String OBSERVATIONS_WITH_GEOMETRIES = "observations_with_geometry";
+        String OBSERVATIONS_WITH_GEOMETRIES = "observations_with_geometry";
         /**
          * since schema descriptior version 0.3
          */
-        public static final String OBSERVED_GEOMETRIES = "observed_geometries";
-        public static final String PLATFORMS = "platforms";
-        public static final String OBSERVATIONS = "observations";
+        String OBSERVED_GEOMETRIES = "observed_geometries";
+        String PLATFORMS = "platforms";
+        String OBSERVATIONS = "observations";
     }
 
     /**
@@ -89,23 +98,22 @@ public interface CkanConstants {
      * However, configuring alternate values have to be done like described in
      * {@link CkanConstants.KnownFieldIdValue}.
      */
-    public interface FieldPropertyName {
-        public static final String RESOURCE_NAME = "resource_name";
-        public static final String RESOURCE_TYPE = "resource_type";
-        public static final String HEADER_ROWS = "headerrows";
-        /** {@value} */
-        public static final String FIELD_ID = "field_id";
-        public static final String SHORT_NAME = "short_name";
-        public static final String LONG_NAME = "long_name";
-        public static final String FIELD_DESCRIPTION = "description";
-        public static final String FIELD_TYPE = "field_type";
-        public static final String NO_DATA = "no_data";
-        public static final String FIELD_ROLE = "field_role";
-        public static final String PHENOMENON = "phenomenon";
-        public static final String PHENOMENON_REF = "phenomenon_ref";
-        public static final String UOM = "uom";
-        public static final String CRS = "crs";
-        public static final String DATE_FORMAT = "date_format";
+    interface FieldPropertyName {
+        String CRS = CkanConstants.CRS;
+        String RESOURCE_TYPE = CkanConstants.RESOURCE_TYPE;
+        String FIELD_DESCRIPTION = CkanConstants.DESCRIPTION;
+        String RESOURCE_NAME = "resource_name";
+        String HEADER_ROWS = "headerrows";
+        String FIELD_ID = "field_id";
+        String SHORT_NAME = "short_name";
+        String LONG_NAME = "long_name";
+        String FIELD_TYPE = "field_type";
+        String NO_DATA = "no_data";
+        String FIELD_ROLE = "field_role";
+        String PHENOMENON = "phenomenon";
+        String PHENOMENON_REF = "phenomenon_ref";
+        String UOM = "uom";
+        String DATE_FORMAT = "date_format";
     }
 
     /**
@@ -123,23 +131,23 @@ public interface CkanConstants {
      *   }
      * </pre>
      */
-    public interface KnownFieldIdValue {
-        public static final String PLATFORM_ID = "platform_id";
-        public static final String CRS = "crs";
-        public static final String LATITUDE = "latitude";
-        public static final String LONGITUDE = "longitude";
-        public static final String ALTITUDE = "altitude";
-        public static final String PLATFORM_NAME = "platform_name";
-        public static final String FIRST_DATE = "first_date";
-        public static final String LAST_DATE = "last_date";
-        public static final String OBSERVATION_TIME = "observation_time";
-        public static final String LOCATION = "location";
-        public static final String VALID_TIME_START = "valid_time_start";
-        public static final String VALID_TIME_END = "valid_time_end";
-        public static final String VALUE = "value";
-        public static final String QUALITY = "quality";
-        public static final String TRACK_ID = "track_id";
-        public static final String TRACK_POINT = "track_point";
+    interface KnownFieldIdValue {
+        String LATITUDE = CkanConstants.LATITUDE;
+        String LONGITUDE = CkanConstants.LONGITUDE;
+        String LOCATION = CkanConstants.LOCATION;
+        String VALID_TIME_START = CkanConstants.VALID_TIME_START;
+        String VALID_TIME_END = CkanConstants.VALID_TIME_END;
+        String CRS = CkanConstants.CRS;
+        String PLATFORM_ID = "platform_id";
+        String ALTITUDE = "altitude";
+        String PLATFORM_NAME = "platform_name";
+        String FIRST_DATE = "first_date";
+        String LAST_DATE = "last_date";
+        String OBSERVATION_TIME = "observation_time";
+        String VALUE = "value";
+        String QUALITY = "quality";
+        String TRACK_ID = "track_id";
+        String TRACK_POINT = "track_point";
     }
 
     /**
@@ -157,14 +165,14 @@ public interface CkanConstants {
      *   }
      * </pre>
      */
-    public interface KnownFieldRoleValue {
-        public static final String LATITUDE = "latitude";
-        public static final String LONGITUDE = "longitude";
-        public static final String HEIGHT = "height";
-        public static final String TIMESTAMP = "timestamp";
-        public static final String VALID_TIME_START = "valid_time_start";
-        public static final String VALID_TIME_END = "valid_time_end";
-        public static final String LOCATION = "location";
+    interface KnownFieldRoleValue {
+        String LOCATION = CkanConstants.LOCATION;
+        String LATITUDE = CkanConstants.LATITUDE;
+        String LONGITUDE = CkanConstants.LONGITUDE;
+        String VALID_TIME_START = CkanConstants.VALID_TIME_START;
+        String VALID_TIME_END = CkanConstants.VALID_TIME_END;
+        String HEIGHT = "height";
+        String TIMESTAMP = "timestamp";
     }
 
     /**
@@ -182,15 +190,15 @@ public interface CkanConstants {
      *   }
      * </pre>
      */
-    public interface DataType {
-        public static final String INTEGER = "integer";
-        public static final String BOOLEAN = "boolean";
-        public static final String GEOMETRY = "geometry";
-        public static final String DOUBLE = "double";
-        public static final String STRING = "string";
-        public static final String DATE = "date";
-        public static final String JSON = "json";
-        public static final List<String> QUANTITY = Collections.unmodifiableList(Arrays.<String>asList(
+    interface DataType {
+        String INTEGER = "integer";
+        String BOOLEAN = "boolean";
+        String GEOMETRY = "geometry";
+        String DOUBLE = "double";
+        String STRING = "string";
+        String DATE = "date";
+        String JSON = "json";
+        List<String> QUANTITY = Collections.unmodifiableList(Arrays.<String>asList(
             INTEGER,
             DOUBLE
         ));

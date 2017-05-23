@@ -26,9 +26,8 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
-package org.n52.series.ckan.table;
 
-import static java.lang.System.currentTimeMillis;
+package org.n52.series.ckan.table;
 
 import java.util.Map.Entry;
 
@@ -57,8 +56,9 @@ public class ResourceTable extends DataTable {
     }
 
     public void readIntoMemory() {
-        long start = currentTimeMillis();
-        String ckanResourceName = dataFile.getResource().getName();
+        long start = System.currentTimeMillis();
+        String ckanResourceName = dataFile.getResource()
+                                          .getName();
         LOGGER.debug("Load data file '{}': {}", ckanResourceName, dataFile.toString());
 
         try {
@@ -69,19 +69,22 @@ public class ResourceTable extends DataTable {
         }
 
         LOGGER.debug("Resource data '{}' loaded into memory (#{} rows and #{} columns), took {}s",
-                     resourceMember.getId(), rowSize(), columnSize(),
-                     (currentTimeMillis() - start)/1000d);
+                     resourceMember.getId(),
+                     rowSize(),
+                     columnSize(),
+                     (System.currentTimeMillis() - start) / 1000d);
     }
 
     private TableLoader createTableLoader(DataFile file) {
-        if (file.getFormat().equalsIgnoreCase("csv")) {
+        if (file.getFormat()
+                .equalsIgnoreCase("csv")) {
             return new CsvTableLoader(this, file);
-        } else if (file.getFormat().equalsIgnoreCase("json")) {
+        } else if (file.getFormat()
+                       .equalsIgnoreCase("json")) {
             return new JsonTableLoader(this, file);
-        } else  {
+        } else {
             return new EmptyTableLoader(this, file);
         }
     }
-
 
 }

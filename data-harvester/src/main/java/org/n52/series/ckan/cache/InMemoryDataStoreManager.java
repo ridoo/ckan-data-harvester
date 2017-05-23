@@ -35,10 +35,14 @@ import java.util.Set;
 
 import org.n52.series.ckan.beans.DataCollection;
 import org.n52.series.ckan.da.DataStoreManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.trentorise.opendata.jackan.model.CkanDataset;
 
 public class InMemoryDataStoreManager implements DataStoreManager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(InMemoryDataStoreManager.class);
 
     private final Map<String, DataCollection> datasets = new HashMap<>();
 
@@ -47,6 +51,7 @@ public class InMemoryDataStoreManager implements DataStoreManager {
         CkanDataset dataset = dataCollection.getDataset();
         if (datasets.containsKey(dataset.getId())) {
             // TODO update
+            LOGGER.debug("update not implemented yet.");
         } else {
             datasets.put(dataset.getId(), dataCollection);
         }

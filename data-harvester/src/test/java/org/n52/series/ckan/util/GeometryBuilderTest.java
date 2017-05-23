@@ -55,7 +55,7 @@ public class GeometryBuilderTest {
 
     @Test
     public void when_geoJsonPoint_then_returnGeometry() {
-        Geometry geometry = builder.withGeoJson("{'coordinates':[52.52,13.41],'type':'Point'}")
+        Geometry geometry = builder.setGeoJson("{'coordinates':[52.52,13.41],'type':'Point'}")
                           .getGeometry();
         Assert.assertThat(geometry,
                           instanceOf(Geometry.class));
@@ -63,7 +63,7 @@ public class GeometryBuilderTest {
 
     @Test
     public void when_geoJsonLPolygon_then_returnGeometry() {
-        Assert.assertThat(builder.withGeoJson(""
+        Assert.assertThat(builder.setGeoJson(""
                 + "{" +
                 "    \"type\": \"Polygon\"," +
                 "    \"coordinates\": [" +
@@ -80,22 +80,22 @@ public class GeometryBuilderTest {
 
     @Test
     public void when_wkt2DPoint_then_returnGeometry() {
-        Geometry geometry = builder.withWKT("POINT(52.52 13.41)")
+        Geometry geometry = builder.setWellKnownText("POINT(52.52 13.41)")
                           .getGeometry();
         Assert.assertThat(geometry, instanceOf(Geometry.class));
     }
 
     @Test
     public void when_wkt3DPoint_then_returnGeometry() {
-        Geometry geometry = builder.withWKT("POINT(52.52 13.41 30)")
+        Geometry geometry = builder.setWellKnownText("POINT(52.52 13.41 30)")
                           .getGeometry();
         Assert.assertThat(geometry, instanceOf(Geometry.class));
     }
 
     @Test
     public void when_wktPointWithSrid_then_geometryHasSrid() {
-        Geometry geometry = builder.withWKT("POINT(52.52 13.41 30)")
-                .withCrs("999")
+        Geometry geometry = builder.setWellKnownText("POINT(52.52 13.41 30)")
+                .setCrs("999")
                 .getGeometry();
         Assert.assertThat(geometry.getSRID(), is(999));
     }

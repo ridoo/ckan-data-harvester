@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.sos;
 
 import java.io.Serializable;
@@ -40,7 +41,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import eu.trentorise.opendata.jackan.model.CkanResource;
 
-
 public class CkanSosObservationReference implements Serializable {
 
     private static final long serialVersionUID = 3444072630244881068L;
@@ -51,6 +51,11 @@ public class CkanSosObservationReference implements Serializable {
 
     private final List<String> observationIdentifiers;
 
+    public CkanSosObservationReference(CkanResource resource) throws JsonProcessingException {
+        this.resource = new SerializableCkanResource(resource);
+        this.observationIdentifiers = new ArrayList<>();
+    }
+
     public static CkanSosObservationReference create(CkanResource resource) {
         try {
             return new CkanSosObservationReference(resource);
@@ -58,11 +63,6 @@ public class CkanSosObservationReference implements Serializable {
             LOGGER.warn("Could not create SOS reference for resource.", e);
             return null;
         }
-    }
-
-    public CkanSosObservationReference(CkanResource resource) throws JsonProcessingException {
-        this.resource = new SerializableCkanResource(resource);
-        this.observationIdentifiers = new ArrayList<>();
     }
 
     public void addObservationReference(OmObservation observation) {

@@ -76,7 +76,7 @@ public class TrackPointBuilder extends AbstractRowVisitor<String> {
     @Override
     public String getResult() {
         if (geometryBuilder.canBuildGeometry()) {
-            trackPoint.withGeometry(geometryBuilder.getGeometry());
+            trackPoint.setGeometry(geometryBuilder.getGeometry());
         }
         return trackPointCollector.addToTrack(trackPoint);
     }

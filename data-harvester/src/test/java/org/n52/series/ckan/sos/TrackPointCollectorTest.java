@@ -59,7 +59,7 @@ public class TrackPointCollectorTest {
         ResourceField timeField = createField("timestamp", "Date");
         TrackPointCollector collector = new TrackPointCollector();
         TrackPoint trackPoint = collector.newTrackPoint()
-                .withGeometry(new WKTReader().read("POINT (52 7)"))
+                .setGeometry(new WKTReader().read("POINT (52 7)"))
                 .withProperty(timeField, "2012-07-21T12:00:00Z");
 
         String trackId = collector.addToTrack(trackPoint);

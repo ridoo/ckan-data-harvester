@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.util;
 
 import java.util.ArrayList;
@@ -45,18 +46,18 @@ import eu.trentorise.opendata.jackan.CkanClient;
 
 public class JsonUtil {
 
-    private static final ObjectMapper om = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     static {
-        CkanClient.configureObjectMapper(om);
+        CkanClient.configureObjectMapper(OBJECT_MAPPER);
     }
 
     public static ObjectMapper getCkanObjectMapper() {
-        return om;
+        return OBJECT_MAPPER;
     }
 
     public static ObjectWriter getCkanObjectWriter() {
-        return getWriter(om);
+        return getWriter(OBJECT_MAPPER);
     }
 
     public static ObjectWriter getJsonWriter() {
@@ -84,13 +85,15 @@ public class JsonUtil {
                 ? field.asInt()
                 : -1;
     }
+
     public static List<String> parseToList(JsonNode node, Set<String> alternateFieldNames) {
         List<String> values = new ArrayList<>();
         JsonNode field = findField(node, alternateFieldNames);
-        if ( !field.isMissingNode() && field.isArray()) {
+        if (!field.isMissingNode() && field.isArray()) {
             final Iterator<JsonNode> iter = field.iterator();
             while (iter.hasNext()) {
-                values.add(iter.next().asText());
+                JsonNode value = iter.next();
+                values.add(value.asText());
             }
         }
         return values;
@@ -102,7 +105,7 @@ public class JsonUtil {
             for (String alternateFieldName : alternateFieldNames) {
                 field = getNodeWithName(alternateFieldName, node);
                 field = tryLowerCasedIfMissing(field, alternateFieldName, node);
-                if ( !field.isMissingNode()) {
+                if (!field.isMissingNode()) {
                     break;
                 }
             }
@@ -123,8 +126,5 @@ public class JsonUtil {
     private static JsonNode getNodeWithLowerCasedName(String fieldName, JsonNode node) {
         return node.at("/" + fieldName.toLowerCase(Locale.ROOT));
     }
-
-
-
 
 }

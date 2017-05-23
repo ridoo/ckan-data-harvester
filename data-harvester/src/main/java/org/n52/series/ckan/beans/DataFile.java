@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.beans;
 
 import java.io.File;
@@ -85,14 +86,14 @@ public class DataFile {
         return DateTime.parse(resource.getLastModified());
     }
 
-    public boolean isNewerThan(CkanResource resource) {
-        if (resource == null) {
+    public boolean isNewerThan(CkanResource ckanResource) {
+        if (ckanResource == null) {
             return false;
         }
 
-        String otherId = resource.getId();
+        String otherId = ckanResource.getId();
         String thisId = this.resource.getId();
-        String otherLastModified = resource.getLastModified();
+        String otherLastModified = ckanResource.getLastModified();
         String thisLastModified = this.resource.getLastModified();
         if (thisId == null || otherLastModified == null) {
             return false;
@@ -113,13 +114,13 @@ public class DataFile {
                 ? file.getAbsolutePath()
                 : "null";
         sb.append("resourceId: ")
-                .append(resource.getId())
-                .append(", ")
-                .append("DataFile [file: ")
-                .append(filePath)
-                .append(", ")
-                .append(" encoding: ")
-                .append(encoding.toString());
+          .append(resource.getId())
+          .append(", ")
+          .append("DataFile [file: ")
+          .append(filePath)
+          .append(", ")
+          .append(" encoding: ")
+          .append(encoding.toString());
         return sb.toString();
     }
 

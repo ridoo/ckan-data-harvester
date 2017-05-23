@@ -32,14 +32,14 @@ import eu.trentorise.opendata.jackan.model.CkanResource;
 
 public interface CkanSosReferenceCache {
 
-    public void addOrUpdate(CkanSosObservationReference reference);
+    void addOrUpdate(CkanSosObservationReference reference);
 
-    public void delete(CkanSosObservationReference reference);
+    void delete(CkanSosObservationReference reference);
 
-    public void delete(CkanResource resource);
+    void delete(CkanResource resource);
 
-    public boolean exists(CkanResource reference);
+    boolean exists(CkanResource reference);
 
-    public CkanSosObservationReference getReference(CkanResource resource);
+    CkanSosObservationReference getReference(CkanResource resource);
 
 }

@@ -29,8 +29,6 @@
 
 package org.n52.series.ckan.sos;
 
-import static org.n52.series.ckan.da.CkanConstants.DEFAULT_CHARSET;
-
 import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.table.ResourceKey;
@@ -53,7 +51,7 @@ import org.slf4j.LoggerFactory;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
+final class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ObservationBuilder.class);
 
@@ -61,9 +59,9 @@ class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
 
     private final TimeFieldParser timeFieldParser = new TimeFieldParser();
 
-    private final TimeFieldParser.ValidTimeBuilder validTimeBuilder = timeFieldParser.new ValidTimeBuilder();
+    private final TimeFieldParser.ValidTimeBuilder validTimeBuilder;
 
-    private final TimeFieldParser.TimeBuilder observationTimeBuilder = timeFieldParser.new TimeBuilder(CkanConstants.KnownFieldIdValue.OBSERVATION_TIME);
+    private final TimeFieldParser.TimeBuilder observationTimeBuilder;
 
     private final GeometryBuilder geometryBuilder = GeometryBuilder.create();
 
@@ -77,23 +75,25 @@ class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
 
     private SensorBuilder sensorBuilder;
 
+    private ObservationBuilder(Phenomenon phenomenon, ResourceKey qualifier) {
+        this.phenomenon = phenomenon;
+        this.qualifier = qualifier;
+        this.validTimeBuilder = timeFieldParser.new ValidTimeBuilder();
+        String observationTimeProperty = CkanConstants.KnownFieldIdValue.OBSERVATION_TIME;
+        this.observationTimeBuilder = timeFieldParser.new TimeBuilder(observationTimeProperty);
+        this.omObservation = new OmObservation();
+    }
+
     public static ObservationBuilder create(Phenomenon phenomenon, ResourceKey qualifier) {
         return new ObservationBuilder(phenomenon, qualifier);
     }
 
-    public ObservationBuilder withUomParser(UomParser uomParser) {
+    public ObservationBuilder setUomParser(UomParser uomParser) {
         this.uomParser = uomParser;
         return this;
     }
 
-    private ObservationBuilder(Phenomenon phenomenon, ResourceKey qualifier) {
-        this.phenomenon = phenomenon;
-        this.qualifier = qualifier;
-
-        this.omObservation = new OmObservation();
-    }
-
-    ObservationBuilder withSensorBuilder(SensorBuilder insertSensorRequestBuilder) {
+    ObservationBuilder setSensorBuilder(SensorBuilder insertSensorRequestBuilder) {
         this.sensorBuilder = insertSensorRequestBuilder;
         return this;
     }
@@ -158,20 +158,19 @@ class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
             sensorBuilder.setInsitu(false);
         }
 
-        omObservation.setDefaultElementEncoding(DEFAULT_CHARSET.toString());
-        omObservation.setObservationConstellation(createConstellation(phenomenon));
+        omObservation.setDefaultElementEncoding(CkanConstants.DEFAULT_CHARSET.toString());
+        omObservation.setObservationConstellation(createObservationConstellation());
         SosObservation o = new SosObservation(omObservation, observationType);
         o.setPhenomenonTime(time);
         LOGGER.trace("Observation: {}", o);
         return o;
     }
 
-
     private boolean isGeometryObservation(String observationType) {
         return observationType.equals(OmConstants.OBS_TYPE_GEOMETRY_OBSERVATION);
     }
 
-    private OmObservationConstellation createConstellation(Phenomenon phenomenon) {
+    private OmObservationConstellation createObservationConstellation() {
         OmObservationConstellation constellation = new OmObservationConstellation();
         constellation.setObservableProperty(phenomenon.toObservableProperty());
         constellation.setObservationType(phenomenon.getObservationType());

@@ -77,12 +77,14 @@ class StationaryInsertStrategy extends AbstractInsertStrategy {
             foiBuilder.visit(values);
 
             SensorBuilder sensorBuilder = SensorBuilder.create()
-                                                       .withFeature(foiBuilder.getResult())
+                                                       .setFeature(foiBuilder.getResult())
                                                        .addPhenomena(phenomena)
-                                                       .withDataset(dataset)
+                                                       .setDataset(dataset)
                                                        .setMobile(false);
 
             for (Phenomenon phenomenon : phenomena) {
+
+                Phenomenon currentPhenomenon = phenomenon;
 
                 if (phenomenon.isSoftTyped()) {
                     // XXX iterating over all phenomena would create n*row observations
@@ -92,24 +94,24 @@ class StationaryInsertStrategy extends AbstractInsertStrategy {
                     // the current row as well?!
 
                     String phenomenonValue = values.get(phenomenon.getPhenomenonField());
-                    phenomenon = new Phenomenon(phenomenonValue, phenomenonValue, phenomenon);
+                    currentPhenomenon = new Phenomenon(phenomenonValue, phenomenonValue, phenomenon);
                 }
 
                 String procedureId = sensorBuilder.getProcedureId();
                 if (!dataInsertions.containsKey(procedureId)) {
                     LOGGER.debug("Building sensor with: procedure '{}', phenomenon '{}' (unit '{}')",
                                  procedureId,
-                                 phenomenon.getLabel(),
-                                 phenomenon.getUom());
+                                 currentPhenomenon.getLabel(),
+                                 currentPhenomenon.getUom());
                     DataFile dataFile = dataCollection.getDataFile(member);
                     DataInsertion dataInsertion = createDataInsertion(sensorBuilder, dataFile);
                     dataInsertions.put(procedureId, dataInsertion);
                 }
 
                 DataInsertion dataInsertion = dataInsertions.get(procedureId);
-                final SosObservation observation = ObservationBuilder.create(phenomenon, rowEntry.getKey())
-                                                                     .withUomParser(getUomParser())
-                                                                     .withSensorBuilder(sensorBuilder)
+                final SosObservation observation = ObservationBuilder.create(currentPhenomenon, rowEntry.getKey())
+                                                                     .setUomParser(getUomParser())
+                                                                     .setSensorBuilder(sensorBuilder)
                                                                      .visit(values)
                                                                      .getResult();
                 if (observation != null) {

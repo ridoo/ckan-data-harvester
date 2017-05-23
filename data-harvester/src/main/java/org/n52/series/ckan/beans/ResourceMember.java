@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.beans;
 
 import java.util.ArrayList;
@@ -92,7 +93,8 @@ public class ResourceMember {
     }
 
     public boolean isOfType(String type) {
-        return resourceType != null && ckanMapping.getResourceTypeMappings(type).contains(resourceType);
+        return resourceType != null && ckanMapping.getResourceTypeMappings(type)
+                                                  .contains(resourceType);
     }
 
     public int getHeaderRows() {
@@ -106,12 +108,13 @@ public class ResourceMember {
     public List<ResourceField> getResourceFields() {
         return resourceFields != null
                 ? Collections.unmodifiableList(resourceFields)
-                : Collections.<ResourceField>emptyList();
+                : Collections.<ResourceField> emptyList();
     }
 
     public ResourceField getField(String fieldId) {
         for (ResourceField field : resourceFields) {
-            if (field.getFieldId().equalsIgnoreCase(fieldId)) {
+            if (field.getFieldId()
+                     .equalsIgnoreCase(fieldId)) {
                 return field;
             }
         }
@@ -160,7 +163,7 @@ public class ResourceMember {
     }
 
     public boolean isJoinable(ResourceMember other) {
-        if ( !isValid(this) || !isValid(other)) {
+        if (!isValid(this) || !isValid(other)) {
             return false;
         }
         if (this == other || isOfSameType(other)) {
@@ -170,7 +173,7 @@ public class ResourceMember {
     }
 
     public boolean isExtensible(ResourceMember other) {
-        if ( !isValid(this) || !isValid(other)) {
+        if (!isValid(this) || !isValid(other)) {
             return false;
         }
         if (this == other || !isOfSameType(other)) {
@@ -227,18 +230,18 @@ public class ResourceMember {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         return sb.append("ResourceMember(")
-                .append("datasetName=")
-                .append(datasetName)
-                .append(", id=").append(id)
-                .append(", resourceType=")
-                .append(resourceType)
-                .append(")")
-                .toString();
+                 .append("datasetName=")
+                 .append(datasetName)
+                 .append(", id=")
+                 .append(id)
+                 .append(", resourceType=")
+                 .append(resourceType)
+                 .append(")")
+                 .toString();
     }
 
     public ResourceKey createResourceKey(int lineNbr) {
-        int next = lineNbr++;
+        int next = lineNbr + 1;
         return new ResourceKey("" + next, this);
     }
 }
-

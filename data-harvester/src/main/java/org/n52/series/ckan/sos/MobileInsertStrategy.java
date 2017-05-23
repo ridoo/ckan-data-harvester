@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.sos;
 
 import java.util.Collection;
@@ -43,6 +44,8 @@ import org.n52.series.ckan.table.ResourceKey;
 import org.n52.sos.ogc.gml.AbstractFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Table;
 
 import eu.trentorise.opendata.jackan.model.CkanDataset;
 
@@ -68,20 +71,21 @@ public class MobileInsertStrategy extends AbstractInsertStrategy {
         Procedure procedure = new Procedure(dataset.getId(), dataset.getName());
 
         SensorBuilder sensorBuilderTemplate = SensorBuilder.create()
-                .withProcedure(procedure)
-                .withDataset(dataset)
-                .setMobile(true);
+                                                           .setProcedure(procedure)
+                                                           .setDataset(dataset)
+                                                           .setMobile(true);
 
         LOGGER.debug("Create mobile insertions ...");
         Map<String, DataInsertion> dataInsertions = new HashMap<>();
         TrackPointCollector trackCollector = new TrackPointCollector(ckanMapping);
         TrackPointBuilder trackBuilder = new TrackPointBuilder(trackCollector);
-        for (Entry<ResourceKey, Map<ResourceField, String>> rowEntry : dataTable.getTable().rowMap().entrySet()) {
+        Table<ResourceKey, ResourceField, String> table = dataTable.getTable();
+        Map<ResourceKey, Map<ResourceField, String>> rows = table.rowMap();
+        for (Entry<ResourceKey, Map<ResourceField, String>> rowEntry : rows.entrySet()) {
 
             /*
-             * Track points have to be collected first to create the
-             * feature afterwards (need to determine first observation
-             * value of a track for the feature id).
+             * Track points have to be collected first to create the feature afterwards (need to determine
+             * first observation value of a track for the feature id).
              */
             trackBuilder.visit(rowEntry.getValue());
             String trackId = trackBuilder.getResult();
@@ -89,7 +93,7 @@ public class MobileInsertStrategy extends AbstractInsertStrategy {
             for (Phenomenon phenomenon : phenomena) {
                 sensorBuilderTemplate.addPhenomenon(phenomenon);
 
-                if ( !dataInsertions.containsKey(trackId)) {
+                if (!dataInsertions.containsKey(trackId)) {
                     LOGGER.debug("Building sensor with: procedure '{}'", trackId);
                     DataFile dataFile = dataCollection.getDataFile(member);
                     DataInsertion dataInsertion = createDataInsertion(sensorBuilderTemplate, dataFile);
@@ -97,12 +101,11 @@ public class MobileInsertStrategy extends AbstractInsertStrategy {
                 }
 
                 DataInsertion dataInsertion = dataInsertions.get(trackId);
-                final SosObservation observation = ObservationBuilder
-                        .create(phenomenon, rowEntry.getKey())
-                        .withUomParser(getUomParser())
-                        .withSensorBuilder(sensorBuilderTemplate)
-                        .visit(rowEntry.getValue())
-                        .getResult();
+                final SosObservation observation = ObservationBuilder.create(phenomenon, rowEntry.getKey())
+                                                                     .setSensorBuilder(sensorBuilderTemplate)
+                                                                     .setUomParser(getUomParser())
+                                                                     .visit(rowEntry.getValue())
+                                                                     .getResult();
 
                 if (observation != null) {
                     dataInsertion.addObservation(observation);
@@ -114,11 +117,10 @@ public class MobileInsertStrategy extends AbstractInsertStrategy {
             DataInsertion dataInsertion = entry.getValue();
             SensorBuilder template = dataInsertion.getSensorBuilder();
             AbstractFeature feature = trackCollector.getFeatureFor(trackId);
-            dataInsertion.setSensorBuilder(template.copy().withFeature(feature));
+            dataInsertion.setSensorBuilder(template.copy()
+                                                   .setFeature(feature));
         }
         return dataInsertions;
     }
-
-
 
 }

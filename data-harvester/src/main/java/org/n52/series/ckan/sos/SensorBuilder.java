@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.sos;
 
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import org.n52.io.response.PlatformType;
 import org.n52.sos.encode.SensorMLEncoderv101;
 import org.n52.sos.ogc.gml.AbstractFeature;
 import org.n52.sos.ogc.gml.time.TimePeriod;
@@ -63,7 +65,7 @@ import eu.trentorise.opendata.jackan.model.CkanDataset;
 import eu.trentorise.opendata.jackan.model.CkanOrganization;
 import eu.trentorise.opendata.jackan.model.CkanTag;
 
-public class SensorBuilder {
+public final class SensorBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SensorBuilder.class);
 
@@ -79,12 +81,12 @@ public class SensorBuilder {
 
     private Boolean mobile = Boolean.FALSE;
 
-    public static SensorBuilder create() {
-        return new SensorBuilder();
-    }
-
     private SensorBuilder() {
         this.phenomenona = new ArrayList<>();
+    }
+
+    public static SensorBuilder create() {
+        return new SensorBuilder();
     }
 
     public SensorBuilder copy() {
@@ -108,17 +110,17 @@ public class SensorBuilder {
         return this;
     }
 
-    public SensorBuilder withFeature(AbstractFeature feature) {
+    public SensorBuilder setFeature(AbstractFeature feature) {
         this.feature = feature;
         return this;
     }
 
-    public SensorBuilder withProcedure(Procedure procedure) {
+    public SensorBuilder setProcedure(Procedure procedure) {
         this.procedure = procedure;
         return this;
     }
 
-    public SensorBuilder withDataset(CkanDataset dataset) {
+    public SensorBuilder setDataset(CkanDataset dataset) {
         this.dataset = dataset;
         return this;
     }
@@ -159,9 +161,11 @@ public class SensorBuilder {
         // TODO procedure is dataset
 
         StringBuilder sb = new StringBuilder();
-        sb.append(dataset.getName()).append("_");
+        sb.append(dataset.getName())
+          .append("_");
         sb = feature.isSetName()
-                ?  sb.append(feature.getFirstName().getValue())
+                ? sb.append(feature.getFirstName()
+                                   .getValue())
                 : sb.append(feature.getIdentifier());
         return sb.toString();
     }
@@ -193,14 +197,15 @@ public class SensorBuilder {
         final String procedureId = getProcedure().getId();
         final SosOffering sosOffering = new SosOffering(procedureId);
         system.setInputs(createInputs())
-                .setOutputs(createOutputs())
-                .setKeywords(createKeywordList())
-                .setIdentifications(createIdentificationList())
-                .setClassifications(createClassificationList())
-                .addCapabilities(createCapabilities(sosOffering))
-                // .addContact(createContact(schemaDescription.getDataset())) // TODO
-                // ... // TODO
-                .setValidTime(createValidTimePeriod()).setIdentifier(procedureId);
+              .setOutputs(createOutputs())
+              .setKeywords(createKeywordList())
+              .setIdentifications(createIdentificationList())
+              .setClassifications(createClassificationList())
+              .addCapabilities(createCapabilities(sosOffering))
+              // .addContact(createContact(schemaDescription.getDataset())) // TODO
+              // ... // TODO
+              .setValidTime(createValidTimePeriod())
+              .setIdentifier(procedureId);
 
         SensorML sml = new SensorML();
         sml.addMember(system);
@@ -214,19 +219,20 @@ public class SensorBuilder {
 
     private static String encodeToXml(final SensorML sml) {
         try {
-            return new SensorMLEncoderv101().encode(sml).xmlText();
-        }
-        catch (OwsExceptionReport ex) {
+            return new SensorMLEncoderv101().encode(sml)
+                                            .xmlText();
+        } catch (OwsExceptionReport ex) {
             LOGGER.error("Could not encode SML to valid XML.", ex);
-            return ""; // TODO empty but valid sml
+            // TODO empty but valid sml
+            return "";
         }
     }
 
     private List<SmlIo< ? >> createInputs() {
-        List<SmlIo<?>> ios = new ArrayList<>();
-        for (Phenomenon phenomenon: phenomenona) {
+        List<SmlIo< ? >> ios = new ArrayList<>();
+        for (Phenomenon phenomenon : phenomenona) {
             SweAbstractDataComponent observableProperty = new SweObservableProperty()
-                    .setDefinition(phenomenon.getId());
+                                                                                     .setDefinition(phenomenon.getId());
             ios.add(new SmlIo<>(observableProperty).setIoName(phenomenon.getId()));
         }
         return ios;
@@ -240,9 +246,10 @@ public class SensorBuilder {
         List<String> keywords = new ArrayList<>();
         keywords.add("CKAN data");
         if (feature.isSetName()) {
-            keywords.add(feature.getFirstName().getValue());
+            keywords.add(feature.getFirstName()
+                                .getValue());
         }
-        for (Phenomenon phenomenon: phenomenona) {
+        for (Phenomenon phenomenon : phenomenona) {
             keywords.add(phenomenon.getLabel());
             keywords.add(phenomenon.getId());
         }
@@ -271,11 +278,12 @@ public class SensorBuilder {
         }
         String datasetname = dataset.getName();
         StringBuilder procedureName = new StringBuilder();
-        procedureName.append(datasetname).append("@");
+        procedureName.append(datasetname)
+                     .append("@");
         if (feature.isSetName()) {
-            procedureName.append(feature.getFirstName().getValue());
-        }
-        else {
+            procedureName.append(feature.getFirstName()
+                                        .getValue());
+        } else {
             procedureName.append(feature.getIdentifier());
         }
         return procedureName.toString();
@@ -283,12 +291,12 @@ public class SensorBuilder {
 
     private List<SmlClassifier> createClassificationList() {
         List<SmlClassifier> classifiers = new ArrayList<>();
-        for (Phenomenon phenomenon: phenomenona) {
+        for (Phenomenon phenomenon : phenomenona) {
             classifiers.add(new SmlClassifier(
-                    "phenomenon",
-                    "urn:ogc:def:classifier:OGC:1.0:phenomenon",
-                    null,
-                    phenomenon.getId()));
+                                              "phenomenon",
+                                              "urn:ogc:def:classifier:OGC:1.0:phenomenon",
+                                              null,
+                                              phenomenon.getId()));
         }
         return classifiers;
     }
@@ -312,18 +320,22 @@ public class SensorBuilder {
         SmlCapabilities offeringCapabilities = new SmlCapabilities("offerings");
         offering.setIdentifier("Offering_" + getProcedureId());
         SweField field = createTextField(
-                "field_0",
-                SensorML20Constants.OFFERING_FIELD_DEFINITION,
-                offering.getIdentifier());
+                                         "field_0",
+                                         SensorML20Constants.OFFERING_FIELD_DEFINITION,
+                                         offering.getIdentifier());
         final SweSimpleDataRecord record = new SweSimpleDataRecord().addField(field);
         return offeringCapabilities.setDataRecord(record);
     }
 
     private SmlCapabilities createMetadataCapabilities() {
         SmlCapabilities capabilities = new SmlCapabilities("metadata");
-        capabilities.addCapability(new SmlCapability("insitu", createBool("insitu", this.insitu)));
-        capabilities.addCapability(new SmlCapability("mobile", createBool("mobile", this.mobile)));
+        capabilities.addCapability(createPlatformTypeCapability(PlatformType.PLATFORM_TYPE_INSITU, this.insitu));
+        capabilities.addCapability(createPlatformTypeCapability(PlatformType.PLATFORM_TYPE_MOBILE, this.mobile));
         return capabilities;
+    }
+
+    private SmlCapability createPlatformTypeCapability(String platformType, boolean capability) {
+        return new SmlCapability(PlatformType.PLATFORM_TYPE_INSITU, createBool(platformType, capability));
     }
 
     private SweBoolean createBool(String definition, Boolean bool) {
@@ -334,7 +346,8 @@ public class SensorBuilder {
     }
 
     private SweField createTextField(String name, String definition, String value) {
-        return new SweField(name, new SweText().setValue(value).setDefinition(definition));
+        return new SweField(name, new SweText().setValue(value)
+                                               .setDefinition(definition));
     }
 
     private SmlCapabilities createBboxCapabilities() {
@@ -345,8 +358,8 @@ public class SensorBuilder {
         return offeringCapabilities;
     }
 
-    private SmlContact createContact(CkanDataset dataset) {
-        CkanOrganization organisation = dataset.getOrganization();
+    private SmlContact createContact(CkanDataset ckanDataset) {
+        CkanOrganization organisation = ckanDataset.getOrganization();
         SmlContactList contactList = new SmlContactList();
         final SmlResponsibleParty responsibleParty = new SmlResponsibleParty();
         responsibleParty.setOrganizationName(organisation.getTitle());

@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.cache;
 
 import java.io.File;
@@ -61,7 +62,8 @@ public class InMemoryMetadataStore implements CkanMetadataStore {
 
     private static final String CONFIG_FILE_BLACKLIST_DATASET_IDS = "/dataset-blacklist.txt";
 
-    private final ObjectMapper om = new ObjectMapper(); // TODO use global om config
+    // TODO use global om config
+    private final ObjectMapper om = new ObjectMapper();
 
     private final Map<String, CkanDataset> datasets;
 
@@ -98,12 +100,11 @@ public class InMemoryMetadataStore implements CkanMetadataStore {
 
     private List<String> readLinesFromFile(File file) {
         List<String> blacklistedIds = new ArrayList<>();
-        try(Scanner scanner = new Scanner(file, "UTF-8")) {
+        try (Scanner scanner = new Scanner(file, "UTF-8")) {
             while (scanner.hasNext()) {
                 String line = scanner.nextLine();
-                line = line != null ? line.trim() : line;
-                if (line != null && !isComment(line)) {
-                    blacklistedIds.add(line);
+                if (line != null && !isComment(line.trim())) {
+                    blacklistedIds.add(line.trim());
                 }
             }
         } catch (Throwable e) {
@@ -122,8 +123,8 @@ public class InMemoryMetadataStore implements CkanMetadataStore {
         return Collections.unmodifiableList(blacklistedDatasetIds);
     }
 
-    protected void putAll(Map<String, CkanDataset> datasets) {
-        this.datasets.putAll(datasets);
+    protected void putAll(Map<String, CkanDataset> ckanDatasets) {
+        this.datasets.putAll(ckanDatasets);
     }
 
     @Override
@@ -150,7 +151,8 @@ public class InMemoryMetadataStore implements CkanMetadataStore {
             return false;
         }
         Timestamp probablyNewer = dataset.getMetadataModified();
-        Timestamp current = datasets.get(dataset.getId()).getMetadataModified();
+        Timestamp current = datasets.get(dataset.getId())
+                                    .getMetadataModified();
         return current.after(probablyNewer)
                 || current.equals(probablyNewer);
     }
@@ -159,8 +161,10 @@ public class InMemoryMetadataStore implements CkanMetadataStore {
     public void insertOrUpdate(CkanDataset dataset) {
         if (dataset != null) {
             String datasetId = dataset.getId();
-            if ( blacklistedDatasetIds.contains(datasetId) || !hasSchemaDescriptor(dataset)) {
-                LOGGER.info("Ignore dataset '{}' ('{}') as it has no ResourceDescription.", datasetId, dataset.getName());
+            if (blacklistedDatasetIds.contains(datasetId) || !hasSchemaDescriptor(dataset)) {
+                LOGGER.info("Ignore dataset '{}' ('{}') as it has no ResourceDescription.",
+                            datasetId,
+                            dataset.getName());
             } else {
                 if (containsNewerThan(dataset)) {
                     LOGGER.info("No data updates for dataset '{}' ('{}').", datasetId, dataset.getName());
@@ -169,8 +173,8 @@ public class InMemoryMetadataStore implements CkanMetadataStore {
                 LOGGER.info("New data present for dataset '{}' ('{}').", datasetId, dataset.getName());
                 datasets.put(datasetId, dataset);
                 // TODO load resource files if newer and
-                  // TODO update metadata
-                  // TODO update observation data
+                // TODO update metadata
+                // TODO update observation data
             }
         }
     }
@@ -211,17 +215,20 @@ public class InMemoryMetadataStore implements CkanMetadataStore {
         CkanMapping ckanMapping = loadCkanMapping(dataset);
         if (dataset != null && dataset.getExtras() != null) {
             for (CkanPair extras : dataset.getExtras()) {
-                if (ckanMapping.hasSchemaDescriptionMappings(CkanConstants.SchemaDescriptor.SCHEMA_DESCRIPTOR, extras.getKey())) {
+                String schemaDescriptorProperty = CkanConstants.SchemaDescriptor.SCHEMA_DESCRIPTOR;
+                if (ckanMapping.hasSchemaDescriptionMappings(schemaDescriptorProperty, extras.getKey())) {
                     try {
                         JsonNode schemaDescriptionNode = om.readTree(extras.getValue());
-                        Set<String> types = ckanMapping.getSchemaDescriptionMappings(CkanConstants.SchemaDescriptor.RESOURCE_TYPE);
+                        String resourceTypeProperty = CkanConstants.SchemaDescriptor.RESOURCE_TYPE;
+                        Set<String> types = ckanMapping.getSchemaDescriptionMappings(resourceTypeProperty);
                         String resourceType = JsonUtil.parse(schemaDescriptionNode, types);
 
-                        if (ckanMapping.hasResourceTypeMappings(CkanConstants.ResourceType.CSV_OBSERVATIONS_COLLECTION, resourceType)) {
+                        String collectionProperty = CkanConstants.ResourceType.CSV_OBSERVATIONS_COLLECTION;
+                        if (ckanMapping.hasResourceTypeMappings(collectionProperty, resourceType)) {
                             return new SchemaDescriptor(dataset, schemaDescriptionNode, ckanMapping);
                         }
                     } catch (IOException e) {
-                         LOGGER.error("Could not read schema_descriptor: {}", extras.getValue(), e);
+                        LOGGER.error("Could not read schema_descriptor: {}", extras.getValue(), e);
                     }
                 }
             }
@@ -231,7 +238,7 @@ public class InMemoryMetadataStore implements CkanMetadataStore {
 
     private CkanMapping loadCkanMapping(CkanDataset dataset) {
         if (dataset != null) {
-        String customMappingPath = "/config-ckan-mapping-" + dataset.getId() + ".json";
+            String customMappingPath = "/config-ckan-mapping-" + dataset.getId() + ".json";
             InputStream is = InMemoryMetadataStore.class.getResourceAsStream(customMappingPath);
             return is != null
                     ? CkanMapping.loadCkanMapping(is)

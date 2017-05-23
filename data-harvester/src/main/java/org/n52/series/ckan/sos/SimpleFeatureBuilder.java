@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.sos;
 
 import org.n52.series.ckan.beans.ResourceField;
@@ -45,7 +46,7 @@ import eu.trentorise.opendata.jackan.model.CkanDataset;
 
 public class SimpleFeatureBuilder extends AbstractRowVisitor<SamplingFeature> {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(SimpleFeatureBuilder.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleFeatureBuilder.class);
 
     private static final String UNINITIALIZED_FEATURE_ID = "UNINITIALIZED FEATURE";
 
@@ -74,23 +75,23 @@ public class SimpleFeatureBuilder extends AbstractRowVisitor<SamplingFeature> {
     @Override
     public FieldVisitor<SamplingFeature> visit(ResourceField field, String value) {
         if (field.isField(CkanConstants.KnownFieldIdValue.PLATFORM_ID)) {
-            String orgaName = dataset.getOrganization().getName();
+            String orgaName = dataset.getOrganization()
+                                     .getName();
             feature.setIdentifier(orgaName + "-" + value);
         }
         if (field.isField(CkanConstants.KnownFieldIdValue.PLATFORM_NAME)) {
             feature.addName(value);
         }
-        if ( !field.isOfResourceType(CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES)) {
+        if (!field.isOfResourceType(CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES)) {
             geometryBuilder.visit(field, value);
         }
         return this;
     }
 
-
     @Override
     public boolean hasResult() {
         return !feature.getIdentifier()
-                .equals(UNINITIALIZED_FEATURE_ID);
+                       .equals(UNINITIALIZED_FEATURE_ID);
     }
 
     @Override
@@ -102,11 +103,10 @@ public class SimpleFeatureBuilder extends AbstractRowVisitor<SamplingFeature> {
         return feature;
     }
 
-    private void setFeatureGeometry(SamplingFeature feature, Geometry geometry) {
+    private void setFeatureGeometry(SamplingFeature samplingFeature, Geometry geometry) {
         try {
-            feature.setGeometry(geometry);
-        }
-        catch (InvalidSridException e) {
+            samplingFeature.setGeometry(geometry);
+        } catch (InvalidSridException e) {
             LOGGER.error("could not set feature's geometry.", e);
         }
     }

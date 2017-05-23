@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.da;
 
 import java.io.File;
@@ -93,7 +94,9 @@ public class CkanHarvestingService implements ServletContextAware {
         int offset = 0;
         int lastSize = -1;
         while (hasMorePages(lastSize)) {
-            offset += lastSize > 0 ? lastSize : 0;
+            offset += lastSize > 0
+                    ? lastSize
+                    : 0;
             SearchResults<CkanDataset> datasets = ckanClient.searchDatasets(query, limit, offset);
             for (CkanDataset dataset : datasets.getResults()) {
                 LOGGER.debug("Inserting dataset '{}' ...", dataset.getName());
@@ -117,7 +120,8 @@ public class CkanHarvestingService implements ServletContextAware {
         for (CkanDataset dataset : metadataStore.getDatasets()) {
             if (metadataStore.hasSchemaDescriptor(dataset)) {
                 LOGGER.debug("Download resources for dataset {} (Name: {}).",
-                        dataset.getId(), dataset.getName());
+                             dataset.getId(),
+                             dataset.getName());
                 DescriptionFile description = getSchemaDescription(dataset);
 
                 List<String> resourceIds = getResourceIds(description.getSchemaDescription());
@@ -131,11 +135,12 @@ public class CkanHarvestingService implements ServletContextAware {
                 observationCollectionCount++;
             }
         }
-        LOGGER.info("Finished harvesting data resources (got #{} csv-observation-collections).", observationCollectionCount);
+        LOGGER.info("Finished harvesting: got #{} csv-observation-collections.", observationCollectionCount);
     }
 
     private DescriptionFile getSchemaDescription(CkanDataset dataset) throws IOException {
-        saveToFile("dataset.json", dataset, JsonUtil.getCkanObjectWriter().writeValueAsString(dataset));
+        saveToFile("dataset.json", dataset, JsonUtil.getCkanObjectWriter()
+                                                    .writeValueAsString(dataset));
         SchemaDescriptor schemaDescription = metadataStore.getSchemaDescription(dataset.getId());
         File file = saveJsonToFile("schema_descriptor.json", dataset, schemaDescription.getNode());
         LOGGER.trace("Downloaded resource description to {}.", file.getAbsolutePath());
@@ -143,13 +148,14 @@ public class CkanHarvestingService implements ServletContextAware {
     }
 
     private File saveJsonToFile(String filename, CkanDataset dataset, Object content) throws IOException {
-        return saveToFile(filename, dataset, JsonUtil.getJsonWriter().writeValueAsString(content));
+        return saveToFile(filename, dataset, JsonUtil.getJsonWriter()
+                                                     .writeValueAsString(content));
     }
 
     private File saveToFile(String filename, CkanDataset dataset, String content) throws IOException {
         File file = getDatasetDownloadFolder(dataset)
-                .resolve(filename)
-                .toFile();
+                                                     .resolve(filename)
+                                                     .toFile();
         FileUtils.writeStringToFile(file, content, CkanConstants.DEFAULT_CHARSET);
         return file;
     }
@@ -161,7 +167,8 @@ public class CkanHarvestingService implements ServletContextAware {
             if (resourceId.isArray()) {
                 Iterator<JsonNode> iter = resourceId.iterator();
                 while (iter.hasNext()) {
-                    resourceIds.add(iter.next().asText());
+                    resourceIds.add(iter.next()
+                                        .asText());
                 }
             } else {
                 resourceIds.add(resourceId.asText());
@@ -188,23 +195,27 @@ public class CkanHarvestingService implements ServletContextAware {
     }
 
     protected DataFile downloadFile(CkanResource resource, Path datasetDownloadFolder) throws IOException {
-        String format = resource.getFormat() != null
-                ? resource.getFormat().toLowerCase()
-                : ".csv"; // XXX as default ok?
-        final String resourceName = resource.getId() + "." + format;
-        File file = datasetDownloadFolder.resolve(resourceName).toFile();
+        String format = resource.getFormat();
+        String extension = format != null
+                ? format.toLowerCase()
+                // XXX as default ok?
+                : ".csv";
+        final String resourceName = resource.getId() + "." + extension;
+        File file = datasetDownloadFolder.resolve(resourceName)
+                                         .toFile();
 
         // TODO download only when newer
 
         downloadToFile(resource.getUrl(), file);
-        return new DataFile(resource, format, file);
+        return new DataFile(resource, extension, file);
     }
 
     private String extractFileName(CkanResource resource) {
         final String url = resource.getUrl();
         return url != null
                 ? url.substring(url.lastIndexOf("/") + 1)
-                : resource.getName() + "." + resource.getFormat().toLowerCase();
+                : resource.getName() + "." + resource.getFormat()
+                                                     .toLowerCase();
     }
 
     private Path getDatasetDownloadFolder(CkanDataset dataset) {
@@ -236,8 +247,9 @@ public class CkanHarvestingService implements ServletContextAware {
     protected final Path resolveDownloadFolder(String folder) {
         try {
             URL resource = CkanHarvestingService.class.getResource("/");
-            return Paths.get(resource.toURI()).resolve(folder);
-        }catch (URISyntaxException e) {
+            return Paths.get(resource.toURI())
+                        .resolve(folder);
+        } catch (URISyntaxException e) {
             LOGGER.error("Could not set download base folder!", e);
             return null;
         }

@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.beans;
 
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ import org.n52.series.ckan.da.CkanMapping;
 
 import eu.trentorise.opendata.jackan.model.CkanDataset;
 
-public class DataCollection implements Iterable<Map.Entry<ResourceMember, DataFile>>{
+public class DataCollection implements Iterable<Map.Entry<ResourceMember, DataFile>> {
 
     private final CkanDataset dataset;
 
@@ -75,7 +76,8 @@ public class DataCollection implements Iterable<Map.Entry<ResourceMember, DataFi
 
     public String getDescription() {
         return schemaDescriptor != null
-                ? schemaDescriptor.getSchemaDescription().getDescription()
+                ? schemaDescriptor.getSchemaDescription()
+                                  .getDescription()
                 : null;
     }
 
@@ -86,7 +88,8 @@ public class DataCollection implements Iterable<Map.Entry<ResourceMember, DataFi
     public Entry<ResourceMember, DataFile> getDataEntry(ResourceMember resourceMember) {
         Map<ResourceMember, DataFile> collection = getDataCollection();
         for (Entry<ResourceMember, DataFile> entry : collection.entrySet()) {
-            if (entry.getKey().equals(resourceMember)) {
+            if (entry.getKey()
+                     .equals(resourceMember)) {
                 return entry;
             }
         }
@@ -96,14 +99,13 @@ public class DataCollection implements Iterable<Map.Entry<ResourceMember, DataFi
     public Map<ResourceMember, DataFile> getDataCollection() {
         return dataCollection != null
                 ? Collections.unmodifiableMap(dataCollection)
-                : Collections.<ResourceMember, DataFile>emptyMap();
+                : Collections.<ResourceMember, DataFile> emptyMap();
     }
 
-
-  public CkanMapping getCkanMapping() {
-      SchemaDescriptor descriptor = schemaDescriptor.getSchemaDescription();
-      return descriptor.getCkanMapping();
-  }
+    public CkanMapping getCkanMapping() {
+        SchemaDescriptor descriptor = schemaDescriptor.getSchemaDescription();
+        return descriptor.getCkanMapping();
+    }
 
     public DescriptorVersion getDescriptorVersion() {
         SchemaDescriptor schemaDescription = schemaDescriptor.getSchemaDescription();
@@ -119,10 +121,11 @@ public class DataCollection implements Iterable<Map.Entry<ResourceMember, DataFi
         for (ResourceMember member : dataCollection.keySet()) {
             String resourceType = member.getResourceType();
             if (filter == null || filter.isEmpty() || filter.contains(resourceType)) {
-                if ( !resourceMembersByType.containsKey(resourceType)) {
+                if (!resourceMembersByType.containsKey(resourceType)) {
                     resourceMembersByType.put(resourceType, new ArrayList<ResourceMember>());
                 }
-                resourceMembersByType.get(resourceType).add(member);
+                resourceMembersByType.get(resourceType)
+                                     .add(member);
             }
         }
         return resourceMembersByType;
@@ -154,12 +157,16 @@ public class DataCollection implements Iterable<Map.Entry<ResourceMember, DataFi
     @Override
     public Iterator<Entry<ResourceMember, DataFile>> iterator() {
         return dataCollection != null
-                ? dataCollection.entrySet().iterator()
-                : Collections.<ResourceMember, DataFile>emptyMap().entrySet().iterator();
+                ? dataCollection.entrySet()
+                                .iterator()
+                : Collections.<ResourceMember, DataFile> emptyMap()
+                             .entrySet()
+                             .iterator();
     }
 
     private static class FieldCounter {
         private final Map<ResourceField, FieldCount> counts = new HashMap<>();
+
         void updateWith(List<ResourceField> fields) {
             for (ResourceField field : fields) {
                 if (counts.containsKey(field)) {
@@ -169,6 +176,7 @@ public class DataCollection implements Iterable<Map.Entry<ResourceMember, DataFi
                 }
             }
         }
+
         boolean isJoinColumn(ResourceField field) {
             return counts.get(field).count > 1;
         }
@@ -176,7 +184,8 @@ public class DataCollection implements Iterable<Map.Entry<ResourceMember, DataFi
 
     private static class FieldCount {
         private int count;
-        public FieldCount() {
+
+        FieldCount() {
             count++;
         }
     }

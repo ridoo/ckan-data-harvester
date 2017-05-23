@@ -65,6 +65,7 @@ public class SosObservation {
         this.phenomenonTime = time;
         
     }
+
     @Override
     public int hashCode() {
         final int prime = 31;

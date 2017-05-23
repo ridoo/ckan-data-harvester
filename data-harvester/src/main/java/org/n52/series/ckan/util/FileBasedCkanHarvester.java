@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.util;
 
 import java.io.File;
@@ -61,8 +62,7 @@ public class FileBasedCkanHarvester extends CkanHarvestingService {
             CkanDataset dataset = parseDatasetTestFile(file);
             try {
                 getMetadataStore().insertOrUpdate(dataset);
-            }
-            catch (IllegalStateException e) {
+            } catch (IllegalStateException e) {
                 LOGGER.warn("Inconsistent test data for dataset '{}'");
             }
         }
@@ -75,7 +75,8 @@ public class FileBasedCkanHarvester extends CkanHarvestingService {
         if (datasetFiles != null) {
             for (File file : datasetFiles) {
                 if (file.isDirectory()) {
-                    Path datasetPath = file.toPath().resolve("dataset.json");
+                    Path datasetPath = file.toPath()
+                                           .resolve("dataset.json");
                     datasets.add(datasetPath.toFile());
                 }
             }
@@ -95,9 +96,9 @@ public class FileBasedCkanHarvester extends CkanHarvestingService {
 
     private CkanDataset parseDatasetTestFile(File file) {
         try {
-            return JsonUtil.getCkanObjectMapper().readValue(file, CkanDataset.class);
-        }
-        catch (IOException e) {
+            return JsonUtil.getCkanObjectMapper()
+                           .readValue(file, CkanDataset.class);
+        } catch (IOException e) {
             LOGGER.error("could not read/parse test file", e);
             return new CkanDataset();
         }
@@ -113,8 +114,10 @@ public class FileBasedCkanHarvester extends CkanHarvestingService {
             for (File file : dataFolders) {
                 if (file.isDirectory()) {
                     String fileName = id + "." + format.toLowerCase();
-                    Path datapath = file.toPath().resolve(fileName);
-                    if (datapath.toFile().exists()) {
+                    Path datapath = file.toPath()
+                                        .resolve(fileName);
+                    if (datapath.toFile()
+                                .exists()) {
                         return new DataFile(resource, format, datapath.toFile());
                     }
                 }

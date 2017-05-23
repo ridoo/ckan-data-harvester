@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.util;
 
 import java.util.Date;
@@ -52,76 +53,8 @@ public class TimeFieldParser {
 
     public TimeInstant parseTimestamp(String dateValue, ResourceField field) {
         return isLong(dateValue) && !hasDateFormat(field)
-            ? new TimeInstant(new Date(Long.parseLong(dateValue)))
-            : parseDateValue(dateValue, parseDateFormat(field));
-    }
-
-    public class ValidTimeBuilder extends ObservationFieldVisitor<TimePeriod> {
-
-        private TimeInstant validStart;
-
-        private TimeInstant validEnd;
-
-        @Override
-        public void visitObservationField(ResourceField field, String value) {
-            if (field.isField(CkanConstants.KnownFieldIdValue.VALID_TIME_START)) {
-                validStart = parseTimestamp(value, field);
-            }
-            else if (field.isField(CkanConstants.KnownFieldIdValue.VALID_TIME_END)) {
-                validEnd = parseTimestamp(value, field);
-            }
-        }
-
-        @Override
-        public boolean hasResult() {
-            return validStart == null && validEnd == null;
-        }
-
-        @Override
-        public TimePeriod getResult() {
-            if (validStart == null && validEnd == null) {
-                return null;
-            }
-            TimePeriod validTime;
-            if (validStart != null && validEnd == null) {
-                validTime = new TimePeriod(validStart, new TimeInstant(TimeIndeterminateValue.unknown));
-            }
-            else if (validStart == null && validEnd != null) {
-                validTime = new TimePeriod(new TimeInstant(TimeIndeterminateValue.unknown), validEnd);
-            }
-            else {
-                validTime = new TimePeriod(validStart, validEnd);
-            }
-            return validTime;
-        }
-    }
-
-    public class TimeBuilder extends ObservationFieldVisitor<TimeInstant> {
-
-        private final String timeField;
-        
-        private TimeInstant time;
-        
-        public TimeBuilder(String timeField) {
-            this.timeField = timeField;
-        }
-
-        @Override
-        public void visitObservationField(ResourceField field, String value) {
-            if (field.isField(timeField)) {
-                time = parseTimestamp(value, field);
-            }
-        }
-
-        @Override
-        public boolean hasResult() {
-            return time != null;
-        }
-
-        @Override
-        public TimeInstant getResult() {
-            return time;
-        }
+                ? new TimeInstant(new Date(Long.parseLong(dateValue)))
+                : parseDateValue(dateValue, parseDateFormat(field));
     }
 
     private boolean isLong(String value) {
@@ -136,10 +69,12 @@ public class TimeFieldParser {
     protected String parseDateFormat(ResourceField field) {
         if (hasDateFormat(field)) {
             String format = field.getOther(CkanConstants.FieldPropertyName.DATE_FORMAT);
-            format = ( !format.endsWith("Z") && !format.endsWith("z"))
-                ? format + "Z"
-                : format;
-            return format.replace("DD", "dd").replace("hh", "HH"); // XXX hack to fix wrong format
+            format = (!format.endsWith("Z") && !format.endsWith("z"))
+                    ? format + "Z"
+                    : format;
+            // XXX hack to fix wrong format
+            return format.replace("DD", "dd")
+                         .replace("hh", "HH");
         }
         return null;
     }
@@ -151,19 +86,16 @@ public class TimeFieldParser {
     protected TimeInstant parseDateValue(String dateValue, String dateFormat) {
         try {
             TimeInstant timeInstant = new TimeInstant();
-            if ( !hasOffsetInfo(dateValue)) {
-                dateValue += "Z";
-            }
-            DateTime dateTime = parseIsoString2DateTime(dateValue, dateFormat);
+            DateTime dateTime = !hasOffsetInfo(dateValue)
+                    ? parseIsoString2DateTime(dateValue + "Z", dateFormat)
+                    : parseIsoString2DateTime(dateValue, dateFormat);
             timeInstant.setValue(dateTime);
             return timeInstant;
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             if (ex instanceof DateTimeParseException) {
                 LOGGER.error("Cannot parse date string {} with format {}", dateValue, dateFormat);
-            }
-            else {
-                LOGGER.error("Cannot parse date string {} with format {}", dateValue, dateFormat, ex);
+            } else {
+                LOGGER.error("Cannot parse {} with format {}", dateValue, dateFormat, ex);
             }
 
             return null;
@@ -187,21 +119,21 @@ public class TimeFieldParser {
             return null;
         }
         try {
-            if ( !Strings.isNullOrEmpty(format)) {
+            if (!Strings.isNullOrEmpty(format)) {
                 return DateTime.parse(timeString, DateTimeFormat.forPattern(format));
-            }
-            else if (hasOffset(timeString)) {
-                return ISODateTimeFormat.dateOptionalTimeParser().withOffsetParsed().parseDateTime(timeString);
-            }
-            else if (false /* TODO check, if time_zone field is set and parse to ISO */ ) {
-                // add timezone
+            } else if (hasOffset(timeString)) {
+                return ISODateTimeFormat.dateOptionalTimeParser()
+                                        .withOffsetParsed()
+                                        .parseDateTime(timeString);
+            } else if (false) {
+                /* TODO check, if time_zone field is set and parse to ISO */
                 return null;
+            } else {
+                return ISODateTimeFormat.dateOptionalTimeParser()
+                                        .withZone(DateTimeZone.UTC)
+                                        .parseDateTime(timeString);
             }
-            else {
-                return ISODateTimeFormat.dateOptionalTimeParser().withZone(DateTimeZone.UTC).parseDateTime(timeString);
-            }
-        }
-        catch (final RuntimeException uoe) {
+        } catch (final RuntimeException uoe) {
             throw new DateTimeParseException(timeString, uoe);
         }
     }
@@ -216,6 +148,71 @@ public class TimeFieldParser {
         return dateValue.endsWith("Z")
                 || dateValue.contains("+")
                 || Pattern.matches("-\\d", dateValue);
+    }
+
+    public class ValidTimeBuilder extends ObservationFieldVisitor<TimePeriod> {
+
+        private TimeInstant validStart;
+
+        private TimeInstant validEnd;
+
+        @Override
+        public void visitObservationField(ResourceField field, String value) {
+            if (field.isField(CkanConstants.KnownFieldIdValue.VALID_TIME_START)) {
+                validStart = parseTimestamp(value, field);
+            } else if (field.isField(CkanConstants.KnownFieldIdValue.VALID_TIME_END)) {
+                validEnd = parseTimestamp(value, field);
+            }
+        }
+
+        @Override
+        public boolean hasResult() {
+            return validStart == null && validEnd == null;
+        }
+
+        @Override
+        public TimePeriod getResult() {
+            if (validStart == null && validEnd == null) {
+                return null;
+            }
+            TimePeriod validTime;
+            if (validStart != null && validEnd == null) {
+                validTime = new TimePeriod(validStart, new TimeInstant(TimeIndeterminateValue.unknown));
+            } else if (validStart == null && validEnd != null) {
+                validTime = new TimePeriod(new TimeInstant(TimeIndeterminateValue.unknown), validEnd);
+            } else {
+                validTime = new TimePeriod(validStart, validEnd);
+            }
+            return validTime;
+        }
+    }
+
+    public class TimeBuilder extends ObservationFieldVisitor<TimeInstant> {
+
+        private final String timeField;
+
+        private TimeInstant time;
+
+        public TimeBuilder(String timeField) {
+            this.timeField = timeField;
+        }
+
+        @Override
+        public void visitObservationField(ResourceField field, String value) {
+            if (field.isField(timeField)) {
+                time = parseTimestamp(value, field);
+            }
+        }
+
+        @Override
+        public boolean hasResult() {
+            return time != null;
+        }
+
+        @Override
+        public TimeInstant getResult() {
+            return time;
+        }
     }
 
 }

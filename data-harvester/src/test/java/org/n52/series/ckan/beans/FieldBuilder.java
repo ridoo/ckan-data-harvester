@@ -222,7 +222,7 @@ public class FieldBuilder {
         }
         CkanMapping mappings = createCkanMapping();
         return new ResourceField(field, index, mappings)
-                .withResourceType(resourceType);
+                .setResourceType(resourceType);
     }
     public ResourceField createSimple(String id) {
         return createViaTemplate("{ \"field_id\": \"%s\", \"field_type\": \"string\" }", id);

@@ -62,12 +62,12 @@ public class Phenomenon {
         this.label = label;
         this.valueField = valueField;
         this.phenomenonField = valueField;
-        this.observationType = parseObservationType(valueField);
+        this.observationType = parseObservationType();
         // TODO String phenomenonDescription = parseDescription(field);
         this.uom = uom;
     }
 
-    private String parseObservationType(ResourceField valueField) {
+    private String parseObservationType() {
         if (valueField.isOneOfType(CkanConstants.DataType.QUANTITY)) {
             return OmConstants.OBS_TYPE_MEASUREMENT;
         }

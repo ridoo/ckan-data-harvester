@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.util;
 
 import org.n52.series.ckan.beans.ResourceField;
@@ -34,7 +35,7 @@ public abstract class ObservationFieldVisitor<T> implements FieldVisitor<T> {
 
     @Override
     public FieldVisitor<T> visit(ResourceField field, String value) {
-        if ( !field.isObservationField()) {
+        if (!field.isObservationField()) {
             // currently visit observation fields only
             return this;
         } else {

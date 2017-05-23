@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.sos;
 
 import java.io.IOException;
@@ -81,7 +82,7 @@ public class SerializedCache implements CkanSosReferenceCache, Serializable {
             SerializableCkanResource resource = serialize(reference);
             return observationReferenceCache.containsKey(resource);
         } catch (JsonProcessingException e) {
-            LOGGER.debug("Invalid resource.", e);
+            LOGGER.debug("Could not determine if reference exists.", e);
             return false;
         }
     }
@@ -91,7 +92,7 @@ public class SerializedCache implements CkanSosReferenceCache, Serializable {
         try {
             return observationReferenceCache.get(serialize(resource));
         } catch (JsonProcessingException e) {
-            LOGGER.debug("Invalid resource.", e);
+            LOGGER.debug("Could not serialize resource.", e);
             return null;
         }
     }
@@ -114,7 +115,7 @@ public class SerializedCache implements CkanSosReferenceCache, Serializable {
     private void addDataset(CkanDataset dataset) {
         try {
             this.datasets.put(dataset.getId(), serialize(dataset));
-        } catch(JsonProcessingException e) {
+        } catch (JsonProcessingException e) {
             LOGGER.debug("Could not serialize dataset.", e);
         }
     }
@@ -149,7 +150,8 @@ public class SerializedCache implements CkanSosReferenceCache, Serializable {
 
     private Map<CkanResource, CkanSosObservationReference> deserializeObservationReferences() {
         Map<CkanResource, CkanSosObservationReference> observationReferences = new HashMap<>();
-        for (Map.Entry<SerializableCkanResource, CkanSosObservationReference> entry : observationReferenceCache.entrySet()) {
+        for (Map.Entry<SerializableCkanResource,
+                       CkanSosObservationReference> entry : observationReferenceCache.entrySet()) {
             final CkanResource ckanResource = deserialize(entry.getKey());
             if (ckanResource != null) {
                 observationReferences.put(ckanResource, entry.getValue());
