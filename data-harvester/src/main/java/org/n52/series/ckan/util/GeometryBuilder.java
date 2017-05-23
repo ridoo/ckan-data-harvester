@@ -71,7 +71,7 @@ public class GeometryBuilder implements FieldVisitor<GeometryValue> {
 
     private Double latitude;
 
-    private double altitude;
+    private Double altitude;
 
     private Geometry geometry;
 
