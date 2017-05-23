@@ -98,11 +98,17 @@ public class TimeFieldParser {
 
     public class TimeBuilder extends ObservationFieldVisitor<TimeInstant> {
 
+        private final String timeField;
+        
         private TimeInstant time;
+        
+        public TimeBuilder(String timeField) {
+            this.timeField = timeField;
+        }
 
         @Override
         public void visitObservationField(ResourceField field, String value) {
-            if (field.isField(CkanConstants.KnownFieldIdValue.OBSERVATION_TIME)) {
+            if (field.isField(timeField)) {
                 time = parseTimestamp(value, field);
             }
         }

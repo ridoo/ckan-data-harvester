@@ -65,7 +65,7 @@ class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
 
     private final TimeFieldParser.ValidTimeBuilder validTimeBuilder = timeFieldParser.new ValidTimeBuilder();
 
-    private final TimeFieldParser.TimeBuilder timeBuilder = timeFieldParser.new TimeBuilder();
+    private final TimeFieldParser.TimeBuilder observationTimeBuilder = timeFieldParser.new TimeBuilder(CkanConstants.KnownFieldIdValue.OBSERVATION_TIME);
 
     private final GeometryBuilder geometryBuilder = GeometryBuilder.create();
 
