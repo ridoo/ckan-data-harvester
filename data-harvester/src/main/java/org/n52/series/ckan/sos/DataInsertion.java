@@ -40,7 +40,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.n52.sos.ogc.gml.AbstractFeature;
-import org.n52.sos.ogc.gml.time.Time;
+import org.n52.sos.ogc.gml.time.TimeInstant;
 import org.n52.sos.ogc.om.OmObservation;
 import org.n52.sos.ogc.om.OmObservationConstellation;
 import org.n52.sos.ogc.ows.OwsExceptionReport;
@@ -50,7 +50,7 @@ import org.n52.sos.request.InsertSensorRequest;
 
 class DataInsertion {
 
-    private final Map<Time, SosObservation> observationsByTime;
+    private final Map<ObservationDiscriminator, SosObservation> observationsByTime;
 
     private final Set<String> observationTypes;
 
@@ -113,7 +113,9 @@ class DataInsertion {
         }
 
         observationTypes.add(sosObservation.getObservationType());
-        observationsByTime.put(sosObservation.getPhenomenonTime(), sosObservation);
+        OmObservation observation = sosObservation.getObservation();
+        OmObservationConstellation constellation = observation.getObservationConstellation();
+        observationsByTime.put(new ObservationDiscriminator(sosObservation), sosObservation);
     }
 
     boolean hasObservations() {
@@ -153,6 +155,63 @@ class DataInsertion {
         String featureIdentifier = "Feature: '" + getFeature().getIdentifier() + "'";
         String observationCount = "Observations: #" + observationsByTime.size();
         return getClass().getSimpleName() + " [ " + featureIdentifier + ", " + observationCount + "]";
+    }
+
+    private static class ObservationDiscriminator {
+
+        private OmObservationConstellation constellation;
+
+        private TimeInstant timestamp;
+
+        ObservationDiscriminator(SosObservation observation) {
+            OmObservation omObservation = observation.getObservation();
+            this.constellation = omObservation.getObservationConstellation();
+            this.timestamp = observation.getPhenomenonTime();
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((constellation == null)
+                    ? 0
+                    : constellation.hashCode());
+            result = prime * result + ((timestamp == null)
+                    ? 0
+                    : timestamp.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            ObservationDiscriminator other = (ObservationDiscriminator) obj;
+            if (constellation == null) {
+                if (other.constellation != null) {
+                    return false;
+                }
+            } else if (!constellation.equals(other.constellation)) {
+                return false;
+            }
+            if (timestamp == null) {
+                {
+                    if (other.timestamp != null) {
+                        return false;
+                    }
+                }
+            } else if (!timestamp.equals(other.timestamp)) {
+                return false;
+            }
+            return true;
+        }
     }
 
 }
