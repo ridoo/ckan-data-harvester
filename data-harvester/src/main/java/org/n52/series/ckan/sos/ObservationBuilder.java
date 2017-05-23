@@ -39,7 +39,7 @@ import org.n52.series.ckan.util.GeometryBuilder;
 import org.n52.series.ckan.util.ObservationFieldVisitor;
 import org.n52.series.ckan.util.TimeFieldParser;
 import org.n52.sos.ogc.gml.ReferenceType;
-import org.n52.sos.ogc.gml.time.Time;
+import org.n52.sos.ogc.gml.time.TimeInstant;
 import org.n52.sos.ogc.gml.time.TimePeriod;
 import org.n52.sos.ogc.om.NamedValue;
 import org.n52.sos.ogc.om.OmConstants;
@@ -57,8 +57,6 @@ class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ObservationBuilder.class);
 
-    private static final String DEFAULT_OBSERVATION_TYPE = OmConstants.OBS_TYPE_MEASUREMENT;
-
     private final SingleObservationValueBuilder observationValueBuilder = new SingleObservationValueBuilder();
 
     private final TimeFieldParser timeFieldParser = new TimeFieldParser();
@@ -74,8 +72,6 @@ class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
     private final Phenomenon phenomenon;
 
     private final ResourceKey qualifier;
-
-    private String observationType = DEFAULT_OBSERVATION_TYPE;
 
     private UomParser uomParser = new UcumParser();
 
@@ -110,13 +106,13 @@ class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
         field.accept(observationValueBuilder, value);
         field.accept(geometryBuilder, value);
         field.accept(validTimeBuilder, value);
-        field.accept(timeBuilder, value);
+        field.accept(observationTimeBuilder, value);
         return this;
     }
 
     @Override
     public boolean hasResult() {
-        if (timeBuilder.hasResult()) {
+        if (observationTimeBuilder.hasResult()) {
             LOGGER.debug("ignore observation having no time.");
             return false;
         } else if (!observationValueBuilder.hasResult()
@@ -129,12 +125,12 @@ class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
 
     @Override
     public SosObservation getResult() {
+        String observationType = phenomenon.getObservationType();
         SingleObservationValue< ? > result = observationValueBuilder.hasResult()
                 ? observationValueBuilder.getResult()
                 : null;
         if (!observationValueBuilder.hasResult() && geometryBuilder.hasResult()) {
             // pure geometry observation w/o any other value
-            observationType = phenomenon.getObservationType();
             SingleObservationValue<Geometry> obsValue = new SingleObservationValue<>();
             obsValue.setValue(geometryBuilder.getResult());
             result = obsValue;
@@ -156,7 +152,7 @@ class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
         result.setPhenomenonTime(time);
         omObservation.setValue(result);
 
-        if (sensorBuilder != null && isGeometryObservation()) {
+        if (sensorBuilder != null && isGeometryObservation(observationType)) {
             sensorBuilder.setInsitu(false);
         }
 
@@ -167,7 +163,8 @@ class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
         return o;
     }
 
-    private boolean isGeometryObservation() {
+
+    private boolean isGeometryObservation(String observationType) {
         return observationType.equals(OmConstants.OBS_TYPE_GEOMETRY_OBSERVATION);
     }
 
@@ -194,8 +191,6 @@ class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
                 }
                 if (field.isOfType(CkanConstants.DataType.STRING)) {
                     result = createTextValue(field, value);
-                } else if (field.isOfType(CkanConstants.DataType.GEOMETRY)) {
-                    observationType = OmConstants.OBS_TYPE_GEOMETRY_OBSERVATION;
                 }
             }
         }
