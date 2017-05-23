@@ -58,7 +58,7 @@ import org.n52.sos.response.GetFeatureOfInterestResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Ignore("currently toooooo slooooooooooow for unit testing")
+//@Ignore("currently toooooo slooooooooooow for unit testing")
 public class SosDataStoreManagerTest extends HibernateTestCase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SosDataStoreManagerTest.class);
@@ -232,6 +232,27 @@ public class SosDataStoreManagerTest extends HibernateTestCase {
         // 2) the track must be identifiable ... can be artificially differentiated by combining columns
         //    --> e.g. timestamp (using raw, or an aggregating pattern)
         insertDataset("9f064e17-799e-4261-8599-d3ee31b5392b");
+        assertThat(database, hasObservationsAvailable());
+    }
+
+    @Test
+    @Ignore("work in progress")
+    public void when_inserting_DWDKreise_dataset_then_getObservationNotEmpty() {
+        String datasetId = "2518529a-fbf1-4940-8270-a1d4d0fa8c4d";
+
+        insertDataset(datasetId);
+        List<DataAvailability> dataAvailability = database.getDataAvailability();
+        MatcherAssert.assertThat("Wrong dataset count", dataAvailability.size(), is(3));
+        assertThat(dataAvailability, containsDatasetWithPhenomenon("FROST"));
+        assertThat(dataAvailability, containsDatasetWithPhenomenon("GLÄTTE"));
+        assertThat(dataAvailability, containsDatasetWithPhenomenon("SCHNEEFALL"));
+        assertThat(dataAvailability, containsDatasetWithPhenomenon("WINDBÖEN"));
+        assertThat(dataAvailability, containsDatasetWithPhenomenon("LEICHTER SCHNEEFALL"));
+
+        GetFeatureOfInterestResponse allFeatures = database.getFeatures();
+        MatcherAssert.assertThat(allFeatures, FeatureOfInterestMatcher.contains("dwd-1048"));
+        MatcherAssert.assertThat(allFeatures, FeatureOfInterestMatcher.isSamplingPoint("dwd-1048"));
+
         assertThat(database, hasObservationsAvailable());
     }
 
