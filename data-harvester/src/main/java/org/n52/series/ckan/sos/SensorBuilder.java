@@ -29,6 +29,7 @@
 package org.n52.series.ckan.sos;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -99,6 +100,11 @@ public class SensorBuilder {
 
     public SensorBuilder addPhenomenon(Phenomenon phenomenon) {
         this.phenomenona.add(phenomenon);
+        return this;
+    }
+
+    public SensorBuilder addPhenomena(Collection<Phenomenon> phenomena) {
+        this.phenomenona.addAll(phenomena);
         return this;
     }
 

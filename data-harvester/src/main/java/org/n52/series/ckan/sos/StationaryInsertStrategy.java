@@ -63,30 +63,26 @@ class StationaryInsertStrategy extends AbstractInsertStrategy {
 
         LOGGER.debug("Create stationary insertions ...");
         Map<String, DataInsertion> dataInsertions = new HashMap<>();
-        for (Entry<ResourceKey, Map<ResourceField, String>> rowEntry : dataTable.getTable().rowMap().entrySet()) {
+        for (Entry<ResourceKey, Map<ResourceField, String>> rowEntry : dataTable.getTable()
+                                                                                .rowMap()
+                                                                                .entrySet()) {
 
             // TODO how and what to create in which order depends on the actual strategy chosen
 
             CkanDataset dataset = dataCollection.getDataset();
-            ResourceMember member = rowEntry.getKey().getMember();
+            ResourceMember member = rowEntry.getKey()
+                                            .getMember();
             SimpleFeatureBuilder foiBuilder = new SimpleFeatureBuilder(dataset);
             Map<ResourceField, String> values = rowEntry.getValue();
             foiBuilder.visit(values);
 
             SensorBuilder sensorBuilder = SensorBuilder.create()
-                    .withFeature(foiBuilder.getResult())
-                    .addPhenomena(phenomena)
-                    .withDataset(dataset)
-                    .setMobile(false);
+                                                       .withFeature(foiBuilder.getResult())
+                                                       .addPhenomena(phenomena)
+                                                       .withDataset(dataset)
+                                                       .setMobile(false);
 
             for (Phenomenon phenomenon : phenomena) {
-                ResourceField valueField = phenomenon.getValueField();
-                String value = values.get(valueField);
-                
-                ObservationBuilder observationBuilder = ObservationBuilder
-                        .create(phenomenon, rowEntry.getKey())
-                        .withUomParser(getUomParser())
-                        .withSensorBuilder(sensorBuilder);
 
                 if (phenomenon.isSoftTyped()) {
                     // XXX iterating over all phenomena would create n*row observations
@@ -100,7 +96,7 @@ class StationaryInsertStrategy extends AbstractInsertStrategy {
                 }
 
                 String procedureId = sensorBuilder.getProcedureId();
-                if ( !dataInsertions.containsKey(procedureId)) {
+                if (!dataInsertions.containsKey(procedureId)) {
                     LOGGER.debug("Building sensor with: procedure '{}', phenomenon '{}' (unit '{}')",
                                  procedureId,
                                  phenomenon.getLabel(),
@@ -111,9 +107,11 @@ class StationaryInsertStrategy extends AbstractInsertStrategy {
                 }
 
                 DataInsertion dataInsertion = dataInsertions.get(procedureId);
-                final SosObservation observation = phenomenon.isSoftTyped()
-                        ? observationBuilder.visit(valueField, value).getResult()
-                        : observationBuilder.visit(values).getResult();
+                final SosObservation observation = ObservationBuilder.create(phenomenon, rowEntry.getKey())
+                                                                     .withUomParser(getUomParser())
+                                                                     .withSensorBuilder(sensorBuilder)
+                                                                     .visit(values)
+                                                                     .getResult();
                 if (observation != null) {
                     dataInsertion.addObservation(observation);
                 }

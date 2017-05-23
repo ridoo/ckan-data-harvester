@@ -148,9 +148,11 @@ class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
             omObservation.setValidTime(validTime);
         }
 
-        Time time = timeBuilder.getResult();
+        TimeInstant time = observationTimeBuilder.getResult();
         result.setPhenomenonTime(time);
         omObservation.setValue(result);
+        // TODO add a result time builder
+        omObservation.setResultTime(time);
 
         if (sensorBuilder != null && isGeometryObservation(observationType)) {
             sensorBuilder.setInsitu(false);
@@ -159,6 +161,7 @@ class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
         omObservation.setDefaultElementEncoding(DEFAULT_CHARSET.toString());
         omObservation.setObservationConstellation(createConstellation(phenomenon));
         SosObservation o = new SosObservation(omObservation, observationType);
+        o.setPhenomenonTime(time);
         LOGGER.trace("Observation: {}", o);
         return o;
     }
