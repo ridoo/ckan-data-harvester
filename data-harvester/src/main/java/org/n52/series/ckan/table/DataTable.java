@@ -133,11 +133,13 @@ public class DataTable {
         if (!resourceMember.isJoinable(other.resourceMember)) {
             return this;
         }
+
         DataTable outputTable = new DataTable(resourceMember);
         outputTable.joinedMembers.add(other.resourceMember);
         Collection<ResourceField> joinFields = fields == null || fields.length == 0
                 ? resourceMember.getJoinableFields(other.resourceMember)
                 : Arrays.asList(fields);
+
         joinTable(other, outputTable, joinFields);
         return outputTable;
     }
@@ -169,6 +171,15 @@ public class DataTable {
             // XXX does not consider AND in joinFields, but rather joins multiple times!
             final Map<ResourceKey, String> joinOnIndex = table.column(field);
             final Map<ResourceKey, String> toJoinIndex = other.table.column(field);
+            joinOnIndex.entrySet()
+                    .stream()
+                    .forEach(joinOnCell -> toJoinIndex.entrySet()
+                            .stream()
+                            .filter(toJoinCell -> field.equalsValues(joinOnCell.getValue(), toJoinCell.getValue()))
+                            .forEach(toJoinCell -> {
+                                            final ResourceKey otherKey = toJoinCell.getKey();
+                                            final String newId = otherKey.getKeyId() + "_" + outputTable.rowSize();
+                                            ResourceKey newKey = new ResourceKey(newId, outputTable.resourceMember);
 
             try {
                 Set<Entry<ResourceKey, String>> joinOnEntries = joinOnIndex.entrySet();

@@ -71,15 +71,15 @@ public final class SensorBuilder {
 
     private final List<Phenomenon> phenomenona;
 
+    private Boolean insitu = Boolean.TRUE;
+
+    private Boolean mobile = Boolean.FALSE;
+
     private AbstractFeature feature;
 
     private Procedure procedure;
 
     private CkanDataset dataset;
-
-    private Boolean insitu = Boolean.TRUE;
-
-    private Boolean mobile = Boolean.FALSE;
 
     private SensorBuilder() {
         this.phenomenona = new ArrayList<>();
@@ -231,9 +231,9 @@ public final class SensorBuilder {
     private List<SmlIo< ? >> createInputs() {
         List<SmlIo< ? >> ios = new ArrayList<>();
         for (Phenomenon phenomenon : phenomenona) {
-            SweAbstractDataComponent observableProperty = new SweObservableProperty()
-                                                                                     .setDefinition(phenomenon.getId());
-            ios.add(new SmlIo<>(observableProperty).setIoName(phenomenon.getId()));
+            String phenomenonId = phenomenon.getId();
+            SweAbstractDataComponent observableProperty = new SweObservableProperty().setDefinition(phenomenonId);
+            ios.add(new SmlIo<>(observableProperty).setIoName(phenomenonId));
         }
         return ios;
     }
@@ -292,8 +292,7 @@ public final class SensorBuilder {
     private List<SmlClassifier> createClassificationList() {
         List<SmlClassifier> classifiers = new ArrayList<>();
         for (Phenomenon phenomenon : phenomenona) {
-            classifiers.add(new SmlClassifier(
-                                              "phenomenon",
+            classifiers.add(new SmlClassifier("phenomenon",
                                               "urn:ogc:def:classifier:OGC:1.0:phenomenon",
                                               null,
                                               phenomenon.getId()));
@@ -319,8 +318,7 @@ public final class SensorBuilder {
 
         SmlCapabilities offeringCapabilities = new SmlCapabilities("offerings");
         offering.setIdentifier("Offering_" + getProcedureId());
-        SweField field = createTextField(
-                                         "field_0",
+        SweField field = createTextField("field_0",
                                          SensorML20Constants.OFFERING_FIELD_DEFINITION,
                                          offering.getIdentifier());
         final SweSimpleDataRecord record = new SweSimpleDataRecord().addField(field);

@@ -56,14 +56,14 @@ public class SosObservation {
     public OmObservation getObservation() {
         return observation;
     }
-    
+
     public TimeInstant getPhenomenonTime() {
         return phenomenonTime;
     }
 
     public void setPhenomenonTime(TimeInstant time) {
         this.phenomenonTime = time;
-        
+
     }
 
     @Override
