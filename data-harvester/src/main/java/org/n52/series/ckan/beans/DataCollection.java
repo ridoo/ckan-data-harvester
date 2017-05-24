@@ -150,7 +150,7 @@ public class DataCollection implements Iterable<Map.Entry<ResourceMember, DataFi
         }
         return joinColumns;
     }
-    
+
     @Override
     public Iterator<Entry<ResourceMember, DataFile>> iterator() {
         return dataCollection != null

@@ -49,19 +49,19 @@ import com.google.common.base.Strings;
 public class TimeFieldParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TimeFieldParser.class);
-    
+
     public TimeInstant parseTimestamp(String dateValue, ResourceField field) {
         return isLong(dateValue) && !hasDateFormat(field)
             ? new TimeInstant(new Date(Long.parseLong(dateValue)))
             : parseDateValue(dateValue, parseDateFormat(field));
     }
-    
+
     public class ValidTimeBuilder extends ObservationFieldVisitor<TimePeriod> {
 
         private TimeInstant validStart;
-        
+
         private TimeInstant validEnd;
-        
+
         @Override
         public void visitObservationField(ResourceField field, String value) {
             if (field.isField(CkanConstants.KnownFieldIdValue.VALID_TIME_START)) {
@@ -71,7 +71,7 @@ public class TimeFieldParser {
                 validEnd = parseTimestamp(value, field);
             }
         }
-    
+
         @Override
         public boolean hasResult() {
             return validStart == null && validEnd == null;
@@ -99,14 +99,14 @@ public class TimeFieldParser {
     public class TimeBuilder extends ObservationFieldVisitor<TimeInstant> {
 
         private TimeInstant time;
-        
+
         @Override
         public void visitObservationField(ResourceField field, String value) {
             if (field.isField(CkanConstants.KnownFieldIdValue.OBSERVATION_TIME)) {
                 time = parseTimestamp(value, field);
             }
         }
-    
+
         @Override
         public boolean hasResult() {
             return time != null;

@@ -13,7 +13,7 @@ public abstract class ObservationFieldVisitor<T> implements FieldVisitor<T> {
             visitObservationField(field, value);
         }
     }
-    
+
     public abstract void visitObservationField(ResourceField field, String value);
 
 }

@@ -186,7 +186,7 @@ public class TrackPointCollector {
         public boolean isValid() {
             return geometry != null;
         }
-        
+
         public Geometry getGeometry() {
             return geometry;
         }

@@ -112,7 +112,7 @@ public class ResourceField implements VisitableField {
     public String getLowerCasedFieldId() {
         return fieldId.toLowerCase(Locale.ROOT);
     }
-    
+
     public boolean matchesIndex(int i) {
         return index == i;
     }

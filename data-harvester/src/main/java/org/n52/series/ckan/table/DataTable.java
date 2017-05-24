@@ -134,7 +134,7 @@ public class DataTable {
     private void joinTable(final DataTable other, final DataTable outputTable, Collection<ResourceField> joinFields) {
         LOGGER.debug("joining (on fields {}) {} with {}.", joinFields, this, other);
         final long start = System.currentTimeMillis();
-        
+
         final int interval = 10;
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
         executor.scheduleAtFixedRate(new Runnable() {
@@ -149,7 +149,7 @@ public class DataTable {
                     return (now - start)/1000;
                 }
             }, interval, interval, TimeUnit.SECONDS);
-        
+
         for (ResourceField field : joinFields) {
             final Map<ResourceKey, String> joinOnIndex = table.column(field);
             final Map<ResourceKey, String> toJoinIndex = other.table.column(field);
@@ -171,7 +171,7 @@ public class DataTable {
                                                         .withQualifier(otherKey.getMember());
                                                 outputTable.table.put(newKey, joinedField, otherValue.getValue());
                                             }
-                                            
+
                                             // TODO remove rows after join
 
                                             // add this instance's values

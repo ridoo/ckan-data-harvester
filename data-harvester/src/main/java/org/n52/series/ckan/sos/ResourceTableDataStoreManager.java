@@ -19,13 +19,13 @@ import eu.trentorise.opendata.jackan.model.CkanDataset;
 import eu.trentorise.opendata.jackan.model.CkanResource;
 
 public class ResourceTableDataStoreManager extends SosDataStoreManager {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceTableDataStoreManager.class);
 
     ResourceTableDataStoreManager() {
         this(null);
     }
-    
+
     ResourceTableDataStoreManager(CkanSosReferenceCache ckanSosReferenceCache) {
         this(new InsertSensorDAO(), new InsertObservationDAO(), new DeleteObservationDAO(), ckanSosReferenceCache);
     }
