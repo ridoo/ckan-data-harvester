@@ -1,7 +1,7 @@
 language: java
 jdk:
   - oraclejdk8
-script: mvn -fae -U -B clean install -P check -P snapshot-dist
+script: mvn -fae -U -B clean install -P check -P allow-snapshot-repos
 #after_success: chmod +x .travis/on_success.sh && .travis/on_success.sh
 cache:
   directories
