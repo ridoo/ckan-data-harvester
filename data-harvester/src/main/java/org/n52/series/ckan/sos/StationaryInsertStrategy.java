@@ -40,6 +40,7 @@ import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.beans.ResourceMember;
 import org.n52.series.ckan.table.DataTable;
 import org.n52.series.ckan.table.ResourceKey;
+import org.n52.sos.ogc.om.features.samplingFeatures.SamplingFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,14 +71,14 @@ class StationaryInsertStrategy extends AbstractInsertStrategy {
             // TODO how and what to create in which order depends on the actual strategy chosen
 
             CkanDataset dataset = dataCollection.getDataset();
-            ResourceMember member = rowEntry.getKey()
-                                            .getMember();
-            SimpleFeatureBuilder foiBuilder = new SimpleFeatureBuilder(dataset);
+            ResourceKey rowKey = rowEntry.getKey();
+            ResourceMember member = rowKey.getMember();
             Map<ResourceField, String> values = rowEntry.getValue();
-            foiBuilder.visit(values);
 
+            SamplingFeature feature = new SimpleFeatureBuilder(dataset).visit(values)
+                                                                       .getResult();
             SensorBuilder sensorBuilder = SensorBuilder.create()
-                                                       .setFeature(foiBuilder.getResult())
+                                                       .setFeature(feature)
                                                        .addPhenomena(phenomena)
                                                        .setDataset(dataset)
                                                        .setMobile(false);
@@ -109,11 +110,11 @@ class StationaryInsertStrategy extends AbstractInsertStrategy {
                 }
 
                 DataInsertion dataInsertion = dataInsertions.get(procedureId);
-                final SosObservation observation = ObservationBuilder.create(currentPhenomenon, rowEntry.getKey())
-                                                                     .setUomParser(getUomParser())
-                                                                     .setSensorBuilder(sensorBuilder)
-                                                                     .visit(values)
-                                                                     .getResult();
+                ObservationBuilder builder = ObservationBuilder.create(currentPhenomenon, rowKey);
+                final SosObservation observation = builder.setUomParser(getUomParser())
+                                                          .setSensorBuilder(sensorBuilder)
+                                                          .visit(values)
+                                                          .getResult();
                 if (observation != null) {
                     dataInsertion.addObservation(observation);
                 }
