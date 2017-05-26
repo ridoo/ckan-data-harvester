@@ -59,29 +59,30 @@ final class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
 
     private final TimeFieldParser timeFieldParser = new TimeFieldParser();
 
+    private final GeometryBuilder geometryBuilder = GeometryBuilder.create();
+    
     private final TimeFieldParser.ValidTimeBuilder validTimeBuilder;
 
     private final TimeFieldParser.TimeBuilder observationTimeBuilder;
-
-    private final GeometryBuilder geometryBuilder = GeometryBuilder.create();
 
     private final OmObservation omObservation;
 
     private final Phenomenon phenomenon;
 
     private final ResourceKey qualifier;
-
-    private UomParser uomParser = new UcumParser();
-
+    
     private SensorBuilder sensorBuilder;
 
+    private UomParser uomParser;
+    
     private ObservationBuilder(Phenomenon phenomenon, ResourceKey qualifier) {
-        this.phenomenon = phenomenon;
-        this.qualifier = qualifier;
         this.validTimeBuilder = timeFieldParser.new ValidTimeBuilder();
         String observationTimeProperty = CkanConstants.KnownFieldIdValue.OBSERVATION_TIME;
         this.observationTimeBuilder = timeFieldParser.new TimeBuilder(observationTimeProperty);
         this.omObservation = new OmObservation();
+        this.uomParser = new UcumParser();
+        this.phenomenon = phenomenon;
+        this.qualifier = qualifier;
     }
 
     public static ObservationBuilder create(Phenomenon phenomenon, ResourceKey qualifier) {
@@ -93,8 +94,8 @@ final class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
         return this;
     }
 
-    ObservationBuilder setSensorBuilder(SensorBuilder insertSensorRequestBuilder) {
-        this.sensorBuilder = insertSensorRequestBuilder;
+    ObservationBuilder setSensorBuilder(SensorBuilder sensorBuilder) {
+        this.sensorBuilder = sensorBuilder;
         return this;
     }
 
@@ -103,10 +104,10 @@ final class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
         if (!field.isObservationField()) {
             return this;
         }
-        field.accept(observationValueBuilder, value);
-        field.accept(geometryBuilder, value);
-        field.accept(validTimeBuilder, value);
         field.accept(observationTimeBuilder, value);
+        field.accept(observationValueBuilder, value);
+        field.accept(validTimeBuilder, value);
+        field.accept(geometryBuilder, value);
         return this;
     }
 
@@ -174,6 +175,9 @@ final class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
         OmObservationConstellation constellation = new OmObservationConstellation();
         constellation.setObservableProperty(phenomenon.toObservableProperty());
         constellation.setObservationType(phenomenon.getObservationType());
+        if (sensorBuilder != null) {
+            constellation.setFeatureOfInterest(sensorBuilder.getFeature());
+        }
         return constellation;
     }
 

@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -112,8 +113,10 @@ class DataInsertion {
             return;
         }
 
+        String procedureId = sensorBuilder.getProcedureId();
+        ObservationDiscriminator key = new ObservationDiscriminator(sosObservation, procedureId);
         observationTypes.add(sosObservation.getObservationType());
-        observationsByTime.put(new ObservationDiscriminator(sosObservation), sosObservation);
+        observationsByTime.put(key, sosObservation);
     }
 
     boolean hasObservations() {
@@ -161,23 +164,20 @@ class DataInsertion {
 
         private TimeInstant timestamp;
 
-        ObservationDiscriminator(SosObservation observation) {
+        private String procedureId;
+
+        ObservationDiscriminator(SosObservation observation, String procedureId) {
             OmObservation omObservation = observation.getObservation();
             this.constellation = omObservation.getObservationConstellation();
             this.timestamp = observation.getPhenomenonTime();
+            this.procedureId = procedureId;
         }
 
         @Override
         public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((constellation == null)
-                    ? 0
-                    : constellation.hashCode());
-            result = prime * result + ((timestamp == null)
-                    ? 0
-                    : timestamp.hashCode());
-            return result;
+            String featureId = constellation.getFeatureOfInterestIdentifier();
+            String phenomenonId = constellation.getObservablePropertyIdentifier();
+            return Objects.hash(featureId, phenomenonId, procedureId, timestamp);
         }
 
         @Override
@@ -185,28 +185,16 @@ class DataInsertion {
             if (this == obj) {
                 return true;
             }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
+            if (!(obj instanceof ObservationDiscriminator)) {
                 return false;
             }
             ObservationDiscriminator other = (ObservationDiscriminator) obj;
-            if (constellation == null) {
-                if (other.constellation != null) {
-                    return false;
-                }
-            } else if (!constellation.equals(other.constellation)) {
-                return false;
-            }
-            if (timestamp == null) {
-                if (other.timestamp != null) {
-                    return false;
-                }
-            } else if (!timestamp.equals(other.timestamp)) {
-                return false;
-            }
-            return true;
+            String featureId = constellation.getFeatureOfInterestIdentifier();
+            String phenomenonId = constellation.getObservablePropertyIdentifier();
+            return Objects.equals(featureId, other.constellation.getFeatureOfInterestIdentifier())
+                    && Objects.equals(phenomenonId, other.constellation.getObservablePropertyIdentifier())
+                    && Objects.equals(procedureId, other.procedureId)
+                    && Objects.equals(timestamp, other.timestamp);
         }
     }
 
