@@ -167,22 +167,6 @@ public class DataTable {
 
         ForkJoinPool pool = new ForkJoinPool(2);
         for (ResourceField field : joinFields) {
-<<<<<<< 1d5a72261f73ff4bdd24d9c837e649484167fce8
-            // XXX does not consider AND in joinFields, but rather joins multiple times!
-            final Map<ResourceKey, String> joinOnIndex = table.column(field);
-            final Map<ResourceKey, String> toJoinIndex = other.table.column(field);
-            joinOnIndex.entrySet()
-                    .stream()
-                    .forEach(joinOnCell -> toJoinIndex.entrySet()
-                            .stream()
-                            .filter(toJoinCell -> field.equalsValues(joinOnCell.getValue(), toJoinCell.getValue()))
-                            .forEach(toJoinCell -> {
-                                            final ResourceKey otherKey = toJoinCell.getKey();
-                                            final String newId = otherKey.getKeyId() + "_" + outputTable.rowSize();
-                                            ResourceKey newKey = new ResourceKey(newId, outputTable.resourceMember);
-
-=======
->>>>>>> fix reusing already closed streams
             try {
                 // XXX does not consider AND in joinFields, but rather joins multiple times!
                 final Map<ResourceKey, String> joinOnIndex = table.column(field);

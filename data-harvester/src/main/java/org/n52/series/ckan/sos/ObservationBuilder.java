@@ -60,7 +60,7 @@ final class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
     private final TimeFieldParser timeFieldParser = new TimeFieldParser();
 
     private final GeometryBuilder geometryBuilder = GeometryBuilder.create();
-    
+
     private final TimeFieldParser.ValidTimeBuilder validTimeBuilder;
 
     private final TimeFieldParser.TimeBuilder observationTimeBuilder;
@@ -70,11 +70,11 @@ final class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
     private final Phenomenon phenomenon;
 
     private final ResourceKey qualifier;
-    
+
     private SensorBuilder sensorBuilder;
 
     private UomParser uomParser;
-    
+
     private ObservationBuilder(Phenomenon phenomenon, ResourceKey qualifier) {
         this.validTimeBuilder = timeFieldParser.new ValidTimeBuilder();
         String observationTimeProperty = CkanConstants.KnownFieldIdValue.OBSERVATION_TIME;

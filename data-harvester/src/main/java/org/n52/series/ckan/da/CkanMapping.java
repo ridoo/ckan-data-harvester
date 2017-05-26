@@ -147,9 +147,7 @@ public class CkanMapping {
     }
 
     protected Set<String> getValueMappings(String group, String name) {
-        String lowerCasedName = name != null
-                ? name.toLowerCase(Locale.ROOT)
-                : name;
+        String lowerCasedName = name.toLowerCase(Locale.ROOT);
         String lowerCasedGroup = !(group == null || group.isEmpty())
                 ? "/" + group.toLowerCase(Locale.ROOT)
                 : "";

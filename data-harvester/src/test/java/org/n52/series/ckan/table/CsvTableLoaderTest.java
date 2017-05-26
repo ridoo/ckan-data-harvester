@@ -31,6 +31,7 @@ package org.n52.series.ckan.table;
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
@@ -74,7 +75,8 @@ public class CsvTableLoaderTest {
         @Override
         protected CSVParser createCsvParser(DataFile dataFile) throws FileNotFoundException, IOException {
             ByteArrayInputStream rawCsvStream = new ByteArrayInputStream(rawCsv.getBytes());
-            return super.createCsvParser(0, rawCsvStream, Charset.forName("UTF-8"));
+            InputStreamReader streamReader = new InputStreamReader(rawCsvStream, "UTF-8");
+            return super.createCsvParser(0, streamReader, Charset.forName("UTF-8"));
         }
 
     }
