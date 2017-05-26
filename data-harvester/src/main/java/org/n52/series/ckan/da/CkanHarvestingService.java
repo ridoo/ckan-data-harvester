@@ -153,8 +153,7 @@ public class CkanHarvestingService implements ServletContextAware {
     }
 
     private File saveToFile(String filename, CkanDataset dataset, String content) throws IOException {
-        File file = getDatasetDownloadFolder(dataset)
-                                                     .resolve(filename)
+        File file = getDatasetDownloadFolder(dataset).resolve(filename)
                                                      .toFile();
         FileUtils.writeStringToFile(file, content, CkanConstants.DEFAULT_CHARSET);
         return file;
