@@ -1,5 +1,4 @@
 {
-  "resource_type" : "csv-observations-collection",
   "members" : [
     {
       "fields" : [
@@ -125,7 +124,7 @@
         },
         {
           "field_type" : "Integer",
-          "field_id" : "WARNCELLID"
+          "field_id" : "GC_WARNCELLID"
         },
         {
           "field_type" : "String",
@@ -200,5 +199,6 @@
       "resource_type" : "observations"
     }
   ],
+  "resource_type" : "csv-observations-collection",
   "schema_descriptor_version" : 0.3
 }
