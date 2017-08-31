@@ -1,41 +1,6 @@
 {
+  "resource_type" : "csv-observations-collection",
   "members" : [
-    {
-      "fields" : [
-        {
-          "field_type" : "String",
-          "field_id" : "NAME"
-        },
-        {
-          "field_type" : "String",
-          "field_id" : "LICENSE"
-        },
-        {
-          "field_type" : "Float",
-          "field_id" : "lon",
-          "field_role" : "longitude",
-          "uom" : "decimal_degrees"
-        },
-        {
-          "field_type" : "String",
-          "field_id" : "bbox"
-        },
-        {
-          "field_type" : "Float",
-          "field_id" : "lat",
-          "field_role" : "latitude",
-          "uom" : "decimal_degrees"
-        },
-        {
-          "field_type" : "Integer",
-          "field_id" : "WARNCELLID"
-        }
-      ],
-      "resource_name" : [
-        "ebe26100-ef92-4b84-8e9e-7ce3a1f7d44e"
-      ],
-      "resource_type" : "observed_geometries"
-    },
     {
       "fields" : [
         {
@@ -81,6 +46,12 @@
         {
           "field_type" : "String",
           "field_id" : "EXPIRES"
+        },
+        {
+          "field_type" : "Float",
+          "field_id" : "lon",
+          "field_role" : "longitude",
+          "uom" : "decimal_degrees"
         },
         {
           "field_type" : "String",
@@ -129,6 +100,12 @@
         {
           "field_type" : "String",
           "field_id" : "bbox"
+        },
+        {
+          "field_type" : "Float",
+          "field_id" : "lat",
+          "field_role" : "latitude",
+          "uom" : "decimal_degrees"
         },
         {
           "field_type" : "String",
@@ -297,8 +274,8 @@
         },
         {
           "field_type" : "category",
-          "field_id" : "SEVERITY",
-          "phaenomenon_ref" : "event"
+          "phenomenon_ref" : "event",
+          "field_id" : "SEVERITY"
         },
         {
           "field_type" : "String",
@@ -381,7 +358,7 @@
           "field_id" : "GC_STATE"
         },
         {
-          "field_type" : "Integer",
+          "field_type" : "Float",
           "field_id" : "ALTITUDE"
         },
         {
@@ -415,7 +392,8 @@
         "b1711843-e4a0-4187-8f76-f5f1765985dc",
         "b0a30b93-84d9-4109-b29b-33a38a8c3c8e",
         "e2e14769-c294-4e05-9977-410a0e80cdab",
-        "7193f914-7392-4ed4-ba15-79dfe62a9c00"
+        "7193f914-7392-4ed4-ba15-79dfe62a9c00",
+        "a883e7db-ddb0-4a2d-a5fe-c5bd6855c924"
       ],
       "resource_type" : "observations"
     },
@@ -455,11 +433,10 @@
         }
       ],
       "resource_name" : [
-        "ebe26100-ef92-4b84-8e9e-7ce3a1f7d44e"
+        "546add17-3bcc-46a8-a550-a9e2e07a4648"
       ],
-      "resource_type" : "observations"
+      "resource_type" : "observed_geometries"
     }
   ],
-  "resource_type" : "csv-observations-collection",
   "schema_descriptor_version" : 0.3
 }

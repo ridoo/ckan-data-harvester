@@ -1,0 +1,10 @@
+WARNCELLID,NAME,LICENSE,bbox,geometry,longitude,latitude
+101001000,Stadt Flensburg,"Geobasisdaten: Copyright Bundesamt f�r Kartographie und Geod�sie, Frankfurt am Main, 2012","[9.35722059154748,54.7518729888321,9.50671528322723,54.8369910007781]",Point,9.443301017457497,54.78852087257417
+101002000,Stadt Kiel,"Geobasisdaten: Copyright Bundesamt f�r Kartographie und Geod�sie, Frankfurt am Main, 2012","[10.0326322558518,54.2508283005116,10.218688828051,54.4329443366593]",Point,10.134985666236334,54.337767053855835
+101003000,Hansestadt LÃ¼beck,"Geobasisdaten: Copyright Bundesamt f�r Kartographie und Geod�sie, Frankfurt am Main, 2012","[10.5547694845975,53.7680780917947,10.9683755941316,53.9940624518612]",Point,10.752387041285942,53.873109563104514
+101004000,Stadt NeumÃ¼nster,"Geobasisdaten: Copyright Bundesamt f�r Kartographie und Geod�sie, Frankfurt am Main, 2012","[9.9256808920526,54.0175577276824,10.0584678806556,54.1498848282495]",Point,9.988550648609264,54.07735947754642
+101053000,Kreis Herzogtum Lauenburg,"Geobasisdaten: Copyright Bundesamt f�r Kartographie und Geod�sie, Frankfurt am Main, 2012","[10.2350292317469,53.359830983618,10.9550420887811,53.8277779498518]",Point,10.60351408753825,53.61809974104027
+101060000,Kreis Segeberg,"Geobasisdaten: Copyright Bundesamt f�r Kartographie und Geod�sie, Frankfurt am Main, 2012","[9.75144514576045,53.6473122918962,10.5641617557952,54.1077150041632]",Point,10.203630615896516,53.90504758202546
+101061000,Kreis Steinburg,"Geobasisdaten: Copyright Bundesamt f�r Kartographie und Geod�sie, Frankfurt am Main, 2012","[9.19843353566056,53.7076646605066,9.8643295114187,54.0997656324108]",Point,9.549018734858356,53.976167015221165
+101062000,Kreis Stormarn,"Geobasisdaten: Copyright Bundesamt f�r Kartographie und Geod�sie, Frankfurt am Main, 2012","[10.0227414622399,53.495415789438,10.6218534167647,53.9204368638033]",Point,10.344497968933227,53.718124317240736
+102000000,Hansestadt Hamburg,"Geobasisdaten: Copyright Bundesamt f�r Kartographie und Geod�sie, Frankfurt am Main, 2012","[9.73010405480832,53.3949884200147,10.3259591575032,53.7384724413153]",Point,10.057346770696112,53.53745984974458

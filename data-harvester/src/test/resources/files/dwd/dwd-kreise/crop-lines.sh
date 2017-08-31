@@ -24,7 +24,7 @@ add_excludes() {
 }
 
 # inplace cropping lines of given range within CSV files in current folder
-for file in `find . -type f -name '*.csv -not "$IGNORE_FILES[0]"'` ; do sed -i -n $LINE_RANGE "$file" ; done
+for file in `find . -type f -name '*.csv' -not \( -path "$IGNORE_FILES[0]" \)` ; do sed -i -n $LINE_RANGE "$file" ; done
 
 #for file in `find . -type f -name '*.csv add_excludes IGNORE_FILES[@]'` ; do sed -i -n $LINE_RANGE "$file" ; done
 
