@@ -40,6 +40,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.hamcrest.Matchers;
 import org.junit.Before;
@@ -148,9 +149,11 @@ public class ResourceMemberTest {
     public void findJoinableFieldsHavingMappedIds() {
         SchemaDescriptor schemaDescriptor = resourceHelper.getSchemaDescriptor(DWDKREISE_DATASET_ID);
         List<ResourceMember> members = schemaDescriptor.getMembers();
+        List<ResourceMember> observationMembers = filterViaType(members, CkanConstants.ResourceType.OBSERVATIONS);
+        List<ResourceMember> kreiseMembers = filterViaType(members, CkanConstants.ResourceType.OBSERVED_GEOMETRIES);
 
-        ResourceMember firstMember = members.get(0);
-        ResourceMember secondMember = members.get(1);
+        ResourceMember firstMember = observationMembers.get(0);
+        ResourceMember secondMember = kreiseMembers.get(0);
         Set<ResourceField> joinableFields = firstMember.getJoinableFields(secondMember);
         assertThat(joinableFields.size(), is(1));
         FieldBuilder builder = FieldBuilder.aField();
@@ -160,6 +163,13 @@ public class ResourceMemberTest {
         ResourceField firstField = iterator.next();
         assertThat(firstField, is(expectedField));
         assertThat(firstField, is(expectedAlternateField));
+    }
+
+    protected List<ResourceMember> filterViaType(List<ResourceMember> members, String resourceType) {
+        return members.stream()
+                      .filter(e -> e.getResourceType()
+                                    .equals(resourceType))
+                      .collect(Collectors.toList());
     }
 
     @Test
