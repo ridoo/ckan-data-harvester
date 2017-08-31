@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.da.CkanMapping;
@@ -141,6 +142,7 @@ public class SchemaDescriptor {
             JsonNode memberNode = iter.next();
             Set<String> resourceNames = ckanMapping.getFieldMappings(CkanConstants.FieldPropertyName.RESOURCE_NAME);
             List<String> resourceIds = JsonUtil.parseToList(memberNode, resourceNames);
+            List<ResourceField> fieldTemplates = parseResourceFields(memberNode);
             for (String resourceId : resourceIds) {
                 String resourceType = getSchemaDescriptionType(memberNode);
                 ResourceMember member = new ResourceMember(resourceId, resourceType, ckanMapping);
@@ -151,27 +153,34 @@ public class SchemaDescriptor {
                         // assume 1 header row by default
                         ? 1
                         : headerRows);
-                member.setResourceFields(parseResourceFields(member, memberNode));
+                member.setResourceFields(createQualifiedFields(fieldTemplates, member));
                 resourceMembers.add(member);
             }
         }
         return resourceMembers;
     }
 
-    private List<ResourceField> parseResourceFields(ResourceMember qualifier, JsonNode member) {
+    private List<ResourceField> parseResourceFields(JsonNode memberNode) {
         List<ResourceField> fields = new ArrayList<>();
-        JsonNode resourceType = member.findValue(CkanConstants.SchemaDescriptor.RESOURCE_TYPE);
-        JsonNode fieldsNode = member.findValue(CkanConstants.SchemaDescriptor.FIELDS);
+        JsonNode resourceType = memberNode.findValue(CkanConstants.SchemaDescriptor.RESOURCE_TYPE);
+        JsonNode fieldsNode = memberNode.findValue(CkanConstants.SchemaDescriptor.FIELDS);
         Iterator<JsonNode> iter = fieldsNode.elements();
         int index = 0;
         while (iter.hasNext()) {
             JsonNode fieldNode = iter.next();
-            fields.add(new ResourceField(fieldNode, index, ckanMapping)
-                                                                       .setResourceType(resourceType.asText())
-                                                                       .setQualifier(qualifier));
+            fields.add(new ResourceField(fieldNode, index, ckanMapping).setResourceType(resourceType.asText()));
             index++;
         }
         return fields;
+    }
+
+    protected List<ResourceField> createQualifiedFields(List<ResourceField> fieldTemplates, ResourceMember member) {
+        return fieldTemplates.stream()
+                             .map(e -> {
+                                 ResourceField field = ResourceField.copy(e);
+                                 return field.setQualifier(member);
+                             })
+                             .collect(Collectors.toList());
     }
 
     public CkanMapping getCkanMapping() {
