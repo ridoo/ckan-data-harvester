@@ -1,5 +1,4 @@
 {
-  "resource_type" : "csv-observations-collection",
   "members" : [
     {
       "fields" : [
@@ -438,5 +437,6 @@
       "resource_type" : "observed_geometries"
     }
   ],
+  "resource_type" : "csv-observations-collection",
   "schema_descriptor_version" : 0.3
 }
