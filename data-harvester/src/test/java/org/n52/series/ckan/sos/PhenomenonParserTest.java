@@ -190,7 +190,7 @@ public class PhenomenonParserTest {
         ResourceTable table = testHelper.readObservationTable(dataset, observationResource);
 
         Collection<Phenomenon> phenomenonIds = parser.parse(table);
-        assertThat(toIds(phenomenonIds), containsInAnyOrder("FROST", "SCHNEEFALL", "GLÄTTE"));
+        assertThat(toIds(phenomenonIds), containsInAnyOrder("FROST"));
     }
 
     private Collection<Phenomenon> parsePhenomenonIdsOfResource(String dataset, String observationResource, String type) {
