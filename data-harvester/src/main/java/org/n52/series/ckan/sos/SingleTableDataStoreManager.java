@@ -29,6 +29,8 @@
 
 package org.n52.series.ckan.sos;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -67,7 +69,7 @@ public class SingleTableDataStoreManager extends SosDataStoreManager {
     }
 
     @Override
-    protected DataTable loadData(DataCollection dataCollection, Set<String> typesToInsert) {
+    protected Collection<DataTable> loadData(DataCollection dataCollection, Set<String> typesToInsert) {
         CkanDataset dataset = dataCollection.getDataset();
         LOGGER.debug("load data for dataset '{}'", dataset.getName());
         DataTable fullTable = new ResourceTable();
@@ -99,7 +101,7 @@ public class SingleTableDataStoreManager extends SosDataStoreManager {
                     : fullTable.innerJoin(dataTable);
         }
         LOGGER.debug("Fully joined table: '{}'", fullTable);
-        return fullTable;
+        return Collections.singleton(fullTable);
     }
 
 }

@@ -30,6 +30,7 @@
 package org.n52.series.ckan.sos;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -106,20 +107,24 @@ public abstract class SosDataStoreManager implements DataStoreManager {
         SosInsertStrategy stationaryStrategy = hasReferenceCache()
                 ? new StationaryInsertStrategy()
                 : new StationaryInsertStrategy(getCkanSosReferenceCache());
-        DataTable stationaryInserts = loadData(dataCollection, getStationaryObservationTypes());
-        dataInsertions.putAll(stationaryStrategy.createDataInsertions(stationaryInserts, dataCollection));
+        Collection<DataTable> stationaryInserts = loadData(dataCollection, getStationaryObservationTypes());
+        for (DataTable dataTable : stationaryInserts) {
+            dataInsertions.putAll(stationaryStrategy.createDataInsertions(dataTable, dataCollection));
+        }
 
         // add mobile observation data
         SosInsertStrategy mobileStrategy = hasReferenceCache()
                 ? new MobileInsertStrategy()
                 : new MobileInsertStrategy(getCkanSosReferenceCache());
-        DataTable mobileInserts = loadData(dataCollection, getMobileObservationTypes());
-        dataInsertions.putAll(mobileStrategy.createDataInsertions(mobileInserts, dataCollection));
+        Collection<DataTable> mobileInserts = loadData(dataCollection, getMobileObservationTypes());
+        for (DataTable dataTable : mobileInserts) {
+            dataInsertions.putAll(mobileStrategy.createDataInsertions(dataTable, dataCollection));
+        }
 
         return dataInsertions;
     }
 
-    protected abstract DataTable loadData(DataCollection dataCollection, Set<String> resourceTypesToInsert);
+    protected abstract Collection<DataTable> loadData(DataCollection dataCollection, Set<String> resourceTypesToInsert);
 
     protected boolean isUpdateNeeded(CkanResource resource, DataFile dataFile) {
         if (hasReferenceCache()) {
