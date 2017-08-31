@@ -34,10 +34,15 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
+import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.da.CkanMapping;
 import org.n52.series.ckan.table.ResourceKey;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 
 public class ResourceMember {
 
@@ -111,14 +116,9 @@ public class ResourceMember {
                 : Collections.<ResourceField> emptyList();
     }
 
-    public ResourceField getField(String fieldId) {
-        for (ResourceField field : resourceFields) {
-            if (field.getFieldId()
-                     .equalsIgnoreCase(fieldId)) {
-                return field;
-            }
-        }
-        return null;
+    public Optional<ResourceField > getField(String fieldId) {
+        return resourceFields.stream().filter(e -> e.getFieldId()
+                     .equalsIgnoreCase(fieldId)).findFirst();
     }
 
     public ResourceField getField(int index) {
@@ -157,9 +157,27 @@ public class ResourceMember {
     }
 
     public Set<ResourceField> getJoinableFields(ResourceMember other) {
-        Set<ResourceField> fields = new HashSet<>(resourceFields);
-        fields.retainAll(other.resourceFields);
-        return fields;
+        String configPath = CkanConstants.Config.CONFIG_PATH_JOIN_COLUMNS;
+        JsonNode joinConfig = getCkanMapping().getConfigValueAt(configPath);
+        if (joinConfig.isArray()) {
+            Set<ResourceField> fields = new HashSet<>();
+            ArrayNode columns = (ArrayNode) joinConfig;
+            for (JsonNode columnNode : columns) {
+                String columnId = columnNode.asText();
+                if (getField(columnId).isPresent()) {
+                    fields.add(getField(columnId).get());
+                } else {
+                    if (other.getField(columnId).isPresent()) {
+                        fields.add(other.getField(columnId).get());
+                    }
+                }
+            }
+            return fields;
+        } else {
+            Set<ResourceField> fields = new HashSet<>(resourceFields);
+            fields.retainAll(other.resourceFields);
+            return fields;
+        }
     }
 
     public boolean isJoinable(ResourceMember other) {

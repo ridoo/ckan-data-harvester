@@ -18,5 +18,9 @@
         "valid_time_end": [
             "expires"
         ]
-    }
+    },
+    "join_fields": [
+        "warncellid",
+        "gc_warncellid"
+    ]
 }

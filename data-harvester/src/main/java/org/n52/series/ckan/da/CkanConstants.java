@@ -204,4 +204,7 @@ public interface CkanConstants {
         ));
     }
 
+    interface Config {
+        String CONFIG_PATH_JOIN_COLUMNS = "/join_fields";
+    }
 }
