@@ -98,9 +98,10 @@ public class DataTable {
             return other;
         }
 
-        if (!resourceMember.isExtensible(other.resourceMember)) {
-            return this;
-        }
+//        if (!resourceMember.isExtensible(other.resourceMember)) {
+//            LOGGER.warn("Extension not applied as columns do not match: '{}'", other);
+//            return this;
+//        }
 
         DataTable outputTable = new DataTable(resourceMember);
         extendTable(other, outputTable);
@@ -108,7 +109,7 @@ public class DataTable {
     }
 
     private void extendTable(DataTable other, DataTable outputTable) {
-        LOGGER.debug("extending table {} (#{} rows, #{} cols) with table {} (#{} rows, #{} cols)",
+        LOGGER.debug("extending table '{}' (#{} rows, #{} cols) with table '{}' (#{} rows, #{} cols)",
                      resourceMember.getId(),
                      rowSize(),
                      columnSize(),
