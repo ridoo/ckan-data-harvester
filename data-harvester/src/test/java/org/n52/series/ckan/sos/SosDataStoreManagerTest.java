@@ -78,7 +78,7 @@ public class SosDataStoreManagerTest extends HibernateTestCase {
     public void setUp() throws IOException, URISyntaxException {
         service = new FileBasedCkanHarvestingService(testFolder.getRoot());
         ckanDataMgr = service.getCkanDataStoreManager();
-        sosDataMgr = new ResourceTableDataStoreManager();
+        sosDataMgr = new SingleTableDataStoreManager();
         database = new H2DatabaseAccessor();
         // empty database before each test
         H2Configuration.recreate();

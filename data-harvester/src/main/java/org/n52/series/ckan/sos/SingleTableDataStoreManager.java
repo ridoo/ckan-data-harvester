@@ -47,19 +47,19 @@ import org.slf4j.LoggerFactory;
 import eu.trentorise.opendata.jackan.model.CkanDataset;
 import eu.trentorise.opendata.jackan.model.CkanResource;
 
-public class ResourceTableDataStoreManager extends SosDataStoreManager {
+public class SingleTableDataStoreManager extends SosDataStoreManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceTableDataStoreManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SingleTableDataStoreManager.class);
 
-    ResourceTableDataStoreManager() {
+    SingleTableDataStoreManager() {
         this(null);
     }
 
-    ResourceTableDataStoreManager(CkanSosReferenceCache ckanSosReferenceCache) {
+    SingleTableDataStoreManager(CkanSosReferenceCache ckanSosReferenceCache) {
         this(new InsertSensorDAO(), new InsertObservationDAO(), new DeleteObservationDAO(), ckanSosReferenceCache);
     }
 
-    public ResourceTableDataStoreManager(InsertSensorDAO insertSensorDao,
+    public SingleTableDataStoreManager(InsertSensorDAO insertSensorDao,
                                          InsertObservationDAO insertObservationDao,
                                          DeleteObservationDAO deleteObservationDao,
                                          CkanSosReferenceCache ckanSosReferenceCache) {
