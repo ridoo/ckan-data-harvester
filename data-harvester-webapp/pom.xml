@@ -23,6 +23,14 @@
         <local.configFile>src/main/resources/application.properties</local.configFile>
     </properties>
     <dependencies>
+    
+        <dependency>
+            <groupId>org.n52.sensorweb.ckan</groupId>
+            <artifactId>data-harvester</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+    
         <dependency>
             <groupId>org.n52.sensorweb.sos</groupId>
             <artifactId>webapp-bundle</artifactId>
@@ -32,19 +40,18 @@
         </dependency>
         
         <dependency>
-            <groupId>org.n52.sensorweb.ckan</groupId>
-            <artifactId>data-harvester</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
+            <groupId>org.n52.series-api.db</groupId>
+            <artifactId>dao</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.n52.series-api.db</groupId>
+            <artifactId>sos-integration</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.n52.series-api.db</groupId>
+            <artifactId>mappings</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.n52.series-api</groupId> 
-            <artifactId>series-mappings</artifactId>
-            <version>${series.api.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
@@ -61,7 +68,7 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
@@ -70,17 +77,16 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
         </dependency>
-
+        
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>xml-apis</groupId>
             <artifactId>xml-apis</artifactId>
-            <version>1.3.04</version>
             <scope>runtime</scope>
         </dependency>
     </dependencies>
@@ -93,15 +99,41 @@
                 <filtering>true</filtering>
             </resource>
         </resources>
-        
+
         <filters>
             <!-- filters src/main/resources -->
             <!-- ordering is important here -->
             <filter>src/main/resources/application.properties</filter>
             <filter>${local.configFile}</filter>
         </filters>
-        
+
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>rest-api-deps</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.n52.series-api.db</groupId>
+                                    <artifactId>mappings</artifactId>
+                                    <includes>hbm</includes>
+                                    <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+                                    <overWrite>false</overWrite>
+                                </artifactItem>
+                            </artifactItems>
+                            <overWriteReleases>false</overWriteReleases>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
@@ -113,13 +145,17 @@
                             <artifactId>webapp-bundle</artifactId>
                             <excludes>
                                 <exclude>cache.tmp</exclude>
+                                <exclude>WEB-INF/web.xml</exclude>
                                 <exclude>static/client/**</exclude>
-                                <exclude>WEB-INF/classes/logback.xml</exclude>
+                                <!-- override Series REST API config -->
+                                <exclude>WEB-INF/classes/logback*.xml</exclude>
                                 <exclude>WEB-INF/classes/config-*.json</exclude>
                                 <exclude>WEB-INF/spring/*.xml</exclude>
-                                <!-- exclude until webapp-bundle ships newest mapping files
-                                <exclude>WEB-INF/classes/mapping/extension/readonly/**</exclude> -->
-                                <exclude>WEB-INF/web.xml</exclude>
+                                <!-- handle DAO SPI deps within this project -->
+                                <exclude>WEB-INF/lib/dao-${series.dao.version}</exclude>
+                                <exclude>WEB-INF/lib/sos-integration-${series.dao.version}</exclude>
+                                <exclude>WEB-INF/classes/mapping/extension/readonly/**</exclude>
+                                -->
                             </excludes>
                         </overlay>
                     </overlays>

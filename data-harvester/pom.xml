@@ -18,53 +18,28 @@
         <slf4j.version>1.7.22</slf4j.version>
         <logback.version>1.2.1</logback.version>
         <hamcrest.version>1.3</hamcrest.version>
-        <jackan.version>0.4.3-SNAPSHOT</jackan.version>
-        <geotools.version>14.0</geotools.version>
     </properties>
     <dependencies>
         <dependency>
             <groupId>org.n52.series-api</groupId>
             <artifactId>spi</artifactId>
-            <version>${series.api.version}</version>
         </dependency>
         <dependency>
             <groupId>org.n52.series-api</groupId>
             <artifactId>io</artifactId>
-            <version>${series.api.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>xml-apis</groupId>
-                    <artifactId>xml-apis</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>jcl-over-slf4j</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlbeans</groupId>
             <artifactId>xmlbeans</artifactId>
-            <version>2.6.0</version>
         </dependency>
         <dependency>
             <groupId>com.vividsolutions</groupId>
             <artifactId>jts</artifactId>
-            <version>1.13</version>
         </dependency>
 
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>18.0</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -74,65 +49,29 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
+        
         <dependency>
             <groupId>eu.trentorise.opendata</groupId>
             <artifactId>traceprov</artifactId>
-            <version>0.3.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.google.code.findbugs</groupId>
-                    <artifactId>jsr305</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>joda-time</groupId>
-                    <artifactId>joda-time</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-annotations</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-databind</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>eu.trentorise.opendata</groupId>
             <artifactId>jackan</artifactId>
-            <version>${jackan.version}</version>
         </dependency>
+        
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
-            <version>1.2</version>
         </dependency>
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
-            <version>2.9.7</version>
         </dependency>
         <dependency>
             <groupId>org.quartz-scheduler</groupId>
             <artifactId>quartz</artifactId>
-            <version>2.2.3</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
-        <!-- !!!Required for @Autorwired in HarvestingJob because quartz always creates a new instance of the job which is 
-            executed!!! -->
+        
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
@@ -144,146 +83,56 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
-            <scope>provided</scope>
         </dependency>
-
 
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-main</artifactId>
-            <version>${geotools.version}</version>
         </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-api</artifactId>
-            <version>${geotools.version}</version>
         </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-opengis</artifactId>
-            <version>${geotools.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>javax.media</groupId>
-                    <artifactId>jai_core</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-shapefile</artifactId>
-            <version>${geotools.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.n52.sensorweb.sos</groupId>
             <artifactId>api</artifactId>
-            <version>${sos.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>xml-apis</groupId>
-                    <artifactId>xml-apis</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.javassist</groupId>
-                    <artifactId>javassist</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>joda-time</groupId>
-                    <artifactId>joda-time</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-databind</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.n52.sensorweb.sos</groupId>
             <artifactId>hibernate-dao</artifactId>
-            <version>${sos.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.n52.sensorweb.sos</groupId>
             <artifactId>gda-hibernate</artifactId>
-            <version>${sos.version}</version>
         </dependency>
         <dependency>
             <groupId>org.n52.sensorweb.sos</groupId>
             <artifactId>gda-operation</artifactId>
-            <version>${sos.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.google.code.findbugs</groupId>
-                    <artifactId>jsr305</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.xmlbeans</groupId>
-                    <artifactId>xmlbeans</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>joda-time</groupId>
-                    <artifactId>joda-time</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-databind</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.n52.sensorweb.sos</groupId>
             <artifactId>do-core</artifactId>
-            <version>${sos.version}</version>
         </dependency>
         <dependency>
             <groupId>org.n52.sensorweb.sos</groupId>
             <artifactId>do-hibernate</artifactId>
-            <version>${sos.version}</version>
         </dependency>
         <dependency>
             <groupId>org.n52.sensorweb.sos</groupId>
             <artifactId>coding-sensorML-v101</artifactId>
-            <version>${sos.version}</version>
         </dependency>
         <dependency>
             <groupId>org.n52.sensorweb.sos</groupId>
             <artifactId>hibernate-feature</artifactId>
-            <version>${sos.version}</version>
-            <scope>runtime</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
@@ -293,42 +142,6 @@
         <dependency>
             <groupId>org.n52.sensorweb.sos</groupId>
             <artifactId>hibernate-h2</artifactId>
-            <version>${sos.version}</version>
-            <!-- <scope>test</scope> -->
-            <exclusions>
-                <exclusion>
-                    <groupId>org.mockito</groupId>
-                    <artifactId>mockito-all</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>junit</groupId>
-                    <artifactId>junit</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.vividsolutions</groupId>
-                    <artifactId>jts</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>ch.qos.logback</groupId>
-                    <artifactId>logback-classic</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>jcl-over-slf4j</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>joda-time</groupId>
-                    <artifactId>joda-time</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.h2database</groupId>
-                    <artifactId>h2</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
@@ -447,7 +260,6 @@
                                 <allowedRepositories>
                                     <id>geotools</id>
                                     <id>n52-releases</id>
-<!--                                     <id>n52-snapshots</id> -->
                                 </allowedRepositories>
                             </requireNoRepositories>
                         </rules>
@@ -501,34 +313,6 @@
             </build>
         </profile>
 
-<!--         <profile> -->
-<!--             <id>snapshot-dist</id> -->
-<!--             <distributionManagement> -->
-<!--                 <repository> -->
-<!--                     <id>n52-releases-dist</id> -->
-<!--                     <name>repository for 52North releases</name> -->
-<!--                     <url>dav:http://52north.org/maven/repo/releases</url> -->
-<!--                 </repository> -->
-<!--                 <snapshotRepository> -->
-<!--                     <id>n52-snapshots-dist</id> -->
-<!--                     <name>repository for 52North snapshots</name> -->
-<!--                     <url>dav:http://52north.org/maven/repo/snapshots</url> -->
-<!--                 </snapshotRepository> -->
-<!--             </distributionManagement> -->
-<!--         </profile> -->
-
-        <profile>
-            <id>disable-quality-control</id>
-            <properties>
-                <skipTests>true</skipTests>
-                <skip.checks>true</skip.checks>
-                <checkstyle.skip>true</checkstyle.skip>
-                <maven.javadoc.skip>true</maven.javadoc.skip>
-                <maven.source.skip>true</maven.source.skip>
-                <enforcer.skip>true</enforcer.skip>
-                <mdep.analyze.skip>true</mdep.analyze.skip>
-            </properties>
-        </profile>
     </profiles>
 
 </project>
