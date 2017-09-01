@@ -33,6 +33,9 @@
     </appender>
 
     <logger name="org.n52" level="${logger.org.n52.level:-WARN}" />
+    <logger name="org.n52.sos" level="${logger.org.n52.level:-WARN}" />
+    <logger name="org.n52.series" level="${logger.org.n52.level:-WARN}" />
+    <logger name="org.n52.series.ckan" level="${logger.org.n52.level:-WARN}" />
 
     <logger name="org.springframework" level="${logger.org.springframework.level:-INFO}" />
     <logger name="org.springframework.web.servlet.mvc.method.annotation" level="${logger.org.springframework.web.servlet.mvc.method.annotation.level:-WARN}" />
