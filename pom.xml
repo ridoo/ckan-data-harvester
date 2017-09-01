@@ -22,9 +22,9 @@
     </modules>
 
     <properties>
-        <!-- disabled during development -->
-        <enforcer.skip>true</enforcer.skip>
         <sos.version>4.4.0-M12</sos.version>
+        <jackson.version>2.7.3</jackson.version>
+        <spring.version>4.2.5.RELEASE</spring.version>
         <series.api.version>2.0.0-SNAPSHOT</series.api.version>
 
         <java.compiler.source>1.8</java.compiler.source>
@@ -37,6 +37,51 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- !!!Required for @Autorwired in HarvestingJob because quartz always creates a new instance of the job which 
+                is executed!!! -->
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-beans</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-webmvc</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-web</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>jackson-annotations</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+        
             <dependency>
                 <groupId>com.h2database</groupId>
                 <artifactId>h2</artifactId>
@@ -187,13 +232,17 @@
                         <useMissingFile>true</useMissingFile>
                         <fileTemplate>misc/license-as-csv.ftl</fileTemplate>
                         <licenseMerges>
-                            <licenseMerge>The Apache Software License,Version 2.0|Apache 2|Apache License, Version2.0|Apache License, version2.0|Apache Public License 2.0|AL 2.0</licenseMerge>
+                            <licenseMerge>The Apache Software License,Version 2.0|Apache 2|Apache License,
+                                Version2.0|Apache License, version2.0|Apache Public License 2.0|AL 2.0</licenseMerge>
                             <licenseMerge>Apache Software Licenses|Apache Software License|Apache License</licenseMerge>
-                            <licenseMerge>GNU General Public License, v2.0|GNU GENERAL PUBLIC LICENSE Version 2, June 1991|GNU General Public License, Version 2.0</licenseMerge>
-                            <licenseMerge>Common Development and Distribution License (CDDL), version 1.0| Common Development and Distribution License (CDDL) v1.0</licenseMerge>
+                            <licenseMerge>GNU General Public License, v2.0|GNU GENERAL PUBLIC LICENSE Version 2, June
+                                1991|GNU General Public License, Version 2.0</licenseMerge>
+                            <licenseMerge>Common Development and Distribution License (CDDL), version 1.0| Common
+                                Development and Distribution License (CDDL) v1.0</licenseMerge>
                             <licenseMerge>GNU Lesser General Public License, version 2.1|LGPL 2.1</licenseMerge>
                             <licenseMerge>Mozilla Public License version 1.1|MPL 1.1</licenseMerge>
-                            <licenseMerge>Eclipse Public License, Version 1.0|Eclipse Public License (EPL), Version 1.0|Eclipse Public License - v 1.0</licenseMerge>
+                            <licenseMerge>Eclipse Public License, Version 1.0|Eclipse Public License (EPL), Version
+                                1.0|Eclipse Public License - v 1.0</licenseMerge>
                             <licenseMerge>GNU Lesser General Public Licence|LGPL</licenseMerge>
                         </licenseMerges>
                     </configuration>
@@ -222,8 +271,10 @@
                         <source>
                             import java.util.Date
                             import java.text.MessageFormat
-                            def vartimestamp = MessageFormat.format("{0,date,yyyy}", new Date())
-                            project.properties['currentYearDynamic'] = vartimestamp
+                            def vartimestamp =
+                            MessageFormat.format("{0,date,yyyy}", new Date())
+                            project.properties['currentYearDynamic'] =
+                            vartimestamp
                         </source>
                     </configuration>
                 </plugin>
