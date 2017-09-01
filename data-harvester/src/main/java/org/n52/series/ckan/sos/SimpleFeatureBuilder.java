@@ -88,6 +88,7 @@ public class SimpleFeatureBuilder extends AbstractRowVisitor<SamplingFeature> {
         return this;
     }
 
+
     @Override
     public boolean hasResult() {
         return !feature.getIdentifier()

@@ -2,7 +2,7 @@ language: java
 jdk:
 - oraclejdk8
 dist: trusty
-script: mvn -fae -U -B clean install -Pcheck
+script: mvn -fae -U -B clean install -Pcheck -Psnapshot-dist
 after_success:
 - curl -Ls https://git.io/deploy-maven-snapshot | bash
 env:

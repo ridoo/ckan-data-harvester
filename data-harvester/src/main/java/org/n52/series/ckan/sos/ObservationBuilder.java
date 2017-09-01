@@ -132,6 +132,7 @@ final class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
                 : null;
         if (!observationValueBuilder.hasResult() && geometryBuilder.hasResult()) {
             // pure geometry observation w/o any other value
+            observationType = OmConstants.OBS_TYPE_GEOMETRY_OBSERVATION;
             SingleObservationValue<Geometry> obsValue = new SingleObservationValue<>();
             obsValue.setValue(geometryBuilder.getResult());
             result = obsValue;
