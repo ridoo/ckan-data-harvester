@@ -24,7 +24,7 @@
     <properties>
         <!-- disabled during development -->
         <enforcer.skip>true</enforcer.skip>
-        <sos.version>4.4.0-SNAPSHOT</sos.version>
+        <sos.version>4.4.1-SNAPSHOT</sos.version>
         <series.api.version>2.0.0-SNAPSHOT</series.api.version>
 
         <java.compiler.source>1.8</java.compiler.source>
@@ -324,19 +324,6 @@
         </profile>
 
         <profile>
-            <id>disable-quality-control</id>
-            <properties>
-                <skipTests>true</skipTests>
-                <skip.checks>true</skip.checks>
-                <checkstyle.skip>true</checkstyle.skip>
-                <maven.javadoc.skip>true</maven.javadoc.skip>
-                <maven.source.skip>true</maven.source.skip>
-                <enforcer.skip>true</enforcer.skip>
-                <mdep.analyze.skip>true</mdep.analyze.skip>
-            </properties>
-        </profile>
-
-	<profile>
             <id>disable-notice</id>
             <build>
                 <plugins>
