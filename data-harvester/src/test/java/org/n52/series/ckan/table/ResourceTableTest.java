@@ -166,9 +166,9 @@ public class ResourceTableTest {
         DataTable output = nonTrivial1.innerJoin(nonTrivial2);
 
         PhenomenonParser parser = new PhenomenonParser();
-        Collection<Phenomenon> phenomenaObservations = parser.parse(nonTrivial1.getResourceFields());
-        Collection<Phenomenon> phenomenaPlatforms = parser.parse(nonTrivial2.getResourceFields());
-        Collection<Phenomenon> allPhenomena = parser.parse(output.getResourceFields());
+        Collection<Phenomenon> phenomenaObservations = parser.parseFromFields(nonTrivial1.getResourceFields());
+        Collection<Phenomenon> phenomenaPlatforms = parser.parseFromFields(nonTrivial2.getResourceFields());
+        Collection<Phenomenon> allPhenomena = parser.parseFromFields(output.getResourceFields());
         assertThat(allPhenomena.size(), is(phenomenaObservations.size() + phenomenaPlatforms.size()));
     }
 

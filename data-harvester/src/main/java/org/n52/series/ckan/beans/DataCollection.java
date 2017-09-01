@@ -184,7 +184,8 @@ public class DataCollection implements Iterable<Map.Entry<ResourceMember, DataFi
 
     private static class FieldCount {
         private int count;
-        public FieldCount() {
+
+        FieldCount() {
             count++;
         }
     }

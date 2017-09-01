@@ -73,7 +73,7 @@ public class PhenomenonParserTest {
     @Test
     public void when_passingEmptyList_then_returnEmptyList() {
         final List<ResourceField> emptyList = Collections.emptyList();
-        assertThat(parser.parse(emptyList), is(emptyCollectionOf(Phenomenon.class)));
+        assertThat(parser.parseFromFields(emptyList), is(emptyCollectionOf(Phenomenon.class)));
     }
 
     @Test
@@ -83,7 +83,7 @@ public class PhenomenonParserTest {
                 .withPhenomenon("Temperature")
                 .withUom("°C")
                 .create());
-        Collection<Phenomenon> actual = parser.parse(fields);
+        Collection<Phenomenon> actual = parser.parseFromFields(fields);
         assertThat(actual, hasSize(1));
         Iterator<Phenomenon> iterator = actual.iterator();
         Phenomenon phenomenon = iterator.next();
@@ -97,7 +97,7 @@ public class PhenomenonParserTest {
                 .withPhenomenon("temperature")
                 .withUom("°C")
                 .create());
-        assertThat(parser.parse(fields), hasSize(1));
+        assertThat(parser.parseFromFields(fields), hasSize(1));
     }
 
     @Test
@@ -113,7 +113,7 @@ public class PhenomenonParserTest {
                    .withPhenomenon("Kelvin")
                    .withUom("K")
                    .create());
-        assertThat(parser.parse(fields), hasSize(2));
+        assertThat(parser.parseFromFields(fields), hasSize(2));
     }
 
     @Test
@@ -196,7 +196,7 @@ public class PhenomenonParserTest {
     private Collection<Phenomenon> parsePhenomenonIdsOfResource(String dataset, String observationResource, String type) {
         ResourceMember member = new ResourceMember(observationResource, type);
         ResourceMember metadata = testHelper.getResourceMember(dataset, member);
-        return parser.parse(metadata.getResourceFields());
+        return parser.parseFromFields(metadata.getResourceFields());
     }
 
     private List<String> toIds(Collection<Phenomenon> phenomena) {

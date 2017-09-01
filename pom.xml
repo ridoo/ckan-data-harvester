@@ -22,7 +22,7 @@
     </modules>
 
     <properties>
-        <sos.version>4.4.1-SNAPSHOT</sos.version>
+        <sos.version>4.4.0-M12</sos.version>
         <jackson.version>2.7.3</jackson.version>
         <geotools.version>14.0</geotools.version>
         <spring.version>4.2.5.RELEASE</spring.version>

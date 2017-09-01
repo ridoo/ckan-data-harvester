@@ -139,15 +139,6 @@ public class SerializedCache implements CkanSosReferenceCache, Serializable {
         return ckanDatasets;
     }
 
-    private CkanDataset deserialize(SerializableCkanDataset dataset) {
-        try {
-            return dataset.getCkanDataset();
-        } catch (IOException e) {
-            LOGGER.error("Unable to deserialize broken dataset.", e);
-            return null;
-        }
-    }
-
     private Map<CkanResource, CkanSosObservationReference> deserializeObservationReferences() {
         Map<CkanResource, CkanSosObservationReference> observationReferences = new HashMap<>();
         for (Map.Entry<SerializableCkanResource, CkanSosObservationReference> entry : referencesByResource.entrySet()) {
@@ -167,4 +158,14 @@ public class SerializedCache implements CkanSosReferenceCache, Serializable {
             return null;
         }
     }
+
+    private CkanDataset deserialize(SerializableCkanDataset dataset) {
+        try {
+            return dataset.getCkanDataset();
+        } catch (IOException e) {
+            LOGGER.error("Unable to deserialize broken dataset.", e);
+            return null;
+        }
+    }
+
 }

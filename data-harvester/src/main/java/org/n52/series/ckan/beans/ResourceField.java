@@ -204,6 +204,14 @@ public class ResourceField implements VisitableField {
         return isOfType(clazz.getSimpleName());
     }
 
+    public boolean isOfType(String ofType) {
+        if (node.isMissingNode()) {
+            return false;
+        }
+        final String fieldType = getFieldType();
+        return ckanMapping.hasDataTypeMappings(ofType, fieldType);
+    }
+
     public boolean isOneOfType(List<String> types) {
         for (String type : types) {
             if (isOfType(type)) {
@@ -211,14 +219,6 @@ public class ResourceField implements VisitableField {
             }
         }
         return false;
-    }
-
-    public boolean isOfType(String ofType) {
-        if (node.isMissingNode()) {
-            return false;
-        }
-        final String fieldType = getFieldType();
-        return ckanMapping.hasDataTypeMappings(ofType, fieldType);
     }
 
     @Override

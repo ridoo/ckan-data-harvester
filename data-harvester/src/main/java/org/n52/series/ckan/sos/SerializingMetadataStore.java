@@ -142,6 +142,15 @@ public class SerializingMetadataStore extends InMemoryMetadataStore implements C
     }
 
     @Override
+    public void delete(CkanDataset dataset) {
+        if (dataset != null) {
+            super.delete(dataset);
+            cache.setDatasets(getDatasets());
+            serialize();
+        }
+    }
+
+    @Override
     public boolean exists(CkanResource reference) {
         return cache.exists(reference);
     }
@@ -149,15 +158,6 @@ public class SerializingMetadataStore extends InMemoryMetadataStore implements C
     @Override
     public CkanSosObservationReference getReference(CkanResource resource) {
         return cache.getReference(resource);
-    }
-
-    @Override
-    public void delete(CkanDataset dataset) {
-        if (dataset != null) {
-            super.delete(dataset);
-            cache.setDatasets(getDatasets());
-            serialize();
-        }
     }
 
     @Override

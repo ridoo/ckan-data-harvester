@@ -60,7 +60,7 @@ public class PhenomenonParser {
 
     public Collection<Phenomenon> parse(DataTable dataTable) {
         Collection<ResourceField> resourceFields = dataTable.getResourceFields();
-        Collection<Phenomenon> phenomena = parse(resourceFields);
+        Collection<Phenomenon> phenomena = parseFromFields(resourceFields);
         Predicate<ResourceField> filter = new Predicate<ResourceField>() {
             @Override
             public boolean test(ResourceField field) {
@@ -95,7 +95,7 @@ public class PhenomenonParser {
                      .collect(Collectors.toSet());
     }
 
-    public Collection<Phenomenon> parse(Collection<ResourceField> resourceFields) {
+    public Collection<Phenomenon> parseFromFields(Collection<ResourceField> resourceFields) {
         Predicate<ResourceField> filter = new Predicate<ResourceField>() {
             @Override
             public boolean test(ResourceField field) {
