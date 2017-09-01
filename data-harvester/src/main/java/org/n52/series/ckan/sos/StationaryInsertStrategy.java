@@ -88,6 +88,7 @@ class StationaryInsertStrategy extends AbstractInsertStrategy {
                 Phenomenon currentPhenomenon = phenomenon;
 
                 if (phenomenon.isSoftTyped()) {
+
                     // XXX iterating over all phenomena would create n*row observations
                     // for softtyped (referenced) phenomena which is WRONG .. find a way
                     // to detect which phenomena is referenced and create an observation
