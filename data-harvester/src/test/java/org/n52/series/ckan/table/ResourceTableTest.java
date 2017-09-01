@@ -151,24 +151,24 @@ public class ResourceTableTest {
         List<Phenomenon> allPhenomena = parser.parse(output.getResourceFields());
         assertThat(allPhenomena.size(), is(phenomenaObservations.size() + phenomenaPlatforms.size()));
     }
-    
+
     @Test
     public void when_twoJoinColumnsWithSwitchedValues_then_noRowsGetsJoined() {
         ResourceMember first = new ResourceMember("TABLE_A", "aType");
         ResourceField firstA = FieldBuilder.aFieldAt(0).createSimple("A");
         ResourceField firstB = FieldBuilder.aFieldAt(1).createSimple("B");
         ResourceTable table = prepareTable(firstA, firstB, first);
-        
-        
+
+
         ResourceMember second = new ResourceMember("TABLE_B", "bType");
         ResourceField secondA = FieldBuilder.aFieldAt(0).createSimple("A");
         ResourceField secondB = FieldBuilder.aFieldAt(1).createSimple("B");
         ResourceTable other = prepareTable(secondB, secondA, second);
-        
+
         DataTable joinedTable = table.innerJoin(other);
         assertThat(joinedTable.rowSize(), is(0));
     }
-    
+
     private ResourceTable prepareTable(ResourceField first, ResourceField second, ResourceMember member) {
         member.setResourceFields(Arrays.asList(first, second));
         ResourceTable table = new ResourceTable(member, new DataFile());

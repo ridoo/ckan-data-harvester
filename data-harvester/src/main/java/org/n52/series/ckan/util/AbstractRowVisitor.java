@@ -7,13 +7,13 @@ import org.n52.series.ckan.beans.ResourceField;
 public abstract class AbstractRowVisitor<T> implements FieldVisitor<T> {
 
     /**
-     * Initialize state of visitor. 
+     * Initialize state of visitor.
      */
     public void init() {};
-    
+
     /**
-     * Visits a complete row, mapping <code>ResourceField</code>s to <code>String</code> values. 
-     * 
+     * Visits a complete row, mapping <code>ResourceField</code>s to <code>String</code> values.
+     *
      * @param rowEntry the row.
      */
     public FieldVisitor<T> visit(Map<ResourceField, String> rowEntry) {
@@ -22,5 +22,5 @@ public abstract class AbstractRowVisitor<T> implements FieldVisitor<T> {
             .forEach(row -> row.getKey().accept(this, row.getValue()));
         return this;
     }
-    
+
 }

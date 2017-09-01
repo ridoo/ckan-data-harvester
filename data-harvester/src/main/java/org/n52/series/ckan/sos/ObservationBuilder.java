@@ -58,19 +58,19 @@ class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
     private static final String DEFAULT_OBSERVATION_TYPE = OmConstants.OBS_TYPE_MEASUREMENT;
 
     private final SingleObservationValueBuilder observationValueBuilder = new SingleObservationValueBuilder();
-    
+
     private final TimeFieldParser timeFieldParser = new TimeFieldParser();
 
     private final TimeFieldParser.ValidTimeBuilder validTimeBuilder = timeFieldParser.new ValidTimeBuilder();
 
     private final TimeFieldParser.TimeBuilder timeBuilder = timeFieldParser.new TimeBuilder();
-    
+
     private final GeometryBuilder geometryBuilder = GeometryBuilder.create();
 
     private final OmObservation omObservation;
-    
+
     private final Phenomenon phenomenon;
-    
+
     private final ResourceKey qualifier;
 
     private String observationType = DEFAULT_OBSERVATION_TYPE;
@@ -78,11 +78,11 @@ class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
     private UomParser uomParser = new UcumParser();
 
     private SensorBuilder sensorBuilder;
-    
+
     public static ObservationBuilder create(Phenomenon phenomenon, ResourceKey qualifier) {
         return new ObservationBuilder(phenomenon, qualifier);
     }
-    
+
     public ObservationBuilder withUomParser(UomParser uomParser) {
         this.uomParser = uomParser;
         return this;
@@ -91,7 +91,7 @@ class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
     private ObservationBuilder(Phenomenon phenomenon, ResourceKey qualifier) {
         this.phenomenon = phenomenon;
         this.qualifier = qualifier;
-        
+
         this.omObservation = new OmObservation();
     }
 
@@ -177,7 +177,7 @@ class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
     protected class SingleObservationValueBuilder extends ObservationFieldVisitor<SingleObservationValue< ? >> {
 
         private SingleObservationValue< ? > result;
-        
+
         @Override
         public void visitObservationField(ResourceField field, String value) {
             if (field.matchesIndex(phenomenon.getFieldIdx())) {

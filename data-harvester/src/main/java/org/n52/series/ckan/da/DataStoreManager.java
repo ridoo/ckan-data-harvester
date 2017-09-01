@@ -37,7 +37,7 @@ import org.n52.series.ckan.beans.DataCollection;
 public interface DataStoreManager {
 
     void insertOrUpdate(DataCollection dataCollection);
-    
+
     default Set<String> getStationaryObservationTypes() {
         return new HashSet<>(Arrays.<String>asList(new String[] {
                 CkanConstants.ResourceType.PLATFORMS,

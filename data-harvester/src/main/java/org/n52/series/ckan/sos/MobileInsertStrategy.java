@@ -85,7 +85,7 @@ public class MobileInsertStrategy extends AbstractInsertStrategy {
              */
             trackBuilder.visit(rowEntry.getValue());
             String trackId = trackBuilder.getResult();
-            
+
             for (Phenomenon phenomenon : phenomena) {
                 sensorBuilderTemplate.addPhenomenon(phenomenon);
 
