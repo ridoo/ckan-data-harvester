@@ -198,10 +198,9 @@ public interface CkanConstants {
         String STRING = "string";
         String DATE = "date";
         String JSON = "json";
-        List<String> QUANTITY = Collections.unmodifiableList(Arrays.<String>asList(
-            INTEGER,
-            DOUBLE
-        ));
+        List<String> QUANTITY = Collections.unmodifiableList(Arrays.<String> asList(
+                                                                                    INTEGER,
+                                                                                    DOUBLE));
     }
 
     interface Config {

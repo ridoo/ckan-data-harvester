@@ -130,29 +130,29 @@ public class DataCollection implements Iterable<Map.Entry<ResourceMember, DataFi
         return resourceMembersByType;
     }
 
-//    public Set<ResourceField> getJoinFieldIds(Set<ResourceMember> members) {
-//        List<ResourceField> allFields = new ArrayList<>();
-//        FieldCounter counter = new FieldCounter();
-//        for (ResourceMember member : members) {
-//            final List<ResourceField> fields = member.getResourceFields();
-//            counter.updateWith(fields);
-//            allFields.addAll(fields);
-//        }
-//
-//        // XXX buggy as it contains fields of the same resource type
-//        // this might lead (for example) to join columns of similar
-//        // structured resources (two observation tables containing
-//        // both the field MESS_DATUM
-//
-//        Set<ResourceField> joinColumns = new LinkedHashSet<>();
-//        for (ResourceField field : allFields) {
-//            if (counter.isJoinColumn(field)) {
-//                joinColumns.add(field);
-//            }
-//        }
-//
-//        return joinColumns;
-//    }
+    //    public Set<ResourceField> getJoinFieldIds(Set<ResourceMember> members) {
+    //        List<ResourceField> allFields = new ArrayList<>();
+    //        FieldCounter counter = new FieldCounter();
+    //        for (ResourceMember member : members) {
+    //            final List<ResourceField> fields = member.getResourceFields();
+    //            counter.updateWith(fields);
+    //            allFields.addAll(fields);
+    //        }
+    //
+    //        // XXX buggy as it contains fields of the same resource type
+    //        // this might lead (for example) to join columns of similar
+    //        // structured resources (two observation tables containing
+    //        // both the field MESS_DATUM
+    //
+    //        Set<ResourceField> joinColumns = new LinkedHashSet<>();
+    //        for (ResourceField field : allFields) {
+    //            if (counter.isJoinColumn(field)) {
+    //                joinColumns.add(field);
+    //            }
+    //        }
+    //
+    //        return joinColumns;
+    //    }
 
     @Override
     public Iterator<Entry<ResourceMember, DataFile>> iterator() {

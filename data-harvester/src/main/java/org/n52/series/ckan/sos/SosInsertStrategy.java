@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.sos;
 
 import java.util.Map;
@@ -35,5 +36,5 @@ import org.n52.series.ckan.table.DataTable;
 
 public interface SosInsertStrategy {
 
-    Map< String, DataInsertion> createDataInsertions(DataTable fullTable, DataCollection dataCollection);
+    Map<String, DataInsertion> createDataInsertions(DataTable fullTable, DataCollection dataCollection);
 }

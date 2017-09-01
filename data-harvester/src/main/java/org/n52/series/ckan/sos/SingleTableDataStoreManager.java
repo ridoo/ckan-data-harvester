@@ -62,9 +62,9 @@ public class SingleTableDataStoreManager extends SosDataStoreManager {
     }
 
     public SingleTableDataStoreManager(InsertSensorDAO insertSensorDao,
-                                         InsertObservationDAO insertObservationDao,
-                                         DeleteObservationDAO deleteObservationDao,
-                                         CkanSosReferenceCache ckanSosReferenceCache) {
+                                       InsertObservationDAO insertObservationDao,
+                                       DeleteObservationDAO deleteObservationDao,
+                                       CkanSosReferenceCache ckanSosReferenceCache) {
         super(insertSensorDao, insertObservationDao, deleteObservationDao, ckanSosReferenceCache);
     }
 

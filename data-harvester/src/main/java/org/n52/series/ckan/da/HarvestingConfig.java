@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.da;
 
 public class HarvestingConfig {
@@ -39,6 +40,5 @@ public class HarvestingConfig {
     public void setOutputPath(String outputPath) {
         this.outputPath = outputPath;
     }
-
 
 }

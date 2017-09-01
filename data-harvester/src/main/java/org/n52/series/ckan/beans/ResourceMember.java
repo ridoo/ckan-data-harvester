@@ -116,9 +116,11 @@ public class ResourceMember {
                 : Collections.<ResourceField> emptyList();
     }
 
-    public Optional<ResourceField > getField(String fieldId) {
-        return resourceFields.stream().filter(e -> e.getFieldId()
-                     .equalsIgnoreCase(fieldId)).findFirst();
+    public Optional<ResourceField> getField(String fieldId) {
+        return resourceFields.stream()
+                             .filter(e -> e.getFieldId()
+                                           .equalsIgnoreCase(fieldId))
+                             .findFirst();
     }
 
     public ResourceField getField(int index) {
@@ -167,8 +169,10 @@ public class ResourceMember {
                 if (getField(columnId).isPresent()) {
                     fields.add(getField(columnId).get());
                 } else {
-                    if (other.getField(columnId).isPresent()) {
-                        fields.add(other.getField(columnId).get());
+                    if (other.getField(columnId)
+                             .isPresent()) {
+                        fields.add(other.getField(columnId)
+                                        .get());
                     }
                 }
             }

@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.table;
 
 import org.n52.series.ckan.beans.DataFile;
@@ -62,10 +63,14 @@ public abstract class TableLoader {
     }
 
     protected void logMemory() {
-        LOGGER.trace("Max Memory: {} Mb", Runtime.getRuntime().maxMemory() / 1048576);
-        LOGGER.trace("Total Memory: {} Mb", Runtime.getRuntime().totalMemory() / 1048576);
-        LOGGER.trace("Free Memory: {} Mb", Runtime.getRuntime().freeMemory() / 1048576);
+        Runtime runtime = Runtime.getRuntime();
+        long maxMemory = runtime.maxMemory();
+        long totalMemory = runtime.totalMemory();
+        long freeMemory = runtime.freeMemory();
+        int toMebiByteDivisor = 1024 * 1024;
+        LOGGER.trace("Max Memory: {} Mb", maxMemory / toMebiByteDivisor);
+        LOGGER.trace("Total Memory: {} Mb", totalMemory / toMebiByteDivisor);
+        LOGGER.trace("Free Memory: {} Mb", freeMemory / toMebiByteDivisor);
     }
-
 
 }

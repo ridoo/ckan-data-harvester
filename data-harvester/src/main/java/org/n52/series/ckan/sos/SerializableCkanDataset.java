@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.sos;
 
 import java.io.IOException;
@@ -47,12 +48,14 @@ public class SerializableCkanDataset implements Serializable {
     private final String id;
 
     public SerializableCkanDataset(CkanDataset dataset) throws JsonProcessingException {
-        this.ckanDatasetAsJson = JsonUtil.getCkanObjectWriter().writeValueAsString(dataset);
+        this.ckanDatasetAsJson = JsonUtil.getCkanObjectWriter()
+                                         .writeValueAsString(dataset);
         this.id = dataset.getId();
     }
 
     public CkanDataset getCkanDataset() throws IOException {
-        return JsonUtil.getCkanObjectMapper().readValue(ckanDatasetAsJson, CkanDataset.class);
+        return JsonUtil.getCkanObjectMapper()
+                       .readValue(ckanDatasetAsJson, CkanDataset.class);
     }
 
     public String getId() {

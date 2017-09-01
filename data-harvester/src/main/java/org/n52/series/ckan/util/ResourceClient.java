@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.util;
 
 import java.io.IOException;
@@ -74,10 +75,13 @@ public class ResourceClient {
             ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
                 @Override
                 public String handleResponse(final HttpResponse response) throws ClientProtocolException, IOException {
-                    int status = response.getStatusLine().getStatusCode();
+                    int status = response.getStatusLine()
+                                         .getStatusCode();
                     if (status >= 200 && status < 300) {
                         HttpEntity entity = response.getEntity();
-                        return entity != null ? EntityUtils.toString(entity, CkanConstants.DEFAULT_CHARSET) : null;
+                        return entity != null
+                                ? EntityUtils.toString(entity, CkanConstants.DEFAULT_CHARSET)
+                                : null;
                     } else {
                         throw new ClientProtocolException("Unexpected response status: " + status);
                     }
@@ -90,11 +94,11 @@ public class ResourceClient {
 
     private CloseableHttpClient create() {
         return HttpClients.custom()
-                .setConnectionManager(createPooledConnectionManager())
-                .setDefaultCredentialsProvider(createCredentialsProvider())
-                .setDefaultRequestConfig(createDefaultRequestConfig())
-                .setRoutePlanner(createProxyRoutePlanner())
-                .build();
+                          .setConnectionManager(createPooledConnectionManager())
+                          .setDefaultCredentialsProvider(createCredentialsProvider())
+                          .setDefaultRequestConfig(createDefaultRequestConfig())
+                          .setRoutePlanner(createProxyRoutePlanner())
+                          .build();
     }
 
     private static SystemDefaultRoutePlanner createProxyRoutePlanner() {
@@ -115,24 +119,24 @@ public class ResourceClient {
 
     private Registry<ConnectionSocketFactory> createConnectionSocketFactory() {
         SSLContext sslcontext = SSLContexts.createSystemDefault();
-        return RegistryBuilder.<ConnectionSocketFactory>create()
-            .register("http", PlainConnectionSocketFactory.INSTANCE)
-            .register("https", new SSLConnectionSocketFactory(sslcontext))
-            .build();
+        return RegistryBuilder.<ConnectionSocketFactory> create()
+                              .register("http", PlainConnectionSocketFactory.INSTANCE)
+                              .register("https", new SSLConnectionSocketFactory(sslcontext))
+                              .build();
     }
 
     private ConnectionConfig createConnectionConfig() {
         return ConnectionConfig.custom()
-                .setCharset(Consts.UTF_8)
-                .build();
+                               .setCharset(Consts.UTF_8)
+                               .build();
     }
 
     private RequestConfig createDefaultRequestConfig() {
         return RequestConfig.custom()
-                .setSocketTimeout(config.getSocketTimeout())
-                .setConnectTimeout(config.getConnectTimeout())
-                .setConnectionRequestTimeout(config.getConnectionRequestTimeout())
-                .build();
+                            .setSocketTimeout(config.getSocketTimeout())
+                            .setConnectTimeout(config.getConnectTimeout())
+                            .setConnectionRequestTimeout(config.getConnectionRequestTimeout())
+                            .build();
     }
 
 }

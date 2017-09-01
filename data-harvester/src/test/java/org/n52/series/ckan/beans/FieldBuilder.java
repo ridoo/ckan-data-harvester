@@ -26,8 +26,8 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
-package org.n52.series.ckan.beans;
 
+package org.n52.series.ckan.beans;
 
 import static org.junit.Assert.fail;
 
@@ -83,7 +83,6 @@ public class FieldBuilder {
         }
     }
 
-
     public FieldBuilder withFieldMappings(String name, String... mappings) {
         Set<String> mappedValues = getMappedValues("field", name);
         mappedValues.addAll(Arrays.asList(mappings));
@@ -98,7 +97,7 @@ public class FieldBuilder {
             mappingsByGroup.put(group, new HashMap<>());
         }
         Map<String, Set<String>> mappingsByName = mappingsByGroup.get(group);
-        if (!mappingsByName.containsKey(name))  {
+        if (!mappingsByName.containsKey(name)) {
             mappingsByName.put(name, new HashSet<>());
         }
         return mappingsByName.get(name);
@@ -179,7 +178,6 @@ public class FieldBuilder {
         return withProperty(CkanConstants.FieldPropertyName.UOM, uom);
     }
 
-
     public FieldBuilder withProperty(String key, JsonNode value) {
         this.valuesByField.put(key, value);
         return this;
@@ -222,8 +220,9 @@ public class FieldBuilder {
         }
         CkanMapping mappings = createCkanMapping();
         return new ResourceField(field, index, mappings)
-                .setResourceType(resourceType);
+                                                        .setResourceType(resourceType);
     }
+
     public ResourceField createSimple(String id) {
         return createViaTemplate("{ \"field_id\": \"%s\", \"field_type\": \"string\" }", id);
     }
@@ -251,11 +250,13 @@ public class FieldBuilder {
         ObjectNode allMappings = factory.objectNode();
         for (Entry<String, Map<String, Set<String>>> mapGroup : mappingsByGroup.entrySet()) {
             if (mapGroup.getValue() != null) {
-                String lowerCasedGroup = mapGroup.getKey().toLowerCase();
+                String lowerCasedGroup = mapGroup.getKey()
+                                                 .toLowerCase();
                 ObjectNode groupMappings = allMappings.putObject(lowerCasedGroup);
                 Map<String, Set<String>> mappings = mapGroup.getValue();
                 for (Entry<String, Set<String>> mapping : mappings.entrySet()) {
-                    String lowerCasedValueName = mapping.getKey().toLowerCase();
+                    String lowerCasedValueName = mapping.getKey()
+                                                        .toLowerCase();
                     ArrayNode values = groupMappings.putArray(lowerCasedValueName);
                     for (String valueMapping : mapping.getValue()) {
                         values.add(valueMapping.toLowerCase());

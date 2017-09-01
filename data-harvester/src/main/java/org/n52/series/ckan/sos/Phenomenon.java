@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.sos;
 
 import java.util.Objects;
@@ -134,7 +135,9 @@ public class Phenomenon {
         int hash = 5;
         hash = 37 * hash + Objects.hashCode(this.id);
         hash = 37 * hash + Objects.hashCode(valueField);
-        hash = 37 * hash + (softTyped ? 1231 : 1237);
+        hash = 37 * hash + (softTyped
+                ? 1231
+                : 1237);
         hash = 37 * hash + Objects.hashCode(this.label);
         hash = 37 * hash + Objects.hashCode(this.uom);
         return hash;
@@ -169,16 +172,20 @@ public class Phenomenon {
 
     @Override
     public String toString() {
-        return new StringBuilder(getClass().getSimpleName())
-                .append("[id=").append(id)
-                .append(", label=").append(label)
-                .append(", uom=").append(uom)
-                .append(", fieldIdx=").append(valueField.getIndex())
-                .append(", softTyped=").append(softTyped)
-                .append("]")
-                .toString();
+        String className = getClass().getSimpleName();
+        StringBuilder sb = new StringBuilder(className);
+        return sb.append("[id=")
+                 .append(id)
+                 .append(", label=")
+                 .append(label)
+                 .append(", uom=")
+                 .append(uom)
+                 .append(", fieldIdx=")
+                 .append(valueField.getIndex())
+                 .append(", softTyped=")
+                 .append(softTyped)
+                 .append("]")
+                 .toString();
     }
-
-
 
 }

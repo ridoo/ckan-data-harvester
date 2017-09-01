@@ -1,3 +1,4 @@
+
 package org.n52.series.ckan.spring;
 /*
  * Copyright (C) 2015-2017 52°North Initiative for Geospatial Open Source
@@ -27,8 +28,6 @@ package org.n52.series.ckan.spring;
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
-
-
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;

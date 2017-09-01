@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.util;
 
 import java.io.File;
@@ -49,7 +50,8 @@ public class FileBasedCkanHarvestingService {
         ckanDataStoreManager = new InMemoryDataStoreManager();
 
         ckanHarvester = new FileBasedCkanHarvester("dwd");
-        ckanHarvester.setResourceDownloadBaseFolder(folder.toURI().toString());
+        ckanHarvester.setResourceDownloadBaseFolder(folder.toURI()
+                                                          .toString());
         ckanHarvester.setMetadataStore(ckanMetadataStore);
         ckanHarvester.setDataStoreManager(ckanDataStoreManager);
 
