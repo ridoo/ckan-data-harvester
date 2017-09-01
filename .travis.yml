@@ -14,5 +14,5 @@ cache:
 notifications:
   irc:
     channels:
-    - chat.freenode.net#52north
+      - "chat.freenode.net#52north"
     on_failure: always
