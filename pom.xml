@@ -415,8 +415,8 @@
             <dependency>
                 <groupId>org.n52.sensorweb.sos</groupId>
                 <artifactId>hibernate-h2</artifactId>
-                <!-- <scope>test</scope> -->
                 <version>${version.sos}</version>
+                <scope>test</scope>
                 <exclusions>
                     <exclusion>
                         <groupId>org.mockito</groupId>
@@ -449,6 +449,10 @@
                     <exclusion>
                         <groupId>com.h2database</groupId>
                         <artifactId>h2</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.hamcrest</groupId>
+                        <artifactId>hamcrest-all</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
