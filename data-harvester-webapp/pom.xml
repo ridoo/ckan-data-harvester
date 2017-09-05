@@ -43,14 +43,17 @@
         <dependency>
             <groupId>org.n52.series-api.db</groupId>
             <artifactId>dao</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.n52.series-api.db</groupId>
-            <artifactId>sos-integration</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.n52.series-api.db</groupId>
             <artifactId>mappings</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.n52.series-api.db</groupId>
+            <artifactId>sos-integration</artifactId>
+            <scope>runtime</scope>
         </dependency>
 
         <dependency>
@@ -69,7 +72,7 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
         </dependency>
-
+        
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
@@ -78,7 +81,7 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
@@ -88,6 +91,12 @@
         <dependency>
             <groupId>xml-apis</groupId>
             <artifactId>xml-apis</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
             <scope>runtime</scope>
         </dependency>
     </dependencies>
@@ -157,6 +166,7 @@
                                 <exclude>WEB-INF/lib/sos-integration-${series.dao.version}</exclude>
                                 <exclude>WEB-INF/classes/mapping/extension/readonly/**</exclude>
                                 -->
+                                <exclude>WEB-INF/lib/logback-*</exclude>
                             </excludes>
                         </overlay>
                     </overlays>

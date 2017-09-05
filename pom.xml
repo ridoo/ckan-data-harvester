@@ -29,6 +29,7 @@
         <jackan.version>0.4.3-SNAPSHOT</jackan.version>
         <series.api.version>2.0.0-SNAPSHOT</series.api.version>
         <series.dao.version>2.0.0-SNAPSHOT</series.dao.version>
+        <version.logback>1.2.1</version.logback>
 
         <java.compiler.source>1.8</java.compiler.source>
         <java.compiler.target>1.8</java.compiler.target>
@@ -456,6 +457,12 @@
                 <groupId>com.h2database</groupId>
                 <artifactId>h2</artifactId>
                 <version>1.3.172</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${version.logback}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
