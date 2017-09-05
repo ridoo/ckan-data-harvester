@@ -2,7 +2,6 @@
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee"
     xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
 http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-		<param-value>${conf.sos.logdir}</param-value>
     version="2.5">
     <display-name>52°North COLABIS CKAN SOS, Git-Branch '${git.branch}' with
         state '${git.commit.id}' @ ${git.build.time}
@@ -12,6 +11,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
         <!--defines the directory in which the log files will be stored. -->
         <param-name>logDir</param-name>
         <!-- a relative path is not allowed, if a relative path would be supported the log dir has to be in the WEB-INF dir -->
+        <param-value>${conf.logdir}</param-value>
     </context-param>
     <!-- Spring configuration -->
     <context-param>

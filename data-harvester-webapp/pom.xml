@@ -18,10 +18,12 @@
         <version.jetty>9.4.6.v20170531</version.jetty>
         <!-- dev | ci | prod -->
         <env>dev</env>
-        <finalName>${project.artifactId}</finalName>
-
         <!-- optional properties file -->
         <local.configFile>src/main/resources/application.properties</local.configFile>
+
+        <finalName>${project.artifactId}</finalName>
+        <webappDirectory>${project.build.directory}/${finalName}</webappDirectory>
+        <conf.logdir>${catalina.base}/logs</conf.logdir>
     </properties>
 
     <dependencies>
