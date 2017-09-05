@@ -23,23 +23,23 @@
         <!-- optional properties file -->
         <local.configFile>src/main/resources/application.properties</local.configFile>
     </properties>
+
     <dependencies>
-    
         <dependency>
             <groupId>org.n52.sensorweb.ckan</groupId>
             <artifactId>data-harvester</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
-    
+
         <dependency>
             <groupId>org.n52.sensorweb.sos</groupId>
             <artifactId>webapp-bundle</artifactId>
-            <version>${sos.version}</version>
+            <version>${version.sos}</version>
             <scope>provided</scope>
             <type>war</type>
         </dependency>
-        
+
         <dependency>
             <groupId>org.n52.series-api.db</groupId>
             <artifactId>dao</artifactId>
