@@ -621,6 +621,23 @@
                 </plugin>
 
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <configuration>
+                        <rules>
+                            <requireNoRepositories>
+                                <allowedRepositories>
+                                    <id>geotools</id>
+                                    <id>n52-releases</id>
+                                    <id>n52-snapshots</id>
+                                    <id>sonatype-nexus-snapshots</id>
+                                </allowedRepositories>
+                            </requireNoRepositories>
+                        </rules>
+                    </configuration>
+                </plugin>
+                
+                <plugin>
                     <groupId>org.codehaus.groovy.maven</groupId>
                     <artifactId>gmaven-plugin</artifactId>
                     <configuration>
@@ -789,17 +806,17 @@
             <name>52n Releases</name>
             <url>http://52north.org/maven/repo/releases/</url>
         </repository>
-        <repository>
-            <id>n52-snapshots</id>
-            <name>52n Snapshots</name>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <url>http://52north.org/maven/repo/snapshots/</url>
-        </repository>
+<!--         <repository> -->
+<!--             <id>n52-snapshots</id> -->
+<!--             <name>52n Snapshots</name> -->
+<!--             <releases> -->
+<!--                 <enabled>false</enabled> -->
+<!--             </releases> -->
+<!--             <snapshots> -->
+<!--                 <enabled>true</enabled> -->
+<!--             </snapshots> -->
+<!--             <url>http://52north.org/maven/repo/snapshots/</url> -->
+<!--         </repository> -->
         <repository>
             <id>geotools</id>
             <name>Open Source Geospatial Foundation Repository</name>
