@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.sos;
 
 import static java.util.Collections.singletonList;
@@ -79,10 +80,10 @@ public class PhenomenonParserTest {
     @Test
     public void when_withUomProperty_then_returnPhenomenon() {
         List<ResourceField> fields = singletonList(FieldBuilder.aField()
-                .withFieldId("observationValue")
-                .withPhenomenon("Temperature")
-                .withUom("°C")
-                .create());
+                                                               .withFieldId("observationValue")
+                                                               .withPhenomenon("Temperature")
+                                                               .withUom("°C")
+                                                               .create());
         Collection<Phenomenon> actual = parser.parseFromFields(fields);
         assertThat(actual, hasSize(1));
         Iterator<Phenomenon> iterator = actual.iterator();
@@ -93,10 +94,10 @@ public class PhenomenonParserTest {
     @Test
     public void when_singlePhenomenon_then_singletonList() {
         List<ResourceField> fields = singletonList(FieldBuilder.aField()
-                .withFieldId("observationValue")
-                .withPhenomenon("temperature")
-                .withUom("°C")
-                .create());
+                                                               .withFieldId("observationValue")
+                                                               .withPhenomenon("temperature")
+                                                               .withUom("°C")
+                                                               .create());
         assertThat(parser.parseFromFields(fields), hasSize(1));
     }
 
@@ -104,15 +105,15 @@ public class PhenomenonParserTest {
     public void when_multiplePhenomenona_then_nonSingletonList() {
         List<ResourceField> fields = new ArrayList<>();
         fields.add(FieldBuilder.aField()
-                   .withFieldId("observationValue")
-                   .withPhenomenon("temperature")
-                   .withUom("°C")
-                   .create());
+                               .withFieldId("observationValue")
+                               .withPhenomenon("temperature")
+                               .withUom("°C")
+                               .create());
         fields.add(FieldBuilder.aField()
-                   .withFieldId("someValue")
-                   .withPhenomenon("Kelvin")
-                   .withUom("K")
-                   .create());
+                               .withFieldId("someValue")
+                               .withPhenomenon("Kelvin")
+                               .withUom("K")
+                               .create());
         assertThat(parser.parseFromFields(fields), hasSize(2));
     }
 
@@ -123,11 +124,17 @@ public class PhenomenonParserTest {
         String type = CkanConstants.ResourceType.OBSERVATIONS;
         Collection<Phenomenon> phenomenonIds = parsePhenomenonIdsOfResource(dataset, observationResource, type);
         String[] expected = {
-                "LUFTTEMPERATUR",
-                "REL_FEUCHTE"
+            "LUFTTEMPERATUR",
+            "REL_FEUCHTE"
         };
         assertThat(toIds(phenomenonIds), containsInAnyOrder(expected));
-        assertThat(toIds(phenomenonIds), not(containsInAnyOrder(new String[] { "STRUKTUR_VERSION", "QUALITAETS_NIVEAU", "MESS_DATUM", "STATIONS_ID"})));
+        assertThat(toIds(phenomenonIds),
+                   not(containsInAnyOrder(new String[] {
+                       "STRUKTUR_VERSION",
+                       "QUALITAETS_NIVEAU",
+                       "MESS_DATUM",
+                       "STATIONS_ID"
+                   })));
     }
 
     @Test
@@ -137,10 +144,16 @@ public class PhenomenonParserTest {
         String type = CkanConstants.ResourceType.OBSERVATIONS;
         Collection<Phenomenon> phenomenonIds = parsePhenomenonIdsOfResource(dataset, observationResource, type);
         String[] expected = {
-                "STUNDENSUMME_SONNENSCHEIN"
+            "STUNDENSUMME_SONNENSCHEIN"
         };
         assertThat(toIds(phenomenonIds), containsInAnyOrder(expected));
-        assertThat(toIds(phenomenonIds), not(containsInAnyOrder(new String[] { "STRUKTUR_VERSION", "QUALITAETS_NIVEAU", "MESS_DATUM", "STATIONS_ID"})));
+        assertThat(toIds(phenomenonIds),
+                   not(containsInAnyOrder(new String[] {
+                       "STRUKTUR_VERSION",
+                       "QUALITAETS_NIVEAU",
+                       "MESS_DATUM",
+                       "STATIONS_ID"
+                   })));
     }
 
     @Test
@@ -150,10 +163,16 @@ public class PhenomenonParserTest {
         String type = CkanConstants.ResourceType.OBSERVATIONS;
         Collection<Phenomenon> phenomenonIds = parsePhenomenonIdsOfResource(dataset, observationResource, type);
         String[] expected = {
-                "temperature"
+            "temperature"
         };
         assertThat(toIds(phenomenonIds), containsInAnyOrder(expected));
-        assertThat(toIds(phenomenonIds), not(containsInAnyOrder(new String[] { "datatime", "location", "timestamp", "station_id"})));
+        assertThat(toIds(phenomenonIds),
+                   not(containsInAnyOrder(new String[] {
+                       "datatime",
+                       "location",
+                       "timestamp",
+                       "station_id"
+                   })));
     }
 
     @Test
@@ -163,24 +182,30 @@ public class PhenomenonParserTest {
         String type = CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES;
         Collection<Phenomenon> phenomenonIds = parsePhenomenonIdsOfResource(dataset, observationResource, type);
         String[] expected = {
-                "Zn(1000 - 400) [micro_g/g]",
-                "Zn(400 - 100) [micro_g/g]",
-                "Zn(100 - 63) [micro_g/g]",
-                "Zn(63 - 0.45) [micro_g/g]",
-                "Zn(SUMM) [micro_g/g]",
-                "Cu(1000 - 400) [micro_g/g]",
-                "Cu(400 - 100) [micro_g/g]",
-                "Cu(100 - 63) [micro_g/g]",
-                "Cu(63 - 0.45) [micro_g/g]",
-                "Cu(SUMM) [micro_g/g]",
-                "Cd(1000 - 400) [micro_g/g]",
-                "Cd(400 - 100) [micro_g/g]",
-                "Cd(100 - 63) [micro_g/g]",
-                "Cd(63 - 0.45) [micro_g/g]",
-                "Cd(SUMM) [micro_g/g]"
+            "Zn(1000 - 400) [micro_g/g]",
+            "Zn(400 - 100) [micro_g/g]",
+            "Zn(100 - 63) [micro_g/g]",
+            "Zn(63 - 0.45) [micro_g/g]",
+            "Zn(SUMM) [micro_g/g]",
+            "Cu(1000 - 400) [micro_g/g]",
+            "Cu(400 - 100) [micro_g/g]",
+            "Cu(100 - 63) [micro_g/g]",
+            "Cu(63 - 0.45) [micro_g/g]",
+            "Cu(SUMM) [micro_g/g]",
+            "Cd(1000 - 400) [micro_g/g]",
+            "Cd(400 - 100) [micro_g/g]",
+            "Cd(100 - 63) [micro_g/g]",
+            "Cd(63 - 0.45) [micro_g/g]",
+            "Cd(SUMM) [micro_g/g]"
         };
         assertThat(toIds(phenomenonIds), containsInAnyOrder(expected));
-        assertThat(toIds(phenomenonIds), not(containsInAnyOrder(new String[] { "X", "Y", "Timestamp", ""})));
+        assertThat(toIds(phenomenonIds),
+                   not(containsInAnyOrder(new String[] {
+                       "X",
+                       "Y",
+                       "Timestamp",
+                       ""
+                   })));
     }
 
     @Test
@@ -193,7 +218,9 @@ public class PhenomenonParserTest {
         assertThat(toIds(phenomenonIds), containsInAnyOrder("FROST"));
     }
 
-    private Collection<Phenomenon> parsePhenomenonIdsOfResource(String dataset, String observationResource, String type) {
+    private Collection<Phenomenon> parsePhenomenonIdsOfResource(String dataset,
+                                                                String observationResource,
+                                                                String type) {
         ResourceMember member = new ResourceMember(observationResource, type);
         ResourceMember metadata = testHelper.getResourceMember(dataset, member);
         return parser.parseFromFields(metadata.getResourceFields());
