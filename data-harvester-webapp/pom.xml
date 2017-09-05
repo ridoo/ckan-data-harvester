@@ -212,13 +212,7 @@
                             <baseAppFirst>false</baseAppFirst>
                             <persistTempDirectory>true</persistTempDirectory>
                             <allowDuplicateFragmentNames>true</allowDuplicateFragmentNames>
-                            <extraClasspath>target/classes/;${project.build.outputDirectory};../data-harvester/target/classes;</extraClasspath>
                         </webApp>
-                        <scanTargets>
-                            <scanTarget>target/classes/</scanTarget>
-                            <scanTarget>${project.build.outputDirectory}</scanTarget>
-                            <scanTarget>../data-harvester/target/classes</scanTarget>
-                        </scanTargets>
                         <systemProperties>
                             <systemProperty>
                                 <name>catalina.base</name>
