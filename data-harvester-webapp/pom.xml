@@ -103,6 +103,7 @@
 
     <build>
         <finalName>${finalName}</finalName>
+        <outputDirectory>${webappDirectory}/WEB-INF/classes</outputDirectory>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -147,7 +148,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>2.6</version>
+                <version>3.1.0</version>
                 <configuration>
                     <overlays>
                         <overlay>
@@ -165,8 +166,18 @@
                                 <exclude>WEB-INF/lib/dao-${series.dao.version}</exclude>
                                 <exclude>WEB-INF/lib/sos-integration-${series.dao.version}</exclude>
                                 <exclude>WEB-INF/classes/mapping/extension/readonly/**</exclude>
-                                -->
+                                <!-- exclude older versions -->
+                                <exclude>WEB-INF/lib/*slf4j-*</exclude>
+                                <exclude>WEB-INF/lib/commons-codec-*</exclude>
+                                <exclude>WEB-INF/lib/guava-*</exclude>
+                                <exclude>WEB-INF/lib/hamcrest-*</exclude>
+                                <exclude>WEB-INF/lib/jackson-*</exclude>
+                                <exclude>WEB-INF/lib/javassist-*</exclude>
+                                <exclude>WEB-INF/lib/joda-time-*</exclude>
                                 <exclude>WEB-INF/lib/logback-*</exclude>
+                                <exclude>WEB-INF/lib/quartz-*</exclude>
+                                <exclude>WEB-INF/lib/test-*</exclude>
+                                <exclude>WEB-INF/lib/xml-apis-*</exclude>
                             </excludes>
                         </overlay>
                     </overlays>
@@ -175,18 +186,35 @@
                         <nonFilteredFileExtension>db</nonFilteredFileExtension>
                     </nonFilteredFileExtensions>
                     <webResources>
-                        <webResource>
+                        <resource>
                             <!-- override SOS config if present -->
                             <directory>src/main/webapp</directory>
                             <include>configuration.db</include>
                             <filtering>false</filtering>
-                        </webResource>
+                        </resource>
                     </webResources>
                     <webResources>
-                        <webResource>
+                        <resource>
+                            <directory>src/main/resources</directory>
+                            <targetPath>WEB-INF/classes</targetPath>
+                            <filtering>true</filtering>
+                        </resource>
+                        <resource>
                             <directory>src/main/webapp</directory>
                             <filtering>true</filtering>
-                        </webResource>
+                            <excludes>
+                                <!-- spring beans are filtered via properties -->
+                                <exclude>WEB-INF/spring/**</exclude>
+                            </excludes>
+                        </resource>
+                        <resource>
+                            <directory>src/main/webapp</directory>
+                            <filtering>true</filtering>
+                            <includes>
+                                <!-- sets the properties file being used for filtering -->
+                                <include>WEB-INF/spring/dispatcher-servlet.xml</include>
+                            </includes>
+                        </resource>
                     </webResources>
                 </configuration>
             </plugin>
