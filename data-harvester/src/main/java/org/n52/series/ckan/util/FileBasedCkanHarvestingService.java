@@ -45,13 +45,14 @@ public class FileBasedCkanHarvestingService {
 
     private final CkanHarvestingService ckanHarvester;
 
-    public FileBasedCkanHarvestingService(File folder) throws URISyntaxException, IOException {
+    public FileBasedCkanHarvestingService(File downloadFolder, String dataFolder)
+            throws URISyntaxException, IOException {
         ckanMetadataStore = new InMemoryMetadataStore();
         ckanDataStoreManager = new InMemoryDataStoreManager();
 
-        ckanHarvester = new FileBasedCkanHarvester("dwd");
-        ckanHarvester.setResourceDownloadBaseFolder(folder.toURI()
-                                                          .toString());
+        ckanHarvester = new FileBasedCkanHarvester(dataFolder);
+        ckanHarvester.setResourceDownloadBaseFolder(downloadFolder.toURI()
+                                                                  .toString());
         ckanHarvester.setMetadataStore(ckanMetadataStore);
         ckanHarvester.setDataStoreManager(ckanDataStoreManager);
 
