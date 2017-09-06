@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.n52.series.ckan.da.CkanMapping;
 
@@ -130,6 +131,13 @@ public class DataCollection implements Iterable<Map.Entry<ResourceMember, DataFi
         return resourceMembersByType;
     }
 
+    public Set<String> getResourceTypes() {
+        return dataCollection.entrySet()
+                             .stream()
+                             .map(e -> e.getKey()
+                                        .getResourceType())
+                             .collect(Collectors.toSet());
+    }
 
     @Override
     public Iterator<Entry<ResourceMember, DataFile>> iterator() {

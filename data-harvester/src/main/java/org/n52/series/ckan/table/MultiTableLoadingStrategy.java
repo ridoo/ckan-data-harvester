@@ -27,7 +27,7 @@
  * for more details.
  */
 
-package org.n52.series.ckan.sos;
+package org.n52.series.ckan.table;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -38,44 +38,38 @@ import java.util.Set;
 import org.n52.series.ckan.beans.DataCollection;
 import org.n52.series.ckan.beans.DataFile;
 import org.n52.series.ckan.beans.ResourceMember;
-import org.n52.series.ckan.table.DataTable;
-import org.n52.series.ckan.table.ResourceTable;
-import org.n52.sos.ds.hibernate.InsertObservationDAO;
-import org.n52.sos.ds.hibernate.InsertSensorDAO;
-import org.n52.sos.ext.deleteobservation.DeleteObservationDAO;
+import org.n52.series.ckan.da.DataStoreManager;
+import org.n52.series.ckan.sos.TableLoadingStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.trentorise.opendata.jackan.model.CkanDataset;
 import eu.trentorise.opendata.jackan.model.CkanResource;
 
-public class SingleTableDataStoreManager extends SosDataStoreManager {
+public class MultiTableLoadingStrategy extends TableLoadingStrategy {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SingleTableDataStoreManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MultiTableLoadingStrategy.class);
 
-    SingleTableDataStoreManager() {
-        this(null);
-    }
-
-    SingleTableDataStoreManager(CkanSosReferenceCache ckanSosReferenceCache) {
-        this(new InsertSensorDAO(), new InsertObservationDAO(), new DeleteObservationDAO(), ckanSosReferenceCache);
-    }
-
-    public SingleTableDataStoreManager(InsertSensorDAO insertSensorDao,
-                                       InsertObservationDAO insertObservationDao,
-                                       DeleteObservationDAO deleteObservationDao,
-                                       CkanSosReferenceCache ckanSosReferenceCache) {
-        super(insertSensorDao, insertObservationDao, deleteObservationDao, ckanSosReferenceCache);
+    public MultiTableLoadingStrategy(DataStoreManager dataStoreManager) {
+        super(dataStoreManager);
     }
 
     @Override
-    protected Collection<DataTable> loadData(DataCollection dataCollection, Set<String> typesToInsert) {
+    protected Collection<DataTable> loadData(DataCollection dataCollection) {
         CkanDataset dataset = dataCollection.getDataset();
         LOGGER.debug("load data for dataset '{}'", dataset.getName());
         DataTable fullTable = new ResourceTable();
 
+
+        // TODO refined strategy to load platforms/observation_with_geometry(?) first
+        // and perform a join + insert for each observation resource available
+        
+        // TODO do not know if mobile here
+
         // TODO write test for it
         // TODO if dataset is newer than in cache -> set flag to re-insert whole datacollection
+
+        Set<String> typesToInsert = dataCollection.getResourceTypes();
 
         Map<String, List<ResourceMember>> membersByType = dataCollection.getResourceMembersByType(typesToInsert);
         for (List<ResourceMember> membersWithCommonResourceTypes : membersByType.values()) {
@@ -86,7 +80,7 @@ public class SingleTableDataStoreManager extends SosDataStoreManager {
 
                 DataFile dataFile = dataCollection.getDataFile(member);
                 CkanResource resource = dataFile.getResource();
-                if (isUpdateNeeded(resource, dataFile)) {
+                if (dataStoreManager.isUpdateNeeded(resource, dataFile)) {
                     ResourceTable singleDatatable = new ResourceTable(dataCollection.getDataEntry(member));
                     singleDatatable.readIntoMemory();
                     LOGGER.debug("Extend table with: '{}'", singleDatatable);
@@ -97,8 +91,8 @@ public class SingleTableDataStoreManager extends SosDataStoreManager {
                                                                 .getResourceType();
             LOGGER.debug("Fully extended table for resource '{}': '{}'", resourceType, dataTable);
             fullTable = fullTable.rowSize() > dataTable.rowSize()
-                    ? dataTable.innerJoin(fullTable)
-                    : fullTable.innerJoin(dataTable);
+                    ? dataTable.innerJoin(fullTable, dataStoreManager.isInterrupted())
+                    : fullTable.innerJoin(dataTable, dataStoreManager.isInterrupted());
         }
         LOGGER.debug("Fully joined table: '{}'", fullTable);
         return Collections.singleton(fullTable);

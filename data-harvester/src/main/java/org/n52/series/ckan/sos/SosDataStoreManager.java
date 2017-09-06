@@ -30,18 +30,21 @@
 package org.n52.series.ckan.sos;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.function.Supplier;
 
 import org.n52.series.ckan.beans.DataCollection;
 import org.n52.series.ckan.beans.DataFile;
+import org.n52.series.ckan.da.CkanConstants;
+import org.n52.series.ckan.da.CkanMapping;
 import org.n52.series.ckan.da.DataStoreManager;
 import org.n52.series.ckan.table.DataTable;
+import org.n52.series.ckan.table.SingleTableLoadingStrategy;
 import org.n52.sos.ds.hibernate.InsertObservationDAO;
 import org.n52.sos.ds.hibernate.InsertSensorDAO;
 import org.n52.sos.ext.deleteobservation.DeleteObservationConstants;
@@ -54,9 +57,12 @@ import org.n52.sos.service.Configurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
+import eu.trentorise.opendata.jackan.model.CkanDataset;
 import eu.trentorise.opendata.jackan.model.CkanResource;
 
-public abstract class SosDataStoreManager implements DataStoreManager {
+public class SosDataStoreManager implements DataStoreManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SosDataStoreManager.class);
 
@@ -105,31 +111,61 @@ public abstract class SosDataStoreManager implements DataStoreManager {
 
     private Map<String, DataInsertion> getDataInsertions(DataCollection dataCollection) {
         Map<String, DataInsertion> dataInsertions = new HashMap<>();
+        CkanMapping ckanMapping = dataCollection.getCkanMapping();
+        CkanDataset ckanDataset = dataCollection.getDataset();
+        SosInsertStrategy insertStrategy = createInsertStrategy(ckanMapping, ckanDataset);
+        TableLoadingStrategy tableLoader = createTableLoader(ckanMapping, ckanDataset);
 
-        // add stationary observation data
-        SosInsertStrategy stationaryStrategy = hasReferenceCache()
-                ? new StationaryInsertStrategy()
-                : new StationaryInsertStrategy(getCkanSosReferenceCache());
-        Collection<DataTable> stationaryInserts = loadData(dataCollection, getStationaryObservationTypes());
-        for (DataTable dataTable : stationaryInserts) {
-            dataInsertions.putAll(stationaryStrategy.createDataInsertions(dataTable, dataCollection));
-        }
-
-        // add mobile observation data
-        SosInsertStrategy mobileStrategy = hasReferenceCache()
-                ? new MobileInsertStrategy()
-                : new MobileInsertStrategy(getCkanSosReferenceCache());
-        Collection<DataTable> mobileInserts = loadData(dataCollection, getMobileObservationTypes());
-        for (DataTable dataTable : mobileInserts) {
-            dataInsertions.putAll(mobileStrategy.createDataInsertions(dataTable, dataCollection));
+        Collection<DataTable> data = tableLoader.loadData(dataCollection);
+        for (DataTable dataTable : data) {
+            dataInsertions.putAll(insertStrategy.createDataInsertions(dataTable, dataCollection));
         }
 
         return dataInsertions;
     }
 
-    protected abstract Collection<DataTable> loadData(DataCollection dataCollection, Set<String> resourceTypesToInsert);
+    protected SosInsertStrategy createInsertStrategy(CkanMapping ckanMapping, CkanDataset ckanDataset) {
+        String path = CkanConstants.Config.CONFIG_PATH_STRATEGY_MOBILE;
+        JsonNode config = ckanMapping.getConfigValueAt(path);
 
-    protected boolean isUpdateNeeded(CkanResource resource, DataFile dataFile) {
+        // TODO enable custom strategy via config
+
+        if (!config.isMissingNode() && config.asBoolean()) {
+            return hasReferenceCache()
+                    ? new MobileInsertStrategy()
+                    : new MobileInsertStrategy(getCkanSosReferenceCache());
+        } else {
+            return hasReferenceCache()
+                    ? new StationaryInsertStrategy()
+                    : new StationaryInsertStrategy(getCkanSosReferenceCache());
+        }
+    }
+
+    protected TableLoadingStrategy createTableLoader(CkanMapping ckanMapping,
+                                                     CkanDataset dataset) {
+        String path = CkanConstants.Config.CONFIG_PATH_STRATEGY_TABLE_LOADER;
+        JsonNode tableLoaderConfig = ckanMapping.getConfigValueAt(path);
+        String clazz = tableLoaderConfig.has("class")
+                ? tableLoaderConfig.get("class")
+                                   .asText()
+                : "";
+        if (!clazz.isEmpty()) {
+            try {
+                Class< ? > tableLoader = Class.forName(clazz);
+                if (TableLoadingStrategy.class.isAssignableFrom(tableLoader)) {
+                    Constructor< ? > constructor = tableLoader.getConstructor(DataStoreManager.class);
+                    return (TableLoadingStrategy) constructor.newInstance(this);
+                }
+            } catch (Exception e) {
+                LOGGER.warn("Unable to create table loading strategy '{}' "
+                        + "for dataset {}", clazz, dataset, e);
+            }
+        }
+        return new SingleTableLoadingStrategy(this);
+    }
+
+    @Override
+    public boolean isUpdateNeeded(CkanResource resource, DataFile dataFile) {
         if (hasReferenceCache()) {
             return true;
         }
