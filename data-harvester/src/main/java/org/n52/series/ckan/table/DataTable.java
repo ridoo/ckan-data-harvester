@@ -38,7 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ScheduledExecutorService;
@@ -186,10 +185,12 @@ public class DataTable {
                 final Map<ResourceKey, String> toJoinIndex = other.table.column(field);
                 Set<Entry<ResourceKey, String>> joinOn = joinOnIndex.entrySet();
                 Set<Entry<ResourceKey, String>> toJoinEntries = toJoinIndex.entrySet();
-                pool.submit(() -> {
-                    joinOn.parallelStream()
+//                pool.submit(() -> {
+//                    joinOn.parallelStream()
+                joinOn.stream()
                           .forEach(joinOnCell -> {
-                              toJoinEntries.parallelStream()
+//                              toJoinEntries.parallelStream()
+                              toJoinEntries.stream()
                                            .filter(toJoinCell -> getJoinFilter(field, joinOnCell, toJoinCell))
                                            .forEach(toJoinCell -> {
                                                if (interruptedSupplier.get()) {
@@ -218,10 +219,10 @@ public class DataTable {
                                                doneToJoinCells.add(toJoinCell.getKey());
                                            });
                           });
-                })
-                    .get();
-            } catch (InterruptedException | ExecutionException e) {
-                LOGGER.warn("Unable to join tables", e);
+//                })
+//                    .get();
+//            } catch (InterruptedException | ExecutionException e) {
+//                LOGGER.warn("Unable to join tables", e);
             } catch (ShutdownInterruptException e) {
                 LOGGER.debug("Joining tables got interrupted.");
             }
