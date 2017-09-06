@@ -198,12 +198,15 @@ public interface CkanConstants {
         String STRING = "string";
         String DATE = "date";
         String JSON = "json";
-        List<String> QUANTITY = Collections.unmodifiableList(Arrays.<String> asList(
-                                                                                    INTEGER,
+        List<String> QUANTITY = Collections.unmodifiableList(Arrays.<String> asList(INTEGER,
                                                                                     DOUBLE));
     }
 
     interface Config {
-        String CONFIG_PATH_JOIN_COLUMNS = "/join_fields";
+        String CONFIG_PATH_JOIN = "/join";
+        String CONFIG_PATH_STRATEGY = "/strategy";
+        String CONFIG_PATH_STRATEGY_CONFIG = "/strategy/config";
+        String CONFIG_PATH_STRATEGY_MOBILE = "/strategy/mobile";
+        String CONFIG_PATH_STRATEGY_TABLE_LOADER = "/strategy/table_loader";
     }
 }

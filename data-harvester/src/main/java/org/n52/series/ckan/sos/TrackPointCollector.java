@@ -44,11 +44,15 @@ import org.n52.series.ckan.da.CkanMapping;
 import org.n52.series.ckan.util.TimeFieldParser;
 import org.n52.sos.ogc.gml.time.TimeInstant;
 import org.n52.sos.ogc.om.features.samplingFeatures.SamplingFeature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.vividsolutions.jts.geom.Geometry;
 
 public class TrackPointCollector {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TrackPointCollector.class);
 
     private final Map<String, List<TrackPoint>> trackPointsByTrackId;
 
@@ -120,8 +124,8 @@ public class TrackPointCollector {
         if (trackPoint.hasTrackId()) {
             return trackPoint.getTrackId();
         } else {
-            String path = "/strategy/mobile/track_discriminator";
-            JsonNode columns = ckanMapping.getConfigValueAt(path);
+            String path = CkanConstants.Config.CONFIG_PATH_STRATEGY;
+            JsonNode columns = ckanMapping.getConfigValueAt(path + "/track_discriminator");
             return trackPoint.generateTrackId(columns);
         }
     }
@@ -193,6 +197,8 @@ public class TrackPointCollector {
             String defaultValue = getTimestampAsIso8601String();
             if (columns.isMissingNode()) {
                 // TODO obviously this wouldn't result in a track
+                LOGGER.warn("No 'track_discriminator' config found. Using timestamp as default, "
+                        + "which will result in single point track instances!");
                 return defaultValue;
             }
 
@@ -250,7 +256,6 @@ public class TrackPointCollector {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            // result = prime * result + ((featureName == null) ? 0 : featureName.hashCode());
             result = prime * result + ((geometry == null)
                     ? 0
                     : geometry.hashCode());
@@ -269,13 +274,6 @@ public class TrackPointCollector {
                 return false;
             }
             TrackPoint other = (TrackPoint) obj;
-            // if (featureName == null) {
-            // if (other.featureName != null) {
-            // return false;
-            // }
-            // } else if (!featureName.equals(other.featureName)) {
-            // return false;
-            // }
             if (geometry == null) {
                 if (other.geometry != null) {
                     return false;

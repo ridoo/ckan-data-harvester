@@ -160,7 +160,7 @@ public class ResourceMember {
     }
 
     public Set<ResourceField> getJoinableFields(ResourceMember other) {
-        String configPath = CkanConstants.Config.CONFIG_PATH_JOIN_COLUMNS;
+        String configPath = CkanConstants.Config.CONFIG_PATH_JOIN;
         JsonNode joinConfig = getCkanMapping().getConfigValueAt(configPath);
         if (joinConfig.isArray()) {
             Set<ResourceField> fields = new HashSet<>();
