@@ -121,7 +121,7 @@
     <bean class="org.n52.web.ctrl.DataController">
         <property name="dataService" ref="datasetService" />
         <property name="datasetService" ref="datasetService" />
-        <property name="preRenderingTask" ref="preRenderingJob" />
+<!--         <property name="preRenderingTask" ref="preRenderingJob" /> -->
         <property name="requestIntervalRestriction" value="${request.interval.restriction}" />
     </bean>
 
@@ -154,9 +154,9 @@
         <property name="timeseriesDataService" ref="timeseriesService" />
         <property name="requestIntervalRestriction" value="${request.interval.restriction}" />
         <!-- reference task here so that controller is able to serve prerendered charts -->
-        <property name="preRenderingTask" ref="preRenderingJob" />
+<!--         <property name="preRenderingTask" ref="preRenderingJob" /> -->
         <!-- Prerendering is being controlled by a JobScheduler -->
-        <property name="handlingPreRenderingTask" value="false" />
+<!--         <property name="handlingPreRenderingTask" value="false" /> -->
     </bean>
 
 
