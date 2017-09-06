@@ -130,29 +130,6 @@ public class DataCollection implements Iterable<Map.Entry<ResourceMember, DataFi
         return resourceMembersByType;
     }
 
-    //    public Set<ResourceField> getJoinFieldIds(Set<ResourceMember> members) {
-    //        List<ResourceField> allFields = new ArrayList<>();
-    //        FieldCounter counter = new FieldCounter();
-    //        for (ResourceMember member : members) {
-    //            final List<ResourceField> fields = member.getResourceFields();
-    //            counter.updateWith(fields);
-    //            allFields.addAll(fields);
-    //        }
-    //
-    //        // XXX buggy as it contains fields of the same resource type
-    //        // this might lead (for example) to join columns of similar
-    //        // structured resources (two observation tables containing
-    //        // both the field MESS_DATUM
-    //
-    //        Set<ResourceField> joinColumns = new LinkedHashSet<>();
-    //        for (ResourceField field : allFields) {
-    //            if (counter.isJoinColumn(field)) {
-    //                joinColumns.add(field);
-    //            }
-    //        }
-    //
-    //        return joinColumns;
-    //    }
 
     @Override
     public Iterator<Entry<ResourceMember, DataFile>> iterator() {
@@ -162,32 +139,6 @@ public class DataCollection implements Iterable<Map.Entry<ResourceMember, DataFi
                 : Collections.<ResourceMember, DataFile> emptyMap()
                              .entrySet()
                              .iterator();
-    }
-
-    private static class FieldCounter {
-        private final Map<ResourceField, FieldCount> counts = new HashMap<>();
-
-        void updateWith(List<ResourceField> fields) {
-            for (ResourceField field : fields) {
-                if (counts.containsKey(field)) {
-                    counts.get(field).count++;
-                } else {
-                    counts.put(field, new FieldCount());
-                }
-            }
-        }
-
-        boolean isJoinColumn(ResourceField field) {
-            return counts.get(field).count > 1;
-        }
-    }
-
-    private static class FieldCount {
-        private int count;
-
-        FieldCount() {
-            count++;
-        }
     }
 
 }
