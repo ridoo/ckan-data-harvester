@@ -103,10 +103,10 @@ public class DataTable {
             return other;
         }
 
-        //        if (!resourceMember.isExtensible(other.resourceMember)) {
-        //            LOGGER.warn("Extension not applied as columns do not match: '{}'", other);
-        //            return this;
-        //        }
+        // if (!resourceMember.isExtensible(other.resourceMember)) {
+        // LOGGER.warn("Extension not applied as columns do not match: '{}'", other);
+        // return this;
+        // }
 
         DataTable outputTable = new DataTable(resourceMember);
         extendTable(other, outputTable);

@@ -26,7 +26,8 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
-package org.n52.series.ckan.table;
+
+package org.n52.series.ckan.tool;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -38,7 +39,9 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -74,7 +77,8 @@ public class WriteSimulationResultStations {
 
     private static final String EMISSION_SIMULATION_DATASET_ID = "9f064e17-799e-4261-8599-d3ee31b5392b";
 
-    public static void main(String[] args) throws URISyntaxException, IOException, NumberFormatException, SchemaException {
+    public static void main(String[] args)
+            throws URISyntaxException, IOException, NumberFormatException, SchemaException {
 
         new ShpWriter().write();
 
@@ -91,9 +95,10 @@ public class WriteSimulationResultStations {
         private final Path exportPath;
 
         public ShpWriter() throws URISyntaxException, IOException, NumberFormatException, SchemaException {
-            exportPath = Paths.get(OUTPUT_ROOT.toURI()).resolve("export");
+            exportPath = Paths.get(OUTPUT_ROOT.toURI())
+                              .resolve("export");
             File folder = exportPath.toFile();
-            if ( !folder.exists() && !folder.mkdir()) {
+            if (!folder.exists() && !folder.mkdir()) {
                 throw new IllegalStateException("Unable to create output folder");
             }
 
@@ -103,7 +108,8 @@ public class WriteSimulationResultStations {
         }
 
         void write() throws NumberFormatException, IOException, SchemaException {
-            Set<String> types = dataManager.getStationaryObservationTypes();
+            Set<String> types = new HashSet<>(Arrays.asList(CkanConstants.ResourceType.OBSERVED_GEOMETRIES,
+                                                            CkanConstants.ResourceType.OBSERVATIONS));
             Map<String, List<ResourceMember>> resourceMembersByType = dataCollection.getResourceMembersByType(types);
             List<ResourceMember> locations = resourceMembersByType.get(CkanConstants.ResourceType.OBSERVED_GEOMETRIES);
 
@@ -111,7 +117,8 @@ public class WriteSimulationResultStations {
             for (ResourceMember member : locations) {
                 DataFile dataFile = dataCollection.getDataFile(member);
                 String shpOutput = today + "-output.shp";
-                File shpTarget = exportPath.resolve(shpOutput).toFile();
+                File shpTarget = exportPath.resolve(shpOutput)
+                                           .toFile();
                 writeLocations(dataFile.getFile(), shpTarget);
             }
         }
@@ -120,31 +127,41 @@ public class WriteSimulationResultStations {
     /**
      * Lent from http://docs.geotools.org/latest/userguide/tutorial/feature/csv2shp.html
      *
-     * @param input CSV file
-     * @param output SHP target file
+     * @param input
+     *        CSV file
+     * @param output
+     *        SHP target file
      * @throws NumberFormatException
      * @throws IOException
      * @throws SchemaException
      */
-    private static void writeLocations(File input, File output) throws NumberFormatException, IOException, SchemaException {
+    private static void writeLocations(File input, File output)
+            throws NumberFormatException, IOException, SchemaException {
 
         SimpleFeatureType type = DataUtilities.createType("Location",
-                "name:String," +    // <- ID
-                "laenge:Double," +   // <- Laenge
-                "flaeche:Double," +   // <- Flaeche
-                "the_geom:Point:srid=4326,"// <- the geometry attribute: Point type
+                                                          "name:String,"
+                                                                  + // <- ID
+                                                                  "laenge:Double,"
+                                                                  + // <- Laenge
+                                                                  "flaeche:Double,"
+                                                                  + // <- Flaeche
+                                                                  "the_geom:Point:srid=4326,"// <- the
+                                                                                             // geometry
+                                                                                             // attribute:
+                                                                                             // Point type
         );
 
         List<SimpleFeature> features = new ArrayList<>();
         GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
         SimpleFeatureBuilder featureBuilder = new SimpleFeatureBuilder(type);
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(input)) ){
+        try (BufferedReader reader = new BufferedReader(new FileReader(input))) {
             /* First line of the data file is the header */
             String line = reader.readLine();
 
             for (line = reader.readLine(); line != null; line = reader.readLine()) {
-                if (line.trim().length() > 0) { // skip blank lines
+                if (line.trim()
+                        .length() > 0) { // skip blank lines
                     String tokens[] = line.split("\\,");
 
                     String id = tokens[0].trim();
@@ -166,7 +183,9 @@ public class WriteSimulationResultStations {
             }
         }
         Map<String, Serializable> params = new HashMap<>();
-        params.put("url", output.toURI().toURL());
+        params.put("url",
+                   output.toURI()
+                         .toURL());
         params.put("create spatial index", Boolean.TRUE);
 
         ShapefileDataStoreFactory dataStoreFactory = new ShapefileDataStoreFactory();
@@ -191,10 +210,9 @@ public class WriteSimulationResultStations {
          * - "the_geom" must be of type Point, MultiPoint, MuiltiLineString, MultiPolygon
          * - Attribute names are limited in length
          * - Not all data types are supported (example Timestamp represented as Date)
-         *
          * Each data store has different limitations so check the resulting SimpleFeatureType.
          */
-        System.out.println("SHAPE:"+SHAPE_TYPE);
+        System.out.println("SHAPE:" + SHAPE_TYPE);
 
         if (featureSource instanceof SimpleFeatureStore) {
             SimpleFeatureStore featureStore = (SimpleFeatureStore) featureSource;

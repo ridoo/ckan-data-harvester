@@ -26,7 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
-package org.n52.series.ckan.util;
+package org.n52.series.ckan.tool;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -36,6 +36,8 @@ import org.hamcrest.MatcherAssert;
 import org.n52.series.ckan.cache.InMemoryDataStoreManager;
 import org.n52.series.ckan.cache.InMemoryMetadataStore;
 import org.n52.series.ckan.da.CkanHarvestingService;
+import org.n52.series.ckan.util.ResourceClient;
+import org.n52.series.ckan.util.TestConstants;
 
 import eu.trentorise.opendata.jackan.CkanClient;
 

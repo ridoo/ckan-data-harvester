@@ -29,9 +29,6 @@
 
 package org.n52.series.ckan.da;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.function.Supplier;
 
 import org.n52.series.ckan.beans.DataCollection;
@@ -45,24 +42,8 @@ public interface DataStoreManager {
 
     boolean isUpdateNeeded(CkanResource resource, DataFile dataFile);
 
+    Supplier<Boolean> isInterrupted();
+
     void shutdown();
-
-    public Supplier<Boolean> isInterrupted();
-
-    default Set<String> getStationaryObservationTypes() {
-        return new HashSet<>(Arrays.<String> asList(new String[] {
-            CkanConstants.ResourceType.PLATFORMS,
-            CkanConstants.ResourceType.OBSERVATIONS,
-            // since 0.3
-            CkanConstants.ResourceType.OBSERVED_GEOMETRIES
-        }));
-    }
-
-    default Set<String> getMobileObservationTypes() {
-        return new HashSet<>(Arrays.<String> asList(new String[] {
-            // since 0.3
-            CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES
-        }));
-    }
 
 }

@@ -63,7 +63,7 @@ public class MultiTableLoadingStrategy extends TableLoadingStrategy {
 
         // TODO refined strategy to load platforms/observation_with_geometry(?) first
         // and perform a join + insert for each observation resource available
-        
+
         // TODO do not know if mobile here
 
         // TODO write test for it

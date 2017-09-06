@@ -145,10 +145,7 @@ public class SosDataStoreManager implements DataStoreManager {
                                                      CkanDataset dataset) {
         String path = CkanConstants.Config.CONFIG_PATH_STRATEGY_TABLE_LOADER;
         JsonNode tableLoaderConfig = ckanMapping.getConfigValueAt(path);
-        String clazz = tableLoaderConfig.has("class")
-                ? tableLoaderConfig.get("class")
-                                   .asText()
-                : "";
+        String clazz = getStringValue("class", tableLoaderConfig);
         if (!clazz.isEmpty()) {
             try {
                 Class< ? > tableLoader = Class.forName(clazz);
@@ -162,6 +159,13 @@ public class SosDataStoreManager implements DataStoreManager {
             }
         }
         return new SingleTableLoadingStrategy(this);
+    }
+
+    protected String getStringValue(String classParameter, JsonNode config) {
+        return config.has(classParameter)
+                ? config.get(classParameter)
+                                   .asText()
+                : "";
     }
 
     @Override
