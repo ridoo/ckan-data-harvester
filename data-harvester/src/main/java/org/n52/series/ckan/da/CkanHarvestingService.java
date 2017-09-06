@@ -49,6 +49,7 @@ import org.n52.series.ckan.beans.DataFile;
 import org.n52.series.ckan.beans.DescriptionFile;
 import org.n52.series.ckan.beans.SchemaDescriptor;
 import org.n52.series.ckan.cache.CkanMetadataStore;
+import org.n52.series.ckan.cache.InMemoryMetadataStore;
 import org.n52.series.ckan.util.JsonUtil;
 import org.n52.series.ckan.util.ResourceClient;
 import org.slf4j.Logger;
@@ -84,6 +85,7 @@ public class CkanHarvestingService implements ServletContextAware {
 
     public CkanHarvestingService() {
         this.resourceDownloadBaseFolder = resolveDownloadFolder("");
+        this.metadataStore = new InMemoryMetadataStore();
     }
 
     public void harvestDatasets() {
