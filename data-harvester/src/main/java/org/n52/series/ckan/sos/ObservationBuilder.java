@@ -150,6 +150,11 @@ final class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
             omObservation.setValidTime(validTime);
         }
 
+        if (result == null) {
+            LOGGER.trace("could not assemble observation for {}", phenomenon);
+            return null;
+        }
+
         TimeInstant time = observationTimeBuilder.getResult();
         result.setPhenomenonTime(time);
         omObservation.setValue(result);
