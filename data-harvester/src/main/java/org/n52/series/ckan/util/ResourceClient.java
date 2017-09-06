@@ -50,12 +50,12 @@ import eu.trentorise.opendata.jackan.internal.org.apache.http.config.RegistryBui
 import eu.trentorise.opendata.jackan.internal.org.apache.http.conn.socket.ConnectionSocketFactory;
 import eu.trentorise.opendata.jackan.internal.org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import eu.trentorise.opendata.jackan.internal.org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import eu.trentorise.opendata.jackan.internal.org.apache.http.conn.ssl.SSLContexts;
 import eu.trentorise.opendata.jackan.internal.org.apache.http.impl.client.BasicCredentialsProvider;
 import eu.trentorise.opendata.jackan.internal.org.apache.http.impl.client.CloseableHttpClient;
 import eu.trentorise.opendata.jackan.internal.org.apache.http.impl.client.HttpClients;
 import eu.trentorise.opendata.jackan.internal.org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import eu.trentorise.opendata.jackan.internal.org.apache.http.impl.conn.SystemDefaultRoutePlanner;
+import eu.trentorise.opendata.jackan.internal.org.apache.http.ssl.SSLContexts;
 import eu.trentorise.opendata.jackan.internal.org.apache.http.util.EntityUtils;
 
 public class ResourceClient {
