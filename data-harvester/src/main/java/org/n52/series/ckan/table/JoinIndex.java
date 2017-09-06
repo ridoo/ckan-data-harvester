@@ -54,25 +54,18 @@ public class JoinIndex {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.field, 7, this.value);
+        return Objects.hash(this.field, this.value);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) {
+        if (obj == null || !(obj instanceof JoinIndex)) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final JoinIndex other = (JoinIndex) obj;
-        if (!Objects.equals(this.field, other.field)) {
-            return false;
-        }
-        if (!Objects.equals(this.value, other.value)) {
-            return false;
-        }
-        return true;
+        JoinIndex other = (JoinIndex) obj;
+        return Objects.equals(this, other)
+                && Objects.equals(field, other.field)
+                && Objects.equals(value, other.value);
     }
 
     @Override

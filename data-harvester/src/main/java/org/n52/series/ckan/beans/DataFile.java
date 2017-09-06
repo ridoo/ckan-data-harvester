@@ -30,6 +30,8 @@
 package org.n52.series.ckan.beans;
 
 import java.io.File;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.charset.Charset;
 
 import org.joda.time.DateTime;
@@ -113,10 +115,23 @@ public class DataFile {
         String filePath = file != null
                 ? file.getAbsolutePath()
                 : "null";
+        Double bytes = file != null
+                ? Double.valueOf(file.length())
+                : null;
+        String megabytes = "???MB";
+        if (bytes != null) {
+            BigDecimal size = new BigDecimal(bytes / (1024 * 1024));
+            megabytes = Double.toString(size.setScale(2, RoundingMode.HALF_UP)
+                                            .doubleValue())
+                    + "MB";
+        }
         sb.append("resourceId: ")
           .append(resource.getId())
           .append(", ")
-          .append("DataFile [file: ")
+          .append("DataFile [Size: ")
+          .append(megabytes)
+          .append(", ")
+          .append("file: ")
           .append(filePath)
           .append(", ")
           .append(" encoding: ")
