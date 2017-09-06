@@ -98,8 +98,9 @@ public class ResourceMember {
     }
 
     public boolean isOfType(String type) {
-        return resourceType != null && ckanMapping.getResourceTypeMappings(type)
-                                                  .contains(resourceType);
+        return resourceType != null
+                && ckanMapping.getResourceTypeMappings(type)
+                              .contains(resourceType);
     }
 
     public int getHeaderRows() {
@@ -163,17 +164,14 @@ public class ResourceMember {
         JsonNode joinConfig = getCkanMapping().getConfigValueAt(configPath);
         if (joinConfig.isArray()) {
             Set<ResourceField> fields = new HashSet<>();
-            ArrayNode columns = (ArrayNode) joinConfig;
-            for (JsonNode columnNode : columns) {
-                String columnId = columnNode.asText();
-                if (getField(columnId).isPresent()) {
-                    fields.add(getField(columnId).get());
-                } else {
-                    if (other.getField(columnId)
-                             .isPresent()) {
-                        fields.add(other.getField(columnId)
-                                        .get());
-                    }
+            ArrayNode joinFields = (ArrayNode) joinConfig;
+            for (JsonNode joinField : joinFields) {
+                String fieldId = joinField.asText();
+                Optional<ResourceField> field = !getField(fieldId).isPresent()
+                        ? other.getField(fieldId)
+                        : getField(fieldId);
+                if (field.isPresent()) {
+                    fields.add(field.get());
                 }
             }
             return fields;
