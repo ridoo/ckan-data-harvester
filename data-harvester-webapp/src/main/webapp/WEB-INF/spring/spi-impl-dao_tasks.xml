@@ -45,41 +45,50 @@
         <property name="harvestingService" ref="ckanHarvestingService" />
     </bean>
 
-<!--    <bean id="ckanHarvestingService" class="org.n52.series.ckan.util.FileBasedCkanHarvester">
-        <constructor-arg index="0" value="dwd" />
-        <property name="resourceDownloadBaseFolder" value="test-data" />
-        <property name="metadataCache" class="org.n52.series.ckan.cache.InMemoryMetadataStore" />
-        <property name="dataStoreManager" class="org.n52.series.ckan.cache.InMemoryDataStoreManager" />
-    </bean>-->
-
-    <bean id="ckanHarvestingService" class="org.n52.series.ckan.da.CkanHarvestingService">
-        <property name="ckanClient">
-            <bean class="eu.trentorise.opendata.jackan.CkanClient">
-                <constructor-arg index="0" value="https://ckan.colabis.de" />
-            </bean>
-        </property>
-        <property name="metadataStore" ref="serializingMetadataStore" />
-        <property name="dataStoreManager">
-            <bean class="org.n52.series.ckan.sos.SingleTableDataStoreManager">
-                <constructor-arg index="0" ref="serializingMetadataStore" />
-            </bean>
-        </property>
-        <property name="resourceClient">
-            <bean class="org.n52.series.ckan.util.ResourceClient">
-                <constructor-arg index="0">
-                    <bean class="org.n52.series.ckan.util.ResourceClientConfig" >
-                        <property name="socketTimeout" value="30000"/>
-                        <property name="connectTimeout" value="30000" />
-                        <property name="connectionRequestTimeout" value="30000" />
-                    </bean>
-                </constructor-arg>
-            </bean>
-        </property>
-    </bean>
-
     <bean id="serializingMetadataStore" class="org.n52.series.ckan.sos.SerializingMetadataStore"
           init-method="init" destroy-method="shutdown">
         <property name="filePath" value="cache/ckan-sos_cache" />
     </bean>
+
+    <beans profile="dev">
+        <bean id="ckanHarvestingService" class="org.n52.series.ckan.util.FileBasedCkanHarvester" destroy-method="shutdown">
+            <constructor-arg index="0" value="${ckan.datafolder:/files/dwd-trimmed}" />
+            <property name="resourceDownloadBaseFolder" value="test-data" />
+            <property name="dataStoreManager">
+                <bean class="org.n52.series.ckan.sos.SosDataStoreManager">
+                    <constructor-arg index="0" ref="serializingMetadataStore" />
+                </bean>
+            </property>
+            <property name="metadataStore" ref="serializingMetadataStore" />
+        </bean>
+    </beans>
+
+    <beans profile="!dev">
+
+        <bean id="ckanHarvestingService" class="org.n52.series.ckan.da.CkanHarvestingService" destroy-method="shutdown">
+            <property name="ckanClient">
+                <bean class="eu.trentorise.opendata.jackan.CkanClient">
+                    <constructor-arg index="0" value="https://ckan.colabis.de" />
+                </bean>
+            </property>
+            <property name="dataStoreManager">
+                <bean class="org.n52.series.ckan.sos.SosDataStoreManager">
+                    <constructor-arg index="0" ref="serializingMetadataStore" />
+                </bean>
+            </property>
+            <property name="metadataStore" ref="serializingMetadataStore" />
+            <property name="resourceClient">
+                <bean class="org.n52.series.ckan.util.ResourceClient">
+                    <constructor-arg index="0">
+                        <bean class="org.n52.series.ckan.util.ResourceClientConfig" >
+                            <property name="socketTimeout" value="30000"/>
+                            <property name="connectTimeout" value="30000" />
+                            <property name="connectionRequestTimeout" value="30000" />
+                        </bean>
+                    </constructor-arg>
+                </bean>
+            </property>
+        </bean>
+    </beans>
 
 </beans>
