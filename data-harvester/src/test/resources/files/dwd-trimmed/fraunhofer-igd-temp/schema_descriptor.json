@@ -1,0 +1,67 @@
+{
+  "schema_descriptor_version" : 0.1,
+  "resource_type" : "csv-observations-collection",
+  "members" : [
+    {
+      "resource_name" : [
+        "27000eb1-272e-44a6-95c5-379e8ed6c8d3"
+      ],
+      "resource_type" : "platforms",
+      "fields" : [
+        {
+          "field_id" : "station_id",
+          "field_type" : "String",
+          "short_name" : "station_id",
+          "long_name" : "station_id"
+        },
+        {
+          "field_id" : "sensor_name",
+          "field_type" : "String",
+          "short_name" : "sensor_name",
+          "long_name" : "sensor_name"
+        }
+      ]
+    },
+    {
+      "resource_name" : [
+        "bd238025-660d-488d-aaf2-573c8630b07e"
+      ],
+      "resource_type" : "observations",
+      "fields" : [
+        {
+          "field_id" : "datetime",
+          "field_type" : "Date",
+          "date_format" : "YYYY-MM-DD'T'HH:mm:ss.SSSZ",
+          "short_name" : "datetime",
+          "long_name" : "datetime"
+        },
+        {
+          "field_id" : "location",
+          "field_type" : "JsonObject",
+          "short_name" : "location",
+          "long_name" : "location"
+        },
+        {
+          "field_id" : "value",
+          "phenomenon" : "temperature",
+          "uom" : "°K",
+          "field_type" : "Double",
+          "short_name" : "temp",
+          "long_name" : "temperature"
+        },
+        {
+          "field_id" : "timestamp",
+          "field_type" : "String",
+          "short_name" : "timestamp",
+          "long_name" : "timestamp"
+        },
+        {
+          "field_id" : "station_id",
+          "field_type" : "String",
+          "short_name" : "station_id",
+          "long_name" : "station_id"
+        }
+      ]
+    }
+  ]
+}

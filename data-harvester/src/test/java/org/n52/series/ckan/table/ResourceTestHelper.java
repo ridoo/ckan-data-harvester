@@ -46,8 +46,8 @@ public class ResourceTestHelper {
 
     private InMemoryDataStoreManager ckanDataCache;
 
-    public ResourceTestHelper(TemporaryFolder testFolder) throws URISyntaxException, IOException {
-        service = new FileBasedCkanHarvestingService(testFolder.getRoot());
+    public ResourceTestHelper(TemporaryFolder downloadFolder, String dataFolder) throws URISyntaxException, IOException {
+        service = new FileBasedCkanHarvestingService(downloadFolder.getRoot(), dataFolder);
         ckanDataCache = service.getCkanDataStoreManager();
     }
 

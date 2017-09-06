@@ -55,6 +55,7 @@ import org.n52.series.ckan.beans.ResourceMember;
 import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.table.ResourceTable;
 import org.n52.series.ckan.table.ResourceTestHelper;
+import org.n52.series.ckan.util.TestConstants;
 
 public class PhenomenonParserTest {
 
@@ -67,7 +68,8 @@ public class PhenomenonParserTest {
 
     @Before
     public void setUp() throws URISyntaxException, IOException {
-        testHelper = new ResourceTestHelper(testFolder);
+        String trimmedData = "/files/" + TestConstants.TEST_TRIMMED_DATA_FOLDER;
+        testHelper = new ResourceTestHelper(testFolder, trimmedData);
         this.parser = new PhenomenonParser();
     }
 

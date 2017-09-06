@@ -49,6 +49,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.table.ResourceTestHelper;
+import org.n52.series.ckan.util.TestConstants;
 
 public class ResourceMemberTest {
 
@@ -65,11 +66,12 @@ public class ResourceMemberTest {
     @Rule
     public TemporaryFolder testFolder = new TemporaryFolder();
 
-    private ResourceTestHelper resourceHelper;
+    private ResourceTestHelper testHelper;
 
     @Before
     public void setUp() throws URISyntaxException, IOException {
-        resourceHelper = new ResourceTestHelper(testFolder);
+        String trimmedData = "/files/" + TestConstants.TEST_TRIMMED_DATA_FOLDER;
+        testHelper = new ResourceTestHelper(testFolder, trimmedData);
     }
 
     @Test
@@ -101,7 +103,7 @@ public class ResourceMemberTest {
     @Test
     public void when_gettingSchemaDescriptor_resourceTypeIsCsvObservationCollection() {
         String expectedType = CkanConstants.ResourceType.CSV_OBSERVATIONS_COLLECTION;
-        SchemaDescriptor schemaDescriptor = resourceHelper.getSchemaDescriptor(DWD_TEMPERATUR_DATASET_ID);
+        SchemaDescriptor schemaDescriptor = testHelper.getSchemaDescriptor(DWD_TEMPERATUR_DATASET_ID);
         assertThat(schemaDescriptor.getSchemaDescriptionType(), Matchers.is(expectedType));
     }
 
@@ -121,17 +123,17 @@ public class ResourceMemberTest {
 
     private ResourceMember getObservationResource(String resourceId) {
         ResourceMember resourceMember = new ResourceMember(resourceId, "observations");
-        return resourceHelper.getResourceMember(DWD_TEMPERATUR_DATASET_ID, resourceMember);
+        return testHelper.getResourceMember(DWD_TEMPERATUR_DATASET_ID, resourceMember);
     }
 
     private ResourceMember getPlatformResource(String resourceId) {
         ResourceMember resourceMember = new ResourceMember(resourceId, "platforms");
-        return resourceHelper.getResourceMember(DWD_TEMPERATUR_DATASET_ID, resourceMember);
+        return testHelper.getResourceMember(DWD_TEMPERATUR_DATASET_ID, resourceMember);
     }
 
     @Test
     public void findJoinableFields() {
-        SchemaDescriptor schemaDescriptor = resourceHelper.getSchemaDescriptor(DWD_TEMPERATUR_DATASET_ID);
+        SchemaDescriptor schemaDescriptor = testHelper.getSchemaDescriptor(DWD_TEMPERATUR_DATASET_ID);
         List<ResourceMember> members = schemaDescriptor.getMembers();
 
         ResourceMember platformDescription = members.get(0);
@@ -147,7 +149,7 @@ public class ResourceMemberTest {
 
     @Test
     public void findJoinableFieldsHavingMappedIds() {
-        SchemaDescriptor schemaDescriptor = resourceHelper.getSchemaDescriptor(DWDKREISE_DATASET_ID);
+        SchemaDescriptor schemaDescriptor = testHelper.getSchemaDescriptor(DWDKREISE_DATASET_ID);
         List<ResourceMember> members = schemaDescriptor.getMembers();
         List<ResourceMember> observationMembers = filterViaType(members, CkanConstants.ResourceType.OBSERVATIONS);
         List<ResourceMember> kreiseMembers = filterViaType(members, CkanConstants.ResourceType.OBSERVED_GEOMETRIES);

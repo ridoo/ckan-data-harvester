@@ -53,6 +53,7 @@ import org.n52.series.ckan.beans.ResourceMember;
 import org.n52.series.ckan.da.CkanMapping;
 import org.n52.series.ckan.sos.Phenomenon;
 import org.n52.series.ckan.sos.PhenomenonParser;
+import org.n52.series.ckan.util.TestConstants;
 
 import com.google.common.collect.Table;
 
@@ -69,11 +70,12 @@ public class ResourceTableTest {
     @Rule
     public TemporaryFolder testFolder = new TemporaryFolder();
 
-    private ResourceTestHelper tableHelper;
+    private ResourceTestHelper testHelper;
 
     @Before
     public void setUp() throws URISyntaxException, IOException {
-        tableHelper = new ResourceTestHelper(testFolder);
+        String trimmedData = "/files/" + TestConstants.TEST_TRIMMED_DATA_FOLDER;
+        testHelper = new ResourceTestHelper(testFolder, trimmedData);
     }
 
     @Test
@@ -94,7 +96,7 @@ public class ResourceTableTest {
 
     @Test
     public void when_joinNonTrivialWithTrivial_outputHasRowsOfNonTrivial() {
-        ResourceTable nonTrivial = tableHelper.readObservationTable(DWD_TEMPERATUR_DATASET_ID, OBSERVATION_DATA_ID_1);
+        ResourceTable nonTrivial = testHelper.readObservationTable(DWD_TEMPERATUR_DATASET_ID, OBSERVATION_DATA_ID_1);
 
         List<String> expectedColumns = nonTrivial.getResourceMember()
                                                  .getColumnHeaders();
@@ -109,7 +111,7 @@ public class ResourceTableTest {
 
     @Test
     public void when_joiningTrivialWithNonTrivial_outputHasRowsOfNonTrivial() {
-        ResourceTable nonTrivial = tableHelper.readObservationTable(DWD_TEMPERATUR_DATASET_ID, OBSERVATION_DATA_ID_1);
+        ResourceTable nonTrivial = testHelper.readObservationTable(DWD_TEMPERATUR_DATASET_ID, OBSERVATION_DATA_ID_1);
 
         List<String> expectedHeaders = nonTrivial.getResourceMember()
                                                  .getColumnHeaders();
@@ -124,8 +126,8 @@ public class ResourceTableTest {
 
     @Test
     public void when_joiningDataOfSameCollectionAndType_rowsAreAddedToOutput() {
-        ResourceTable nonTrivial1 = tableHelper.readObservationTable(DWD_TEMPERATUR_DATASET_ID, OBSERVATION_DATA_ID_1);
-        ResourceTable nonTrivial2 = tableHelper.readObservationTable(DWD_TEMPERATUR_DATASET_ID, OBSERVATION_DATA_ID_2);
+        ResourceTable nonTrivial1 = testHelper.readObservationTable(DWD_TEMPERATUR_DATASET_ID, OBSERVATION_DATA_ID_1);
+        ResourceTable nonTrivial2 = testHelper.readObservationTable(DWD_TEMPERATUR_DATASET_ID, OBSERVATION_DATA_ID_2);
         DataTable output = nonTrivial1.extendWith(nonTrivial2);
         assertThat(output.getResourceMember()
                          .getResourceType(),
@@ -146,8 +148,8 @@ public class ResourceTableTest {
 
     @Test
     public void when_joiningDataOfSameCollectionButDifferentType_joinColumnsAppearJustOnce() {
-        ResourceTable nonTrivial1 = tableHelper.readObservationTable(DWD_TEMPERATUR_DATASET_ID, OBSERVATION_DATA_ID_1);
-        ResourceTable nonTrivial2 = tableHelper.readPlatformTable(DWD_TEMPERATUR_DATASET_ID, DWD_PLATFORM_DATA_ID_1);
+        ResourceTable nonTrivial1 = testHelper.readObservationTable(DWD_TEMPERATUR_DATASET_ID, OBSERVATION_DATA_ID_1);
+        ResourceTable nonTrivial2 = testHelper.readPlatformTable(DWD_TEMPERATUR_DATASET_ID, DWD_PLATFORM_DATA_ID_1);
         DataTable output = nonTrivial1.innerJoin(nonTrivial2);
 
         ResourceMember member1 = nonTrivial1.getResourceMember();
@@ -161,8 +163,8 @@ public class ResourceTableTest {
 
     @Test
     public void when_joiningDataOfSameCollectionButDifferentType_phenomenaOfBothTablesAreAvailable() {
-        ResourceTable nonTrivial1 = tableHelper.readObservationTable(DWD_TEMPERATUR_DATASET_ID, OBSERVATION_DATA_ID_1);
-        ResourceTable nonTrivial2 = tableHelper.readPlatformTable(DWD_TEMPERATUR_DATASET_ID, DWD_PLATFORM_DATA_ID_1);
+        ResourceTable nonTrivial1 = testHelper.readObservationTable(DWD_TEMPERATUR_DATASET_ID, OBSERVATION_DATA_ID_1);
+        ResourceTable nonTrivial2 = testHelper.readPlatformTable(DWD_TEMPERATUR_DATASET_ID, DWD_PLATFORM_DATA_ID_1);
         DataTable output = nonTrivial1.innerJoin(nonTrivial2);
 
         PhenomenonParser parser = new PhenomenonParser();

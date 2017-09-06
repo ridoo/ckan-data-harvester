@@ -62,6 +62,7 @@ import org.n52.series.ckan.beans.ResourceMember;
 import org.n52.series.ckan.cache.InMemoryDataStoreManager;
 import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.util.FileBasedCkanHarvestingService;
+import org.n52.series.ckan.util.TestConstants;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 
@@ -96,7 +97,8 @@ public class WriteSimulationResultStations {
                 throw new IllegalStateException("Unable to create output folder");
             }
 
-            dataManager = new FileBasedCkanHarvestingService(folder).getCkanDataStoreManager();
+            String dataFolder = TestConstants.TEST_COMPLETE_DATA_FOLDER;
+            dataManager = new FileBasedCkanHarvestingService(folder, dataFolder).getCkanDataStoreManager();
             dataCollection = dataManager.getCollection(EMISSION_SIMULATION_DATASET_ID);
         }
 

@@ -48,12 +48,10 @@ public class FileBasedCkanHarvester extends CkanHarvestingService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileBasedCkanHarvester.class);
 
-    private static final String TEST_FILES_BASE_PATH = "/files";
+    private final String dataFolder;
 
-    private final String contextPath;
-
-    public FileBasedCkanHarvester(String contextPath) {
-        this.contextPath = contextPath;
+    public FileBasedCkanHarvester(String dataFolder) {
+        this.dataFolder = dataFolder;
     }
 
     @Override
@@ -85,13 +83,17 @@ public class FileBasedCkanHarvester extends CkanHarvestingService {
     }
 
     private File getSourceDataFolder() {
-        String baseFolder = TEST_FILES_BASE_PATH + "/" + contextPath;
-        LOGGER.trace("Source Data Folder: {}", baseFolder);
-        URL resource = getClass().getResource(baseFolder);
-        if (resource == null) {
-            throw new IllegalStateException("invalid data folder: " + baseFolder);
+        LOGGER.trace("Source Data Folder: {}", dataFolder);
+        File file = new File(dataFolder);
+        if (file.exists()) {
+            return file;
+        } else {
+            URL resource = getClass().getResource(dataFolder);
+            if (resource == null) {
+                throw new IllegalStateException("invalid data folder: " + dataFolder);
+            }
+            return new File(resource.getFile());
         }
-        return new File(resource.getFile());
     }
 
     private CkanDataset parseDatasetTestFile(File file) {
