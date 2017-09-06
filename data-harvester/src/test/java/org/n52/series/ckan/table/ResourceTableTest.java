@@ -50,6 +50,7 @@ import org.n52.series.ckan.beans.DataFile;
 import org.n52.series.ckan.beans.FieldBuilder;
 import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.beans.ResourceMember;
+import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.da.CkanMapping;
 import org.n52.series.ckan.sos.Phenomenon;
 import org.n52.series.ckan.sos.PhenomenonParser;
@@ -230,6 +231,25 @@ public class ResourceTableTest {
         ResourceTable other = new ResourceTable(secondMember, new DataFile());
         DataTable joinedTable = table.innerJoin(other);
         Assert.assertTrue(joinedTable.hasJoinedMembers());
+    }
+
+
+    @Test
+    public void when_joiningDWDKreise_joinSuccessful() {
+        String datasetId = "2518529a-fbf1-4940-8270-a1d4d0fa8c4d";
+        String platformId = "546add17-3bcc-46a8-a550-a9e2e07a4648";
+        String dataId = "a2e6fce1-77f4-4c2a-9ab0-b989b994bd06";
+        ResourceTable nonTrivial1 = testHelper.readTable(datasetId, dataId, CkanConstants.ResourceType.OBSERVATIONS);
+        ResourceTable nonTrivial2 = testHelper.readTable(datasetId, platformId, CkanConstants.ResourceType.OBSERVED_GEOMETRIES);
+        DataTable output = nonTrivial1.innerJoin(nonTrivial2);
+
+        ResourceMember member1 = nonTrivial1.getResourceMember();
+        ResourceMember member2 = nonTrivial2.getResourceMember();
+        int joinColumnSize = member1.getJoinableFields(member2)
+                                    .size();
+
+        int allColumnSize = nonTrivial1.columnSize() + nonTrivial2.columnSize();
+        assertThat(output.columnSize(), is(allColumnSize - joinColumnSize));
     }
 
 }

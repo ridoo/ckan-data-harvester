@@ -107,6 +107,11 @@ public class FieldBuilder {
         return FieldBuilder.aFieldAt(0);
     }
 
+    public static FieldBuilder aField(CkanMapping ckanMapping) {
+        return FieldBuilder.aFieldAt(0)
+                           .withCkanMapping(ckanMapping);
+    }
+
     public static FieldBuilder aFieldAt(int index) {
         return new FieldBuilder(index);
     }
@@ -219,8 +224,7 @@ public class FieldBuilder {
             field.set(property.getKey(), property.getValue());
         }
         CkanMapping mappings = createCkanMapping();
-        return new ResourceField(field, index, mappings)
-                                                        .setResourceType(resourceType);
+        return new ResourceField(field, index, mappings).setResourceType(resourceType);
     }
 
     public ResourceField createSimple(String id) {

@@ -32,11 +32,14 @@ package org.n52.series.ckan.beans;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
+import java.io.ByteArrayInputStream;
+
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
 import org.junit.Test;
 import org.n52.series.ckan.da.CkanConstants;
+import org.n52.series.ckan.da.CkanMapping;
 
 public class ResourceFieldTest {
 
@@ -148,7 +151,9 @@ public class ResourceFieldTest {
                                            .withFieldMappings(ID_VALUE, ID_VALUE_MAPPED)
                                            .createSimple(ID_VALUE_MAPPED);
         assertThat("first field is not considered equal with second field having mapped id value", first, is(second));
-        assertThat("second field is not considered equal with other first field having mapped id value", second, is(first));
+        assertThat("second field is not considered equal with other first field having mapped id value",
+                   second,
+                   is(first));
     }
 
     @Test
@@ -160,6 +165,48 @@ public class ResourceFieldTest {
                                            .withFieldMappings("field", ID_VALUE, ID_VALUE_MAPPED)
                                            .createSimple(ID_VALUE_MAPPED);
         assertThat("hashCode is not equal of fields with mapped ids.", first.hashCode(), is(second.hashCode()));
+    }
 
+    @Test
+    public void when_fieldsMatchOnlyViaMapping_then_equalsTrue() {
+        String fieldMapping = "{"
+                + "\"field\": {"
+                + "  \"warncellid\" : ["
+                + "      \"gc_warncellid\""
+                + "    ]"
+                + "  }"
+                + "}";
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(fieldMapping.getBytes());
+        CkanMapping ckanMapping = CkanMapping.loadCkanMapping(inputStream);
+
+        ResourceField field1 = FieldBuilder.aField(ckanMapping)
+                                           .createSimple("warncellid");
+        ResourceField field2 = FieldBuilder.aField(ckanMapping)
+                                           .createSimple("gc_warncellid");
+        assertThat(field1, is(field2));
+    }
+
+    @Test
+    public void when_fieldsMatchOnlyViaMapping_then_hashCodeIsSame() {
+        String fieldMapping = "{"
+                + "\"field\": {"
+                +
+                "    \"warncellid\" : ["
+                +
+                "        \"gc_warncellid\""
+                +
+                "      ],"
+                + "  }"
+                + "}";
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(fieldMapping.getBytes());
+        CkanMapping ckanMapping = CkanMapping.loadCkanMapping(inputStream);
+
+        ResourceField field1 = FieldBuilder.aField()
+                                           .withCkanMapping(ckanMapping)
+                                           .createSimple("warncellid");
+        ResourceField field2 = FieldBuilder.aField()
+                                           .withCkanMapping(ckanMapping)
+                                           .createSimple("gc_warncellid");
+        assertThat(field1.hashCode(), is(field2.hashCode()));
     }
 }
