@@ -7,13 +7,11 @@
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${logFile}.log</file>
 
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>${logFile}/%d{yyyy-MM-dd}-%i.log</fileNamePattern>
             <!-- keep 30 days' worth of history -->
             <maxHistory>30</maxHistory>
-            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                <maxFileSize>5MB</maxFileSize>
-            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxFileSize>5MB</maxFileSize>
         </rollingPolicy>
         <encoder>
             <pattern>%date %level [%thread] [%file:%line] %msg%n</pattern>
@@ -46,7 +44,7 @@
 
     <root level="INFO">
         <appender-ref ref="FILE" />
-<!--         <appender-ref ref="STDOUT" /> -->
+        <appender-ref ref="STDOUT" />
     </root>
 
 </configuration>
