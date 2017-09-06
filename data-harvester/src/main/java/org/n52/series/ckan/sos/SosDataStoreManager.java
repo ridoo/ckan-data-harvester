@@ -131,11 +131,11 @@ public class SosDataStoreManager implements DataStoreManager {
         // TODO enable custom strategy via config
 
         if (!config.isMissingNode() && config.asBoolean()) {
-            return hasReferenceCache()
+            return !hasReferenceCache()
                     ? new MobileInsertStrategy()
                     : new MobileInsertStrategy(getCkanSosReferenceCache());
         } else {
-            return hasReferenceCache()
+            return !hasReferenceCache()
                     ? new StationaryInsertStrategy()
                     : new StationaryInsertStrategy(getCkanSosReferenceCache());
         }
@@ -170,7 +170,7 @@ public class SosDataStoreManager implements DataStoreManager {
 
     @Override
     public boolean isUpdateNeeded(CkanResource resource, DataFile dataFile) {
-        if (hasReferenceCache()) {
+        if (!hasReferenceCache()) {
             return true;
         }
 
@@ -219,7 +219,7 @@ public class SosDataStoreManager implements DataStoreManager {
     }
 
     protected boolean hasReferenceCache() {
-        return ckanSosReferenceCache == null;
+        return ckanSosReferenceCache != null;
     }
 
     private boolean storeDataInsertions(Map<String, DataInsertion> dataInsertionByProcedure) {
