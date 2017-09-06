@@ -112,7 +112,8 @@ public class HarvestingJob extends ScheduledJob implements InterruptableJob {
     @Override
     public void interrupt() throws UnableToInterruptJobException {
         this.enabled = false;
-        LOGGER.info("Render task successfully shutted down.");
+        this.harvestingService.shutdown();
+        LOGGER.info("Harvesting Job successfully disabled.");
     }
 
     @Override

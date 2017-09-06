@@ -39,6 +39,8 @@ public interface CkanMetadataStore {
 
     void clear();
 
+    void shutdown();
+
     boolean contains(CkanDataset dataset);
 
     boolean containsNewerThan(CkanDataset dataset);

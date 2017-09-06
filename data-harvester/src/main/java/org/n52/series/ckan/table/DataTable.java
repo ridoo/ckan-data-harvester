@@ -44,6 +44,7 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.beans.ResourceMember;
@@ -93,6 +94,10 @@ public class DataTable {
     }
 
     public DataTable extendWith(DataTable other) {
+        return extendWith(other, () -> Boolean.FALSE);
+    }
+
+    public DataTable extendWith(DataTable other, Supplier<Boolean> interruptedSupplier) {
         if (resourceMember == null || resourceMember.getId() == null) {
             // ignore trivial instance
             return other;
@@ -126,6 +131,10 @@ public class DataTable {
     }
 
     public DataTable innerJoin(DataTable other, ResourceField... fields) {
+        return innerJoin(other, () -> Boolean.FALSE, fields);
+    }
+
+    public DataTable innerJoin(DataTable other, Supplier<Boolean> interruptedSupplier, ResourceField... fields) {
         if (resourceMember == null || resourceMember.getId() == null) {
             // ignore trivial instance
             return other;
@@ -140,11 +149,14 @@ public class DataTable {
                 ? resourceMember.getJoinableFields(other.resourceMember)
                 : Arrays.asList(fields);
 
-        joinTable(other, outputTable, joinFields);
+        joinTable(other, outputTable, joinFields, interruptedSupplier);
         return outputTable;
     }
 
-    private void joinTable(final DataTable other, final DataTable outputTable, Collection<ResourceField> joinFields) {
+    private void joinTable(final DataTable other,
+                           final DataTable outputTable,
+                           Collection<ResourceField> joinFields,
+                           Supplier<Boolean> interruptedSupplier) {
         LOGGER.debug("joining (on fields {}) {} with {}.", joinFields, this, other);
         final long start = System.currentTimeMillis();
         final Set<ResourceKey> doneJoinOnCells = new HashSet<>();
@@ -180,6 +192,9 @@ public class DataTable {
                               toJoinEntries.parallelStream()
                                            .filter(toJoinCell -> getJoinFilter(field, joinOnCell, toJoinCell))
                                            .forEach(toJoinCell -> {
+                                               if (interruptedSupplier.get()) {
+                                                   throw new ShutdownInterruptException();
+                                               }
                                                final ResourceKey otherKey = toJoinCell.getKey();
                                                ResourceKey newKey = createJoinedRowId(outputTable, otherKey);
 
@@ -207,6 +222,8 @@ public class DataTable {
                     .get();
             } catch (InterruptedException | ExecutionException e) {
                 LOGGER.warn("Unable to join tables", e);
+            } catch (ShutdownInterruptException e) {
+                LOGGER.debug("Joining tables got interrupted.");
             }
         }
         processLogger.cancel(true);
@@ -273,6 +290,10 @@ public class DataTable {
                  .append(Arrays.toString(joinedMembers.toArray()))
                  .append(" ])")
                  .toString();
+    }
+
+    private static class ShutdownInterruptException extends RuntimeException {
+
     }
 
 }

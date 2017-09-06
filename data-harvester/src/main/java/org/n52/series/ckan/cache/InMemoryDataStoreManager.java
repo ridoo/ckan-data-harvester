@@ -33,13 +33,16 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.n52.series.ckan.beans.DataCollection;
+import org.n52.series.ckan.beans.DataFile;
 import org.n52.series.ckan.da.DataStoreManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.trentorise.opendata.jackan.model.CkanDataset;
+import eu.trentorise.opendata.jackan.model.CkanResource;
 
 public class InMemoryDataStoreManager implements DataStoreManager {
 
@@ -69,5 +72,23 @@ public class InMemoryDataStoreManager implements DataStoreManager {
     public Set<String> getCollectionIds() {
         return datasets.keySet();
     }
+
+    @Override
+    public void shutdown() {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public boolean isUpdateNeeded(CkanResource resource, DataFile dataFile) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public Supplier<Boolean> isInterrupted() {
+        return () -> Boolean.FALSE;
+    }
+
 
 }

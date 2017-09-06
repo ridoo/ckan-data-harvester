@@ -32,12 +32,22 @@ package org.n52.series.ckan.da;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.n52.series.ckan.beans.DataCollection;
+import org.n52.series.ckan.beans.DataFile;
+
+import eu.trentorise.opendata.jackan.model.CkanResource;
 
 public interface DataStoreManager {
 
     void insertOrUpdate(DataCollection dataCollection);
+
+    boolean isUpdateNeeded(CkanResource resource, DataFile dataFile);
+
+    void shutdown();
+
+    public Supplier<Boolean> isInterrupted();
 
     default Set<String> getStationaryObservationTypes() {
         return new HashSet<>(Arrays.<String> asList(new String[] {

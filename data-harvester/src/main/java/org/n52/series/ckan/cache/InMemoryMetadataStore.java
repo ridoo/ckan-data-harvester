@@ -247,4 +247,9 @@ public class InMemoryMetadataStore implements CkanMetadataStore {
         return CkanMapping.loadCkanMapping();
     }
 
+    @Override
+    public void shutdown() {
+        // TODO Auto-generated method stub
+    }
+
 }

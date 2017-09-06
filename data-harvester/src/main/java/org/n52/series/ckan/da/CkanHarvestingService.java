@@ -80,6 +80,8 @@ public class CkanHarvestingService implements ServletContextAware {
 
     private DataStoreManager dataStoreManager;
 
+    private boolean interrupt;
+
     public CkanHarvestingService() {
         this.resourceDownloadBaseFolder = resolveDownloadFolder("");
     }
@@ -93,12 +95,16 @@ public class CkanHarvestingService implements ServletContextAware {
         int limit = pagingLimit;
         int offset = 0;
         int lastSize = -1;
-        while (hasMorePages(lastSize)) {
+        while (hasMorePages(lastSize) && !interrupt) {
             offset += lastSize > 0
                     ? lastSize
                     : 0;
             SearchResults<CkanDataset> datasets = ckanClient.searchDatasets(query, limit, offset);
             for (CkanDataset dataset : datasets.getResults()) {
+                if (interrupt) {
+                    LOGGER.debug("harvest datasources got interrupted");
+                    break;
+                }
                 LOGGER.debug("Inserting dataset '{}' ...", dataset.getName());
                 metadataStore.insertOrUpdate(dataset);
             }
@@ -118,6 +124,10 @@ public class CkanHarvestingService implements ServletContextAware {
         LOGGER.info("Start harvesting data resources.");
         int observationCollectionCount = 0;
         for (CkanDataset dataset : metadataStore.getDatasets()) {
+            if (interrupt) {
+                LOGGER.debug("harvest resources got interrupted");
+                break;
+            }
             if (metadataStore.hasSchemaDescriptor(dataset)) {
                 LOGGER.debug("Download resources for dataset {} (Name: {}).",
                              dataset.getId(),
@@ -292,6 +302,16 @@ public class CkanHarvestingService implements ServletContextAware {
 
     public void setMetadataStore(CkanMetadataStore metadataStore) {
         this.metadataStore = metadataStore;
+    }
+
+    public void shutdown() {
+        this.interrupt = true;
+        if (this.metadataStore != null) {
+            this.metadataStore.shutdown();
+        }
+        if (this.dataStoreManager != null) {
+            this.dataStoreManager.shutdown();
+        }
     }
 
 }

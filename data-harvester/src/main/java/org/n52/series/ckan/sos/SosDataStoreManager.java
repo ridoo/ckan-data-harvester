@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.n52.series.ckan.beans.DataCollection;
 import org.n52.series.ckan.beans.DataFile;
@@ -66,6 +67,8 @@ public abstract class SosDataStoreManager implements DataStoreManager {
     private final DeleteObservationDAO deleteObservationDao;
 
     private final CkanSosReferenceCache ckanSosReferenceCache;
+
+    private boolean interrupted;
 
     SosDataStoreManager() {
         this(null);
@@ -154,6 +157,10 @@ public abstract class SosDataStoreManager implements DataStoreManager {
 
             LOGGER.debug("start deleting existing observation data before updating data.");
             for (String observationIdentifier : reference.getObservationIdentifiers()) {
+                if (interrupted) {
+                    LOGGER.info("deleting existing observation got interrupted.");
+                    break;
+                }
                 try {
                     String namespace = DeleteObservationConstants.NS_SOSDO_1_0;
                     DeleteObservationRequest doRequest = new DeleteObservationRequest(namespace);
@@ -179,6 +186,10 @@ public abstract class SosDataStoreManager implements DataStoreManager {
         boolean dataInserted = false;
         LOGGER.debug("#{} data insertions: {}", dataInsertionByProcedure.size(), dataInsertionByProcedure);
         for (Entry<String, DataInsertion> entry : dataInsertionByProcedure.entrySet()) {
+            if (interrupted) {
+                LOGGER.info("data insertion got interrupted.");
+                break;
+            }
             try {
                 DataInsertion dataInsertion = entry.getValue();
                 LOGGER.debug("procedure {} => store {}", entry.getKey(), dataInsertion);
@@ -226,6 +237,16 @@ public abstract class SosDataStoreManager implements DataStoreManager {
 
     public CkanSosReferenceCache getCkanSosReferenceCache() {
         return ckanSosReferenceCache;
+    }
+
+    @Override
+    public Supplier<Boolean> isInterrupted() {
+        return () -> interrupted;
+    }
+
+    @Override
+    public void shutdown() {
+        this.interrupted = true;
     }
 
 }
