@@ -29,15 +29,20 @@
 
 package org.n52.series.ckan.table;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.n52.series.ckan.beans.DataCollection;
 import org.n52.series.ckan.beans.DataFile;
 import org.n52.series.ckan.beans.ResourceMember;
+import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.da.DataStoreManager;
 import org.n52.series.ckan.sos.TableLoadingStrategy;
 import org.slf4j.Logger;
@@ -58,8 +63,8 @@ public class MultiTableLoadingStrategy extends TableLoadingStrategy {
     protected Collection<DataTable> loadData(DataCollection dataCollection) {
         CkanDataset dataset = dataCollection.getDataset();
         LOGGER.debug("load data for dataset '{}'", dataset.getName());
-        DataTable fullTable = new ResourceTable();
-
+        DataTable platformTable = new ResourceTable();
+        List<DataTable> joinedDataTables = new ArrayList<>();
 
         // TODO refined strategy to load platforms/observation_with_geometry(?) first
         // and perform a join + insert for each observation resource available
@@ -69,33 +74,55 @@ public class MultiTableLoadingStrategy extends TableLoadingStrategy {
         // TODO write test for it
         // TODO if dataset is newer than in cache -> set flag to re-insert whole datacollection
 
-        Set<String> typesToInsert = dataCollection.getResourceTypes();
-
-        Map<String, List<ResourceMember>> membersByType = dataCollection.getResourceMembersByType(typesToInsert);
-        for (List<ResourceMember> membersWithCommonResourceTypes : membersByType.values()) {
-            DataTable dataTable = new ResourceTable();
-            for (ResourceMember member : membersWithCommonResourceTypes) {
-
-                // TODO write test for it
-
-                DataFile dataFile = dataCollection.getDataFile(member);
-                CkanResource resource = dataFile.getResource();
-                if (dataStoreManager.isUpdateNeeded(resource, dataFile)) {
-                    ResourceTable singleDatatable = new ResourceTable(dataCollection.getDataEntry(member));
-                    singleDatatable.readIntoMemory();
-                    LOGGER.debug("Extend table with: '{}'", singleDatatable);
-                    dataTable = dataTable.extendWith(singleDatatable);
-                }
-            }
-            String resourceType = membersWithCommonResourceTypes.get(0)
-                                                                .getResourceType();
-            LOGGER.debug("Fully extended table for resource '{}': '{}'", resourceType, dataTable);
-            fullTable = fullTable.rowSize() > dataTable.rowSize()
-                    ? dataTable.innerJoin(fullTable, dataStoreManager.isInterrupted())
-                    : fullTable.innerJoin(dataTable, dataStoreManager.isInterrupted());
+        Set<String> platformTypes =
+                new HashSet<>(Arrays.asList(CkanConstants.ResourceType.PLATFORMS,
+                                            CkanConstants.ResourceType.OBSERVED_GEOMETRIES,
+                                            CkanConstants.ResourceType.OBSERVATIONS_WITH_GEOMETRIES));
+        Map<String, List<ResourceMember>> platformData = dataCollection.getResourceMembersByType(platformTypes);
+        for (List<ResourceMember> members : platformData.values()) {
+            platformTable = readDataToTable(platformTable, dataCollection, members);
         }
-        LOGGER.debug("Fully joined table: '{}'", fullTable);
-        return Collections.singleton(fullTable);
+
+        LOGGER.debug("Loaded platform data: '{}'", platformTable);
+
+        Set<String> observationTypes =
+                new HashSet<>(Arrays.asList(CkanConstants.ResourceType.OBSERVATIONS));
+        Map<String, List<ResourceMember>> observationData = dataCollection.getResourceMembersByType(observationTypes);
+        for (List<ResourceMember> members : observationData.values()) {
+            for (ResourceMember member : members) {
+                DataTable dataTable = readDataToTable(dataCollection, Collections.singleton(member));
+                DataTable joinedTable = dataTable.innerJoin(platformTable, dataStoreManager.isInterrupted());
+                LOGGER.debug("joined data table: '{}'", joinedTable);
+                joinedDataTables.add(joinedTable);
+            }
+        }
+        LOGGER.debug("#{} of joined data tables.", joinedDataTables.size());
+        return joinedDataTables;
+    }
+
+    protected DataTable readDataToTable(DataCollection dataCollection, Collection<ResourceMember> members) {
+        return readDataToTable(new ResourceTable(), dataCollection, members);
+    }
+
+    protected DataTable readDataToTable(DataTable dataTable,
+                                        DataCollection dataCollection,
+                                        Collection<ResourceMember> members) {
+        for (ResourceMember member : members) {
+
+            // TODO write test for it
+
+            DataFile dataFile = dataCollection.getDataFile(member);
+            CkanResource resource = dataFile.getResource();
+            if (dataStoreManager.isUpdateNeeded(resource, dataFile)) {
+                Entry<ResourceMember, DataFile> memberData = dataCollection.getDataEntry(member);
+                ResourceTable singleDatatable = new ResourceTable(memberData);
+                singleDatatable.readIntoMemory();
+
+                LOGGER.debug("Extend table with: '{}'", singleDatatable);
+                dataTable = dataTable.extendWith(singleDatatable);
+            }
+        }
+        return dataTable;
     }
 
 }
