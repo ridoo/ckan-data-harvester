@@ -58,6 +58,8 @@ public class DataTable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataTable.class);
 
+    private static final ForkJoinPool FORK_JOIN_POOL = ForkJoinPool.commonPool();
+
     protected final Table<ResourceKey, ResourceField, String> table;
 
     protected final ResourceMember resourceMember;
@@ -139,6 +141,7 @@ public class DataTable {
             return other;
         }
         if (!resourceMember.isJoinable(other.resourceMember)) {
+            LOGGER.debug("Tables are not joinable.");
             return this;
         }
 
@@ -177,58 +180,52 @@ public class DataTable {
             }
         }, interval, interval, TimeUnit.SECONDS);
 
-        ForkJoinPool pool = new ForkJoinPool(2);
         for (ResourceField field : joinFields) {
             try {
                 // XXX does not consider AND in joinFields, but rather joins multiple times!
                 final Map<ResourceKey, String> joinOnIndex = table.column(field);
                 final Map<ResourceKey, String> toJoinIndex = other.table.column(field);
                 Set<Entry<ResourceKey, String>> joinOn = joinOnIndex.entrySet();
-                Set<Entry<ResourceKey, String>> toJoinEntries = toJoinIndex.entrySet();
-//                pool.submit(() -> {
-//                    joinOn.parallelStream()
-                joinOn.stream()
-                          .forEach(joinOnCell -> {
-//                              toJoinEntries.parallelStream()
-                              toJoinEntries.stream()
-                                           .filter(toJoinCell -> getJoinFilter(field, joinOnCell, toJoinCell))
-                                           .forEach(toJoinCell -> {
-                                               if (interruptedSupplier.get()) {
-                                                   throw new ShutdownInterruptException();
-                                               }
-                                               final ResourceKey otherKey = toJoinCell.getKey();
-                                               ResourceKey newKey = createJoinedRowId(outputTable, otherKey);
+                Set<Entry<ResourceKey, String>> toJoin = toJoinIndex.entrySet();
+                joinOn.parallelStream()
+                      .map(joinOnCell -> FORK_JOIN_POOL.submit(() -> {
+                          toJoin.parallelStream()
+                                .filter(toJoinCell -> getJoinFilter(field, joinOnCell, toJoinCell))
+                                .forEach(cell -> {
+                                    if (interruptedSupplier.get()) {
+                                        throw new ShutdownInterruptException();
+                                    }
+                                    final ResourceKey otherKey = cell.getKey();
+                                    ResourceKey newKey = createJoinedRowId(outputTable, otherKey);
 
-                                               // add other's values
-                                               final Map<ResourceField, String> toJoinRow = other.table.row(otherKey);
-                                               Set<Entry<ResourceField, String>> toJoinValues = toJoinRow.entrySet();
-                                               for (Map.Entry<ResourceField, String> toJoinValue : toJoinValues) {
-                                                   ResourceMember member = other.getResourceMember();
-                                                   ResourceField joinedField = cloneValueField(member, toJoinValue);
-                                                   outputTable.table.put(newKey, joinedField, toJoinValue.getValue());
-                                               }
+                                    // add other's values
+                                    final Map<ResourceField, String> toJoinRow = other.table.row(otherKey);
+                                    Set<Entry<ResourceField, String>> toJoinValues = toJoinRow.entrySet();
+                                    for (Map.Entry<ResourceField, String> toJoinValue : toJoinValues) {
+                                        ResourceMember member = other.getResourceMember();
+                                        ResourceField joinedField = cloneValueField(member, toJoinValue);
+                                        outputTable.table.put(newKey, joinedField, toJoinValue.getValue());
+                                    }
 
-                                               // add this instance's values
-                                               Map<ResourceField, String> joinOnRow = table.row(joinOnCell.getKey());
-                                               for (Map.Entry<ResourceField, String> value : joinOnRow.entrySet()) {
-                                                   outputTable.table.put(newKey, value.getKey(), value.getValue());
-                                               }
+                                    // add this instance's values
+                                    Map<ResourceField, String> joinOnRow = table.row(joinOnCell.getKey());
+                                    for (Map.Entry<ResourceField, String> value : joinOnRow.entrySet()) {
+                                        outputTable.table.put(newKey, value.getKey(), value.getValue());
+                                    }
 
-                                               // filter in next iteration
-                                               doneJoinOnCells.add(joinOnCell.getKey());
-                                               doneToJoinCells.add(toJoinCell.getKey());
-                                           });
-                          });
-//                })
-//                    .get();
-//            } catch (InterruptedException | ExecutionException e) {
-//                LOGGER.warn("Unable to join tables", e);
+                                    // filter in next iteration
+                                    doneJoinOnCells.add(joinOnCell.getKey());
+                                    doneToJoinCells.add(cell.getKey());
+                                });
+                      }))
+                      .forEach(t -> t.join());
             } catch (ShutdownInterruptException e) {
                 LOGGER.debug("Joining tables got interrupted.");
             }
         }
         processLogger.cancel(true);
         LOGGER.debug("joined table has #{} rows and #{} columns, took {}s",
+                     // LOGGER.trace("joined table has #{} rows, took {}s",
                      outputTable.rowSize(),
                      outputTable.columnSize(),
                      (System.currentTimeMillis() - start) / 1000d);
@@ -263,6 +260,11 @@ public class DataTable {
     }
 
     public int columnSize() {
+
+        // TODO
+
+        // avoid ConcurrentModificationException
+        // return Collections.unmodifiableCollection(table.columnKeySet()).size();
         return table.columnKeySet()
                     .size();
     }
