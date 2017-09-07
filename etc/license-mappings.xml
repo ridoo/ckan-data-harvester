@@ -5,6 +5,21 @@
         <artifactId>jgridshift</artifactId>
         <version>1.0</version>
         <license>GNU Lesser General Public License, version 2.0 (LGPLv2)</license>
+        <name>jgridshift</name>
+    </artifact>
+    <artifact>
+        <groupId>org.opengeo</groupId>
+        <artifactId>geodb</artifactId>
+        <version>0.7</version>
+        <license>BSD style, https://github.com/jdeolive/geodb/blob/master/LICENSE.txt</license>
+        <name>GeoDB Core</name>
+    </artifact>
+    <artifact>
+        <groupId>java3d</groupId>
+        <artifactId>vecmath</artifactId>
+        <version>1.5.2</version>
+        <license>GPL 2.0 license w/ CPE</license>
+        <name>vecmath</name>
     </artifact>
     <artifact>
         <groupId>xalan</groupId>
