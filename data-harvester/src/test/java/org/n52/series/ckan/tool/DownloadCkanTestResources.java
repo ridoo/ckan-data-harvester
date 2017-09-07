@@ -54,7 +54,7 @@ public class DownloadCkanTestResources {
         ckanHarvester.setResourceClient(new ResourceClient());
 
         String baseFolder = DownloadCkanTestResources.class.getResource("/files").toString();
-        ckanHarvester.setResourceDownloadBaseFolder(baseFolder + "/" + TestConstants.TEST_COMPLETE_DATA_FOLDER);
+        ckanHarvester.setResourceTargetBaseFolder(baseFolder + "/" + TestConstants.TEST_COMPLETE_DATA_FOLDER);
         ckanHarvester.setMetadataStore(ckanMetadataStore);
         ckanHarvester.setDataStoreManager(ckanDataStoreManager);
 

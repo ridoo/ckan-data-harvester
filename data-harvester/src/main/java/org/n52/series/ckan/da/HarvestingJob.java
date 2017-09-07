@@ -100,7 +100,7 @@ public class HarvestingJob extends ScheduledJob implements InterruptableJob {
             String outputPath = getOutputFolder(harvestingConfig.getOutputPath());
             LOGGER.debug("Download resources to {}", outputPath);
 
-            harvestingService.setResourceDownloadBaseFolder(outputPath);
+            harvestingService.setResourceTargetBaseFolder(outputPath);
             harvestingService.harvestDatasets();
             harvestingService.harvestResources();
         } catch (Exception e) {

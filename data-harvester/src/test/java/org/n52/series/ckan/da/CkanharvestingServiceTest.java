@@ -41,6 +41,6 @@ public class CkanharvestingServiceTest {
     @Test
     public void when_resolvingDownloadUrlWithEmptySubfolder_then_validPath() {
         CkanHarvestingService service = new CkanHarvestingService();
-        assertThat(service.resolveDownloadFolder(""), is(notNullValue(Path.class)));
+        assertThat(service.resolveTargetFolder(""), is(notNullValue(Path.class)));
     }
 }

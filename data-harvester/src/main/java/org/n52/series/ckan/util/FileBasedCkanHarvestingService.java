@@ -51,7 +51,7 @@ public class FileBasedCkanHarvestingService {
         ckanDataStoreManager = new InMemoryDataStoreManager();
 
         ckanHarvester = new FileBasedCkanHarvester(dataFolder);
-        ckanHarvester.setResourceDownloadBaseFolder(downloadFolder.toURI()
+        ckanHarvester.setResourceTargetBaseFolder(downloadFolder.toURI()
                                                                   .toString());
         ckanHarvester.setMetadataStore(ckanMetadataStore);
         ckanHarvester.setDataStoreManager(ckanDataStoreManager);

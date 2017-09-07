@@ -69,7 +69,7 @@ public class CkanHarvestingService implements ServletContextAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CkanHarvestingService.class);
 
-    private Path resourceDownloadBaseFolder;
+    private Path resourceTargetBaseFolder;
 
     private int pagingLimit = 20;
 
@@ -84,7 +84,7 @@ public class CkanHarvestingService implements ServletContextAware {
     private boolean interrupt;
 
     public CkanHarvestingService() {
-        this.resourceDownloadBaseFolder = resolveDownloadFolder("");
+        this.resourceTargetBaseFolder = resolveTargetFolder("");
         this.metadataStore = new InMemoryMetadataStore();
     }
 
@@ -131,7 +131,7 @@ public class CkanHarvestingService implements ServletContextAware {
                 break;
             }
             if (metadataStore.hasSchemaDescriptor(dataset)) {
-                LOGGER.debug("Download resources for dataset {} (Name: {}).",
+                LOGGER.debug("Get resources for dataset {} (Name: {}).",
                              dataset.getId(),
                              dataset.getName());
                 DescriptionFile description = getSchemaDescription(dataset);
@@ -139,7 +139,7 @@ public class CkanHarvestingService implements ServletContextAware {
                 List<String> resourceIds = getResourceIds(description.getSchemaDescription());
                 Map<String, DataFile> dataFiles = downloadFiles(dataset, resourceIds);
 
-                LOGGER.debug("downloaded data files for '{}': {}", dataset.getName(), dataFiles.keySet());
+                LOGGER.debug("Retrieved data files for '{}': {}", dataset.getName(), dataFiles.keySet());
 
                 // TODO check when to delete or update resource
 
@@ -155,7 +155,7 @@ public class CkanHarvestingService implements ServletContextAware {
                                                     .writeValueAsString(dataset));
         SchemaDescriptor schemaDescription = metadataStore.getSchemaDescription(dataset.getId());
         File file = saveJsonToFile("schema_descriptor.json", dataset, schemaDescription.getNode());
-        LOGGER.trace("Downloaded resource description to {}.", file.getAbsolutePath());
+        LOGGER.trace("Got resource description to {}.", file.getAbsolutePath());
         return new DescriptionFile(dataset, file, schemaDescription);
     }
 
@@ -198,7 +198,7 @@ public class CkanHarvestingService implements ServletContextAware {
                     files.put(resource.getId(), datafile);
                 } catch (IOException e) {
                     String url = resource.getUrl();
-                    LOGGER.error("Could not download resource from {}.", url, e);
+                    LOGGER.error("Could not retrieve resource from {}.", url, e);
                 }
             }
         }
@@ -230,7 +230,7 @@ public class CkanHarvestingService implements ServletContextAware {
     }
 
     private Path getDatasetDownloadFolder(CkanDataset dataset) {
-        return resourceDownloadBaseFolder.resolve(dataset.getName());
+        return resourceTargetBaseFolder.resolve(dataset.getName());
     }
 
     private void downloadToFile(String url, File file) throws IOException {
@@ -241,27 +241,27 @@ public class CkanHarvestingService implements ServletContextAware {
     @Override
     public void setServletContext(ServletContext servletContext) {
         final String realPath = servletContext.getRealPath("/");
-        LOGGER.debug("Download location via servlet context: {}", realPath);
-        resourceDownloadBaseFolder = Paths.get(realPath);
+        LOGGER.debug("Resource target location via servlet context: {}", realPath);
+        resourceTargetBaseFolder = Paths.get(realPath);
     }
 
-    public String getResourceDownloadBaseFolder() throws URISyntaxException {
-        return resourceDownloadBaseFolder.toString();
+    public String getResourceTargetBaseFolder() throws URISyntaxException {
+        return resourceTargetBaseFolder.toString();
     }
 
-    public void setResourceDownloadBaseFolder(String downloadFolder) throws URISyntaxException {
-        this.resourceDownloadBaseFolder = new URI(downloadFolder).isAbsolute()
+    public void setResourceTargetBaseFolder(String downloadFolder) throws URISyntaxException {
+        this.resourceTargetBaseFolder = new URI(downloadFolder).isAbsolute()
                 ? Paths.get(new URI(downloadFolder))
-                : resolveDownloadFolder(downloadFolder);
+                : resolveTargetFolder(downloadFolder);
     }
 
-    protected final Path resolveDownloadFolder(String folder) {
+    protected final Path resolveTargetFolder(String folder) {
         try {
             URL resource = CkanHarvestingService.class.getResource("/");
             return Paths.get(resource.toURI())
                         .resolve(folder);
         } catch (URISyntaxException e) {
-            LOGGER.error("Could not set download base folder!", e);
+            LOGGER.error("Could not set target base folder!", e);
             return null;
         }
     }
