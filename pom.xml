@@ -639,9 +639,10 @@
                         <rules>
                             <requireNoRepositories>
                                 <allowedRepositories>
-                                    <id>geotools</id>
+                                    <id>osgeo</id>
+                                    <id>boundlessgeo</id>
                                     <id>n52-releases</id>
-                                    <id>n52-snapshots</id>
+<!--                                     <id>n52-snapshots</id> -->
                                     <id>sonatype-nexus-snapshots</id>
                                 </allowedRepositories>
                             </requireNoRepositories>
@@ -748,7 +749,8 @@
                                 <rules>
                                     <requireNoRepositories>
                                         <allowedRepositories>
-                                            <id>geotools</id>
+                                            <id>osgeo</id>
+                                            <id>boundlessgeo</id>
                                             <id>n52-releases</id>
 <!--                                             <id>n52-snapshots</id> -->
                                             <id>sonatype-nexus-snapshots</id>
@@ -809,11 +811,19 @@
 <!--             <url>http://52north.org/maven/repo/snapshots/</url> -->
 <!--         </repository> -->
         <repository>
-            <id>geotools</id>
+            <id>boundlessgeo</id>
             <name>Open Source Geospatial Foundation Repository</name>
             <!-- <url>http://download.osgeo.org/webdav/geotools/</url> -->
             <!--<url>https://boundless.artifactoryonline.com/boundless/main</url> -->
             <url>http://repo.boundlessgeo.com/main/</url>
+        </repository>
+        <repository>
+            <id>osgeo</id>
+            <name>Open Source Geospatial Foundation Repository</name>
+            <url>http://download.osgeo.org/webdav/geotools/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </repository>
     </repositories>
 </project>
