@@ -63,11 +63,8 @@ public class MultiTableLoadingStrategy extends TableLoadingStrategy {
     protected Collection<DataTable> loadData(DataCollection dataCollection) {
         CkanDataset dataset = dataCollection.getDataset();
         LOGGER.debug("load data for dataset '{}'", dataset.getName());
+        final List<DataTable> joinedDataTables = new ArrayList<>();
         DataTable platformTable = new ResourceTable();
-        List<DataTable> joinedDataTables = new ArrayList<>();
-
-        // TODO refined strategy to load platforms/observation_with_geometry(?) first
-        // and perform a join + insert for each observation resource available
 
         // TODO do not know if mobile here
 
@@ -83,44 +80,44 @@ public class MultiTableLoadingStrategy extends TableLoadingStrategy {
             platformTable = readDataToTable(platformTable, dataCollection, members);
         }
 
-        LOGGER.debug("Loaded platform data: '{}'", platformTable);
-
-        Set<String> observationTypes =
-                new HashSet<>(Arrays.asList(CkanConstants.ResourceType.OBSERVATIONS));
+        final DataTable platforms = platformTable;
+        Set<String> observationTypes = new HashSet<>(Arrays.asList(CkanConstants.ResourceType.OBSERVATIONS));
         Map<String, List<ResourceMember>> observationData = dataCollection.getResourceMembersByType(observationTypes);
-        for (List<ResourceMember> members : observationData.values()) {
-            for (ResourceMember member : members) {
-                DataTable dataTable = readDataToTable(dataCollection, Collections.singleton(member));
-                DataTable joinedTable = dataTable.innerJoin(platformTable, dataStoreManager.isInterrupted());
-                LOGGER.debug("joined data table: '{}'", joinedTable);
-                joinedDataTables.add(joinedTable);
-            }
+        for (Entry<String, List<ResourceMember>> membersByType : observationData.entrySet()) {
+            List<ResourceMember> members = membersByType.getValue();
+            members.stream()
+                   .filter(m -> {
+                       // only perform join on resources to be updated
+                       DataFile dataFile = dataCollection.getDataFile(m);
+                       CkanResource resource = dataFile.getResource();
+                       return dataStoreManager.isUpdateNeeded(resource, dataFile);
+                   })
+                   .forEach(m -> {
+                       DataTable dataTable = readDataToTable(dataCollection, Collections.singleton(m));
+                       joinedDataTables.add(dataTable.innerJoin(platforms, dataStoreManager.isInterrupted()));
+                   });
         }
-        LOGGER.debug("#{} of joined data tables.", joinedDataTables.size());
-        return joinedDataTables;
+        return joinedDataTables.isEmpty()
+                ? Collections.singleton(platformTable)
+                : joinedDataTables;
     }
 
     protected DataTable readDataToTable(DataCollection dataCollection, Collection<ResourceMember> members) {
-        return readDataToTable(new ResourceTable(), dataCollection, members);
+        return readDataToTable(null, dataCollection, members);
     }
 
     protected DataTable readDataToTable(DataTable dataTable,
                                         DataCollection dataCollection,
                                         Collection<ResourceMember> members) {
         for (ResourceMember member : members) {
+            Entry<ResourceMember, DataFile> memberData = dataCollection.getDataEntry(member);
+            ResourceTable singleDatatable = new ResourceTable(memberData);
+            singleDatatable.readIntoMemory();
 
-            // TODO write test for it
-
-            DataFile dataFile = dataCollection.getDataFile(member);
-            CkanResource resource = dataFile.getResource();
-            if (dataStoreManager.isUpdateNeeded(resource, dataFile)) {
-                Entry<ResourceMember, DataFile> memberData = dataCollection.getDataEntry(member);
-                ResourceTable singleDatatable = new ResourceTable(memberData);
-                singleDatatable.readIntoMemory();
-
-                LOGGER.debug("Extend table with: '{}'", singleDatatable);
-                dataTable = dataTable.extendWith(singleDatatable);
-            }
+            LOGGER.debug("Extend table with: '{}'", singleDatatable);
+            dataTable = dataTable != null
+                    ? dataTable.extendWith(singleDatatable)
+                    : singleDatatable;
         }
         return dataTable;
     }
