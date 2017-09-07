@@ -75,7 +75,7 @@ public class ResourceTable extends DataTable {
                      (System.currentTimeMillis() - start) / 1000d);
     }
 
-    private TableLoader createTableLoader(DataFile file) {
+    protected TableLoader createTableLoader(DataFile file) {
         if (file.getFormat()
                 .equalsIgnoreCase("csv")) {
             return new CsvTableLoader(this, file);
