@@ -64,24 +64,16 @@ public class SerializableCkanDataset implements Serializable {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 41 * hash + Objects.hashCode(this.id);
-        return hash;
+        return Objects.hash(id);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) {
+        if (obj == null || !(obj instanceof SerializableCkanDataset)) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final SerializableCkanDataset other = (SerializableCkanDataset) obj;
-        if (!Objects.equals(this.id, other.id)) {
-            return false;
-        }
-        return true;
+        SerializableCkanDataset other = (SerializableCkanDataset) obj;
+        return Objects.equals(id, other.id);
     }
 
 }

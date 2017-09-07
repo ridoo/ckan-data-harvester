@@ -132,42 +132,20 @@ public class Phenomenon {
 
     @Override
     public int hashCode() {
-        int hash = 5;
-        hash = 37 * hash + Objects.hashCode(this.id);
-        hash = 37 * hash + Objects.hashCode(valueField);
-        hash = 37 * hash + (softTyped
-                ? 1231
-                : 1237);
-        hash = 37 * hash + Objects.hashCode(this.label);
-        hash = 37 * hash + Objects.hashCode(this.uom);
-        return hash;
+        return Objects.hash(id, valueField, softTyped, label, uom);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) {
+        if (obj == null || !(obj instanceof Phenomenon)) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Phenomenon other = (Phenomenon) obj;
-        if (!Objects.equals(this.id, other.id)) {
-            return false;
-        }
-        if (!Objects.equals(valueField, other.valueField)) {
-            return false;
-        }
-        if (!Objects.equals(this.label, other.label)) {
-            return false;
-        }
-        if (softTyped != other.softTyped) {
-            return false;
-        }
-        if (!Objects.equals(this.uom, other.uom)) {
-            return false;
-        }
-        return true;
+        Phenomenon other = (Phenomenon) obj;
+        return Objects.equals(id, other.id)
+                && Objects.equals(valueField, other.valueField)
+                && Objects.equals(softTyped, other.softTyped)
+                && Objects.equals(label, other.label)
+                && Objects.equals(uom, other.uom);
     }
 
     @Override

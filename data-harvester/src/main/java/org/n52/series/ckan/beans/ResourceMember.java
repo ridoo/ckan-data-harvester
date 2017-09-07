@@ -222,28 +222,17 @@ public class ResourceMember {
 
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 17 * hash + Objects.hashCode(this.id);
-        hash = 17 * hash + Objects.hashCode(this.resourceType);
-        return hash;
+        return Objects.hash(id, resourceType);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) {
+        if (obj == null || !(obj instanceof ResourceMember)) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final ResourceMember other = (ResourceMember) obj;
-        if (!Objects.equals(this.id, other.id)) {
-            return false;
-        }
-        if (!Objects.equals(this.resourceType, other.resourceType)) {
-            return false;
-        }
-        return true;
+        ResourceMember other = (ResourceMember) obj;
+        return Objects.equals(id, other.id)
+                && Objects.equals(resourceType, other.resourceType);
     }
 
     @Override
