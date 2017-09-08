@@ -45,7 +45,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.n52.series.ckan.beans.ResourceField;
@@ -207,39 +206,68 @@ public class DataTable {
         final Map<ResourceKey, String> toJoinIndex = other.table.column(field);
         Set<Entry<ResourceKey, String>> joinOn = joinOnIndex.entrySet();
         Set<Entry<ResourceKey, String>> toJoin = toJoinIndex.entrySet();
-        return joinOn.stream()
-                     .map(joinOnCell -> {
-                         return FORK_JOIN_POOL.submit(() -> {
-                             toJoin.stream()
-                                   .filter(toJoinCell -> getJoinFilter(field, joinOnCell, toJoinCell))
-                                   .forEach(cell -> {
-                                       if (interruptedSupplier.get()) {
-                                           // cancel
-                                           return;
-                                       }
-                                       final ResourceKey joinOnKey = cell.getKey();
-                                       // use key from cell iterated over once!
-                                       final ResourceKey toJoinKey = joinOnCell.getKey();
-                                       ResourceKey newKey = createJoinedRowId(outputTable, joinOnKey, toJoinKey);
+        
+        List<ForkJoinTask< ? >> tasks = new ArrayList<>();
+        for (Entry<ResourceKey, String> joinOnEntry : joinOn) {
+            for (Entry<ResourceKey, String> toJoinEntry : toJoin) {
+                tasks.add(FORK_JOIN_POOL.submit(() -> {
+                        if (!getJoinFilter(field, joinOnEntry, toJoinEntry) || interruptedSupplier.get()) {
+                            return;
+                        }
+                        final ResourceKey joinOnKey = joinOnEntry.getKey();
+                        final ResourceKey toJoinKey = toJoinEntry.getKey();
+                        ResourceKey newKey = createJoinedRowId(outputTable, joinOnKey, toJoinKey);
 
-                                       // add other's values
-                                       final Map<ResourceField, String> toJoinRow = other.table.row(toJoinKey);
-                                       Set<Entry<ResourceField, String>> toJoinValues = toJoinRow.entrySet();
-                                       for (Map.Entry<ResourceField, String> toJoinValue : toJoinValues) {
-                                           ResourceMember member = other.getResourceMember();
-                                           ResourceField joinedField = cloneValueField(member, toJoinValue);
-                                           outputTable.table.put(newKey, joinedField, toJoinValue.getValue());
-                                       }
+                        // add other's values
+                        final Map<ResourceField, String> toJoinRow = other.table.row(toJoinKey);
+                        Set<Entry<ResourceField, String>> toJoinValues = toJoinRow.entrySet();
+                        for (Map.Entry<ResourceField, String> toJoinValue : toJoinValues) {
+                            ResourceMember member = other.getResourceMember();
+                            ResourceField joinedField = cloneValueField(member, toJoinValue);
+                            outputTable.table.put(newKey, joinedField, toJoinValue.getValue());
+                        }
 
-                                       // add this instance's values
-                                       Map<ResourceField, String> joinOnRow = table.row(joinOnCell.getKey());
-                                       for (Map.Entry<ResourceField, String> value : joinOnRow.entrySet()) {
-                                           outputTable.table.put(newKey, value.getKey(), value.getValue());
-                                       }
-                                   });
-                         });
-                     })
-                     .collect(Collectors.toList());
+                        // add this instance's values
+                        Map<ResourceField, String> joinOnRow = table.row(joinOnKey);
+                        for (Map.Entry<ResourceField, String> value : joinOnRow.entrySet()) {
+                            outputTable.table.put(newKey, value.getKey(), value.getValue());
+                        }
+                    }));
+                }
+            }
+        return tasks;
+//        return joinOn.stream()
+//                .map(joinOnCell -> {
+//                    return FORK_JOIN_POOL.submit(() -> {
+//                        toJoin.stream()
+//                              .filter(toJoinCell -> getJoinFilter(field, joinOnCell, toJoinCell))
+//                              .forEach(toJoinCell -> {
+//                                  if (interruptedSupplier.get()) {
+//                                      // cancel
+//                                      return;
+//                                  }
+//                                  final ResourceKey toJoinKey = toJoinCell.getKey();
+//                                  final ResourceKey joinOnKey = joinOnCell.getKey();
+//                                  ResourceKey newKey = createJoinedRowId(outputTable, joinOnKey, toJoinKey);
+//
+//                                  // add other's values
+//                                  final Map<ResourceField, String> toJoinRow = other.table.row(toJoinKey);
+//                                  Set<Entry<ResourceField, String>> toJoinValues = toJoinRow.entrySet();
+//                                  for (Map.Entry<ResourceField, String> toJoinValue : toJoinValues) {
+//                                      ResourceMember member = other.getResourceMember();
+//                                      ResourceField joinedField = cloneValueField(member, toJoinValue);
+//                                      outputTable.table.put(newKey, joinedField, toJoinValue.getValue());
+//                                  }
+//
+//                                  // add this instance's values
+//                                  Map<ResourceField, String> joinOnRow = table.row(joinOnCell.getKey());
+//                                  for (Map.Entry<ResourceField, String> value : joinOnRow.entrySet()) {
+//                                      outputTable.table.put(newKey, value.getKey(), value.getValue());
+//                                  }
+//                              });
+//                    });
+//                })
+//                .collect(Collectors.toList());
     }
 
     private ResourceField cloneValueField(ResourceMember member, Map.Entry<ResourceField, String> value) {
@@ -248,9 +276,9 @@ public class DataTable {
     }
 
     private ResourceKey createJoinedRowId(DataTable outputTable, ResourceKey joinOnKey, ResourceKey toJoinKey) {
-        // String newId = otherKey.getKeyId()
-        // + "_"
-        // + outputTable.rowSize();
+//         String newId = joinOnKey.getKeyId()
+//         + "_"
+//         + outputTable.rowSize();
         String newId = joinOnKey.getKeyId()
                 + "_"
                 + toJoinKey.getKeyId();

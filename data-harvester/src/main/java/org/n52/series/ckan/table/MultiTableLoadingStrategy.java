@@ -110,10 +110,13 @@ public class MultiTableLoadingStrategy extends TableLoadingStrategy {
                                         DataCollection dataCollection,
                                         Collection<ResourceMember> members) {
         DataTable table = dataTable;
+        if (members.size() == 1) {
+            ResourceMember member = members.iterator().next();
+            return readResource(dataCollection, member);
+        }
+        
         for (ResourceMember member : members) {
-            Entry<ResourceMember, DataFile> memberData = dataCollection.getDataEntry(member);
-            ResourceTable singleDatatable = new ResourceTable(memberData);
-            singleDatatable.readIntoMemory();
+            ResourceTable singleDatatable = readResource(dataCollection, member);
 
             LOGGER.debug("Extend table with: '{}'", singleDatatable);
             table = table != null
@@ -121,6 +124,13 @@ public class MultiTableLoadingStrategy extends TableLoadingStrategy {
                     : singleDatatable;
         }
         return table;
+    }
+
+    protected ResourceTable readResource(DataCollection dataCollection, ResourceMember member) {
+        Entry<ResourceMember, DataFile> memberData = dataCollection.getDataEntry(member);
+        ResourceTable singleDatatable = new ResourceTable(memberData);
+        singleDatatable.readIntoMemory();
+        return singleDatatable;
     }
 
 }
