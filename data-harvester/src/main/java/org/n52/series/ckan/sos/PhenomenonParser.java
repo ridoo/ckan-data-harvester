@@ -33,7 +33,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -41,10 +40,14 @@ import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.table.DataTable;
 import org.n52.series.ckan.table.ResourceKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Table;
 
 public class PhenomenonParser {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PhenomenonParser.class);
 
     // TODO evaluate separating observableProperty parsing to schemaDescription
 
@@ -73,26 +76,29 @@ public class PhenomenonParser {
             Table<ResourceKey, ResourceField, String> table = dataTable.getTable();
             Map<ResourceKey, String> column = table.column(phenomenonField);
             HashSet<String> phenomenonValues = new HashSet<String>(column.values());
-            phenomena.addAll(parseSoftTypedPhenomenon(phenomenonField, valueField, phenomenonValues));
+            phenomena.addAll(parseSoftTypedPhenomena(phenomenonField, valueField, phenomenonValues));
         }
         return phenomena;
     }
 
-    private Collection< ? extends Phenomenon> parseSoftTypedPhenomenon(ResourceField phenomenonField,
-                                                                       ResourceField valueField,
-                                                                       HashSet<String> values) {
-        Function< ? super String, ? extends Phenomenon> parseReferencedPhenomenon = e -> {
-            String uom = uomParser.parse(phenomenonField);
-            String id = e;
-            String label = phenomenonField.getFieldId() + "_" + e;
-            Phenomenon phenomenon = new Phenomenon(id, label, valueField, uom);
-            phenomenon.setPhenomenonField(phenomenonField);
-            phenomenon.setSoftTyped(true);
-            return phenomenon;
-        };
+    private Collection< ? extends Phenomenon> parseSoftTypedPhenomena(ResourceField phenomenonField,
+                                                                      ResourceField valueField,
+                                                                      HashSet<String> values) {
+        String phenomenonFieldId = phenomenonField.getFieldId();
+        LOGGER.debug("Parse referenced phenomena values from field: {}", phenomenonFieldId);
         return values.stream()
-                     .map(parseReferencedPhenomenon)
+                     .map(v -> parseSoftTypedPhenomenon(v, phenomenonField, valueField))
                      .collect(Collectors.toSet());
+    }
+
+    protected Phenomenon parseSoftTypedPhenomenon(String id, ResourceField phenomenonField, ResourceField valueField) {
+        String uom = uomParser.parse(phenomenonField);
+        String label = phenomenonField.getFieldId() + "_" + id;
+        Phenomenon phenomenon = new Phenomenon(id, label, valueField, uom);
+        phenomenon.setPhenomenonField(phenomenonField);
+        phenomenon.setSoftTyped(true);
+        LOGGER.debug("New phenomenon: {}", phenomenon);
+        return phenomenon;
     }
 
     public Collection<Phenomenon> parseFromFields(Collection<ResourceField> resourceFields) {
@@ -109,10 +115,13 @@ public class PhenomenonParser {
     }
 
     private Phenomenon parsePhenomenon(ResourceField field) {
+        LOGGER.debug("Detected phenomenon field: {}", field);
         String uom = uomParser.parse(field);
         String id = parsePhenomenonId(field);
         String label = parsePhenomenonName(field);
-        return new Phenomenon(id, label, field, uom);
+        Phenomenon phenomenon = new Phenomenon(id, label, field, uom);
+        LOGGER.debug("New phenomenon: {}", phenomenon);
+        return phenomenon;
     }
 
     private List<ResourceField> filterFields(Collection<ResourceField> fields, Predicate<ResourceField> filter) {

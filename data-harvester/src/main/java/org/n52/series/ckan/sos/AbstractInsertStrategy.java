@@ -64,10 +64,7 @@ public abstract class AbstractInsertStrategy implements SosInsertStrategy {
     }
 
     protected Collection<Phenomenon> parsePhenomena(DataTable dataTable) {
-        PhenomenonParser phenomenonParser = new PhenomenonParser(uomParser);
-        final Collection<Phenomenon> phenomena = phenomenonParser.parse(dataTable);
-        LOGGER.debug("Phenomena: {}", phenomena);
-        return phenomena;
+        return new PhenomenonParser(uomParser).parse(dataTable);
     }
 
     protected UomParser getUomParser() {
