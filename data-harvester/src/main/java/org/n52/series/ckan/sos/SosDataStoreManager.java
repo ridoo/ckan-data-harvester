@@ -110,18 +110,17 @@ public class SosDataStoreManager implements DataStoreManager {
     }
 
     private Map<String, DataInsertion> getDataInsertions(DataCollection dataCollection) {
-        Map<String, DataInsertion> dataInsertions = new HashMap<>();
-        CkanMapping ckanMapping = dataCollection.getCkanMapping();
-        CkanDataset ckanDataset = dataCollection.getDataset();
-        SosInsertStrategy insertStrategy = createInsertStrategy(ckanMapping, ckanDataset);
-        TableLoadingStrategy tableLoader = createTableLoader(ckanMapping, ckanDataset);
-
+        SosInsertStrategy insertStrategy = createInsertStrategy(dataCollection);
+        TableLoadingStrategy tableLoader = createTableLoader(dataCollection);
         Collection<DataTable> data = tableLoader.loadData(dataCollection);
-        for (DataTable dataTable : data) {
-            dataInsertions.putAll(insertStrategy.createDataInsertions(dataTable, dataCollection));
-        }
+        return data.stream()
+            .filter(d -> !d.isEmpty())
+            .map(d -> insertStrategy.createDataInsertions(d, dataCollection))
+            .collect(HashMap::new, Map::putAll, Map::putAll);
+    }
 
-        return dataInsertions;
+    private SosInsertStrategy createInsertStrategy(DataCollection dataCollection) {
+        return createInsertStrategy(dataCollection.getCkanMapping(), dataCollection.getDataset());
     }
 
     protected SosInsertStrategy createInsertStrategy(CkanMapping ckanMapping, CkanDataset ckanDataset) {
@@ -139,6 +138,10 @@ public class SosDataStoreManager implements DataStoreManager {
                     ? new StationaryInsertStrategy()
                     : new StationaryInsertStrategy(getCkanSosReferenceCache());
         }
+    }
+
+    private TableLoadingStrategy createTableLoader(DataCollection dataCollection) {
+        return createTableLoader(dataCollection.getCkanMapping(), dataCollection.getDataset());
     }
 
     protected TableLoadingStrategy createTableLoader(CkanMapping ckanMapping,
@@ -164,7 +167,7 @@ public class SosDataStoreManager implements DataStoreManager {
     protected String getStringValue(String classParameter, JsonNode config) {
         return config.has(classParameter)
                 ? config.get(classParameter)
-                                   .asText()
+                        .asText()
                 : "";
     }
 
