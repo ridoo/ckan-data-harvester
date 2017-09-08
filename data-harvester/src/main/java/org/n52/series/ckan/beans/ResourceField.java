@@ -29,6 +29,7 @@
 
 package org.n52.series.ckan.beans;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -244,8 +245,7 @@ public class ResourceField implements VisitableField {
     @Override
     public int hashCode() {
         String idProperty = CkanConstants.FieldPropertyName.FIELD_ID;
-        return this.ckanMapping.getFieldMappings(idProperty)
-                               .hashCode();
+        return Arrays.hashCode(this.ckanMapping.getFieldMappings(idProperty).toArray());
     }
 
     @Override
