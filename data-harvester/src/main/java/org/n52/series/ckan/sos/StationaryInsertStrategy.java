@@ -89,13 +89,11 @@ class StationaryInsertStrategy extends AbstractInsertStrategy {
 
                 if (phenomenon.isSoftTyped()) {
 
-                    // XXX iterating over all phenomena would create n*row observations
-                    // for softtyped (referenced) phenomena which is WRONG .. find a way
-                    // to detect which phenomena is referenced and create an observation
-                    // value for just that one phenomenon (which has to be picked from
-                    // the current row as well?!
-
                     String phenomenonValue = values.get(phenomenon.getPhenomenonField());
+                    if (!phenomenon.getId().equals(phenomenonValue)) {
+                        // referenced phenomenon does not match, skip
+                        continue;
+                    }
                     currentPhenomenon = new Phenomenon(phenomenonValue, phenomenonValue, phenomenon);
                 }
 
