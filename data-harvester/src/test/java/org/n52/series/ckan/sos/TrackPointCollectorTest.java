@@ -92,12 +92,11 @@ public class TrackPointCollectorTest {
         ResourceField timeField = createField("timestamp", "Date");
         CkanMapping ckanMapping = getCkanMapping("{"
                 + "  \"strategy\": {"
-                + "    \"mobile\": {"
-                + "      \"track_discriminator\": [{"
-                + "        \"column\": \"timestamp\","
-                + "        \"pattern\": \"(\\\\d{4}-\\\\d{2}-\\\\d{2}).*$\""
-                + "      }]"
-                + "    }"
+                + "    \"mobile\": true,"
+                + "    \"track_discriminator\": [{"
+                + "      \"column\": \"timestamp\","
+                + "      \"pattern\": \"(\\\\d{4}-\\\\d{2}-\\\\d{2}).*$\""
+                + "    }]"
                 + "  }"
                 + "}");
         TrackPointCollector collector = new TrackPointCollector(ckanMapping);
@@ -114,16 +113,15 @@ public class TrackPointCollectorTest {
         ResourceField foobarField = createField("foobar", "String");
         CkanMapping ckanMapping = getCkanMapping("{"
                 + "  \"strategy\": {"
-                + "    \"mobile\": {"
-                + "      \"track_discriminator\": [{"
-                + "        \"column\": \"timestamp\","
-                + "        \"pattern\": \"(\\\\d{4}-\\\\d{2}-\\\\d{2}).*$\""
-                + "      },"
-                + "      {"
-                + "        \"column\": \"foobar\","
-                + "        \"separator\": \"_\""
-                + "      }]"
-                + "    }"
+                + "    \"mobile\": true,"
+                + "    \"track_discriminator\": [{"
+                + "      \"column\": \"timestamp\","
+                + "      \"pattern\": \"(\\\\d{4}-\\\\d{2}-\\\\d{2}).*$\""
+                + "    },"
+                + "    {"
+                + "      \"column\": \"foobar\","
+                + "      \"separator\": \"_\""
+                + "    }]"
                 + "  }"
                 + "}");
         TrackPointCollector collector = new TrackPointCollector(ckanMapping);
