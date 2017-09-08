@@ -52,7 +52,7 @@
 
     <beans profile="dev">
         <bean id="ckanHarvestingService" class="org.n52.series.ckan.util.FileBasedCkanHarvester" destroy-method="shutdown">
-            <constructor-arg index="0" value="${ckan.datafolder:/files/dwd-trimmed}" />
+            <constructor-arg index="0" value="${ckan.datafolder}" />
             <property name="resourceTargetBaseFolder" value="test-data" />
             <property name="dataStoreManager">
                 <bean class="org.n52.series.ckan.sos.SosDataStoreManager">
