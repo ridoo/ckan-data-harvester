@@ -97,7 +97,7 @@ public class PhenomenonParser {
         Phenomenon phenomenon = new Phenomenon(id, label, valueField, uom);
         phenomenon.setPhenomenonField(phenomenonField);
         phenomenon.setSoftTyped(true);
-        LOGGER.debug("New phenomenon: {}", phenomenon);
+        LOGGER.debug("New softtyped phenomenon: {}", phenomenon);
         return phenomenon;
     }
 

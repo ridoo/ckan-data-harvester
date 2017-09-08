@@ -71,21 +71,46 @@ public class FileBasedCkanHarvester extends CkanHarvestingService {
     }
 
     private List<File> getDatasets() {
-        List<File> datasets = new ArrayList<>();
         File folder = getSourceDataFolder();
-
-//        File[] datasetFiles = folder.listFiles();
-//        if (datasetFiles != null) {
-//            for (File file : datasetFiles) {
-//                if (file.isDirectory()) {
-//                    Path datasetPath = file.toPath()
-//                                           .resolve("dataset.json");
-//                    datasets.add(datasetPath.toFile());
-//                }
-//            }
-//        }
-//        return datasets;
         return findFilesWithName(folder, "dataset.json");
+    }
+
+    private File getSourceDataFolder() {
+        LOGGER.trace("Source Data Folder: {}", dataFolder);
+        File file = new File(dataFolder);
+        if (file.exists()) {
+            return file;
+        } else {
+            URL resource = getClass().getResource(dataFolder);
+            if (resource == null) {
+                throw new IllegalStateException("invalid data folder: " + dataFolder);
+            }
+            return new File(resource.getFile());
+        }
+    }
+
+    private CkanDataset parseDatasetTestFile(File file) {
+        try {
+            return JsonUtil.getCkanObjectMapper()
+                           .readValue(file, CkanDataset.class);
+        } catch (IOException e) {
+            LOGGER.error("could not read/parse test file", e);
+            return new CkanDataset();
+        }
+    }
+
+    @Override
+    protected DataFile downloadFile(CkanResource resource, Path datasetDownloadFolder) throws IOException {
+        File folder = getSourceDataFolder();
+        String id = resource.getId();
+        String format = resource.getFormat();
+        String fileName = id + "." + format.toLowerCase();
+        List<File> files = findFilesWithName(folder, fileName);
+        if (files.isEmpty()) {
+            String name = resource.getName();
+            throw new IOException("no data file found for resource '" + name + "' and id '" + id + "'.");
+        }
+        return new DataFile(resource, format, files.get(0));
     }
 
     private List<File> findFilesWithName(File file, String name) {
@@ -121,63 +146,10 @@ public class FileBasedCkanHarvester extends CkanHarvestingService {
             return matchesFile.test(file.toPath())
                     ? Collections.singletonList(file)
                     : Collections.emptyList();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LOGGER.warn("Unable to find file '{}' in '{}'", file.getAbsolutePath(), e);
             return Collections.emptyList();
         }
-    }
-
-    private File getSourceDataFolder() {
-        LOGGER.trace("Source Data Folder: {}", dataFolder);
-        File file = new File(dataFolder);
-        if (file.exists()) {
-            return file;
-        } else {
-            URL resource = getClass().getResource(dataFolder);
-            if (resource == null) {
-                throw new IllegalStateException("invalid data folder: " + dataFolder);
-            }
-            return new File(resource.getFile());
-        }
-    }
-
-    private CkanDataset parseDatasetTestFile(File file) {
-        try {
-            return JsonUtil.getCkanObjectMapper()
-                           .readValue(file, CkanDataset.class);
-        } catch (IOException e) {
-            LOGGER.error("could not read/parse test file", e);
-            return new CkanDataset();
-        }
-    }
-
-    @Override
-    protected DataFile downloadFile(CkanResource resource, Path datasetDownloadFolder) throws IOException {
-        File folder = getSourceDataFolder();
-        String id = resource.getId();
-        String format = resource.getFormat();
-        String fileName = id + "." + format.toLowerCase();
-        List<File> files = findFilesWithName(folder, fileName);
-//        File[] dataFolders = folder.listFiles();
-//        if (dataFolders != null) {
-//            for (File file : dataFolders) {
-//                if (file.isDirectory()) {
-//
-//                    Path datapath = file.toPath()
-//                                        .resolve(fileName);
-//                    if (datapath.toFile()
-//                                .exists()) {
-//                        return new DataFile(resource, format, datapath.toFile());
-//                    }
-//                }
-//            }
-//        }
-        if (files.isEmpty()) {
-            String name = resource.getName();
-            throw new IOException("no data file found for resource '" + name + "' and id '" + id + "'.");
-        }
-        return new DataFile(resource, format, files.get(0));
     }
 
 }
