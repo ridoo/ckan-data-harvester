@@ -60,7 +60,7 @@ import org.n52.sos.response.GetFeatureOfInterestResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//@Ignore("currently toooooo slooooooooooow for unit testing")
+@Ignore("currently toooooo slooooooooooow for unit testing")
 public class DatabaseStorageTest extends HibernateTestCase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseStorageTest.class);
