@@ -84,7 +84,7 @@ public class DataCollection implements Iterable<Map.Entry<ResourceMember, DataFi
     public DescriptionFile getSchemaDescriptor() {
         return schemaDescriptor;
     }
-    
+
     public Entry<ResourceMember, DataFile> getDataEntry(String resourceId) {
         Map<ResourceMember, DataFile> collection = getDataCollection();
     for (Entry<ResourceMember, DataFile> entry : collection.entrySet()) {
