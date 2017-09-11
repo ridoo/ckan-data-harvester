@@ -33,6 +33,7 @@ This project includes:
   AOP alliance under Public Domain
   Apache Commons Codec under Apache License, Version 2.0
   Apache Commons CSV under Apache License, Version 2.0
+  Apache Commons Logging under The Apache Software License, Version 2.0
   Apache FOP under The Apache Software License, Version 2.0
   Apache Tika core under Apache License, Version 2.0
   Apache XML Graphics Commons under The Apache Software License, Version 2.0
@@ -54,7 +55,6 @@ This project includes:
   Batik SVG transcoder classes under The Apache Software License, Version 2.0
   Batik utility library under The Apache Software License, Version 2.0
   Batik XML utility library under The Apache Software License, Version 2.0
-  c3p0:JDBC DataSources/Resource Pools under GNU LESSER GENERAL PUBLIC LICENSE
   CKAN Data Harvester under The Apache Software License, Version 2.0
   CKAN Data Harvester Module under The Apache Software License, Version 2.0
   CKAN Data Harvester Webapp Module under The Apache Software License, Version 2.0
@@ -63,11 +63,11 @@ This project includes:
   Commons Lang under The Apache Software License, Version 2.0
   Commons Pool under The Apache Software License, Version 2.0
   Core Hibernate O/RM functionality under GNU Lesser General Public License
+  DataStore Support under Lesser General Public License (LGPL)
   dom4j under DOM4J license, http://dom4j.sourceforge.net/dom4j-1.6.1/license.html (BSD style)
   EJML under The Apache Software License, Version 2.0
   EPSG Authority Service using HSQL database under GNU Lesser General Public License (LGPL) version 2.1
   FindBugs-Annotations under GNU Lesser Public License
-  FindBugs-jsr305 under The Apache Software License, Version 2.0
   GeoDB Core under BSD style, https://github.com/jdeolive/geodb/blob/master/LICENSE.txt
   Guava: Google Core Libraries for Java under The Apache Software License, Version 2.0
   H2 Database Engine under The H2 License, Version 1.0
@@ -94,6 +94,7 @@ This project includes:
   JBoss Logging I18n Annotations under Public Domain
   JCL 1.1.1 implemented over SLF4J under MIT License
   JCommon under GNU Lesser General Public Licence
+  JDOM under Similar to Apache License but with the acknowledgment clause removed
   JFreeChart under GNU Lesser General Public Licence
   jgridshift under GNU Lesser General Public License, version 2.0 (LGPLv2)
   Joda-Time under Apache 2
@@ -106,6 +107,7 @@ This project includes:
   Log4j Implemented Over SLF4J under Apache Software Licenses
   Logback Classic Module under Eclipse Public License - v 1.0 or GNU Lesser General Public License
   Logback Core Module under Eclipse Public License - v 1.0 or GNU Lesser General Public License
+  Main module under GNU Lesser General Public License (LGPL) version 2.1
   Metadata under GNU Lesser General Public License (LGPL) version 2.1
   Mozilla Rhino under Mozilla Public License, Version 2.0
   null under Lesser General Public License, version 3 or greater or Apache Software License, version 2.0
@@ -129,12 +131,18 @@ This project includes:
   OGC WaterML DR schema (spec. v2.0) under The Apache Software License, Version 2.0
   OGC WaterML schema (spec. v2.0) under The Apache Software License, Version 2.0
   Open GIS Interfaces under GNU Lesser General Public License (LGPL) version 2.1
-  Quartz Enterprise Job Scheduler under Apache 2.0
+  quartz under The Apache Software License, Version 2.0
   Referencing services under GNU Lesser General Public License (LGPL) version 2.1
   Reflections under WTFPL
   SaxonB under Mozilla Public License Version 1.0
+  Series REST API - DAO Mappings module under GNU General Public License, Version 2.0
+  Series REST API - DAO module under GNU General Public License, Version 2.0
   Series REST API - IO module under GNU General Public License, Version 2.0
+  Series REST API - REST module under GNU General Public License, Version 2.0
+  Series REST API - SOS DAO module under GNU General Public License, Version 2.0
+  Series REST API - SPI module under GNU General Public License, Version 2.0
   servlet-api under CDDL 1.1 or GPL2 w/ CPE
+  Shapefile module under Lesser General Public License (LGPL)
   SLF4J API Module under MIT License
   Spring AOP under The Apache Software License, Version 2.0
   Spring Beans under The Apache Software License, Version 2.0
@@ -142,7 +150,11 @@ This project includes:
   Spring Context Support under The Apache Software License, Version 2.0
   Spring Core under The Apache Software License, Version 2.0
   Spring Expression Language (SpEL) under The Apache Software License, Version 2.0
+  Spring JDBC under The Apache Software License, Version 2.0
+  Spring Object/Relational Mapping under The Apache Software License, Version 2.0
+  Spring Transaction under The Apache Software License, Version 2.0
   Spring Web under The Apache Software License, Version 2.0
+  Spring Web MVC under The Apache Software License, Version 2.0
   SQLite JDBC under The Apache Software License, Version 2.0
   StAX API under The Apache Software License, Version 2.0
   Tod Commons under Apache License, Version 2.0
@@ -152,7 +164,7 @@ This project includes:
   W3C WS-Addressing specification schemas (v1.0) under The Apache Software License, Version 2.0
   W3C xlink schema (spec. v1.1.0) under The Apache Software License, Version 2.0
   xalan under The Apache Software License, Version 2.0
-  XML Commons External Components XML APIs under The Apache Software License, Version 2.0
+  XML Commons External Components XML APIs under The Apache Software License, Version 2.0 or The SAX License or The W3C License
   XML Commons External Components XML APIs Extensions under The Apache Software License, Version 2.0
   XmlBeans under The Apache Software License, Version 2.0
   XmlBeansXPath under The Apache Software License, Version 2.0

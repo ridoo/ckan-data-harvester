@@ -26,33 +26,51 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.da;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.MissingNode;
-import com.google.common.base.Strings;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.nio.file.Path;
+import java.net.URL;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.MissingNode;
+import com.google.common.base.Strings;
+
+/**
+ * Allows to map a common set of identifiers ({@link CkanConstants}) to an alternate set of terms. By default
+ * <tt>config-ckan-mapping.json</tt> read from classpath. Defaults can be overridden by passing a different
+ * mapping file to one of the overloaded {@link CkanMapping#loadCkanMapping()}.
+ */
 public class CkanMapping {
+
+    private static final String GROUP_SCHEMA_DESCRIPTOR = "schema_descriptor";
+
+    private static final String GROUP_ROLE = "role";
+
+    private static final String GROUP_RESOURCE_TYPE = "resource_type";
+
+    private static final String GROUP_PROPERTY = "property";
+
+    private static final String GROUP_FIELD = "field";
+
+    private static final String GROUP_DATATYPE = "datatype";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CkanMapping.class);
 
-    private final static String DEFAULT_CKAN_MAPPING_FILE = "config-ckan-mapping.json";
+    private static final String DEFAULT_CKAN_MAPPING_FILE = "config-ckan-mapping.json";
 
     private final JsonNode fallbackMapping;
 
@@ -75,77 +93,77 @@ public class CkanMapping {
                 : fallbackMapping;
     }
 
-    public boolean hasDataTypeMappings(String name, String mapping) {
-        return hasMappings("datatype", name, mapping);
+    public boolean hasDataTypeMappings(String datatypeValue, String mapping) {
+        return hasMappings(GROUP_DATATYPE, datatypeValue, mapping);
     }
 
-    public boolean hasFieldMappings(String name, String mapping) {
-        return hasMappings("field", name, mapping);
+    public boolean hasFieldMappings(String fieldValue, String mapping) {
+        return hasMappings(GROUP_FIELD, fieldValue, mapping);
     }
 
-    public boolean hasPropertyMappings(String name, String mapping) {
-        return hasMappings("property", name, mapping);
+    public boolean hasPropertyMappings(String property, String mapping) {
+        return hasMappings(GROUP_PROPERTY, property, mapping);
     }
 
-    public boolean hasResourceTypeMappings(String name, String mapping) {
-        return hasMappings("resource_type", name, mapping);
+    public boolean hasResourceTypeMappings(String resourceTypeValue, String mapping) {
+        return hasMappings(GROUP_RESOURCE_TYPE, resourceTypeValue, mapping);
     }
 
-    public boolean hasRoleMappings(String name, String mapping) {
-        return hasMappings("role", name, mapping);
+    public boolean hasRoleMappings(String roleValue, String mapping) {
+        return hasMappings(GROUP_ROLE, roleValue, mapping);
     }
 
-    public boolean hasSchemaDescriptionMappings(String name, String mapping) {
-        return hasMappings("schema_descriptor", name, mapping);
+    public boolean hasSchemaDescriptionMappings(String schemaDescriptionValue, String mapping) {
+        return hasMappings(GROUP_SCHEMA_DESCRIPTOR, schemaDescriptionValue, mapping);
     }
 
     public boolean hasMappings(String group, String name, String mapping) {
-        return getMappings(group, name).contains(mapping.toLowerCase(Locale.ROOT));
-    }
-
-    public Set<String> getDatatypeMappings(String name) {
-        return getMappings("datatype", name);
-    }
-
-    public Set<String> getFieldMappings(String name) {
-        return getMappings("field", name);
+        return getValueMappings(group, name).contains(mapping.toLowerCase(Locale.ROOT))
+                || getValueMappings(group, mapping).contains(name.toLowerCase(Locale.ROOT));
     }
 
     public Set<String> getPropertyMappings(String name) {
-        return getMappings("property", name);
+        return getValueMappings(GROUP_PROPERTY, name);
+    }
+
+    public Set<String> getDatatypeMappings(String name) {
+        return getValueMappings(GROUP_DATATYPE, name);
+    }
+
+    public Set<String> getFieldMappings(String name) {
+        return getValueMappings(GROUP_FIELD, name);
     }
 
     public Set<String> getResourceTypeMappings(String name) {
-        return getMappings("resource_type", name);
+        return getValueMappings(GROUP_RESOURCE_TYPE, name);
     }
 
     public Set<String> getRoleMappings(String name) {
-        return getMappings("role", name);
+        return getValueMappings(GROUP_ROLE, name);
     }
 
     public Set<String> getSchemaDescriptionMappings(String name) {
-        return getMappings("schema_descriptor", name);
+        return getValueMappings(GROUP_SCHEMA_DESCRIPTOR, name);
     }
 
-    public Set<String> getMappings(String group, String name) {
+    protected Set<String> getValueMappings(String group, String name) {
+        String lowerCasedName = name.toLowerCase(Locale.ROOT);
         String lowerCasedGroup = !(group == null || group.isEmpty())
                 ? "/" + group.toLowerCase(Locale.ROOT)
                 : "";
-        String lowerCasedName = name != null
-                ? name.toLowerCase(Locale.ROOT)
-                : name;
         String path = lowerCasedGroup + "/" + lowerCasedName;
         JsonNode mappingArray = getConfigValueAt(path);
         if (mappingArray.isMissingNode()) {
             LOGGER.trace("try to get '{}' from fallback mapping.", path);
             mappingArray = fallbackMapping.at(path);
         }
-        List<String> values = new ArrayList<>();
+        Set<String> mappingValues = new HashSet<>();
         for (JsonNode node : mappingArray) {
-            values.add(node.asText().toLowerCase(Locale.ROOT));
+            mappingValues.add(node.asText()
+                                  .toLowerCase(Locale.ROOT));
         }
-        values.add(lowerCasedName); // add self
-        return new HashSet<>(values);
+        mappingValues.add(lowerCasedName);
+        return new HashSet<>(mappingValues);
     }
 
     public JsonNode getConfigValueAt(String path) {
@@ -175,7 +193,7 @@ public class CkanMapping {
 
     private static class CkanMappingLoader {
 
-        private final static Logger LOGGER = LoggerFactory.getLogger(CkanMapping.CkanMappingLoader.class);
+        private static final Logger LOGGER = LoggerFactory.getLogger(CkanMapping.CkanMappingLoader.class);
 
         private CkanMapping loadConfig() {
             return loadConfig((String) null);
@@ -184,8 +202,7 @@ public class CkanMapping {
         private CkanMapping loadConfig(String configFile) {
             try {
                 return loadConfig(createStreamFrom(configFile));
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 LOGGER.error("Could not load from '{}'. Using empty config.", configFile, e);
                 return new CkanMapping();
             }
@@ -193,7 +210,7 @@ public class CkanMapping {
 
         private CkanMapping loadConfig(File file) {
             try {
-                return loadConfig(createStreamFrom(file));
+                return loadConfig(createStreamFrom(file.getAbsolutePath()));
             } catch (IOException e) {
                 LOGGER.error("Could not load {}. Using empty config.", file.getAbsolutePath(), e);
                 return new CkanMapping();
@@ -211,31 +228,31 @@ public class CkanMapping {
             }
         }
 
-        private InputStream createStreamFrom(String configFile) throws FileNotFoundException {
-            File file = Strings.isNullOrEmpty(configFile)
-                    ? getConfigFile(DEFAULT_CKAN_MAPPING_FILE)
-                    : getConfigFile(configFile);
-            return file.exists()
-                    ? createStreamFrom(file)
-                    : loadDefaults();
-        }
-
         private File getConfigFile(String configFile) {
             try {
-                Path path = Paths.get(CkanMapping.CkanMappingLoader.class.getResource("/").toURI());
-                File file = path.resolve(configFile).toFile();
-                LOGGER.trace("Loading config from '{}'", file.getAbsolutePath());
-                return file;
+                URL resource = CkanMapping.CkanMappingLoader.class.getResource("/");
+                return Paths.get(resource.toURI())
+                            .resolve(configFile)
+                            .toFile();
             } catch (URISyntaxException e) {
                 LOGGER.info("Could not find config file '{}'. Load from compiled default.", configFile, e);
                 return null;
             }
         }
 
+        private InputStream createStreamFrom(String configFile) throws FileNotFoundException {
+            File file = Strings.isNullOrEmpty(configFile)
+                    ? getConfigFile(DEFAULT_CKAN_MAPPING_FILE)
+                    : getConfigFile(configFile);
+            LOGGER.trace("Loading config from '{}'", file.getAbsolutePath());
+            return file.exists()
+                    ? createStreamFrom(file)
+                    : loadDefaults();
+        }
+
         private InputStream createStreamFrom(File file) {
             if (file != null) {
                 try {
-                    LOGGER.trace("Loading config from '{}'", file.getAbsolutePath());
                     return new FileInputStream(file);
                 } catch (FileNotFoundException e) {
                     LOGGER.warn("Missing config file '{}'! Loading from jar.", file.getAbsolutePath());

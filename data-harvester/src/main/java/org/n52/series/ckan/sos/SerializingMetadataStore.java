@@ -26,10 +26,9 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.sos;
 
-import eu.trentorise.opendata.jackan.model.CkanDataset;
-import eu.trentorise.opendata.jackan.model.CkanResource;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -37,15 +36,21 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+
 import org.n52.series.ckan.cache.InMemoryMetadataStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import eu.trentorise.opendata.jackan.model.CkanDataset;
+import eu.trentorise.opendata.jackan.model.CkanResource;
 
 public class SerializingMetadataStore extends InMemoryMetadataStore implements CkanSosReferenceCache {
 
@@ -69,12 +74,14 @@ public class SerializingMetadataStore extends InMemoryMetadataStore implements C
     public void init() {
         try {
             final File cacheFile = getMetadataFile();
-            final String filePath = cacheFile.getAbsolutePath();
-            LOGGER.debug("Try reading cache from '{}'", filePath);
+            final String fullPath = cacheFile.getAbsolutePath();
+            LOGGER.debug("Try reading cache from '{}'", fullPath);
             mutex.lock();
-            if ( !cacheFile.exists()) {
-                if ( !cacheFile.getParentFile().mkdirs() || !cacheFile.createNewFile()) {
-                    LOGGER.error("Could not create file '{}'.", filePath);
+            if (!cacheFile.exists()) {
+                if (!cacheFile.getParentFile()
+                              .mkdirs()
+                        || !cacheFile.createNewFile()) {
+                    LOGGER.error("Could not create file '{}'.", fullPath);
                 }
             } else {
                 readCacheFromFile(cacheFile);
@@ -82,29 +89,30 @@ public class SerializingMetadataStore extends InMemoryMetadataStore implements C
         } catch (URISyntaxException | IOException e) {
             LOGGER.error("Could not create file '{}'", filePath, e);
             throw new IllegalStateException("config parameter 'metadataCacheFile' is not valid.", e);
-        }
-        finally {
+        } finally {
             mutex.unlock();
         }
     }
 
     private File getMetadataFile() throws URISyntaxException {
-        final Path path = Paths.get(getClass().getResource("/").toURI());
-        final File cacheFile = path.resolve(filePath).toFile();
+        URL resource = SerializingMetadataStore.class.getResource("/");
+        final Path path = Paths.get(resource.toURI());
+        final File cacheFile = path.resolve(filePath)
+                                   .toFile();
         return cacheFile;
     }
 
     private void readCacheFromFile(File cacheFile) {
-        final String filePath = cacheFile.getAbsolutePath();
-        if (new File(filePath).exists()) {
-            LOGGER.info("Read cache file from '{}'", filePath);
+        final String fullPath = cacheFile.getAbsolutePath();
+        if (new File(fullPath).exists()) {
+            LOGGER.info("Read cache file from '{}'", fullPath);
             try (ObjectInputStream objIn = new ObjectInputStream(new FileInputStream(cacheFile))) {
                 cache = (SerializedCache) objIn.readObject();
                 putAll(cache.getDatasets());
             } catch (IOException e) {
-                LOGGER.error("Could not deserialize from '{}'", filePath, e);
+                LOGGER.error("Could not deserialize from '{}'", fullPath, e);
             } catch (ClassNotFoundException e) {
-                 LOGGER.error("Cache file outdated: '{}'", filePath, e);
+                LOGGER.error("Cache file outdated: '{}'", fullPath, e);
             }
         }
     }
@@ -134,6 +142,15 @@ public class SerializingMetadataStore extends InMemoryMetadataStore implements C
     }
 
     @Override
+    public void delete(CkanDataset dataset) {
+        if (dataset != null) {
+            super.delete(dataset);
+            cache.setDatasets(getDatasets());
+            serialize();
+        }
+    }
+
+    @Override
     public boolean exists(CkanResource reference) {
         return cache.exists(reference);
     }
@@ -141,15 +158,6 @@ public class SerializingMetadataStore extends InMemoryMetadataStore implements C
     @Override
     public CkanSosObservationReference getReference(CkanResource resource) {
         return cache.getReference(resource);
-    }
-
-    @Override
-    public void delete(CkanDataset dataset) {
-        if (dataset != null) {
-            super.delete(dataset);
-            cache.setDatasets(getDatasets());
-            serialize();
-        }
     }
 
     @Override
@@ -161,6 +169,7 @@ public class SerializingMetadataStore extends InMemoryMetadataStore implements C
         }
     }
 
+    @Override
     @PreDestroy
     public void shutdown() {
         LOGGER.info("Serialize metadata before shutting down ...");
@@ -171,17 +180,17 @@ public class SerializingMetadataStore extends InMemoryMetadataStore implements C
     public void serialize() {
         try {
             final File cacheFile = getMetadataFile();
-            String filePath = cacheFile.getAbsolutePath();
-            LOGGER.info("Serializing metadata to file {}", filePath);
+            String fullPath = cacheFile.getAbsolutePath();
+            LOGGER.info("Serializing metadata to file {}", fullPath);
             mutex.lock();
             try (ObjectOutputStream objOut = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
                 objOut.writeObject(cache);
             } catch (IOException e) {
-                LOGGER.error("Could not write cache to file '{}'", filePath, e);
+                LOGGER.error("Could not write cache to file '{}'", fullPath, e);
             }
         } catch (URISyntaxException e) {
             LOGGER.error("Could not write cache.", e);
-        }  finally {
+        } finally {
             mutex.unlock();
         }
     }

@@ -1,11 +1,16 @@
 language: java
 jdk:
-  - oraclejdk8
-script: mvn -fae -U -B clean install -P check -P allow-snapshot-repos
-#after_success: chmod +x .travis/on_success.sh && .travis/on_success.sh
+- oraclejdk8
+dist: trusty
+script: mvn -fae -U -B clean install -Pcheck -Psnapshot-dist
+after_success:
+- curl -Ls https://git.io/deploy-maven-snapshot | bash
+env:
+  global:
+  - SNAPSHOT_BRANCH: "develop"
 cache:
-  directories
-    - $HOME/.m2
+  directories:
+  - $HOME/.m2
 notifications:
   irc:
     channels:

@@ -26,18 +26,21 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.sos;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import eu.trentorise.opendata.jackan.model.CkanDataset;
-import eu.trentorise.opendata.jackan.model.CkanResource;
 import java.io.IOException;
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import eu.trentorise.opendata.jackan.model.CkanDataset;
+import eu.trentorise.opendata.jackan.model.CkanResource;
 
 public class SerializedCache implements CkanSosReferenceCache, Serializable {
 
@@ -45,29 +48,29 @@ public class SerializedCache implements CkanSosReferenceCache, Serializable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SerializedCache.class);
 
-    private final Map<SerializableCkanResource, CkanSosObservationReference> observationReferenceCache;
+    private final Map<SerializableCkanResource, CkanSosObservationReference> referencesByResource;
 
     private final Map<String, SerializableCkanDataset> datasets;
 
     public SerializedCache() {
-        observationReferenceCache = new HashMap<>();
+        referencesByResource = new HashMap<>();
         datasets = new HashMap<>();
     }
 
     @Override
     public void addOrUpdate(CkanSosObservationReference reference) {
-        observationReferenceCache.put(reference.getResource(), reference);
+        referencesByResource.put(reference.getResource(), reference);
     }
 
     @Override
     public void delete(CkanSosObservationReference reference) {
-        observationReferenceCache.remove(reference.getResource());
+        referencesByResource.remove(reference.getResource());
     }
 
     @Override
     public void delete(CkanResource resource) {
         try {
-            observationReferenceCache.remove(serialize(resource));
+            referencesByResource.remove(serialize(resource));
         } catch (JsonProcessingException e) {
             LOGGER.error("Invalid CkanResource.", e);
         }
@@ -77,9 +80,9 @@ public class SerializedCache implements CkanSosReferenceCache, Serializable {
     public boolean exists(CkanResource reference) {
         try {
             SerializableCkanResource resource = serialize(reference);
-            return observationReferenceCache.containsKey(resource);
+            return referencesByResource.containsKey(resource);
         } catch (JsonProcessingException e) {
-            LOGGER.debug("Invalid resource.", e);
+            LOGGER.debug("Could not determine if reference exists.", e);
             return false;
         }
     }
@@ -87,9 +90,9 @@ public class SerializedCache implements CkanSosReferenceCache, Serializable {
     @Override
     public CkanSosObservationReference getReference(CkanResource resource) {
         try {
-            return observationReferenceCache.get(serialize(resource));
+            return referencesByResource.get(serialize(resource));
         } catch (JsonProcessingException e) {
-            LOGGER.debug("Invalid resource.", e);
+            LOGGER.debug("Could not serialize resource.", e);
             return null;
         }
     }
@@ -112,7 +115,7 @@ public class SerializedCache implements CkanSosReferenceCache, Serializable {
     private void addDataset(CkanDataset dataset) {
         try {
             this.datasets.put(dataset.getId(), serialize(dataset));
-        } catch(JsonProcessingException e) {
+        } catch (JsonProcessingException e) {
             LOGGER.debug("Could not serialize dataset.", e);
         }
     }
@@ -136,18 +139,9 @@ public class SerializedCache implements CkanSosReferenceCache, Serializable {
         return ckanDatasets;
     }
 
-    private CkanDataset deserialize(SerializableCkanDataset dataset) {
-        try {
-            return dataset.getCkanDataset();
-        } catch (IOException e) {
-            LOGGER.error("Unable to deserialize broken dataset.", e);
-            return null;
-        }
-    }
-
     private Map<CkanResource, CkanSosObservationReference> deserializeObservationReferences() {
         Map<CkanResource, CkanSosObservationReference> observationReferences = new HashMap<>();
-        for (Map.Entry<SerializableCkanResource, CkanSosObservationReference> entry : observationReferenceCache.entrySet()) {
+        for (Map.Entry<SerializableCkanResource, CkanSosObservationReference> entry : referencesByResource.entrySet()) {
             final CkanResource ckanResource = deserialize(entry.getKey());
             if (ckanResource != null) {
                 observationReferences.put(ckanResource, entry.getValue());
@@ -164,4 +158,14 @@ public class SerializedCache implements CkanSosReferenceCache, Serializable {
             return null;
         }
     }
+
+    private CkanDataset deserialize(SerializableCkanDataset dataset) {
+        try {
+            return dataset.getCkanDataset();
+        } catch (IOException e) {
+            LOGGER.error("Unable to deserialize broken dataset.", e);
+            return null;
+        }
+    }
+
 }

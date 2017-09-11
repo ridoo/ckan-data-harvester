@@ -47,21 +47,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 
-import eu.trentorise.opendata.jackan.model.CkanDataset;
-
 public class TrackPointCollectorTest {
 
     @Test
     public void when_simpleCreate_then_noException() {
-        createSimpleCollector();
+        new TrackPointCollector();
     }
 
     @Test
     public void when_simpleCreate_then_timestampIsDefaultTrackId() throws ParseException {
         ResourceField timeField = createField("timestamp", "Date");
-        TrackPointCollector collector = createSimpleCollector();
+        TrackPointCollector collector = new TrackPointCollector();
         TrackPoint trackPoint = collector.newTrackPoint()
-                .withGeometry(new WKTReader().read("POINT (52 7)"))
+                .setGeometry(new WKTReader().read("POINT (52 7)"))
                 .withProperty(timeField, "2012-07-21T12:00:00Z");
 
         String trackId = collector.addToTrack(trackPoint);
@@ -71,7 +69,7 @@ public class TrackPointCollectorTest {
     @Test
     public void when_trackPointWithoutTrackId_then_featureIdTimestamp() throws ParseException {
         ResourceField timeField = createField("timestamp", "Date");
-        TrackPointCollector collector = createSimpleCollector();
+        TrackPointCollector collector = new TrackPointCollector();
         TrackPoint trackPoint = collector.newTrackPoint()
                 .withProperty(timeField, "2012-07-21T12:00:00Z");
         SamplingFeature actual = collector.createFeature(trackPoint);
@@ -82,7 +80,7 @@ public class TrackPointCollectorTest {
 
     @Test
     public void when_trackPointWithoutTrackId_then_featureHasTimestampAsId() throws ParseException {
-        TrackPointCollector collector = createSimpleCollector();
+        TrackPointCollector collector = new TrackPointCollector();
         TrackPoint trackPoint = collector.newTrackPoint();
         MatcherAssert.assertThat(trackPoint.getTimestamp(), notNullValue());
         MatcherAssert.assertThat(trackPoint.getTimestamp().getValue()
@@ -94,15 +92,14 @@ public class TrackPointCollectorTest {
         ResourceField timeField = createField("timestamp", "Date");
         CkanMapping ckanMapping = getCkanMapping("{"
                 + "  \"strategy\": {"
-                + "    \"mobile\": {"
-                + "      \"track_discriminator\": [{"
-                + "        \"column\": \"timestamp\","
-                + "        \"pattern\": \"(\\\\d{4}-\\\\d{2}-\\\\d{2}).*$\""
-                + "      }]"
-                + "    }"
+                + "    \"mobile\": true,"
+                + "    \"track_discriminator\": [{"
+                + "      \"column\": \"timestamp\","
+                + "      \"pattern\": \"(\\\\d{4}-\\\\d{2}-\\\\d{2}).*$\""
+                + "    }]"
                 + "  }"
                 + "}");
-        TrackPointCollector collector = createCollector(ckanMapping);
+        TrackPointCollector collector = new TrackPointCollector(ckanMapping);
         TrackPoint trackPoint = collector.newTrackPoint()
                 .withProperty(timeField, "2012-07-21T12:00:00Z");
 
@@ -116,19 +113,18 @@ public class TrackPointCollectorTest {
         ResourceField foobarField = createField("foobar", "String");
         CkanMapping ckanMapping = getCkanMapping("{"
                 + "  \"strategy\": {"
-                + "    \"mobile\": {"
-                + "      \"track_discriminator\": [{"
-                + "        \"column\": \"timestamp\","
-                + "        \"pattern\": \"(\\\\d{4}-\\\\d{2}-\\\\d{2}).*$\""
-                + "      },"
-                + "      {"
-                + "        \"column\": \"foobar\","
-                + "        \"separator\": \"_\""
-                + "      }]"
-                + "    }"
+                + "    \"mobile\": true,"
+                + "    \"track_discriminator\": [{"
+                + "      \"column\": \"timestamp\","
+                + "      \"pattern\": \"(\\\\d{4}-\\\\d{2}-\\\\d{2}).*$\""
+                + "    },"
+                + "    {"
+                + "      \"column\": \"foobar\","
+                + "      \"separator\": \"_\""
+                + "    }]"
                 + "  }"
                 + "}");
-        TrackPointCollector collector = createCollector(ckanMapping);
+        TrackPointCollector collector = new TrackPointCollector(ckanMapping);
         TrackPoint trackPoint = collector.newTrackPoint()
                 .withProperty(foobarField, "fooValue")
                 .withProperty(timeField, "2012-07-21T12:00:00Z");
@@ -146,14 +142,6 @@ public class TrackPointCollectorTest {
                 .withFieldId(id)
                 .withFieldType(type)
                 .create();
-    }
-
-    private TrackPointCollector createSimpleCollector() {
-        return new TrackPointCollector(new FeatureBuilder(new CkanDataset()));
-    }
-
-    private TrackPointCollector createCollector(CkanMapping ckanMapping) {
-        return new TrackPointCollector(new FeatureBuilder(new CkanDataset()), ckanMapping);
     }
 
 }

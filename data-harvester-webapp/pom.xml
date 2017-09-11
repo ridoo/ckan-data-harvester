@@ -15,23 +15,20 @@
     <url>http://52north.org/communities/sensorweb/</url>
 
     <properties>
+        <version.jetty>9.4.6.v20170531</version.jetty>
+        
         <!-- dev | ci | prod -->
         <env>dev</env>
-        <local.configFile>file:${user.home}/${project.build.finalName}.properties</local.configFile>
-        <config.logger.fileappender.filepath>${catalina.base:-.}/logs/${project.build.finalName}</config.logger.fileappender.filepath>
+        
+        <!-- optional properties file -->
+        <local.configFile>src/main/resources/application.properties</local.configFile>
 
-        <enforcer.skip>true</enforcer.skip>
-        <mdep.analyze.skip>true</mdep.analyze.skip>
-
-        <java.compiler.source>1.7</java.compiler.source>
-        <java.compiler.target>1.7</java.compiler.target>
-        <timestamp>${maven.build.timestamp}</timestamp>
-        <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
-        <currentYearDynamic>${maven.build.timestamp}</currentYearDynamic>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <finalName>${project.artifactId}</finalName>
+        <webappDirectory>${project.build.directory}/${finalName}</webappDirectory>
+        <conf.logdir>${catalina.base}/logs</conf.logdir>
     </properties>
-    <dependencies>
 
+    <dependencies>
         <dependency>
             <groupId>org.n52.sensorweb.ckan</groupId>
             <artifactId>data-harvester</artifactId>
@@ -42,25 +39,94 @@
         <dependency>
             <groupId>org.n52.sensorweb.sos</groupId>
             <artifactId>webapp-bundle</artifactId>
-            <version>${sos.version}</version>
+            <version>${version.sos}</version>
+            <scope>provided</scope>
             <type>war</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.n52.series-api.db</groupId>
+            <artifactId>dao</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.n52.series-api.db</groupId>
+            <artifactId>mappings</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.n52.series-api.db</groupId>
+            <artifactId>sos-integration</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>xml-apis</groupId>
+            <artifactId>xml-apis</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 
     <build>
-        <finalName>${project.artifactId}</finalName>
-	<resources>
+        <finalName>${finalName}</finalName>
+        <outputDirectory>${webappDirectory}/WEB-INF/classes</outputDirectory>
+        <resources>
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
             </resource>
-	</resources>
-        <plugins>
+        </resources>
 
+        <filters>
+            <!-- filters src/main/resources -->
+            <!-- ordering is important here -->
+            <filter>src/main/resources/application.properties</filter>
+            <filter>${local.configFile}</filter>
+        </filters>
+
+        <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>2.6</version>
+                <version>3.1.0</version>
                 <configuration>
                     <overlays>
                         <overlay>
@@ -68,11 +134,28 @@
                             <artifactId>webapp-bundle</artifactId>
                             <excludes>
                                 <exclude>cache.tmp</exclude>
-                                <exclude>static/client/jsClient</exclude>
-                                <exclude>WEB-INF/classes/logback.xml</exclude>
+                                <exclude>WEB-INF/web.xml</exclude>
+                                <exclude>static/client/**</exclude>
+                                <!-- override Series REST API config -->
+                                <exclude>WEB-INF/classes/logback*.xml</exclude>
                                 <exclude>WEB-INF/classes/config-*.json</exclude>
                                 <exclude>WEB-INF/spring/*.xml</exclude>
-                                <exclude>WEB-INF/web.xml</exclude>
+                                <!-- handle DAO SPI deps within this project -->
+                                <exclude>WEB-INF/lib/dao-${series.dao.version}</exclude>
+                                <exclude>WEB-INF/lib/sos-integration-${series.dao.version}</exclude>
+                                <exclude>WEB-INF/classes/mapping/extension/readonly/**</exclude>
+                                <!-- exclude older versions -->
+                                <exclude>WEB-INF/lib/*slf4j-*</exclude>
+                                <exclude>WEB-INF/lib/commons-codec-*</exclude>
+                                <exclude>WEB-INF/lib/guava-*</exclude>
+                                <exclude>WEB-INF/lib/hamcrest-*</exclude>
+                                <exclude>WEB-INF/lib/jackson-*</exclude>
+                                <exclude>WEB-INF/lib/javassist-*</exclude>
+                                <exclude>WEB-INF/lib/joda-time-*</exclude>
+                                <exclude>WEB-INF/lib/logback-*</exclude>
+                                <exclude>WEB-INF/lib/quartz-*</exclude>
+                                <exclude>WEB-INF/lib/test-*</exclude>
+                                <exclude>WEB-INF/lib/xml-apis-*</exclude>
                             </excludes>
                         </overlay>
                     </overlays>
@@ -81,18 +164,35 @@
                         <nonFilteredFileExtension>db</nonFilteredFileExtension>
                     </nonFilteredFileExtensions>
                     <webResources>
-                        <webResource>
+                        <resource>
                             <!-- override SOS config if present -->
                             <directory>src/main/webapp</directory>
                             <include>configuration.db</include>
                             <filtering>false</filtering>
-                        </webResource>
+                        </resource>
                     </webResources>
                     <webResources>
-                        <webResource>
+                        <resource>
+                            <directory>src/main/resources</directory>
+                            <targetPath>WEB-INF/classes</targetPath>
+                            <filtering>true</filtering>
+                        </resource>
+                        <resource>
                             <directory>src/main/webapp</directory>
                             <filtering>true</filtering>
-                        </webResource>
+                            <excludes>
+                                <!-- spring beans are filtered via properties -->
+                                <exclude>WEB-INF/spring/**</exclude>
+                            </excludes>
+                        </resource>
+                        <resource>
+                            <directory>src/main/webapp</directory>
+                            <filtering>true</filtering>
+                            <includes>
+                                <!-- sets the properties file being used for filtering -->
+                                <include>WEB-INF/spring/dispatcher-servlet.xml</include>
+                            </includes>
+                        </resource>
                     </webResources>
                 </configuration>
             </plugin>
@@ -103,7 +203,7 @@
                 <plugin>
                     <groupId>org.eclipse.jetty</groupId>
                     <artifactId>jetty-maven-plugin</artifactId>
-                    <version>9.3.7.v20160115</version>
+                    <version>${version.jetty}</version>
                     <configuration>
                         <stopKey>C</stopKey>
                         <stopPort>34343</stopPort>
@@ -114,13 +214,7 @@
                             <baseAppFirst>false</baseAppFirst>
                             <persistTempDirectory>true</persistTempDirectory>
                             <allowDuplicateFragmentNames>true</allowDuplicateFragmentNames>
-                            <extraClasspath>target/classes/;${project.build.outputDirectory};../data-harvester/target/classes;</extraClasspath>
                         </webApp>
-                        <scanTargets>
-                            <scanTarget>target/classes/</scanTarget>
-                            <scanTarget>${project.build.outputDirectory}</scanTarget>
-                            <scanTarget>../data-harvester/target/classes</scanTarget>
-                        </scanTargets>
                         <systemProperties>
                             <systemProperty>
                                 <name>catalina.base</name>

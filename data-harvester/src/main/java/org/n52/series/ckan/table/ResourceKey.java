@@ -26,9 +26,11 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.table;
 
 import java.util.Objects;
+
 import org.n52.series.ckan.beans.ResourceMember;
 
 public class ResourceKey {
@@ -36,6 +38,11 @@ public class ResourceKey {
     private final String keyId;
 
     private final ResourceMember member;
+
+    public ResourceKey() {
+        this.keyId = "";
+        this.member = null;
+    }
 
     public ResourceKey(String keyId, ResourceMember member) {
         this.member = member;
@@ -52,25 +59,17 @@ public class ResourceKey {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.keyId, 5);
+        return Objects.hash(keyId, member);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) {
+        if (obj == null || !(obj instanceof ResourceKey)) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final ResourceKey other = (ResourceKey) obj;
-        if (!Objects.equals(this.keyId, other.keyId)) {
-            return false;
-        }
-        if (!Objects.equals(this.member, other.member)) {
-            return false;
-        }
-        return true;
+        ResourceKey other = (ResourceKey) obj;
+        return Objects.equals(keyId, other.keyId)
+                && Objects.equals(member, other.member);
     }
 
     @Override

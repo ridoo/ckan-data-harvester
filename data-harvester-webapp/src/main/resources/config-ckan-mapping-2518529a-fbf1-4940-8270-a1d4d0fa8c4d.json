@@ -1,0 +1,32 @@
+{
+    "field": {
+        "warncellid" : [
+            "gc_warncellid"
+        ],
+        "platform_id": [
+            "name"
+        ],
+        "platform_name": [
+            "name"
+        ],
+        "observation_time": [
+            "sent"
+        ],
+        "valid_time_start": [
+            "onset"
+        ],
+        "valid_time_end": [
+            "expires"
+        ]
+    },
+    "join": [
+        "warncellid",
+        "gc_warncellid"
+    ],
+    "strategy": {
+        "mobile": false,
+        "table_loader": {
+            "class": "org.n52.series.ckan.table.MultiTableLoadingStrategy"
+        }
+    }
+}

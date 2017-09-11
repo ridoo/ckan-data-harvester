@@ -26,197 +26,220 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
-package org.n52.series.ckan.sos;
 
-import java.util.Map;
-import java.util.Map.Entry;
+package org.n52.series.ckan.sos;
 
 import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.table.ResourceKey;
+import org.n52.series.ckan.util.AbstractRowVisitor;
 import org.n52.series.ckan.util.GeometryBuilder;
+import org.n52.series.ckan.util.ObservationFieldVisitor;
 import org.n52.series.ckan.util.TimeFieldParser;
-import org.n52.sos.ogc.gml.time.Time;
-import org.n52.sos.ogc.gml.time.Time.TimeIndeterminateValue;
+import org.n52.sos.ogc.gml.ReferenceType;
 import org.n52.sos.ogc.gml.time.TimeInstant;
 import org.n52.sos.ogc.gml.time.TimePeriod;
+import org.n52.sos.ogc.om.NamedValue;
 import org.n52.sos.ogc.om.OmConstants;
 import org.n52.sos.ogc.om.OmObservation;
 import org.n52.sos.ogc.om.OmObservationConstellation;
 import org.n52.sos.ogc.om.SingleObservationValue;
 import org.n52.sos.ogc.om.values.QuantityValue;
+import org.n52.sos.ogc.om.values.TextValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-class ObservationBuilder {
+final class ObservationBuilder extends AbstractRowVisitor<SosObservation> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ObservationBuilder.class);
 
-    private final Entry<ResourceKey, Map<ResourceField, String>> rowEntry;
+    private final SingleObservationValueBuilder observationValueBuilder = new SingleObservationValueBuilder();
 
-    private final TimeFieldParser timeFieldParser;
+    private final TimeFieldParser timeFieldParser = new TimeFieldParser();
+
+    private final GeometryBuilder geometryBuilder = GeometryBuilder.create();
+
+    private final TimeFieldParser.ValidTimeBuilder validTimeBuilder;
+
+    private final TimeFieldParser.TimeBuilder observationTimeBuilder;
+
+    private final OmObservation omObservation;
+
+    private final Phenomenon phenomenon;
+
+    private final ResourceKey qualifier;
 
     private SensorBuilder sensorBuilder;
 
     private UomParser uomParser;
 
-    ObservationBuilder(Entry<ResourceKey, Map<ResourceField, String>> rowEntry) {
-        this(rowEntry, new UcumParser());
+    private ObservationBuilder(Phenomenon phenomenon, ResourceKey qualifier) {
+        this.validTimeBuilder = timeFieldParser.new ValidTimeBuilder();
+        String observationTimeProperty = CkanConstants.KnownFieldIdValue.OBSERVATION_TIME;
+        this.observationTimeBuilder = timeFieldParser.new TimeBuilder(observationTimeProperty);
+        this.omObservation = new OmObservation();
+        this.uomParser = new UcumParser();
+        this.phenomenon = phenomenon;
+        this.qualifier = qualifier;
     }
 
-    ObservationBuilder(Entry<ResourceKey, Map<ResourceField, String>> rowEntry, UomParser uomParser) {
-        this.timeFieldParser = new TimeFieldParser();
-        this.rowEntry = rowEntry;
+    public static ObservationBuilder create(Phenomenon phenomenon, ResourceKey qualifier) {
+        return new ObservationBuilder(phenomenon, qualifier);
+    }
+
+    public ObservationBuilder setUomParser(UomParser uomParser) {
         this.uomParser = uomParser;
-    }
-
-
-    ObservationBuilder withSensorBuilder(SensorBuilder insertSensorRequestBuilder) {
-        this.sensorBuilder = insertSensorRequestBuilder;
         return this;
     }
 
-    SosObservation createObservation(DataInsertion dataInsertion, Phenomenon phenomenon) {
-        if (rowEntry == null) {
-            return new SosObservation();
+    ObservationBuilder setSensorBuilder(SensorBuilder sensorBuilder) {
+        this.sensorBuilder = sensorBuilder;
+        return this;
+    }
+
+    @Override
+    public ObservationBuilder visit(ResourceField field, String value) {
+        if (!field.isObservationField()) {
+            return this;
+        }
+        field.accept(observationTimeBuilder, value);
+        field.accept(observationValueBuilder, value);
+        field.accept(validTimeBuilder, value);
+        field.accept(geometryBuilder, value);
+        return this;
+    }
+
+    @Override
+    public boolean hasResult() {
+        if (observationTimeBuilder.hasResult()) {
+            LOGGER.debug("ignore observation having no time.");
+            return false;
+        } else if (!observationValueBuilder.hasResult()
+                && !geometryBuilder.hasResult()) {
+            LOGGER.debug("no value or geometry present to create obseration.");
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public SosObservation getResult() {
+        String observationType = phenomenon.getObservationType();
+        SingleObservationValue< ? > result = observationValueBuilder.hasResult()
+                ? observationValueBuilder.getResult()
+                : null;
+        if (!observationValueBuilder.hasResult() && geometryBuilder.hasResult()) {
+            // pure geometry observation w/o any other value
+            observationType = OmConstants.OBS_TYPE_GEOMETRY_OBSERVATION;
+            SingleObservationValue<Geometry> obsValue = new SingleObservationValue<>();
+            obsValue.setValue(geometryBuilder.getResult());
+            result = obsValue;
+        }
+        if (geometryBuilder.hasResult()) {
+            // geometry is meta info of an actual observation value
+            final NamedValue<Geometry> namedValue = new NamedValue<>();
+            namedValue.setName(new ReferenceType(OmConstants.PARAM_NAME_SAMPLING_GEOMETRY));
+            namedValue.setValue(geometryBuilder.getResult());
+            omObservation.addParameter(namedValue);
         }
 
-        OmObservationConstellation constellation = dataInsertion.createConstellation(phenomenon);
-
-        SingleObservationValue< ? > value = null;
-        Time time = null;
-        TimeInstant validStart = null;
-        TimeInstant validEnd = null;
-
-        OmObservation omObservation = new OmObservation();
-        omObservation.setObservationConstellation(constellation);
-        omObservation.setDefaultElementEncoding(CkanConstants.DEFAULT_CHARSET.toString());
-        String observationType = OmConstants.OBS_TYPE_MEASUREMENT; // the default
-
-        final GeometryBuilder geometryBuilder = GeometryBuilder.create();
-        for (Map.Entry<ResourceField, String> cells : rowEntry.getValue().entrySet()) {
-
-            ResourceField field = cells.getKey();
-            if ( !field.isObservationField()) {
-                continue;
-            }
-
-            String normalizedValue = field.normalizeValue(cells.getValue());
-            if (field.getIndex() == phenomenon.getFieldIdx()) {
-                String phenomenonId = constellation.getObservableProperty().getIdentifier();
-                omObservation.setIdentifier(rowEntry.getKey().getKeyId() + "_" + phenomenonId);
-                // TODO support NO_DATA
-                if (field.isOneOfType(CkanConstants.DataType.QUANTITY)) {
-                    value = createQuantityObservationValue(field, normalizedValue);
-                } else if (field.isOfType(CkanConstants.DataType.GEOMETRY)) {
-                    observationType = OmConstants.OBS_TYPE_GEOMETRY_OBSERVATION;
-                    parseGeometryField(geometryBuilder, cells);
-                }
-            }
-            else if (field.isField(CkanConstants.KnownFieldIdValue.OBSERVATION_TIME)) {
-                time = timeFieldParser.parseTimestamp(normalizedValue, field);
-            }
-            else if (field.isField(CkanConstants.KnownFieldIdValue.LOCATION)) {
-                parseGeometryField(geometryBuilder, cells);
-            }
-            else if (field.isField(CkanConstants.KnownFieldIdValue.CRS)) {
-                geometryBuilder.withCrs(normalizedValue);
-            }
-            else if (field.isField(CkanConstants.KnownFieldIdValue.LATITUDE)) {
-                geometryBuilder.setLatitude(normalizedValue);
-            }
-            else if (field.isField(CkanConstants.KnownFieldIdValue.LONGITUDE)) {
-                geometryBuilder.setLongitude(normalizedValue);
-            }
-            else if (field.isField(CkanConstants.KnownFieldIdValue.ALTITUDE)) {
-                geometryBuilder.setAltitude(normalizedValue);
-            }
-            else if (field.isField(CkanConstants.KnownFieldIdValue.VALID_TIME_START)) {
-                validStart = timeFieldParser.parseTimestamp(normalizedValue, field);
-            }
-            else if (field.isField(CkanConstants.KnownFieldIdValue.VALID_TIME_END)) {
-                validEnd = timeFieldParser.parseTimestamp(normalizedValue, field);
-            }
-        }
-
-        if (validStart != null || validEnd != null) {
-            TimePeriod validTime;
-            if (validStart != null && validEnd == null) {
-                validTime = new TimePeriod(validStart, new TimeInstant(TimeIndeterminateValue.unknown));
-            }
-            else if (validStart == null && validEnd != null) {
-                validTime = new TimePeriod(new TimeInstant(TimeIndeterminateValue.unknown), validEnd);
-            }
-            else {
-                validTime = new TimePeriod(validStart, validEnd);
-            }
+        if (validTimeBuilder.hasResult()) {
+            TimePeriod validTime = validTimeBuilder.getResult();
             omObservation.setValidTime(validTime);
         }
 
-        // TODO support NO_DATA
-
-        if (time == null) {
-            LOGGER.debug("ignore observation having no time.");
+        if (result == null) {
+            LOGGER.trace("could not assemble observation for {}", phenomenon);
             return null;
         }
 
-        if (value == null && geometryBuilder.canBuildGeometry()) {
-            // construct observation at this stage to allow single lat/lon/alt
-            // values to server as fallback geometry observation when no other
-            // observation value is present
-            SingleObservationValue<Geometry> obsValue = new SingleObservationValue<>();
-            obsValue.setValue(geometryBuilder.createGeometryValue());
-            observationType = OmConstants.OBS_TYPE_GEOMETRY_OBSERVATION;
-            value = obsValue;
-        } else {
-            if (geometryBuilder.canBuildGeometry()) {
-                omObservation.addParameter(geometryBuilder.createNamedValue());
-            }
-        }
+        TimeInstant time = observationTimeBuilder.getResult();
+        result.setPhenomenonTime(time);
+        omObservation.setValue(result);
+        // TODO add a result time builder
+        omObservation.setResultTime(time);
 
-        if (value == null) {
-            return null;
-        }
-
-        value.setPhenomenonTime(time);
-        omObservation.setValue(value);
-        if (sensorBuilder != null && observationType.equals(OmConstants.OBS_TYPE_GEOMETRY_OBSERVATION)) {
+        if (sensorBuilder != null && isGeometryObservation(observationType)) {
             sensorBuilder.setInsitu(false);
         }
+
+        omObservation.setDefaultElementEncoding(CkanConstants.DEFAULT_CHARSET.toString());
+        omObservation.setObservationConstellation(createObservationConstellation());
         SosObservation o = new SosObservation(omObservation, observationType);
+        o.setPhenomenonTime(time);
         LOGGER.trace("Observation: {}", o);
         return o;
     }
 
-    protected SingleObservationValue<Double> createQuantityObservationValue(ResourceField field, String value) {
-        try {
-            SingleObservationValue<Double> obsValue = new SingleObservationValue<>();
-            if (field.isOfType(Integer.class)
-                    || field.isOfType(Float.class)
-                    || field.isOfType(Double.class)
-                    || field.isOfType(String.class)) {
-                QuantityValue quantityValue = new QuantityValue(Double.parseDouble(value));
-                quantityValue.setUnit(uomParser.parse(field));
-                obsValue.setValue(quantityValue);
-                return obsValue;
+    private boolean isGeometryObservation(String observationType) {
+        return observationType.equals(OmConstants.OBS_TYPE_GEOMETRY_OBSERVATION);
+    }
+
+    private OmObservationConstellation createObservationConstellation() {
+        OmObservationConstellation constellation = new OmObservationConstellation();
+        constellation.setObservableProperty(phenomenon.toObservableProperty());
+        constellation.setObservationType(phenomenon.getObservationType());
+        if (sensorBuilder != null) {
+            constellation.setFeatureOfInterest(sensorBuilder.getFeature());
+        }
+        return constellation;
+    }
+
+    protected class SingleObservationValueBuilder extends ObservationFieldVisitor<SingleObservationValue< ? >> {
+
+        private SingleObservationValue< ? > result;
+
+        @Override
+        public void visitObservationField(ResourceField field, String value) {
+            if (field.matchesIndex(phenomenon.getValueFieldIdx())) {
+                String phenomenonId = phenomenon.getId();
+                String omIdentifier = qualifier.getKeyId() + "_" + phenomenonId;
+                omObservation.setIdentifier(omIdentifier);
+                // TODO support NO_DATA
+                if (field.isOneOfType(CkanConstants.DataType.QUANTITY)) {
+                    result = createQuantityValue(field, value);
+                }
+                if (field.isOfType(CkanConstants.DataType.STRING)) {
+                    result = createTextValue(field, value);
+                }
             }
         }
-        catch (Exception e) {
-            LOGGER.error("could not parse value {}", value, e);
-        }
-        return null;
-    }
 
-    private void parseGeometryField(final GeometryBuilder geometryBuilder, Entry<ResourceField, String> cells) {
-        ResourceField field = cells.getKey();
-        if (field.isOfType("JsonObject")) {
-            geometryBuilder.withGeoJson(cells.getValue());
-        } else {
-            geometryBuilder.withWKT(cells.getValue());
+        protected SingleObservationValue<Double> createQuantityValue(ResourceField field, String value) {
+            try {
+                SingleObservationValue<Double> obsValue = new SingleObservationValue<>();
+                if (field.isOfType(Integer.class)
+                        || field.isOfType(Float.class)
+                        || field.isOfType(Double.class)
+                        || field.isOfType(String.class)) {
+                    QuantityValue quantityValue = new QuantityValue(Double.parseDouble(value));
+                    quantityValue.setUnit(uomParser.parse(field));
+                    obsValue.setValue(quantityValue);
+                    return obsValue;
+                }
+            } catch (Exception e) {
+                LOGGER.error("could not parse value {}", value, e);
+            }
+            return null;
+        }
+
+        protected SingleObservationValue<String> createTextValue(ResourceField field, String value) {
+            return field.isOfType(String.class)
+                    ? new SingleObservationValue<>(new TextValue(value))
+                    : null;
+        }
+
+        @Override
+        public boolean hasResult() {
+            return result != null;
+        }
+
+        @Override
+        public SingleObservationValue< ? > getResult() {
+            return result;
         }
     }
-
 
 }

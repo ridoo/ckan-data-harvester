@@ -26,26 +26,28 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.beans;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.MissingNode;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Set;
+
 import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.da.CkanMapping;
+import org.n52.series.ckan.util.FieldVisitor;
 import org.n52.series.ckan.util.JsonUtil;
+import org.n52.series.ckan.util.VisitableField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ResourceField {
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.MissingNode;
+
+public class ResourceField implements VisitableField {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceField.class);
-
-    public static ResourceField copy(ResourceField field) {
-        return new ResourceField(field.node, field.index, field.ckanMapping);
-    }
 
     private final String fieldId;
 
@@ -79,12 +81,16 @@ public class ResourceField {
         this.fieldId = JsonUtil.parse(node, alternates);
     }
 
-    public ResourceField withResourceType(String type) {
+    public static ResourceField copy(ResourceField field) {
+        return new ResourceField(field.node, field.index, field.ckanMapping);
+    }
+
+    public ResourceField setResourceType(String type) {
         this.resourceType = type;
         return this;
     }
 
-    public ResourceField withQualifier(ResourceMember qualifier) {
+    public ResourceField setQualifier(ResourceMember qualifier) {
         this.qualifier = qualifier;
         return this;
     }
@@ -110,16 +116,16 @@ public class ResourceField {
         return fieldId.toLowerCase(Locale.ROOT);
     }
 
+    public boolean matchesIndex(int i) {
+        return index == i;
+    }
+
     public int getIndex() {
         return index;
     }
 
     public ResourceMember getQualifier() {
         return qualifier;
-    }
-
-    public void setQualifier(ResourceMember qualifier) {
-        this.qualifier = qualifier;
     }
 
     public String getShortName() {
@@ -160,33 +166,21 @@ public class ResourceField {
 
     public boolean hasProperty(String property) {
         // TODO move to JsonUtil and involve ckanMapping
-        return !node.at("/" + property).isMissingNode();
+        return !node.at("/" + property)
+                    .isMissingNode();
     }
 
     public String getOther(String name) {
-        return node.at("/" + name).asText();
-    }
-
-    public String normalizeValue(String value) {
-        if (value != null) {
-            try {
-                if (this.isOfType(Integer.class)) {
-                    value = new Integer(value).toString();
-                } else if (this.isOfType(Double.class)) {
-                    value = new Double(value).toString();
-                }
-            } catch (NumberFormatException e) {
-                LOGGER.error("Could normalize field value '{}' (type {}) ", value, getFieldType(), e);
-            }
-        }
-        return value;
+        return node.at("/" + name)
+                   .asText();
     }
 
     public boolean equalsValues(String thisValue, String otherValue) {
         if (otherValue != null) {
             try {
                 if (this.isOfType(Integer.class)) {
-                    return new Integer(thisValue).equals(new Integer(otherValue));
+                    Integer value = parseToInteger(thisValue);
+                    return value != null && value.equals(parseToInteger(otherValue));
                 }
                 if (this.isOfType(String.class)) {
                     return thisValue.equals(otherValue);
@@ -198,18 +192,17 @@ public class ResourceField {
         return false;
     }
 
-    public boolean isOfType(Class<?> clazz) {
-        return isOfType(clazz.getSimpleName());
+    private Integer parseToInteger(String toParse) {
+        try {
+            return Integer.valueOf(toParse);
+        } catch (NumberFormatException e) {
+            LOGGER.trace("Invalid integer: '{}'", toParse);
+            return null;
+        }
     }
 
-
-    public boolean isOneOfType(String[] types) {
-        for (String type : types) {
-            if (isOfType(type)) {
-                return true;
-            }
-        }
-        return false;
+    public boolean isOfType(Class< ? > clazz) {
+        return isOfType(clazz.getSimpleName());
     }
 
     public boolean isOfType(String ofType) {
@@ -220,9 +213,39 @@ public class ResourceField {
         return ckanMapping.hasDataTypeMappings(ofType, fieldType);
     }
 
+    public boolean isOneOfType(List<String> types) {
+        for (String type : types) {
+            if (isOfType(type)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public <T> void accept(FieldVisitor<T> visitor, String value) {
+        visitor.visit(this, normalizeValue(value));
+    }
+
+    private String normalizeValue(String value) {
+        if (value != null) {
+            try {
+                if (this.isOfType(Integer.class)) {
+                    return parseToInteger(value).toString();
+                } else if (this.isOfType(Double.class)) {
+                    return new Double(value).toString();
+                }
+            } catch (NumberFormatException e) {
+                LOGGER.error("Could normalize field value '{}' (type {}) ", value, getFieldType(), e);
+            }
+        }
+        return value;
+    }
+
     @Override
     public int hashCode() {
-        return Objects.hash(this.getLowerCasedFieldId(), 7);
+        String idProperty = CkanConstants.FieldPropertyName.FIELD_ID;
+        return Arrays.hashCode(this.ckanMapping.getFieldMappings(idProperty).toArray());
     }
 
     @Override
@@ -234,15 +257,21 @@ public class ResourceField {
             return false;
         }
         final ResourceField other = (ResourceField) obj;
-        if (!Objects.equals(this.getLowerCasedFieldId(), other.getLowerCasedFieldId())) {
-            return false;
-        }
-        return true;
+        Set<String> thisMappings = this.ckanMapping.getFieldMappings(this.getLowerCasedFieldId());
+        Set<String> otherMappings = this.ckanMapping.getFieldMappings(other.getLowerCasedFieldId());
+        return thisMappings.contains(other.getLowerCasedFieldId())
+                || otherMappings.contains(getLowerCasedFieldId());
     }
 
     @Override
     public String toString() {
-        return "ResourceField{fieldId=" + getFieldId() + ", qualifier=" + getQualifier() + ", index=" + getIndex() + '}';
+        return "ResourceField{fieldId="
+                + getFieldId()
+                + ", qualifier="
+                + getQualifier()
+                + ", index="
+                + getIndex()
+                + '}';
     }
 
 }

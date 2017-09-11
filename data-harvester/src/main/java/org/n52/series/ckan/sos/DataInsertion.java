@@ -26,16 +26,22 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.sos;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.n52.sos.ogc.gml.AbstractFeature;
-import org.n52.sos.ogc.om.OmConstants;
+import org.n52.sos.ogc.gml.time.TimeInstant;
 import org.n52.sos.ogc.om.OmObservation;
 import org.n52.sos.ogc.om.OmObservationConstellation;
 import org.n52.sos.ogc.ows.OwsExceptionReport;
@@ -45,7 +51,7 @@ import org.n52.sos.request.InsertSensorRequest;
 
 class DataInsertion {
 
-    private final List<OmObservation> observations;
+    private final Map<ObservationDiscriminator, SosObservation> observationsByTime;
 
     private final Set<String> observationTypes;
 
@@ -55,7 +61,7 @@ class DataInsertion {
 
     DataInsertion(SensorBuilder sensorBuilder) {
         this.sensorBuilder = sensorBuilder;
-        this.observations = new ArrayList<>();
+        this.observationsByTime = new HashMap<>();
         this.observationTypes = new HashSet<>();
     }
 
@@ -75,12 +81,6 @@ class DataInsertion {
         return sensorBuilder.getFeature();
     }
 
-//    public Set<String> getFeaturesCharacteristics() {
-//        return isMovingPlatform() // XXX
-//                ? Collections.singleton(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_CURVE)
-//                : Collections.singleton(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_FEATURE);
-//    }
-
     void setReference(CkanSosObservationReference reference) {
         this.reference = reference;
     }
@@ -91,8 +91,9 @@ class DataInsertion {
 
     CkanSosObservationReference getObservationsReference() {
         if (hasObservationsReference()) {
-            for (OmObservation observation : observations) {
-                reference.addObservationReference(observation);
+            for (SosObservation observation : observationsByTime.values()) {
+                OmObservation omObservation = observation.getObservation();
+                reference.addObservationReference(omObservation);
             }
         }
         return reference;
@@ -112,13 +113,14 @@ class DataInsertion {
             return;
         }
 
-        OmObservation observation = sosObservation.getObservation();
+        String procedureId = sensorBuilder.getProcedureId();
+        ObservationDiscriminator key = new ObservationDiscriminator(sosObservation, procedureId);
         observationTypes.add(sosObservation.getObservationType());
-        observations.add(observation);
+        observationsByTime.put(key, sosObservation);
     }
 
     boolean hasObservations() {
-        return observations != null && !observations.isEmpty();
+        return observationsByTime != null && !observationsByTime.isEmpty();
     }
 
     Set<String> getObservationTypes() {
@@ -127,38 +129,73 @@ class DataInsertion {
 
     InsertObservationRequest createInsertObservationRequest() throws OwsExceptionReport {
         InsertSensorRequest insertSensorRequest = buildInsertSensorRequest();
-        for (OmObservation observation : observations) {
+        for (SosObservation observation : observationsByTime.values()) {
             /*
-             * for observations belonging to a track (mobile platforms) the
-             * feature and offering ids are only available after iterating
-             * over the observation set. When request is created, we assume
-             * that the csv dataset(s) has been parsed all information is
-             * valid from that point in time.
+             * for observations belonging to a track (mobile platforms) the feature and offering ids are only
+             * available after iterating over the observation set. When request is created, we assume that the
+             * csv dataset(s) has been parsed all information is valid from that point in time.
              */
-            OmObservationConstellation constellation = observation.getObservationConstellation();
+            OmObservation omObservation = observation.getObservation();
+            OmObservationConstellation constellation = omObservation.getObservationConstellation();
             constellation.setProcedure(insertSensorRequest.getProcedureDescription());
             constellation.setFeatureOfInterest(getFeature());
             constellation.setOfferings(getOfferingIds());
         }
+        Collection<SosObservation> observations = observationsByTime.values();
+        List<OmObservation> omObservations = observations.stream()
+                                                         .map(e -> e.getObservation())
+                                                         .collect(Collectors.toList());
         InsertObservationRequest insertObservationRequest = new InsertObservationRequest();
         insertObservationRequest.setOfferings(getOfferingIds());
-        insertObservationRequest.setObservation(observations);
+        insertObservationRequest.setObservation(omObservations);
         return insertObservationRequest;
-    }
-
-    OmObservationConstellation createConstellation(Phenomenon phenomenon) {
-        OmObservationConstellation constellation = new OmObservationConstellation();
-        constellation.setObservableProperty(phenomenon.toObservableProperty());
-        constellation.setObservationType(OmConstants.OBS_TYPE_MEASUREMENT);
-        return constellation;
     }
 
     @Override
     public String toString() {
         String featureIdentifier = "Feature: '" + getFeature().getIdentifier() + "'";
-        String observationCount = "Observations: #" + observations.size();
+        String observationCount = "Observations: #" + observationsByTime.size();
         return getClass().getSimpleName() + " [ " + featureIdentifier + ", " + observationCount + "]";
     }
 
-}
+    private static class ObservationDiscriminator {
 
+        private OmObservationConstellation constellation;
+
+        private TimeInstant timestamp;
+
+        private String procedureId;
+
+        ObservationDiscriminator(SosObservation observation, String procedureId) {
+            OmObservation omObservation = observation.getObservation();
+            this.constellation = omObservation.getObservationConstellation();
+            this.timestamp = observation.getPhenomenonTime();
+            this.procedureId = procedureId;
+        }
+
+        @Override
+        public int hashCode() {
+            String featureId = constellation.getFeatureOfInterestIdentifier();
+            String phenomenonId = constellation.getObservablePropertyIdentifier();
+            return Objects.hash(featureId, phenomenonId, procedureId, timestamp);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof ObservationDiscriminator)) {
+                return false;
+            }
+            ObservationDiscriminator other = (ObservationDiscriminator) obj;
+            String featureId = constellation.getFeatureOfInterestIdentifier();
+            String phenomenonId = constellation.getObservablePropertyIdentifier();
+            return Objects.equals(featureId, other.constellation.getFeatureOfInterestIdentifier())
+                    && Objects.equals(phenomenonId, other.constellation.getObservablePropertyIdentifier())
+                    && Objects.equals(procedureId, other.procedureId)
+                    && Objects.equals(timestamp, other.timestamp);
+        }
+    }
+
+}

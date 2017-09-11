@@ -26,10 +26,12 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,18 +43,15 @@ import org.slf4j.LoggerFactory;
 
 import eu.trentorise.opendata.jackan.model.CkanDataset;
 import eu.trentorise.opendata.jackan.model.CkanResource;
-import java.net.URL;
 
 public class FileBasedCkanHarvester extends CkanHarvestingService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileBasedCkanHarvester.class);
 
-    private static final String TEST_FILES_BASE_PATH = "/files";
+    private final String dataFolder;
 
-    private final String contextPath;
-
-    public FileBasedCkanHarvester(String contextPath) {
-        this.contextPath = contextPath;
+    public FileBasedCkanHarvester(String dataFolder) {
+        this.dataFolder = dataFolder;
     }
 
     @Override
@@ -61,8 +60,7 @@ public class FileBasedCkanHarvester extends CkanHarvestingService {
             CkanDataset dataset = parseDatasetTestFile(file);
             try {
                 getMetadataStore().insertOrUpdate(dataset);
-            }
-            catch (IllegalStateException e) {
+            } catch (IllegalStateException e) {
                 LOGGER.warn("Inconsistent test data for dataset '{}'");
             }
         }
@@ -72,30 +70,32 @@ public class FileBasedCkanHarvester extends CkanHarvestingService {
         List<File> datasets = new ArrayList<>();
         File folder = getSourceDataFolder();
         File[] datasetFiles = folder.listFiles();
-        for (File file : datasetFiles) {
-            if (file.isDirectory()) {
-                Path datasetPath = file.toPath().resolve("dataset.json");
-                datasets.add(datasetPath.toFile());
+        if (datasetFiles != null) {
+            for (File file : datasetFiles) {
+                if (file.isDirectory()) {
+                    Path datasetPath = file.toPath()
+                                           .resolve("dataset.json");
+                    datasets.add(datasetPath.toFile());
+                }
             }
         }
         return datasets;
     }
 
     private File getSourceDataFolder() {
-        String baseFolder = TEST_FILES_BASE_PATH + "/" + contextPath;
-        LOGGER.trace("Source Data Folder: {}", baseFolder);
-        URL resource = getClass().getResource(baseFolder);
+        LOGGER.trace("Source Data Folder: {}", dataFolder);
+        URL resource = getClass().getResource(dataFolder);
         if (resource == null) {
-            throw new IllegalStateException("invalid data folder: " + baseFolder);
+            throw new IllegalStateException("invalid data folder: " + dataFolder);
         }
         return new File(resource.getFile());
     }
 
     private CkanDataset parseDatasetTestFile(File file) {
         try {
-            return JsonUtil.getCkanObjectMapper().readValue(file, CkanDataset.class);
-        }
-        catch (IOException e) {
+            return JsonUtil.getCkanObjectMapper()
+                           .readValue(file, CkanDataset.class);
+        } catch (IOException e) {
             LOGGER.error("could not read/parse test file", e);
             return new CkanDataset();
         }
@@ -104,15 +104,19 @@ public class FileBasedCkanHarvester extends CkanHarvestingService {
     @Override
     protected DataFile downloadFile(CkanResource resource, Path datasetDownloadFolder) throws IOException {
         File folder = getSourceDataFolder();
-        File[] dataFolders = folder.listFiles();
         String id = resource.getId();
         String format = resource.getFormat();
-        for (File file : dataFolders) {
-            if (file.isDirectory()) {
-                String fileName = id + "." + format.toLowerCase();
-                Path datapath = file.toPath().resolve(fileName);
-                if (datapath.toFile().exists()) {
-                    return new DataFile(resource, format, datapath.toFile());
+        File[] dataFolders = folder.listFiles();
+        if (dataFolders != null) {
+            for (File file : dataFolders) {
+                if (file.isDirectory()) {
+                    String fileName = id + "." + format.toLowerCase();
+                    Path datapath = file.toPath()
+                                        .resolve(fileName);
+                    if (datapath.toFile()
+                                .exists()) {
+                        return new DataFile(resource, format, datapath.toFile());
+                    }
                 }
             }
         }

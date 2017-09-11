@@ -28,16 +28,19 @@
  */
 package org.n52.series.ckan.util;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Set;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertThat;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Set;
+
 import org.junit.Before;
 import org.junit.Test;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class JsonUtilTest {
 
@@ -74,14 +77,14 @@ public class JsonUtilTest {
     public void when_parseMissingArrayNode_then_returnEmptyList() throws IOException {
         JsonNode node = om.readTree(TEST_TEMPLATE);
         Set<String> names = Collections.singleton("missingList");
-        assertThat(JsonUtil.parseMissingToEmptyArray(node, names), is(empty()));
+        assertThat(JsonUtil.parseToList(node, names), is(empty()));
     }
 
     @Test
     public void when_parseAvailableArrayNode_then_returnList() throws IOException {
         JsonNode node = om.readTree(TEST_TEMPLATE);
         Set<String> names = Collections.singleton("list");
-        assertThat(JsonUtil.parseMissingToEmptyArray(node, names).size(), is(2));
+        assertThat(JsonUtil.parseToList(node, names).size(), is(2));
     }
 
     @Test

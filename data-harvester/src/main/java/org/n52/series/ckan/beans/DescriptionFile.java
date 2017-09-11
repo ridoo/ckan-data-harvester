@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.beans;
 
 import java.io.File;
@@ -73,15 +74,16 @@ public class DescriptionFile {
         return new DateTime(dataset.getMetadataModified());
     }
 
-    public boolean isNewerThan(CkanDataset dataset) {
-        if (dataset == null) {
+    public boolean isNewerThan(CkanDataset ckanDataset) {
+        if (ckanDataset == null) {
             return false;
         }
-        Timestamp probablyNewer = dataset.getMetadataModified();
+        Timestamp probablyNewer = ckanDataset.getMetadataModified();
         Timestamp current = this.dataset.getMetadataModified();
-        return this.dataset.getId().equals(dataset.getId())
-            ? current.after(probablyNewer)
-            : false;
+        return this.dataset.getId()
+                           .equals(ckanDataset.getId())
+                                   ? current.after(probablyNewer)
+                                   : false;
 
     }
 
@@ -90,8 +92,12 @@ public class DescriptionFile {
         String filePath = file != null
                 ? file.getAbsolutePath()
                 : "null";
-        return "DescriptionFile [schemaDescription=" + schemaDescription + ", datasetname=" + dataset.getName()
-                + ", file=" + filePath
+        return "DescriptionFile [schemaDescription="
+                + schemaDescription
+                + ", datasetname="
+                + dataset.getName()
+                + ", file="
+                + filePath
                 + "]";
     }
 

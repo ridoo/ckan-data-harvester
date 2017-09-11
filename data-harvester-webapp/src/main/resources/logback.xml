@@ -1,5 +1,50 @@
 <configuration scan="true">
 
-    <include resource="logback-${env}.xml"/>
+    <!-- refer to http://logback.qos.ch/manual/appenders.html -->
+
+    <property name="logFile" value="${conf.logdir}/${finalName}" />
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${logFile}.log</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${logFile}/%d{yyyy-MM-dd}-%i.log</fileNamePattern>
+            <!-- keep 30 days' worth of history -->
+            <maxHistory>30</maxHistory>
+            <maxFileSize>5MB</maxFileSize>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%date %level [%thread] [%file:%line] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>
+                %d{HH:mm:ss.SSS} [%thread] %-5level %logger{0} - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <logger name="org.n52" level="INFO" />
+    <logger name="org.n52.sos" level="INFO" />
+    <logger name="org.n52.series" level="DEBUG" />
+
+    <logger name="org.springframework" level="WARN" />
+    <logger name="org.springframework.web.servlet.mvc.method.annotation" level="WARN" />
+    <logger name="org.springframework.core.env.PropertySourcesPropertyResolver" level="WARN" />
+
+    <logger name="org.hibernate" level="WARN" />
+    <logger name="org.hibernate.type" level="WARN" />
+    <logger name="org.hibernate.SQL" level="WARN" />
+
+    <logger name="org.apache" level="WARN" />
+    <logger name="org.geotools" level="WARN" />
+    <logger name="com.sun.xml" level="WARN" />
+
+    <root level="INFO">
+        <appender-ref ref="FILE" />
+        <appender-ref ref="STDOUT" />
+    </root>
 
 </configuration>

@@ -86,7 +86,7 @@ public class TimeFieldParserTest {
         String format = parser.parseDateFormat(field);
 
         // test daylight saving time 2015-03-29 @02:00:00 local
-        TimeInstant instant = (TimeInstant)parser.parseDateValue("2015032902", format);
+        TimeInstant instant = parser.parseDateValue("2015032902", format);
         final DateTime dateTime = new DateTime("2015-03-29T02:00:00Z");
         Assert.assertTrue("expected: " + instant.getValue().toString()
                 + ", actual: " + dateTime, instant.getValue().equals(dateTime));
@@ -109,7 +109,7 @@ public class TimeFieldParserTest {
         TimeFieldParser parser = new TimeFieldParser();
         String format = parser.parseDateFormat(field);
 
-        TimeInstant instant1 = (TimeInstant)parser.parseDateValue("2015-03-29T02:00:00+01:00", format);
+        TimeInstant instant1 = parser.parseDateValue("2015-03-29T02:00:00+01:00", format);
         final DateTime dateTime1 = new DateTime("2015-03-29T01:00:00Z"); // UTC
         Assert.assertTrue("expected: " + instant1.getValue().toString()
                 + ", actual: " + dateTime1, instant1.getValue().equals(dateTime1));
@@ -121,7 +121,7 @@ public class TimeFieldParserTest {
         TimeFieldParser parser = new TimeFieldParser();
         String format = parser.parseDateFormat(field);
 
-        TimeInstant instant2 = (TimeInstant)parser.parseDateValue("2015-03-29T02:00:00", format);
+        TimeInstant instant2 = parser.parseDateValue("2015-03-29T02:00:00", format);
         final DateTime dateTime2 = new DateTime("2015-03-29T02:00:00Z"); // UTC
         Assert.assertTrue("expected: " + instant2.getValue().toString()
                 + ", actual: " + dateTime2, instant2.getValue().equals(dateTime2));
@@ -133,7 +133,7 @@ public class TimeFieldParserTest {
         TimeFieldParser parser = new TimeFieldParser();
         String format = parser.parseDateFormat(field);
 
-        TimeInstant instant2 = (TimeInstant)parser.parseDateValue("2015-03-29T02:00:00", format);
+        TimeInstant instant2 = parser.parseDateValue("2015-03-29T02:00:00", format);
         final DateTime dateTime2 = new DateTime("2015-03-29T02:00:00Z", DateTimeZone.UTC); // UTC
         Assert.assertTrue("expected: " + instant2.getValue().toString()  + ", actual: " + dateTime2,
                 instant2.getValue().equals(dateTime2));
@@ -158,7 +158,7 @@ public class TimeFieldParserTest {
         ResourceField field = fieldCreator.createViaTemplate(TEST_DATE_TEMPLATE, "my-test-id", "YYYY-MM-dd'T'HH:mm:ss.SSSZ");
         TimeFieldParser parser = new TimeFieldParser();
         String format = parser.parseDateFormat(field);
-        TimeInstant instant2 = (TimeInstant) parser.parseDateValue("2016-02-16T08:03:54.609+01:00", format);
+        TimeInstant instant2 = parser.parseDateValue("2016-02-16T08:03:54.609+01:00", format);
         final DateTime dateTime2 = new DateTime("2016-02-16T08:03:54.609+01:00"); // UTC
         Assert.assertTrue("expected: " + instant2.getValue().toString()
                 + ", actual: " + dateTime2, instant2.getValue().equals(dateTime2));

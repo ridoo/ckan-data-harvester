@@ -31,6 +31,7 @@ package org.n52.series.ckan.sos;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.hamcrest.Description;
@@ -39,6 +40,7 @@ import org.hamcrest.TypeSafeMatcher;
 import org.junit.Assert;
 import org.n52.sos.ds.hibernate.DescribeSensorDAO;
 import org.n52.sos.ds.hibernate.GetDataAvailabilityDAO;
+import org.n52.sos.ds.hibernate.GetFeatureOfInterestDAO;
 import org.n52.sos.ds.hibernate.GetObservationDAO;
 import org.n52.sos.ds.hibernate.H2Configuration;
 import org.n52.sos.gda.GetDataAvailabilityRequest;
@@ -49,8 +51,10 @@ import org.n52.sos.ogc.ows.OwsExceptionReport;
 import org.n52.sos.ogc.sos.Sos2Constants;
 import org.n52.sos.ogc.sos.SosConstants;
 import org.n52.sos.request.DescribeSensorRequest;
+import org.n52.sos.request.GetFeatureOfInterestRequest;
 import org.n52.sos.request.GetObservationRequest;
 import org.n52.sos.response.DescribeSensorResponse;
+import org.n52.sos.response.GetFeatureOfInterestResponse;
 import org.n52.sos.response.GetObservationResponse;
 import org.n52.sos.service.AbstractServiceCommunicationObject;
 import org.slf4j.Logger;
@@ -111,6 +115,21 @@ public class H2DatabaseAccessor {
             request.setProcedureDescriptionFormat("http://www.opengis.net/sensorML/1.0.1");
             request.setProcedure(procedureId);
             return descSensor.getSensorDescription(request);
+        } catch (OwsExceptionReport e) {
+            LOGGER.error("Could not query H2 database!", e);
+            Assert.fail("Could not query H2 database!");
+            return null;
+        }
+    }
+
+    GetFeatureOfInterestResponse getFeatures(String... featureIds) {
+        try {
+            GetFeatureOfInterestDAO getFeature = new GetFeatureOfInterestDAO();
+            GetFeatureOfInterestRequest request = applyCommonParameters(new GetFeatureOfInterestRequest());
+            request.setFeatureIdentifiers(featureIds == null
+                    ? Collections.<String>emptyList()
+                    :Arrays.asList(featureIds));
+            return getFeature.getFeatureOfInterest(request);
         } catch (OwsExceptionReport e) {
             LOGGER.error("Could not query H2 database!", e);
             Assert.fail("Could not query H2 database!");

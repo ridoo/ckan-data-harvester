@@ -26,20 +26,20 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
-package org.n52.series.ckan.util;
 
-import static com.vividsolutions.jts.geom.PrecisionModel.FLOATING;
+package org.n52.series.ckan.util;
 
 import java.io.IOException;
 
 import org.n52.io.crs.CRSUtils;
 import org.n52.io.geojson.GeoJSONDecoder;
 import org.n52.io.geojson.GeoJSONException;
-import org.n52.sos.ogc.gml.ReferenceType;
-import org.n52.sos.ogc.om.NamedValue;
-import org.n52.sos.ogc.om.OmConstants;
+import org.n52.series.ckan.beans.ResourceField;
+import org.n52.series.ckan.da.CkanConstants;
 import org.n52.sos.ogc.om.features.SfConstants;
 import org.n52.sos.ogc.om.values.GeometryValue;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.TransformException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,10 +51,8 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.TransformException;
 
-public class GeometryBuilder {
+public class GeometryBuilder implements FieldVisitor<GeometryValue> {
 
     // TODO add line string builder
 
@@ -64,7 +62,7 @@ public class GeometryBuilder {
 
     private final GeoJSONDecoder geoJsonDecoder = new GeoJSONDecoder();
 
-    private ObjectMapper om = new ObjectMapper();
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     private String crs = "EPSG:4326";
 
@@ -72,7 +70,7 @@ public class GeometryBuilder {
 
     private Double latitude;
 
-    private double altitude;
+    private Double altitude;
 
     private Geometry geometry;
 
@@ -82,22 +80,41 @@ public class GeometryBuilder {
         return new GeometryBuilder();
     }
 
-    public GeometryBuilder withObjectMapper(ObjectMapper om) {
-        this.om = om == null
-                ? this.om
-                : om;
+    @Override
+    public FieldVisitor<GeometryValue> visit(ResourceField field, String value) {
+        if (field.isField(CkanConstants.KnownFieldIdValue.LATITUDE)) {
+            setLatitude(value);
+        } else if (field.isField(CkanConstants.KnownFieldIdValue.LONGITUDE)) {
+            setLongitude(value);
+        } else if (field.isField(CkanConstants.KnownFieldIdValue.ALTITUDE)) {
+            setAltitude(value);
+        } else if (field.isField(CkanConstants.KnownFieldIdValue.CRS)) {
+            setCrs(value);
+        } else if (field.isField(CkanConstants.KnownFieldIdValue.LOCATION)) {
+            parseGeometryField(field, value);
+        } else if (field.isOfType(CkanConstants.DataType.GEOMETRY)) {
+            // in case of geometry observations
+            parseGeometryField(field, value);
+        }
         return this;
     }
 
-    public GeometryValue createGeometryValue() {
-        return new GeometryValue(getGeometry());
+    private void parseGeometryField(ResourceField field, String value) {
+        if (field.isOfType("JsonObject")) {
+            setGeoJson(value);
+        } else {
+            setWellKnownText(value);
+        }
     }
 
-    public NamedValue<Geometry> createNamedValue() {
-        final NamedValue<Geometry> namedValue = new NamedValue<>();
-        namedValue.setName(new ReferenceType(OmConstants.PARAM_NAME_SAMPLING_GEOMETRY));
-        namedValue.setValue(new GeometryValue(getGeometry()));
-        return namedValue;
+    @Override
+    public boolean hasResult() {
+        return canBuildGeometry();
+    }
+
+    @Override
+    public GeometryValue getResult() {
+        return new GeometryValue(getGeometry());
     }
 
     public boolean canBuildGeometry() {
@@ -107,7 +124,7 @@ public class GeometryBuilder {
     }
 
     public Geometry getGeometry() {
-        if ( !canBuildGeometry()) {
+        if (!canBuildGeometry()) {
             return null;
         }
         if (geometry != null) {
@@ -116,7 +133,7 @@ public class GeometryBuilder {
         if (wellKnownText != null) {
             try {
                 int srid = utils.getSrsIdFrom(crs);
-                PrecisionModel pm = new PrecisionModel(FLOATING);
+                PrecisionModel pm = new PrecisionModel(PrecisionModel.FLOATING);
                 GeometryFactory factory = new GeometryFactory(pm, srid);
                 WKTReader wktReader = new WKTReader(factory);
                 return wktReader.read(wellKnownText);
@@ -135,7 +152,7 @@ public class GeometryBuilder {
         }
     }
 
-    public GeometryBuilder withGeoJson(String json) {
+    public GeometryBuilder setGeoJson(String json) {
         try {
             JsonNode jsonNode = new ObjectMapper().readTree(json.replace("'", "\""));
             this.geometry = geoJsonDecoder.decodeGeometry(jsonNode);
@@ -145,23 +162,35 @@ public class GeometryBuilder {
         return this;
     }
 
-    public GeometryBuilder withCrs(String crs) {
+    public GeometryBuilder setObjectMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper == null
+                ? this.objectMapper
+                : objectMapper;
+        return this;
+    }
+
+    public GeometryBuilder setCrs(String crs) {
         this.crs = crs;
         return this;
     }
 
-    public GeometryBuilder setLongitude(String lon) {
-        this.longitude = parseToDouble(lon);
+    public GeometryBuilder setLongitude(String longitude) {
+        this.longitude = parseToDouble(longitude);
         return this;
     }
 
-    public GeometryBuilder setLatitude(String lat) {
-        this.latitude = parseToDouble(lat);
+    public GeometryBuilder setLatitude(String latitude) {
+        this.latitude = parseToDouble(latitude);
         return this;
     }
 
-    public GeometryBuilder setAltitude(String alt) {
-        this.altitude = parseToDouble(alt);
+    public GeometryBuilder setAltitude(String altitude) {
+        this.altitude = parseToDouble(altitude);
+        return this;
+    }
+
+    public GeometryBuilder setWellKnownText(String wellKnownText) {
+        this.wellKnownText = wellKnownText;
         return this;
     }
 
@@ -175,16 +204,17 @@ public class GeometryBuilder {
     }
 
     public boolean hasCoordinates() {
-        return longitude != null &&  latitude !=  null;
+        return longitude != null && latitude != null;
     }
 
     public String getFeatureType() {
         if (getGeometry() != null) {
-            if (getGeometry().getGeometryType().equalsIgnoreCase("POINT")) {
+            String geometryType = getGeometry().getGeometryType();
+            if (geometryType.equalsIgnoreCase("POINT")) {
                 return SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_POINT;
-            } else if (getGeometry().getGeometryType().equalsIgnoreCase("LINESTRING")) {
+            } else if (geometryType.equalsIgnoreCase("LINESTRING")) {
                 return SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_CURVE;
-            } else if (getGeometry().getGeometryType().equalsIgnoreCase("POLYGON")) {
+            } else if (geometryType.equalsIgnoreCase("POLYGON")) {
                 return SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_SURFACE;
             }
         }
@@ -192,11 +222,6 @@ public class GeometryBuilder {
         // TODO further types?
 
         return "http://www.opengis.net/def/nil/OGC/0/unknown";
-    }
-
-    public GeometryBuilder withWKT(String wellKnownText) {
-        this.wellKnownText = wellKnownText;
-        return this;
     }
 
 }

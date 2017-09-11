@@ -26,18 +26,28 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.sos;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.da.CkanConstants;
+import org.n52.series.ckan.table.DataTable;
+import org.n52.series.ckan.table.ResourceKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Table;
 
 public class PhenomenonParser {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PhenomenonParser.class);
 
     // TODO evaluate separating observableProperty parsing to schemaDescription
 
@@ -51,30 +61,92 @@ public class PhenomenonParser {
         this.uomParser = uomParser;
     }
 
-    public List<Phenomenon> parse(Collection<ResourceField> resourceFields) {
-        Set<Phenomenon> phenomena = new HashSet<>();
-        for (ResourceField field : resourceFields) {
-            if (isValueField(field)) {
-                phenomena.add(parsePhenomenon(field));
+    public Collection<Phenomenon> parse(DataTable dataTable) {
+        Collection<ResourceField> resourceFields = dataTable.getResourceFields();
+        Collection<Phenomenon> phenomena = parseFromFields(resourceFields);
+        Predicate<ResourceField> filter = new Predicate<ResourceField>() {
+            @Override
+            public boolean test(ResourceField field) {
+                return isValueFieldWithPhenomenonReference(field);
+            }
+        };
+        for (ResourceField valueField : filterFields(resourceFields, filter)) {
+            String ref = valueField.getOther(CkanConstants.FieldPropertyName.PHENOMENON_REF);
+            ResourceField phenomenonField = getReferencedField(ref, resourceFields);
+            Table<ResourceKey, ResourceField, String> table = dataTable.getTable();
+            Map<ResourceKey, String> column = table.column(phenomenonField);
+            HashSet<String> phenomenonValues = new HashSet<String>(column.values());
+            phenomena.addAll(parseSoftTypedPhenomena(phenomenonField, valueField, phenomenonValues));
+        }
+        return phenomena;
+    }
+
+    private Collection< ? extends Phenomenon> parseSoftTypedPhenomena(ResourceField phenomenonField,
+                                                                      ResourceField valueField,
+                                                                      HashSet<String> values) {
+        String phenomenonFieldId = phenomenonField.getFieldId();
+        LOGGER.debug("Parse referenced phenomena values from field: {}", phenomenonFieldId);
+        return values.stream()
+                     .map(v -> parseSoftTypedPhenomenon(v, phenomenonField, valueField))
+                     .collect(Collectors.toSet());
+    }
+
+    protected Phenomenon parseSoftTypedPhenomenon(String id, ResourceField phenomenonField, ResourceField valueField) {
+        String uom = uomParser.parse(phenomenonField);
+        String label = phenomenonField.getFieldId() + "_" + id;
+        Phenomenon phenomenon = new Phenomenon(id, label, valueField, uom);
+        phenomenon.setPhenomenonField(phenomenonField);
+        phenomenon.setSoftTyped(true);
+        LOGGER.debug("New softtyped phenomenon: {}", phenomenon);
+        return phenomenon;
+    }
+
+    public Collection<Phenomenon> parseFromFields(Collection<ResourceField> resourceFields) {
+        Predicate<ResourceField> filter = new Predicate<ResourceField>() {
+            @Override
+            public boolean test(ResourceField field) {
+                return isValueField(field);
+            }
+        };
+        return resourceFields.stream()
+                             .filter(filter)
+                             .map(e -> parsePhenomenon(e))
+                             .collect(Collectors.toSet());
+    }
+
+    private Phenomenon parsePhenomenon(ResourceField field) {
+        LOGGER.debug("Detected phenomenon field: {}", field);
+        String uom = uomParser.parse(field);
+        String id = parsePhenomenonId(field);
+        String label = parsePhenomenonName(field);
+        Phenomenon phenomenon = new Phenomenon(id, label, field, uom);
+        LOGGER.debug("New phenomenon: {}", phenomenon);
+        return phenomenon;
+    }
+
+    private List<ResourceField> filterFields(Collection<ResourceField> fields, Predicate<ResourceField> filter) {
+        return fields.stream()
+                     .filter(filter)
+                     .collect(Collectors.toList());
+    }
+
+    private ResourceField getReferencedField(String ref, Collection<ResourceField> resourceFields) {
+        for (ResourceField resourceField : resourceFields) {
+            if (resourceField.isField(ref)) {
+                return resourceField;
             }
         }
-
-        return new ArrayList<>(phenomena);
+        return null;
     }
 
     private boolean isValueField(ResourceField field) {
         return field.hasProperty(CkanConstants.FieldPropertyName.PHENOMENON)
                 || field.hasProperty(CkanConstants.FieldPropertyName.UOM)
-                && field.isField(CkanConstants.KnownFieldIdValue.VALUE);
+                        && field.isField(CkanConstants.KnownFieldIdValue.VALUE);
     }
 
-    private Phenomenon parsePhenomenon(ResourceField field) {
-        int index = field.getIndex();
-        String uom = uomParser.parse(field);
-        String phenomenonId = parsePhenomenonId(field);
-        String phenomenonName = parsePhenomenonName(field);
-//        TODO String phenomenonDescription = parseDescription(field);
-        return new Phenomenon(phenomenonId, phenomenonName, index, uom);
+    private boolean isValueFieldWithPhenomenonReference(ResourceField field) {
+        return field.hasProperty(CkanConstants.FieldPropertyName.PHENOMENON_REF);
     }
 
     private String parsePhenomenonId(ResourceField field) {
@@ -87,7 +159,7 @@ public class PhenomenonParser {
     private String parsePhenomenonName(ResourceField field) {
         if (field.hasProperty(CkanConstants.FieldPropertyName.LONG_NAME)) {
             return field.getOther(CkanConstants.FieldPropertyName.LONG_NAME);
-        }else if (field.hasProperty(CkanConstants.FieldPropertyName.PHENOMENON)) {
+        } else if (field.hasProperty(CkanConstants.FieldPropertyName.PHENOMENON)) {
             return field.getOther(CkanConstants.FieldPropertyName.PHENOMENON);
         } else if (field.hasProperty(CkanConstants.FieldPropertyName.SHORT_NAME)) {
             return field.getOther(CkanConstants.FieldPropertyName.SHORT_NAME);

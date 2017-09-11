@@ -28,10 +28,12 @@
  */
 package org.n52.series.ckan.da;
 
-import java.nio.file.Path;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.nio.file.Path;
+
 import org.junit.Test;
 
 public class CkanharvestingServiceTest {
@@ -39,6 +41,6 @@ public class CkanharvestingServiceTest {
     @Test
     public void when_resolvingDownloadUrlWithEmptySubfolder_then_validPath() {
         CkanHarvestingService service = new CkanHarvestingService();
-        assertThat(service.resolveDownloadFolder(""), is(notNullValue(Path.class)));
+        assertThat(service.resolveTargetFolder(""), is(notNullValue(Path.class)));
     }
 }

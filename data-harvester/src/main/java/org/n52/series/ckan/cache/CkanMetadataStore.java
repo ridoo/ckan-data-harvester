@@ -26,32 +26,36 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.cache;
 
-import eu.trentorise.opendata.jackan.model.CkanDataset;
 import org.n52.series.ckan.beans.SchemaDescriptor;
+
+import eu.trentorise.opendata.jackan.model.CkanDataset;
 
 public interface CkanMetadataStore {
 
-    public int size();
+    int size();
 
-    public void clear();
+    void clear();
 
-    public boolean contains(CkanDataset dataset);
+    void shutdown();
 
-    public boolean containsNewerThan(CkanDataset dataset);
+    boolean contains(CkanDataset dataset);
 
-    public void insertOrUpdate(CkanDataset dataset);
+    boolean containsNewerThan(CkanDataset dataset);
 
-    public void delete(CkanDataset dataset);
+    void insertOrUpdate(CkanDataset dataset);
 
-    public Iterable<String> getDatasetIds();
+    void delete(CkanDataset dataset);
 
-    public Iterable<CkanDataset> getDatasets();
+    Iterable<String> getDatasetIds();
 
-    public CkanDataset getDataset(String datasetId);
+    Iterable<CkanDataset> getDatasets();
 
-    public boolean hasSchemaDescriptor(CkanDataset datasetId);
+    CkanDataset getDataset(String datasetId);
 
-    public SchemaDescriptor getSchemaDescription(String datasetId);
+    boolean hasSchemaDescriptor(CkanDataset datasetId);
+
+    SchemaDescriptor getSchemaDescription(String datasetId);
 }

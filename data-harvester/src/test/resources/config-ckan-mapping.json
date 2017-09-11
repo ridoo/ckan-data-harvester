@@ -34,6 +34,9 @@
         ]
     },
     "field": {
+        "id_value": [
+            "alternate_id_value"
+        ],
         "altitude": [
             "Stationshoehe",
             "hight",
@@ -91,7 +94,8 @@
         "date_format": [],
         "description": [],
         "field_id": [
-            "fieldid"
+            "fieldid",
+            "some_weird_fieldid"
         ],
         "field_role": [],
         "field_type": [
@@ -116,7 +120,8 @@
             "Einheit",
             "unit",
             "unitOfMeasure"
-        ]
+        ],
+        "phenomenon_ref": []
     },
     "resource_type": {
         "csv-observations-collection": [

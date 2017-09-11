@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.sos;
 
 import java.io.IOException;
@@ -47,12 +48,14 @@ public class SerializableCkanDataset implements Serializable {
     private final String id;
 
     public SerializableCkanDataset(CkanDataset dataset) throws JsonProcessingException {
-        this.ckanDatasetAsJson = JsonUtil.getCkanObjectWriter().writeValueAsString(dataset);
+        this.ckanDatasetAsJson = JsonUtil.getCkanObjectWriter()
+                                         .writeValueAsString(dataset);
         this.id = dataset.getId();
     }
 
     public CkanDataset getCkanDataset() throws IOException {
-        return JsonUtil.getCkanObjectMapper().readValue(ckanDatasetAsJson, CkanDataset.class);
+        return JsonUtil.getCkanObjectMapper()
+                       .readValue(ckanDatasetAsJson, CkanDataset.class);
     }
 
     public String getId() {
@@ -61,24 +64,16 @@ public class SerializableCkanDataset implements Serializable {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 41 * hash + Objects.hashCode(this.id);
-        return hash;
+        return Objects.hash(id);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) {
+        if (obj == null || !(obj instanceof SerializableCkanDataset)) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final SerializableCkanDataset other = (SerializableCkanDataset) obj;
-        if (!Objects.equals(this.id, other.id)) {
-            return false;
-        }
-        return true;
+        SerializableCkanDataset other = (SerializableCkanDataset) obj;
+        return Objects.equals(id, other.id);
     }
 
 }

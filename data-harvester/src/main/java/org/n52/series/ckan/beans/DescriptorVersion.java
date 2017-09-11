@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.beans;
 
 import java.util.Arrays;
@@ -35,18 +36,21 @@ public class DescriptorVersion implements Comparable<DescriptorVersion> {
     private String[] versionParts;
 
     public DescriptorVersion(String versionString) {
-        if (versionString == null || versionString.isEmpty()) {
-            versionParts = new String[] {"0"};
-        }
-        this.versionParts = validateParts(versionString);
+        this.versionParts = versionString != null && !versionString.isEmpty()
+                ? validateParts(versionString)
+                : new String[] {
+                    "0"
+                };
     }
 
     private String[] validateParts(String versionString) {
         String[] parts = parseParts(versionString);
-        for (int i = 0 ; i < parts.length && i < 2 ; i++) {
+        for (int i = 0; i < parts.length && i < 2; i++) {
             int parsedInt = 0;
             try {
-                parts[i] = !parts[i].isEmpty() ? parts[i] : "0";
+                parts[i] = !parts[i].isEmpty()
+                        ? parts[i]
+                        : "0";
                 parsedInt = Integer.parseInt(parts[i]);
             } catch (NumberFormatException e) {
                 throw new IllegalArgumentException("unparsable version string: " + versionString);

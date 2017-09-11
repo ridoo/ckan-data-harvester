@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.sos;
 
 import java.util.ArrayList;
@@ -43,13 +44,15 @@ import org.n52.series.ckan.da.CkanMapping;
 import org.n52.series.ckan.util.TimeFieldParser;
 import org.n52.sos.ogc.gml.time.TimeInstant;
 import org.n52.sos.ogc.om.features.samplingFeatures.SamplingFeature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.vividsolutions.jts.geom.Geometry;
 
 public class TrackPointCollector {
 
-    private final FeatureBuilder foiBuilder;
+    private static final Logger LOGGER = LoggerFactory.getLogger(TrackPointCollector.class);
 
     private final Map<String, List<TrackPoint>> trackPointsByTrackId;
 
@@ -57,14 +60,13 @@ public class TrackPointCollector {
 
     private final CkanMapping ckanMapping;
 
-    public TrackPointCollector(FeatureBuilder foibuilder) {
-        this(foibuilder, CkanMapping.loadCkanMapping());
+    public TrackPointCollector() {
+        this(CkanMapping.loadCkanMapping());
     }
 
-    public TrackPointCollector(FeatureBuilder foiBuilder, CkanMapping ckanMapping) {
+    public TrackPointCollector(CkanMapping ckanMapping) {
         this.trackPointsByTrackId = new HashMap<>();
         this.featureByTrackId = new HashMap<>();
-        this.foiBuilder = foiBuilder;
         this.ckanMapping = ckanMapping;
     }
 
@@ -74,17 +76,24 @@ public class TrackPointCollector {
 
     public String addToTrack(TrackPoint trackPoint) {
         String trackId = getTrackId(trackPoint);
-        if ( !trackPointsByTrackId.containsKey(trackId)) {
+        if (!trackPointsByTrackId.containsKey(trackId)) {
             ArrayList<TrackPoint> points = new ArrayList<TrackPoint>();
             trackPointsByTrackId.put(trackId, points);
         }
-        trackPointsByTrackId.get(trackId).add(trackPoint);
-        if ( !featureByTrackId.containsKey(trackId)) {
+        trackPointsByTrackId.get(trackId)
+                            .add(trackPoint);
+        if (!featureByTrackId.containsKey(trackId)) {
             featureByTrackId.put(trackId, createFeature(trackPoint));
         }
         return trackId;
     }
-    public TrackPoint getStart(String trackId) {
+
+    SamplingFeature getFeatureFor(String trackId) {
+        TrackPoint startPoint = getStart(trackId);
+        return createFeature(startPoint);
+    }
+
+    TrackPoint getStart(String trackId) {
         TrackPoint startPoint = null;
         if (trackPointsByTrackId.containsKey(trackId)) {
             for (TrackPoint candidate : trackPointsByTrackId.get(trackId)) {
@@ -105,7 +114,7 @@ public class TrackPointCollector {
         String featureIdentifier = featureName != null
                 ? getTrackId(trackPoint) + " - " + featureName
                 : getTrackId(trackPoint);
-        SamplingFeature feature = foiBuilder.createEmptyFeature();
+        SamplingFeature feature = SimpleFeatureBuilder.createEmptyFeature();
         feature.setIdentifier(featureIdentifier);
         feature.addName(featureName);
         return feature;
@@ -115,8 +124,8 @@ public class TrackPointCollector {
         if (trackPoint.hasTrackId()) {
             return trackPoint.getTrackId();
         } else {
-            String path = "/strategy/mobile/track_discriminator";
-            JsonNode columns = ckanMapping.getConfigValueAt(path);
+            String path = CkanConstants.Config.CONFIG_PATH_STRATEGY;
+            JsonNode columns = ckanMapping.getConfigValueAt(path + "/track_discriminator");
             return trackPoint.generateTrackId(columns);
         }
     }
@@ -124,8 +133,6 @@ public class TrackPointCollector {
     public static class TrackPoint {
 
         private final Map<ResourceField, String> valuesByField;
-
-        private String featureName;
 
         private Geometry geometry;
 
@@ -138,7 +145,7 @@ public class TrackPointCollector {
             return this;
         }
 
-        public TrackPoint withGeometry(Geometry geometry) {
+        public TrackPoint setGeometry(Geometry geometry) {
             this.geometry = geometry;
             return this;
         }
@@ -178,6 +185,10 @@ public class TrackPointCollector {
             return getField(fieldId) != null;
         }
 
+        public boolean isValid() {
+            return geometry != null;
+        }
+
         public Geometry getGeometry() {
             return geometry;
         }
@@ -186,19 +197,24 @@ public class TrackPointCollector {
             String defaultValue = getTimestampAsIso8601String();
             if (columns.isMissingNode()) {
                 // TODO obviously this wouldn't result in a track
+                LOGGER.warn("No 'track_discriminator' config found. Using timestamp as default, "
+                        + "which will result in single point track instances!");
                 return defaultValue;
             }
 
             StringBuilder sb = new StringBuilder();
             for (JsonNode column : columns) {
                 if (sb.length() != 0) {
-                    String separator = column.has("separator")
-                        ? column.get("separator").asText()
-                                : "-";
+                    String property = "separator";
+                    String separator = column.has(property)
+                            ? column.get(property)
+                                    .asText()
+                            : "-";
                     sb.append(separator);
                 }
 
-                String discriminatorColumn = column.get("column").asText();
+                String discriminatorColumn = column.get("column")
+                                                   .asText();
                 String value = getValue(discriminatorColumn, defaultValue);
                 JsonNode regex = column.get("pattern");
                 if (regex == null || regex.isMissingNode()) {
@@ -207,7 +223,8 @@ public class TrackPointCollector {
                     Pattern pattern = Pattern.compile(regex.asText());
                     Matcher matcher = pattern.matcher(value);
                     String discriminatorValue = matcher.matches()
-                            ? matcher.toMatchResult().group(1)
+                            ? matcher.toMatchResult()
+                                     .group(1)
                             : value;
                     sb.append(discriminatorValue);
                 }
@@ -220,14 +237,15 @@ public class TrackPointCollector {
         public String getValue(String fieldId, String defaultValue) {
             ResourceField field = getField(fieldId);
             String value = valuesByField.get(field);
-            return field != null
-                    ? field.normalizeValue(value)
-                    : defaultValue;
+            return field == null
+                    ? defaultValue
+                    : value;
         }
 
         public ResourceField getField(String fieldId) {
             for (Entry<ResourceField, String> entry : valuesByField.entrySet()) {
-                if (entry.getKey().isField(fieldId)) {
+                if (entry.getKey()
+                         .isField(fieldId)) {
                     return entry.getKey();
                 }
             }
@@ -238,8 +256,9 @@ public class TrackPointCollector {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((featureName == null) ? 0 : featureName.hashCode());
-            result = prime * result + ((geometry == null) ? 0 : geometry.hashCode());
+            result = prime * result + ((geometry == null)
+                    ? 0
+                    : geometry.hashCode());
             return result;
         }
 
@@ -255,13 +274,6 @@ public class TrackPointCollector {
                 return false;
             }
             TrackPoint other = (TrackPoint) obj;
-            if (featureName == null) {
-                if (other.featureName != null) {
-                    return false;
-                }
-            } else if (!featureName.equals(other.featureName)) {
-                return false;
-            }
             if (geometry == null) {
                 if (other.geometry != null) {
                     return false;

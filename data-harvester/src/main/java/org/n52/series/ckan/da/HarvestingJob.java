@@ -26,12 +26,12 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.da;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -53,14 +53,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class HarvestingJob extends ScheduledJob implements InterruptableJob {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(HarvestingJob.class);
+    private static final String PROPERTY_CONFIG_FILE = "configFile";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(HarvestingJob.class);
 
     /**
-     * Autowired is required because quartz always creates a new instance of the job.
-     *
-     * See Job Instances in the documentation:
-     *
-     * www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/tutorial-lesson-03.html
+     * Autowired is required because quartz always creates a new instance of the job. See Job Instances in the
+     * documentation: www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/tutorial-lesson-03.html
      */
     @Autowired
     private CkanHarvestingService harvestingService;
@@ -69,13 +68,12 @@ public class HarvestingJob extends ScheduledJob implements InterruptableJob {
 
     private boolean enabled = true;
 
-    private HarvestingConfig readJobConfig(String configFile) {
-        try (InputStream taskConfig = getClass().getResourceAsStream(configFile)) {
+    private HarvestingConfig readJobConfig(String file) {
+        try (InputStream taskConfig = getClass().getResourceAsStream(file)) {
             ObjectMapper om = new ObjectMapper();
             return om.readValue(taskConfig, HarvestingConfig.class);
-        }
-        catch (IOException e) {
-            LOGGER.error("Could not load {}. Using empty config.", configFile, e);
+        } catch (IOException e) {
+            LOGGER.error("Could not load {}. Using empty config.", file, e);
             return new HarvestingConfig();
         }
     }
@@ -83,27 +81,26 @@ public class HarvestingJob extends ScheduledJob implements InterruptableJob {
     @Override
     public JobDetail createJobDetails() {
         return JobBuilder.newJob(HarvestingJob.class)
-                .withIdentity(getJobName())
-                .withDescription(getJobDescription())
-                .usingJobData("configFile", configFile)
-                .build();
+                         .withIdentity(getJobName())
+                         .withDescription(getJobDescription())
+                         .usingJobData(PROPERTY_CONFIG_FILE, configFile)
+                         .build();
     }
-
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
-        if ( !enabled) {
+        if (!enabled) {
             return;
         }
         LOGGER.info("Start ckan harvesting task ...");
         final JobDetail details = context.getJobDetail();
         JobDataMap jobDataMap = details.getJobDataMap();
-        HarvestingConfig harvestingConfig = readJobConfig((String) jobDataMap.get("configFile"));
+        HarvestingConfig harvestingConfig = readJobConfig((String) jobDataMap.get(PROPERTY_CONFIG_FILE));
         try {
             String outputPath = getOutputFolder(harvestingConfig.getOutputPath());
             LOGGER.debug("Download resources to {}", outputPath);
 
-            harvestingService.setResourceDownloadBaseFolder(outputPath);
+            harvestingService.setResourceTargetBaseFolder(outputPath);
             harvestingService.harvestDatasets();
             harvestingService.harvestResources();
         } catch (Exception e) {
@@ -115,7 +112,8 @@ public class HarvestingJob extends ScheduledJob implements InterruptableJob {
     @Override
     public void interrupt() throws UnableToInterruptJobException {
         this.enabled = false;
-        LOGGER.info("Render task successfully shutted down.");
+        this.harvestingService.shutdown();
+        LOGGER.info("Harvesting Job successfully disabled.");
     }
 
     @Override
@@ -139,11 +137,13 @@ public class HarvestingJob extends ScheduledJob implements InterruptableJob {
     private String getOutputFolder(String outputPath) throws URISyntaxException {
         URL resource = getClass().getResource("/");
         Path baseFolder = Paths.get(resource.toURI());
-        File outputDir = baseFolder.resolve(outputPath).toFile();
-        if ( !outputDir.exists()) {
-            outputDir.mkdirs();
+        File outputDir = baseFolder.resolve(outputPath)
+                                   .toFile();
+        String absolutePath = outputDir.getAbsolutePath();
+        if (!outputDir.exists() && !outputDir.mkdirs()) {
+            LOGGER.warn("unable to create output dir at '{}'", absolutePath);
         }
-        return outputDir.getAbsolutePath();
+        return absolutePath;
     }
 
     public CkanHarvestingService getHarvestingService() {

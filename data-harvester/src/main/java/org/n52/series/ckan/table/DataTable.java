@@ -26,14 +26,25 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.table;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.beans.ResourceMember;
@@ -48,26 +59,28 @@ public class DataTable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataTable.class);
 
-    protected final Table<ResourceKey,ResourceField,String> table;
+    private static final ForkJoinPool FORK_JOIN_POOL = ForkJoinPool.commonPool();
+
+    protected final Table<ResourceKey, ResourceField, String> table;
 
     protected final ResourceMember resourceMember;
 
     private final List<ResourceMember> joinedMembers;
 
     protected DataTable(ResourceMember resourceMember) {
-        this(HashBasedTable.<ResourceKey,ResourceField,String>create(), resourceMember);
+        this(HashBasedTable.<ResourceKey, ResourceField, String> create(), resourceMember);
     }
 
-    private DataTable(Table<ResourceKey,ResourceField,String> table, ResourceMember resourceMember) {
+    private DataTable(Table<ResourceKey, ResourceField, String> table, ResourceMember resourceMember) {
         this.table = table;
         this.resourceMember = resourceMember;
         this.joinedMembers = new ArrayList<>();
     }
 
-    public Table<ResourceKey,ResourceField,String> getTable() {
+    public Table<ResourceKey, ResourceField, String> getTable() {
         return table == null
-                ? HashBasedTable.<ResourceKey,ResourceField,String>create()
-                : ImmutableTable.<ResourceKey,ResourceField,String>copyOf(table);
+                ? HashBasedTable.<ResourceKey, ResourceField, String> create()
+                : ImmutableTable.<ResourceKey, ResourceField, String> copyOf(table);
     }
 
     public ResourceMember getResourceMember() {
@@ -75,20 +88,21 @@ public class DataTable {
     }
 
     public Collection<ResourceField> getResourceFields() {
-        List<ResourceField> fields = new ArrayList<>(resourceMember.getResourceFields());
+        Set<ResourceField> fields = new HashSet<>(resourceMember.getResourceFields());
         for (ResourceMember joinedMember : joinedMembers) {
             fields.addAll(joinedMember.getResourceFields());
         }
-        return Collections.unmodifiableList(fields);
+        return Collections.unmodifiableSet(fields);
     }
 
     public DataTable extendWith(DataTable other) {
-        if (resourceMember == null || resourceMember.getId() == null) {
-            return other; // ignore trivial instance
-        }
+        return extendWith(other, () -> Boolean.FALSE);
+    }
 
-        if ( !resourceMember.isExtensible(other.resourceMember)) {
-            return this;
+    public DataTable extendWith(DataTable other, Supplier<Boolean> interruptedSupplier) {
+        if (resourceMember == null || resourceMember.getId() == null) {
+            // ignore trivial instance
+            return other;
         }
 
         DataTable outputTable = new DataTable(resourceMember);
@@ -97,9 +111,13 @@ public class DataTable {
     }
 
     private void extendTable(DataTable other, DataTable outputTable) {
-        LOGGER.debug("extending table {} (#{} rows, #{} cols) with table {} (#{} rows, #{} cols)",
-                     resourceMember.getId(), rowSize(), columnSize(),
-                     other.resourceMember.getId(), other.rowSize(), columnSize());
+        LOGGER.debug("extending table '{}' (#{} rows, #{} cols) with table '{}' (#{} rows, #{} cols)",
+                     resourceMember.getId(),
+                     rowSize(),
+                     columnSize(),
+                     other.resourceMember.getId(),
+                     other.rowSize(),
+                     columnSize());
         long start = System.currentTimeMillis();
         outputTable.table.putAll(table);
         outputTable.table.putAll(other.table);
@@ -110,11 +128,16 @@ public class DataTable {
     }
 
     public DataTable innerJoin(DataTable other, ResourceField... fields) {
-        if (resourceMember == null || resourceMember.getId() == null) {
-            return other; // ignore trivial instance
-        }
+        return innerJoin(other, () -> Boolean.FALSE, fields);
+    }
 
-        if ( !resourceMember.isJoinable(other.resourceMember)) {
+    public DataTable innerJoin(DataTable other, Supplier<Boolean> interruptedSupplier, ResourceField... fields) {
+        if (resourceMember == null || resourceMember.getId() == null) {
+            // ignore trivial instance
+            return other;
+        }
+        if (!resourceMember.isJoinable(other.resourceMember)) {
+            LOGGER.debug("Tables are not joinable.");
             return this;
         }
 
@@ -124,47 +147,152 @@ public class DataTable {
                 ? resourceMember.getJoinableFields(other.resourceMember)
                 : Arrays.asList(fields);
 
-        joinTable(other, outputTable, joinFields);
+        joinTable(other, outputTable, joinFields, interruptedSupplier);
         return outputTable;
     }
 
-    private void joinTable(DataTable other, DataTable outputTable, Collection<ResourceField> joinFields) {
+    private void joinTable(final DataTable other,
+                           final DataTable outputTable,
+                           Collection<ResourceField> joinFields,
+                           Supplier<Boolean> interruptedSupplier) {
         LOGGER.debug("joining (on fields {}) {} with {}.", joinFields, this, other);
-        long start = System.currentTimeMillis();
-        for (ResourceField field : joinFields) {
-            final Map<ResourceKey, String> joinOnIndex = table.column(field);
-            int i = 0;
-            for (Map.Entry<ResourceKey, String> joinOnIndexEntry : joinOnIndex.entrySet()) {
-                Map<ResourceKey, String> toJoinIndex = other.table.column(field);
-                for (Map.Entry<ResourceKey, String> toJoinIndexEntry : toJoinIndex.entrySet()) {
-                    if ( !field.equalsValues(joinOnIndexEntry.getValue(), toJoinIndexEntry.getValue())) {
-                        continue;
+        final long start = System.currentTimeMillis();
+
+        final int interval = 10;
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+        ScheduledFuture< ? > processLogger = executor.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                int rows = outputTable.rowSize();
+                long rowsPer = rows * interval / getSeconds(start);
+                LOGGER.trace("join performs #{} output rows per {}s (#{} total)", rowsPer, interval, rows);
+            }
+
+            private long getSeconds(long startTime) {
+                long now = System.currentTimeMillis();
+                return (now - start) / 1000;
+            }
+        }, interval, interval, TimeUnit.SECONDS);
+
+        try {
+            Collection<ForkJoinTask< ? >> tasks =
+                    joinFields.stream()
+                              .map(f -> createJoinTasks(f, other, outputTable, interruptedSupplier))
+                              .collect(ArrayList::new, List::addAll, List::addAll);
+            // oracle JDK was not able to refer collection type when inlined
+            ForkJoinTask.invokeAll(tasks);
+        } catch (Throwable e) {
+            LOGGER.info("Unable to complete join task", e);
+        } finally {
+            ForkJoinTask.helpQuiesce();
+            processLogger.cancel(true);
+        }
+
+        LOGGER.debug("joined table has #{} rows and #{} columns, took {}s",
+                     outputTable.rowSize(),
+                     outputTable.columnSize(),
+                     (System.currentTimeMillis() - start) / 1000d);
+    }
+
+    private List<ForkJoinTask< ? >> createJoinTasks(ResourceField field,
+                                                    final DataTable other,
+                                                    final DataTable outputTable,
+                                                    Supplier<Boolean> interruptedSupplier) {
+        // XXX does not consider AND in joinFields, but rather joins multiple times!
+        final Map<ResourceKey, String> joinOnIndex = table.column(field);
+        final Map<ResourceKey, String> toJoinIndex = other.table.column(field);
+        Set<Entry<ResourceKey, String>> joinOn = joinOnIndex.entrySet();
+        Set<Entry<ResourceKey, String>> toJoin = toJoinIndex.entrySet();
+
+        List<ForkJoinTask< ? >> tasks = new ArrayList<>();
+        for (Entry<ResourceKey, String> joinOnEntry : joinOn) {
+            for (Entry<ResourceKey, String> toJoinEntry : toJoin) {
+                tasks.add(FORK_JOIN_POOL.submit(() -> {
+                    if (!getJoinFilter(field, joinOnEntry, toJoinEntry) || interruptedSupplier.get()) {
+                        return;
                     }
-                    final ResourceKey otherKey = toJoinIndexEntry.getKey();
-                    final String newId = toJoinIndexEntry.getKey().getKeyId() + "_" + i++;
-                    ResourceKey newKey = new ResourceKey(newId, outputTable.resourceMember);
+                    final ResourceKey joinOnKey = joinOnEntry.getKey();
+                    final ResourceKey toJoinKey = toJoinEntry.getKey();
+                    ResourceKey newKey = createJoinedRowId(outputTable, joinOnKey, toJoinKey);
 
                     // add other's values
-                    final Map<ResourceField, String> toJoinRow = other.table.row(otherKey);
-                    for (Map.Entry<ResourceField, String> otherValue : toJoinRow.entrySet()) {
-                        final ResourceField rightField = otherValue.getKey();
-                        ResourceField joinedField = ResourceField.copy(rightField)
-                                .withQualifier(otherKey.getMember());
-                        outputTable.table.put(newKey, joinedField, otherValue.getValue());
+                    final Map<ResourceField, String> toJoinRow = other.table.row(toJoinKey);
+                    Set<Entry<ResourceField, String>> toJoinValues = toJoinRow.entrySet();
+                    for (Map.Entry<ResourceField, String> toJoinValue : toJoinValues) {
+                        ResourceMember member = other.getResourceMember();
+                        ResourceField joinedField = cloneValueField(member, toJoinValue);
+                        if (!table.containsRow(joinedField)) {
+                            outputTable.table.put(newKey, joinedField, toJoinValue.getValue());
+                        }
+                        // else {
+                        // TODO add qualifier to field id when it already exists
+                        // --> otherwise it will be overridden later anyway
+                        // }
                     }
 
                     // add this instance's values
-                    Map<ResourceField, String> joinOnRow = table.row(joinOnIndexEntry.getKey());
+                    Map<ResourceField, String> joinOnRow = table.row(joinOnKey);
                     for (Map.Entry<ResourceField, String> value : joinOnRow.entrySet()) {
                         outputTable.table.put(newKey, value.getKey(), value.getValue());
                     }
-                }
+                }));
             }
         }
-        LOGGER.debug("joined table has #{} rows and #{} columns, took {}s",
-                outputTable.rowSize(),
-                outputTable.columnSize(),
-                (System.currentTimeMillis() - start) / 1000d);
+        return tasks;
+
+        // XXX using lambdas will result in incorrect output size during join :/
+        //
+        // return joinOn.stream()
+        // .map(joinOnCell -> {
+        // return FORK_JOIN_POOL.submit(() -> {
+        // toJoin.stream()
+        // .filter(toJoinCell -> getJoinFilter(field, joinOnCell, toJoinCell))
+        // .forEach(toJoinCell -> {
+        // if (interruptedSupplier.get()) {
+        // // cancel
+        // return;
+        // }
+        // final ResourceKey toJoinKey = toJoinCell.getKey();
+        // final ResourceKey joinOnKey = joinOnCell.getKey();
+        // ResourceKey newKey = createJoinedRowId(outputTable, joinOnKey, toJoinKey);
+        //
+        // // add other's values
+        // final Map<ResourceField, String> toJoinRow = other.table.row(toJoinKey);
+        // Set<Entry<ResourceField, String>> toJoinValues = toJoinRow.entrySet();
+        // for (Map.Entry<ResourceField, String> toJoinValue : toJoinValues) {
+        // ResourceMember member = other.getResourceMember();
+        // ResourceField joinedField = cloneValueField(member, toJoinValue);
+        // outputTable.table.put(newKey, joinedField, toJoinValue.getValue());
+        // }
+        //
+        // // add this instance's values
+        // Map<ResourceField, String> joinOnRow = table.row(joinOnCell.getKey());
+        // for (Map.Entry<ResourceField, String> value : joinOnRow.entrySet()) {
+        // outputTable.table.put(newKey, value.getKey(), value.getValue());
+        // }
+        // });
+        // });
+        // })
+        // .collect(Collectors.toList());
+    }
+
+    private ResourceField cloneValueField(ResourceMember member, Map.Entry<ResourceField, String> value) {
+        return ResourceField.copy(value.getKey())
+                            .setQualifier(member);
+    }
+
+    private ResourceKey createJoinedRowId(DataTable outputTable, ResourceKey joinOnKey, ResourceKey toJoinKey) {
+        String newId = joinOnKey.getKeyId()
+                + "_"
+                + toJoinKey.getKeyId();
+        return new ResourceKey(newId, outputTable.resourceMember);
+    }
+
+    private boolean getJoinFilter(ResourceField field,
+                                  Entry<ResourceKey, String> cellA,
+                                  Entry<ResourceKey, String> cellB) {
+        // TODO multiple join cells
+        return field.equalsValues(cellA.getValue(), cellB.getValue());
     }
 
     public void setCellValue(ResourceKey id, ResourceField field, String value) {
@@ -172,27 +300,43 @@ public class DataTable {
     }
 
     public int rowSize() {
-        return table.rowKeySet().size();
+        return table.rowKeySet()
+                    .size();
     }
 
     public int columnSize() {
-        return table.columnKeySet().size();
+        return table.columnKeySet()
+                    .size();
+    }
+
+    public boolean isEmpty() {
+        return table.isEmpty();
+    }
+
+    public List<ResourceMember> getJoinedMembers() {
+        return hasJoinedMembers()
+                ? Collections.unmodifiableList(joinedMembers)
+                : Collections.emptyList();
+    }
+
+    public boolean hasJoinedMembers() {
+        return joinedMembers != null && !joinedMembers.isEmpty();
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         return sb.append("DataTable(")
-                .append("#rows=")
-                .append(rowSize())
-                .append(", #columns=")
-                .append(columnSize())
-                .append(", resource=")
-                .append(resourceMember)
-                .append(". Joined resources: [ ")
-                .append(Arrays.toString(joinedMembers.toArray()))
-                .append(" ])")
-                .toString();
+                 .append("#rows=")
+                 .append(rowSize())
+                 .append(", #columns=")
+                 .append(columnSize())
+                 .append(", resource=")
+                 .append(resourceMember)
+                 .append(". Joined resources: [ ")
+                 .append(Arrays.toString(joinedMembers.toArray()))
+                 .append(" ])")
+                 .toString();
     }
 
 }

@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.beans;
 
 import java.util.ArrayList;
@@ -33,8 +34,15 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+
+import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.da.CkanMapping;
+import org.n52.series.ckan.table.ResourceKey;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 
 public class ResourceMember {
 
@@ -90,7 +98,9 @@ public class ResourceMember {
     }
 
     public boolean isOfType(String type) {
-        return resourceType != null && ckanMapping.getResourceTypeMappings(type).contains(resourceType);
+        return resourceType != null
+                && ckanMapping.getResourceTypeMappings(type)
+                              .contains(resourceType);
     }
 
     public int getHeaderRows() {
@@ -104,16 +114,14 @@ public class ResourceMember {
     public List<ResourceField> getResourceFields() {
         return resourceFields != null
                 ? Collections.unmodifiableList(resourceFields)
-                : Collections.<ResourceField>emptyList();
+                : Collections.<ResourceField> emptyList();
     }
 
-    public ResourceField getField(String fieldId) {
-        for (ResourceField field : resourceFields) {
-            if (field.getFieldId().equalsIgnoreCase(fieldId)) {
-                return field;
-            }
-        }
-        return null;
+    public Optional<ResourceField> getField(String fieldId) {
+        return resourceFields.stream()
+                             .filter(e -> e.getFieldId()
+                                           .equalsIgnoreCase(fieldId))
+                             .findFirst();
     }
 
     public ResourceField getField(int index) {
@@ -124,7 +132,7 @@ public class ResourceMember {
 
     public boolean containsField(String fieldId) {
         for (ResourceField field : resourceFields) {
-            if (field.getFieldId().equalsIgnoreCase(fieldId)) {
+            if (field.isField(fieldId.toLowerCase())) {
                 return true;
             }
         }
@@ -134,7 +142,11 @@ public class ResourceMember {
     public List<String> getColumnHeaders() {
         List<String> headers = new ArrayList<>();
         for (ResourceField field : getResourceFields()) {
-            headers.add(field.getShortName());
+            String shortName = field.getShortName();
+            String header = shortName == null || shortName.isEmpty()
+                    ? field.getFieldId()
+                    : shortName;
+            headers.add(header);
         }
         return headers;
     }
@@ -148,35 +160,40 @@ public class ResourceMember {
     }
 
     public Set<ResourceField> getJoinableFields(ResourceMember other) {
-        if ( !isJoinable(other)) {
-            return Collections.<ResourceField>emptySet();
-        }
-        Set<ResourceField> fields = new HashSet<>();
-        for (ResourceField possibleJoinColumn : other.resourceFields) {
-            if (resourceFields.contains(possibleJoinColumn)) {
-                fields.add(ResourceField.copy(possibleJoinColumn));
+        String configPath = CkanConstants.Config.CONFIG_PATH_JOIN;
+        JsonNode joinConfig = getCkanMapping().getConfigValueAt(configPath);
+        if (joinConfig.isArray()) {
+            Set<ResourceField> fields = new HashSet<>();
+            ArrayNode joinFields = (ArrayNode) joinConfig;
+            for (JsonNode joinField : joinFields) {
+                String fieldId = joinField.asText();
+                Optional<ResourceField> field = !getField(fieldId).isPresent()
+                        ? other.getField(fieldId)
+                        : getField(fieldId);
+                if (field.isPresent()) {
+                    fields.add(field.get());
+                }
             }
+            return fields;
+        } else {
+            Set<ResourceField> fields = new HashSet<>(resourceFields);
+            fields.retainAll(other.resourceFields);
+            return fields;
         }
-        return Collections.unmodifiableSet(fields);
     }
 
     public boolean isJoinable(ResourceMember other) {
-        if ( !isValid(this) || !isValid(other)) {
+        if (!isValid(this) || !isValid(other)) {
             return false;
         }
         if (this == other || isOfSameType(other)) {
             return false;
         }
-        for (ResourceField otherField : other.resourceFields) {
-            if (resourceFields.contains(otherField)) {
-                return true;
-            }
-        }
-        return false;
+        return !getJoinableFields(other).isEmpty();
     }
 
     public boolean isExtensible(ResourceMember other) {
-        if ( !isValid(this) || !isValid(other)) {
+        if (!isValid(this) || !isValid(other)) {
             return false;
         }
         if (this == other || !isOfSameType(other)) {
@@ -205,43 +222,35 @@ public class ResourceMember {
 
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 17 * hash + Objects.hashCode(this.id);
-        hash = 17 * hash + Objects.hashCode(this.resourceType);
-        return hash;
+        return Objects.hash(id, resourceType);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) {
+        if (obj == null || !(obj instanceof ResourceMember)) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final ResourceMember other = (ResourceMember) obj;
-        if (!Objects.equals(this.id, other.id)) {
-            return false;
-        }
-        if (!Objects.equals(this.resourceType, other.resourceType)) {
-            return false;
-        }
-        return true;
+        ResourceMember other = (ResourceMember) obj;
+        return Objects.equals(id, other.id)
+                && Objects.equals(resourceType, other.resourceType);
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         return sb.append("ResourceMember(")
-                .append("datasetName=")
-                .append(datasetName)
-                .append(", id=").append(id)
-                .append(", resourceType=")
-                .append(resourceType)
-                .append(")")
-                .toString();
+                 .append("datasetName=")
+                 .append(datasetName)
+                 .append(", id=")
+                 .append(id)
+                 .append(", resourceType=")
+                 .append(resourceType)
+                 .append(")")
+                 .toString();
     }
 
-
+    public ResourceKey createResourceKey(int lineNbr) {
+        int next = lineNbr + 1;
+        return new ResourceKey("" + next, this);
+    }
 }
-

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<license-lookup xmlns="https://source.jasig.org/schemas/maven-notice-plugin/license-lookup" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://source.jasig.org/schemas/maven-notice-plugin/license-lookup https://source.jasig.org/schemas/maven-notice-plugin/license-lookup/license-lookup-v1.0.xsd">
+    <artifact>
+        <groupId>jgridshift</groupId>
+        <artifactId>jgridshift</artifactId>
+        <version>1.0</version>
+        <license>GNU Lesser General Public License, version 2.0 (LGPLv2)</license>
+        <name>jgridshift</name>
+    </artifact>
+    <artifact>
+        <groupId>org.opengeo</groupId>
+        <artifactId>geodb</artifactId>
+        <version>0.7</version>
+        <license>BSD style, https://github.com/jdeolive/geodb/blob/master/LICENSE.txt</license>
+        <name>GeoDB Core</name>
+    </artifact>
+    <artifact>
+        <groupId>java3d</groupId>
+        <artifactId>vecmath</artifactId>
+        <version>1.5.2</version>
+        <license>GPL 2.0 license w/ CPE</license>
+        <name>vecmath</name>
+    </artifact>
+    <artifact>
+        <groupId>xalan</groupId>
+        <artifactId>xalan</artifactId>
+        <version>2.7.0</version>
+        <license>The Apache Software License, Version 2.0</license>
+    </artifact>
+    <artifact>
+        <groupId>eu.trentorise.opendata</groupId>
+        <artifactId>jackan</artifactId>
+        <version>0.4.3-SNAPSHOT</version>
+        <license>The Apache Software License, Version 2.0</license>
+    </artifact>
+    <artifact>
+        <groupId>eu.trentorise.opendata</groupId>
+        <artifactId>jackan</artifactId>
+        <version>0.4.3-SNAPSHOT</version>
+        <license>The Apache Software License, Version 2.0</license>
+    </artifact>
+</license-lookup>

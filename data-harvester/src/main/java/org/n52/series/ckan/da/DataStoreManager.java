@@ -26,11 +26,24 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.da;
 
+import java.util.function.Supplier;
+
 import org.n52.series.ckan.beans.DataCollection;
+import org.n52.series.ckan.beans.DataFile;
+
+import eu.trentorise.opendata.jackan.model.CkanResource;
 
 public interface DataStoreManager {
 
     void insertOrUpdate(DataCollection dataCollection);
+
+    boolean isUpdateNeeded(CkanResource resource, DataFile dataFile);
+
+    Supplier<Boolean> isInterrupted();
+
+    void shutdown();
+
 }

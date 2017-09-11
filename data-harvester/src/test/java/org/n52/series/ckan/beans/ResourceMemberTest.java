@@ -26,6 +26,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.beans;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -34,8 +35,12 @@ import static org.hamcrest.Matchers.is;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.hamcrest.Matchers;
 import org.junit.Before;
@@ -44,10 +49,13 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.table.ResourceTestHelper;
+import org.n52.series.ckan.util.TestConstants;
 
 public class ResourceMemberTest {
 
     private static final String DWD_TEMPERATUR_DATASET_ID = "eab53bfe-fce7-4fd8-8325-a0fe5cdb23c8";
+
+    private static final String DWDKREISE_DATASET_ID = "2518529a-fbf1-4940-8270-a1d4d0fa8c4d";
 
     private static final String PLATFORM_DATA_ID_1 = "8f0637bc-c15e-4f74-b7d8-bfc4ed2ac2f9";
 
@@ -58,11 +66,12 @@ public class ResourceMemberTest {
     @Rule
     public TemporaryFolder testFolder = new TemporaryFolder();
 
-    private ResourceTestHelper resourceHelper;
+    private ResourceTestHelper testHelper;
 
     @Before
     public void setUp() throws URISyntaxException, IOException {
-        resourceHelper = new ResourceTestHelper(testFolder);
+        String trimmedData = "/files/" + TestConstants.TEST_TRIMMED_DATA_FOLDER;
+        testHelper = new ResourceTestHelper(testFolder, trimmedData);
     }
 
     @Test
@@ -94,7 +103,7 @@ public class ResourceMemberTest {
     @Test
     public void when_gettingSchemaDescriptor_resourceTypeIsCsvObservationCollection() {
         String expectedType = CkanConstants.ResourceType.CSV_OBSERVATIONS_COLLECTION;
-        SchemaDescriptor schemaDescriptor = resourceHelper.getSchemaDescriptor(DWD_TEMPERATUR_DATASET_ID);
+        SchemaDescriptor schemaDescriptor = testHelper.getSchemaDescriptor(DWD_TEMPERATUR_DATASET_ID);
         assertThat(schemaDescriptor.getSchemaDescriptionType(), Matchers.is(expectedType));
     }
 
@@ -112,26 +121,101 @@ public class ResourceMemberTest {
         assertThat(obs1.isExtensible(obs2), is(false));
     }
 
+    private ResourceMember getObservationResource(String resourceId) {
+        ResourceMember resourceMember = new ResourceMember(resourceId, "observations");
+        return testHelper.getResourceMember(DWD_TEMPERATUR_DATASET_ID, resourceMember);
+    }
+
+    private ResourceMember getPlatformResource(String resourceId) {
+        ResourceMember resourceMember = new ResourceMember(resourceId, "platforms");
+        return testHelper.getResourceMember(DWD_TEMPERATUR_DATASET_ID, resourceMember);
+    }
+
     @Test
     public void findJoinableFields() {
-        SchemaDescriptor schemaDescriptor = resourceHelper.getSchemaDescriptor(DWD_TEMPERATUR_DATASET_ID);
+        SchemaDescriptor schemaDescriptor = testHelper.getSchemaDescriptor(DWD_TEMPERATUR_DATASET_ID);
         List<ResourceMember> members = schemaDescriptor.getMembers();
 
         ResourceMember platformDescription = members.get(0);
         ResourceMember observationDescription = members.get(1);
         Set<ResourceField> joinableFields = platformDescription.getJoinableFields(observationDescription);
         assertThat(joinableFields.size(), is(1));
-        assertThat(joinableFields.iterator().next().getFieldId(), is("STATIONS_ID"));
+        FieldBuilder builder = FieldBuilder.aField();
+        ResourceField expectedField = builder.createSimple("STATIONS_ID");
+        Iterator<ResourceField> iterator = joinableFields.iterator();
+        ResourceField firstField = iterator.next();
+        assertThat(firstField, is(expectedField));
     }
 
-    private ResourceMember getObservationResource(String resourceId) {
-        ResourceMember resourceMember = new ResourceMember(resourceId, "observations");
-        return resourceHelper.getResourceMember(DWD_TEMPERATUR_DATASET_ID, resourceMember);
+    @Test
+    public void findJoinableFieldsHavingMappedIds() {
+        SchemaDescriptor schemaDescriptor = testHelper.getSchemaDescriptor(DWDKREISE_DATASET_ID);
+        List<ResourceMember> members = schemaDescriptor.getMembers();
+        List<ResourceMember> observationMembers = filterViaType(members, CkanConstants.ResourceType.OBSERVATIONS);
+        List<ResourceMember> kreiseMembers = filterViaType(members, CkanConstants.ResourceType.OBSERVED_GEOMETRIES);
+
+        ResourceMember firstMember = observationMembers.get(0);
+        ResourceMember secondMember = kreiseMembers.get(0);
+        Set<ResourceField> joinableFields = firstMember.getJoinableFields(secondMember);
+        assertThat(joinableFields.size(), is(1));
+        FieldBuilder builder = FieldBuilder.aField();
+        ResourceField expectedField = builder.createSimple("warncellid");
+        ResourceField expectedAlternateField = builder.createSimple("gc_warncellid");
+        Iterator<ResourceField> iterator = joinableFields.iterator();
+        ResourceField firstField = iterator.next();
+        assertThat(firstField, is(expectedField));
+        assertThat(firstField, is(expectedAlternateField));
     }
 
-    private ResourceMember getPlatformResource(String resourceId) {
-        ResourceMember resourceMember = new ResourceMember(resourceId, "platforms");
-        return resourceHelper.getResourceMember(DWD_TEMPERATUR_DATASET_ID, resourceMember);
+    protected List<ResourceMember> filterViaType(List<ResourceMember> members, String resourceType) {
+        return members.stream()
+                      .filter(e -> e.getResourceType()
+                                    .equals(resourceType))
+                      .collect(Collectors.toList());
     }
 
+    @Test
+    public void when_columnHasNoShortName_then_fieldIdIsColumnHeader() {
+        ResourceMember resourceMember = new ResourceMember();
+        ResourceField field = FieldBuilder.aField()
+                                          .createSimple("foo");
+        resourceMember.setResourceFields(Collections.singletonList(field));
+        List<String> columnHeaders = resourceMember.getColumnHeaders();
+        assertThat(columnHeaders.size(), is(1));
+        assertThat(columnHeaders.get(0), is("foo"));
+    }
+
+    @Test
+    public void when_fieldHasMappedIdValues_then_containsEvaluatesTrueInCaseOfAlternateValues() {
+        ResourceMember resourceMember = new ResourceMember();
+        ResourceField first = FieldBuilder.aField()
+                                          .withFieldMappings("foo", "bar")
+                                          .createSimple("foo");
+        resourceMember.setResourceFields(Collections.singletonList(first));
+        assertThat(resourceMember.containsField("bar"), is(true));
+    }
+
+    @Test
+    public void when_joinFieldsWithMappedValues_then_detectIfJoinable() {
+        ResourceMember resourceMemberA = new ResourceMember("id_A", "type_A");
+        ResourceField[] fieldsA = {
+            FieldBuilder.aField()
+                        .withFieldMappings("foo", "bar")
+                        .createSimple("foo"),
+            FieldBuilder.aField()
+                        .createSimple("blah")
+        };
+        resourceMemberA.setResourceFields(Arrays.asList(fieldsA));
+
+        ResourceMember resourceMemberB = new ResourceMember("id_B", "type_B");
+        ResourceField[] fieldsB = {
+            FieldBuilder.aField()
+                        .withFieldMappings("foo", "bar")
+                        .createSimple("bar"),
+        };
+        resourceMemberB.setResourceFields(Arrays.asList(fieldsB));
+        assertThat("resource members with mapped join columns must be joinable",
+                   resourceMemberA.isJoinable(resourceMemberB),
+                   is(true));
+    }
 }

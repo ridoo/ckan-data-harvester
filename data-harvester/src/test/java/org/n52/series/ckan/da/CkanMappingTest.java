@@ -32,6 +32,7 @@ import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
+
 import org.junit.Test;
 
 public class CkanMappingTest {
@@ -59,7 +60,7 @@ public class CkanMappingTest {
     @Test
     public void when_noMappings_then_onlyNameIsIncluded() {
          CkanMapping ckanMappin = CkanMapping.loadCkanMapping("some-ckan-config.json");
-         assertThat(ckanMappin.getMappings("some", "does-not-exist"), hasSize(1));
+         assertThat(ckanMappin.getValueMappings("some", "does-not-exist"), hasSize(1));
          assertTrue(ckanMappin.hasMappings("some", "does-not-exist", "does-not-exist"));
     }
 
@@ -67,6 +68,13 @@ public class CkanMappingTest {
     public void when_parsingDefault_then_idMappingsNotEmpty() {
         CkanMapping mappings = CkanMapping.loadCkanMapping();
         assertTrue(mappings.hasMappings("", "default", "default"));
+    }
+
+    @Test
+    public void when_fieldIdPropertyIsMapped_thenFieldIdHasPropertyMappings() {
+        CkanMapping mappings = CkanMapping.loadCkanMapping("config-ckan-mapping.json");
+        String fieldId = CkanConstants.FieldPropertyName.FIELD_ID;
+        assertTrue(mappings.hasPropertyMappings(fieldId, "some_weird_fieldid"));
     }
 
 }

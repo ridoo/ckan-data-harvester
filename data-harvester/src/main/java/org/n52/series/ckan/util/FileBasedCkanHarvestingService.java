@@ -26,13 +26,15 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.util;
 
-import org.n52.series.ckan.cache.InMemoryMetadataStore;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+
 import org.n52.series.ckan.cache.InMemoryDataStoreManager;
+import org.n52.series.ckan.cache.InMemoryMetadataStore;
 import org.n52.series.ckan.da.CkanHarvestingService;
 
 public class FileBasedCkanHarvestingService {
@@ -43,12 +45,14 @@ public class FileBasedCkanHarvestingService {
 
     private final CkanHarvestingService ckanHarvester;
 
-    public FileBasedCkanHarvestingService(File folder) throws URISyntaxException, IOException {
+    public FileBasedCkanHarvestingService(File downloadFolder, String dataFolder)
+            throws URISyntaxException, IOException {
         ckanMetadataStore = new InMemoryMetadataStore();
         ckanDataStoreManager = new InMemoryDataStoreManager();
 
-        ckanHarvester = new FileBasedCkanHarvester("dwd");
-        ckanHarvester.setResourceDownloadBaseFolder(folder.toURI().toString());
+        ckanHarvester = new FileBasedCkanHarvester(dataFolder);
+        ckanHarvester.setResourceTargetBaseFolder(downloadFolder.toURI()
+                                                                  .toString());
         ckanHarvester.setMetadataStore(ckanMetadataStore);
         ckanHarvester.setDataStoreManager(ckanDataStoreManager);
 

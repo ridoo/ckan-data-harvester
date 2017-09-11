@@ -26,23 +26,28 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.beans;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.MissingNode;
-import eu.trentorise.opendata.jackan.model.CkanDataset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.n52.series.ckan.da.CkanConstants;
 import org.n52.series.ckan.da.CkanMapping;
 import org.n52.series.ckan.util.JsonUtil;
-import static org.n52.series.ckan.util.JsonUtil.parseMissingToNegativeInt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.MissingNode;
+
+import eu.trentorise.opendata.jackan.model.CkanDataset;
 
 public class SchemaDescriptor {
 
@@ -86,7 +91,11 @@ public class SchemaDescriptor {
     }
 
     public String getSchemaDescriptionType() {
-        return getStringValueOf(node, CkanConstants.SchemaDescriptor.RESOURCE_TYPE);
+        return getSchemaDescriptionType(node);
+    }
+
+    public String getSchemaDescriptionType(JsonNode jsonNode) {
+        return getStringValueOf(jsonNode, CkanConstants.SchemaDescriptor.RESOURCE_TYPE);
     }
 
     private String getStringValueOf(JsonNode jsonNode, String field) {
@@ -95,6 +104,10 @@ public class SchemaDescriptor {
 
     public JsonNode getNode() {
         return node;
+    }
+
+    public JsonNode getMemberNodes() {
+        return node.at("/members");
     }
 
     public CkanDataset getDataset() {
@@ -124,43 +137,54 @@ public class SchemaDescriptor {
 
     private List<ResourceMember> parseMemberDescriptions() {
         List<ResourceMember> resourceMembers = new ArrayList<>();
-//        final JsonNode membersNode = node.findValue("members");
-        final JsonNode membersNode = node.at("/members");
-        final Iterator<JsonNode> iter = membersNode.elements();
+        final Iterator<JsonNode> iter = getMemberNodes().elements();
         while (iter.hasNext()) {
             JsonNode memberNode = iter.next();
-            for (String id : JsonUtil.parseMissingToEmptyArray(memberNode, ckanMapping.getFieldMappings(CkanConstants.FieldPropertyName.RESOURCE_NAME))) {
-                String resourceType = getStringValueOf(memberNode, CkanConstants.FieldPropertyName.RESOURCE_TYPE);
-                ResourceMember member = new ResourceMember(id, resourceType, ckanMapping);
+            Set<String> resourceNames = ckanMapping.getFieldMappings(CkanConstants.FieldPropertyName.RESOURCE_NAME);
+            List<String> resourceIds = JsonUtil.parseToList(memberNode, resourceNames);
+            List<ResourceField> fieldTemplates = parseResourceFields(memberNode);
+            for (String resourceId : resourceIds) {
+                String resourceType = getSchemaDescriptionType(memberNode);
+                ResourceMember member = new ResourceMember(resourceId, resourceType, ckanMapping);
                 member.setDatasetName(dataset.getName());
-                final int headerRows = parseMissingToNegativeInt(memberNode, ckanMapping.getFieldMappings(CkanConstants.FieldPropertyName.HEADER_ROWS));
-                member.setHeaderRows(headerRows < 0 ? 1 : headerRows); // assume 1 header row by default
-                member.setResourceFields(parseResourceFields(member, memberNode));
+                Set<String> headerRowNames = ckanMapping.getFieldMappings(CkanConstants.FieldPropertyName.HEADER_ROWS);
+                final int headerRows = JsonUtil.parseMissingToNegativeInt(memberNode, headerRowNames);
+                member.setHeaderRows(headerRows < 0
+                        // assume 1 header row by default
+                        ? 1
+                        : headerRows);
+                member.setResourceFields(createQualifiedFields(fieldTemplates, member));
                 resourceMembers.add(member);
             }
         }
         return resourceMembers;
     }
 
-    private List<ResourceField> parseResourceFields(ResourceMember qualifier, JsonNode member) {
+    private List<ResourceField> parseResourceFields(JsonNode memberNode) {
         List<ResourceField> fields = new ArrayList<>();
-        JsonNode resourceType = member.findValue("resource_type");
-        JsonNode fieldsNode = member.findValue("fields");
+        JsonNode resourceType = memberNode.findValue(CkanConstants.SchemaDescriptor.RESOURCE_TYPE);
+        JsonNode fieldsNode = memberNode.findValue(CkanConstants.SchemaDescriptor.FIELDS);
         Iterator<JsonNode> iter = fieldsNode.elements();
         int index = 0;
         while (iter.hasNext()) {
             JsonNode fieldNode = iter.next();
-            fields.add(new ResourceField(fieldNode, index, ckanMapping)
-                    .withResourceType(resourceType.asText())
-                    .withQualifier(qualifier));
+            fields.add(new ResourceField(fieldNode, index, ckanMapping).setResourceType(resourceType.asText()));
             index++;
         }
         return fields;
     }
 
+    protected List<ResourceField> createQualifiedFields(List<ResourceField> fieldTemplates, ResourceMember member) {
+        return fieldTemplates.stream()
+                             .map(e -> {
+                                 ResourceField field = ResourceField.copy(e);
+                                 return field.setQualifier(member);
+                             })
+                             .collect(Collectors.toList());
+    }
+
     public CkanMapping getCkanMapping() {
         return ckanMapping;
     }
-
 
 }

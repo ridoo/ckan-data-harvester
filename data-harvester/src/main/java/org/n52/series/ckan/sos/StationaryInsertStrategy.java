@@ -26,10 +26,11 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.sos;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -39,7 +40,7 @@ import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.beans.ResourceMember;
 import org.n52.series.ckan.table.DataTable;
 import org.n52.series.ckan.table.ResourceKey;
-import org.n52.sos.ogc.gml.AbstractFeature;
+import org.n52.sos.ogc.om.features.samplingFeatures.SamplingFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,45 +60,64 @@ class StationaryInsertStrategy extends AbstractInsertStrategy {
 
     @Override
     public Map<String, DataInsertion> createDataInsertions(DataTable dataTable, DataCollection dataCollection) {
-        final List<Phenomenon> phenomena = parsePhenomena(dataTable);
+        final Collection<Phenomenon> phenomena = parsePhenomena(dataTable);
 
         LOGGER.debug("Create stationary insertions ...");
         Map<String, DataInsertion> dataInsertions = new HashMap<>();
-        for (Entry<ResourceKey, Map<ResourceField, String>> rowEntry : dataTable.getTable().rowMap().entrySet()) {
+        for (Entry<ResourceKey, Map<ResourceField, String>> rowEntry : dataTable.getTable()
+                                                                                .rowMap()
+                                                                                .entrySet()) {
 
             // TODO how and what to create in which order depends on the actual strategy chosen
 
             CkanDataset dataset = dataCollection.getDataset();
-            ResourceMember member = rowEntry.getKey().getMember();
-            FeatureBuilder foiBuilder = new FeatureBuilder(dataset);
-            AbstractFeature feature = foiBuilder.createFeature(rowEntry.getValue());
+            ResourceKey rowKey = rowEntry.getKey();
+            ResourceMember member = rowKey.getMember();
+            Map<ResourceField, String> values = rowEntry.getValue();
 
-            ObservationBuilder observationBuilder = new ObservationBuilder(rowEntry, getUomParser());
+            SamplingFeature feature = new SimpleFeatureBuilder(dataset).visit(values)
+                                                                       .getResult();
             SensorBuilder sensorBuilder = SensorBuilder.create()
-                    .withFeature(feature)
-                    .withDataset(dataset)
-                    .setMobile(false);
+                                                       .setFeature(feature)
+                                                       .addPhenomena(phenomena)
+                                                       .setDataset(dataset)
+                                                       .setMobile(false);
 
             for (Phenomenon phenomenon : phenomena) {
-                sensorBuilder.addPhenomenon(phenomenon);
+
+                Phenomenon currentPhenomenon = phenomenon;
+
+                if (phenomenon.isSoftTyped()) {
+
+                    String phenomenonValue = values.get(phenomenon.getPhenomenonField());
+                    if (!phenomenon.getId().equals(phenomenonValue)) {
+                        // referenced phenomenon does not match, skip
+                        continue;
+                    }
+                    currentPhenomenon = new Phenomenon(phenomenonValue, phenomenonValue, phenomenon);
+                }
+
                 String procedureId = sensorBuilder.getProcedureId();
-                if ( !dataInsertions.containsKey(procedureId)) {
+                if (!dataInsertions.containsKey(procedureId)) {
                     LOGGER.debug("Building sensor with: procedure '{}', phenomenon '{}' (unit '{}')",
                                  procedureId,
-                                 phenomenon.getLabel(),
-                                 phenomenon.getUom());
+                                 currentPhenomenon.getLabel(),
+                                 currentPhenomenon.getUom());
                     DataFile dataFile = dataCollection.getDataFile(member);
                     DataInsertion dataInsertion = createDataInsertion(sensorBuilder, dataFile);
                     dataInsertions.put(procedureId, dataInsertion);
                 }
 
                 DataInsertion dataInsertion = dataInsertions.get(procedureId);
-                final SosObservation observation =  observationBuilder
-                        .withSensorBuilder(sensorBuilder)
-                        .createObservation(dataInsertion, phenomenon);
+                ObservationBuilder builder = ObservationBuilder.create(currentPhenomenon, rowKey);
+                final SosObservation observation = builder.setUomParser(getUomParser())
+                                                          .setSensorBuilder(sensorBuilder)
+                                                          .visit(values)
+                                                          .getResult();
                 if (observation != null) {
                     dataInsertion.addObservation(observation);
                 }
+
             }
         }
         return dataInsertions;

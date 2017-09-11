@@ -26,7 +26,15 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.util;
+
+import java.io.IOException;
+import java.net.ProxySelector;
+
+import javax.net.ssl.SSLContext;
+
+import org.n52.series.ckan.da.CkanConstants;
 
 import eu.trentorise.opendata.jackan.internal.org.apache.http.Consts;
 import eu.trentorise.opendata.jackan.internal.org.apache.http.HttpEntity;
@@ -42,17 +50,13 @@ import eu.trentorise.opendata.jackan.internal.org.apache.http.config.RegistryBui
 import eu.trentorise.opendata.jackan.internal.org.apache.http.conn.socket.ConnectionSocketFactory;
 import eu.trentorise.opendata.jackan.internal.org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import eu.trentorise.opendata.jackan.internal.org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import eu.trentorise.opendata.jackan.internal.org.apache.http.conn.ssl.SSLContexts;
 import eu.trentorise.opendata.jackan.internal.org.apache.http.impl.client.BasicCredentialsProvider;
 import eu.trentorise.opendata.jackan.internal.org.apache.http.impl.client.CloseableHttpClient;
 import eu.trentorise.opendata.jackan.internal.org.apache.http.impl.client.HttpClients;
 import eu.trentorise.opendata.jackan.internal.org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import eu.trentorise.opendata.jackan.internal.org.apache.http.impl.conn.SystemDefaultRoutePlanner;
+import eu.trentorise.opendata.jackan.internal.org.apache.http.ssl.SSLContexts;
 import eu.trentorise.opendata.jackan.internal.org.apache.http.util.EntityUtils;
-import java.io.IOException;
-import java.net.ProxySelector;
-import javax.net.ssl.SSLContext;
-import org.n52.series.ckan.da.CkanConstants;
 
 public class ResourceClient {
 
@@ -71,10 +75,13 @@ public class ResourceClient {
             ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
                 @Override
                 public String handleResponse(final HttpResponse response) throws ClientProtocolException, IOException {
-                    int status = response.getStatusLine().getStatusCode();
+                    int status = response.getStatusLine()
+                                         .getStatusCode();
                     if (status >= 200 && status < 300) {
                         HttpEntity entity = response.getEntity();
-                        return entity != null ? EntityUtils.toString(entity, CkanConstants.DEFAULT_CHARSET) : null;
+                        return entity != null
+                                ? EntityUtils.toString(entity, CkanConstants.DEFAULT_CHARSET)
+                                : null;
                     } else {
                         throw new ClientProtocolException("Unexpected response status: " + status);
                     }
@@ -87,11 +94,11 @@ public class ResourceClient {
 
     private CloseableHttpClient create() {
         return HttpClients.custom()
-                .setConnectionManager(createPooledConnectionManager())
-                .setDefaultCredentialsProvider(createCredentialsProvider())
-                .setDefaultRequestConfig(createDefaultRequestConfig())
-                .setRoutePlanner(createProxyRoutePlanner())
-                .build();
+                          .setConnectionManager(createPooledConnectionManager())
+                          .setDefaultCredentialsProvider(createCredentialsProvider())
+                          .setDefaultRequestConfig(createDefaultRequestConfig())
+                          .setRoutePlanner(createProxyRoutePlanner())
+                          .build();
     }
 
     private static SystemDefaultRoutePlanner createProxyRoutePlanner() {
@@ -112,24 +119,24 @@ public class ResourceClient {
 
     private Registry<ConnectionSocketFactory> createConnectionSocketFactory() {
         SSLContext sslcontext = SSLContexts.createSystemDefault();
-        return RegistryBuilder.<ConnectionSocketFactory>create()
-            .register("http", PlainConnectionSocketFactory.INSTANCE)
-            .register("https", new SSLConnectionSocketFactory(sslcontext))
-            .build();
+        return RegistryBuilder.<ConnectionSocketFactory> create()
+                              .register("http", PlainConnectionSocketFactory.INSTANCE)
+                              .register("https", new SSLConnectionSocketFactory(sslcontext))
+                              .build();
     }
 
     private ConnectionConfig createConnectionConfig() {
         return ConnectionConfig.custom()
-                .setCharset(Consts.UTF_8)
-                .build();
+                               .setCharset(Consts.UTF_8)
+                               .build();
     }
 
     private RequestConfig createDefaultRequestConfig() {
         return RequestConfig.custom()
-                .setSocketTimeout(config.getSocketTimeout())
-                .setConnectTimeout(config.getConnectTimeout())
-                .setConnectionRequestTimeout(config.getConnectionRequestTimeout())
-                .build();
+                            .setSocketTimeout(config.getSocketTimeout())
+                            .setConnectTimeout(config.getConnectTimeout())
+                            .setConnectionRequestTimeout(config.getConnectionRequestTimeout())
+                            .build();
     }
 
 }

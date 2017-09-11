@@ -28,9 +28,6 @@
  */
 package org.n52.series.ckan.cache;
 
-import eu.trentorise.opendata.jackan.model.CkanDataset;
-import eu.trentorise.opendata.jackan.model.CkanPair;
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.contains;
@@ -45,6 +42,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.n52.series.ckan.beans.SchemaDescriptor;
 import org.n52.series.ckan.da.CkanConstants;
+
+import eu.trentorise.opendata.jackan.model.CkanDataset;
+import eu.trentorise.opendata.jackan.model.CkanPair;
 
 public class InMemoryCkanMetadataStoreTest {
 

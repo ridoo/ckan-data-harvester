@@ -1,0 +1,8 @@
+{
+    "strategy": {
+        "mobile": false,
+        "table_loader": {
+            "class": "org.n52.series.ckan.table.MultiTableLoadingStrategy"
+        }
+    }
+}

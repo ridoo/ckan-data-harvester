@@ -26,9 +26,12 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.beans;
 
 import java.io.File;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.charset.Charset;
 
 import org.joda.time.DateTime;
@@ -85,18 +88,15 @@ public class DataFile {
         return DateTime.parse(resource.getLastModified());
     }
 
-    public boolean isNewerThan(CkanResource resource) {
-        if (resource == null) {
+    public boolean isNewerThan(CkanResource ckanResource) {
+        if (ckanResource == null) {
             return false;
         }
 
-        String otherId = resource.getId();
+        String otherId = ckanResource.getId();
         String thisId = this.resource.getId();
-        String otherLastModified = resource.getLastModified();
+        String otherLastModified = ckanResource.getLastModified();
         String thisLastModified = this.resource.getLastModified();
-        if (otherId == null || otherLastModified == null) {
-            return true;
-        }
         if (thisId == null || otherLastModified == null) {
             return false;
         }
@@ -115,14 +115,27 @@ public class DataFile {
         String filePath = file != null
                 ? file.getAbsolutePath()
                 : "null";
+        Double bytes = file != null
+                ? Double.valueOf(file.length())
+                : null;
+        String megabytes = "???MB";
+        if (bytes != null) {
+            BigDecimal size = new BigDecimal(bytes / (1024 * 1024));
+            megabytes = Double.toString(size.setScale(2, RoundingMode.HALF_UP)
+                                            .doubleValue())
+                    + "MB";
+        }
         sb.append("resourceId: ")
-                .append(resource.getId())
-                .append(", ")
-                .append("DataFile [file: ")
-                .append(filePath)
-                .append(", ")
-                .append(" encoding: ")
-                .append(encoding.toString());
+          .append(resource.getId())
+          .append(", ")
+          .append("DataFile [Size: ")
+          .append(megabytes)
+          .append(", ")
+          .append("file: ")
+          .append(filePath)
+          .append(", ")
+          .append(" encoding: ")
+          .append(encoding.toString());
         return sb.toString();
     }
 

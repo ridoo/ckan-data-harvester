@@ -26,10 +26,10 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
  */
+
 package org.n52.series.ckan.table;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
@@ -44,6 +44,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.n52.series.ckan.beans.DataFile;
 import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.beans.ResourceMember;
+import org.n52.series.ckan.da.CkanConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,16 +63,16 @@ public class CsvTableLoader extends TableLoader {
             Iterator<CSVRecord> iterator = csvParser.iterator();
             List<String> columnHeaders = resourceMember.getColumnHeaders();
 
-            for (int i = 0 ; i < resourceMember.getHeaderRows() ; i++) {
-                iterator.next(); // skip
+            for (int i = 0; i < resourceMember.getHeaderRows(); i++) {
+                // skip line
+                iterator.next();
             }
             int lineNbr = 0;
             int ignoredCount = 0;
             while (iterator.hasNext()) {
                 CSVRecord line = iterator.next();
                 LOGGER.trace("parsing line '{}'", line.toString());
-//                if (line.size() != columnHeaders.size()) {
-                if ( !line.isConsistent()) {
+                if (!line.isConsistent() || line.size() != columnHeaders.size()) {
 
                     // TODO choose csv parsing strategy
 
@@ -81,10 +82,14 @@ public class CsvTableLoader extends TableLoader {
                     ignoredCount++;
                     continue;
                 }
-                ResourceKey id = new ResourceKey("" + lineNbr++, resourceMember);
-                for (int j = 0 ; j < columnHeaders.size() ; j++) {
+                ResourceKey id = resourceMember.createResourceKey(lineNbr++);
+                for (int j = 0; j < columnHeaders.size(); j++) {
                     final ResourceField field = resourceMember.getField(j);
-                    final String value = line.get(j);
+                    String value = line.get(j);
+                    if (value == null || value.isEmpty()) {
+                        LOGGER.trace("Empty value for field {}", field);
+                        value = field.getOther(CkanConstants.FieldPropertyName.NO_DATA);
+                    }
                     setCellValue(id, field, value);
                 }
             }
@@ -94,17 +99,30 @@ public class CsvTableLoader extends TableLoader {
                         + "Set LOG level to TRACE to log each.", ignoredCount);
             }
 
-        } catch (Throwable e) { // RuntimeExceptions in csvParser#getNextRecord()
+        } catch (Throwable e) {
+            // RuntimeExceptions in csvParser#getNextRecord()
             throw new TableLoadException("could not parse csv data", e);
         }
     }
 
-    private CSVParser createCsvParser(final DataFile dataFile) throws FileNotFoundException, IOException {
+    protected CSVParser createCsvParser(final DataFile dataFile) throws IOException {
         Charset encoding = dataFile.getEncoding();
-        final Path filePath = dataFile.getFile().toPath();
+        final Path filePath = dataFile.getFile()
+                                      .toPath();
         int headerRows = getResourceMember().getHeaderRows();
         FileInputStream fis = new FileInputStream(filePath.toFile());
-        InputStreamReader fileReader = new InputStreamReader(fis, encoding);
-        return new CSVParser(fileReader, CSVFormat.DEFAULT, headerRows, 0);
+        try {
+            InputStreamReader fileReader = new InputStreamReader(fis, encoding);
+            return createCsvParser(headerRows, fileReader, encoding);
+        } catch (Exception e) {
+            if (fis != null) {
+                fis.close();
+            }
+            throw e;
+        }
+    }
+
+    protected CSVParser createCsvParser(int headerRows, InputStreamReader reader, Charset encoding) throws IOException {
+        return new CSVParser(reader, CSVFormat.DEFAULT, headerRows, 0);
     }
 }

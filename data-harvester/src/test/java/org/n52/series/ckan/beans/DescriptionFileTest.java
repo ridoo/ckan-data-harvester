@@ -28,11 +28,14 @@
  */
 package org.n52.series.ckan.beans;
 
-import eu.trentorise.opendata.jackan.model.CkanDataset;
-import java.sql.Timestamp;
 import static junit.framework.TestCase.assertTrue;
+
+import java.sql.Timestamp;
+
 import org.joda.time.DateTime;
 import org.junit.Test;
+
+import eu.trentorise.opendata.jackan.model.CkanDataset;
 
 public class DescriptionFileTest {
 
