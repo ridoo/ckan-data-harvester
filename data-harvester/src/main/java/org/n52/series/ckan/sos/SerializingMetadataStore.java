@@ -169,6 +169,7 @@ public class SerializingMetadataStore extends InMemoryMetadataStore implements C
         }
     }
 
+    @Override
     @PreDestroy
     public void shutdown() {
         LOGGER.info("Serialize metadata before shutting down ...");
