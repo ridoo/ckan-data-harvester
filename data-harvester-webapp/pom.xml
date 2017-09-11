@@ -134,8 +134,8 @@
                                 <exclude>WEB-INF/classes/config-*.json</exclude>
                                 <exclude>WEB-INF/spring/*.xml</exclude>
                                 <!-- handle DAO SPI deps within this project -->
-                                <exclude>WEB-INF/lib/dao-${series.dao.version}</exclude>
-                                <exclude>WEB-INF/lib/sos-integration-${series.dao.version}</exclude>
+                                <exclude>WEB-INF/lib/dao-alpha.2</exclude>
+                                <exclude>WEB-INF/lib/sos-integration-alpha.2</exclude>
                                 <exclude>WEB-INF/classes/mapping/extension/readonly/**</exclude>
                                 <!-- exclude older versions -->
                                 <exclude>WEB-INF/lib/*slf4j-*</exclude>
