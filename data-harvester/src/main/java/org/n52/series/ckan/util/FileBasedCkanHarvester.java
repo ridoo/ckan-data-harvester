@@ -32,13 +32,9 @@ package org.n52.series.ckan.util;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Predicate;
 
 import org.n52.series.ckan.beans.DataFile;
 import org.n52.series.ckan.da.CkanHarvestingService;
@@ -71,22 +67,28 @@ public class FileBasedCkanHarvester extends CkanHarvestingService {
     }
 
     private List<File> getDatasets() {
+        List<File> datasets = new ArrayList<>();
         File folder = getSourceDataFolder();
-        return findFilesWithName(folder, "dataset.json");
+        File[] datasetFiles = folder.listFiles();
+        if (datasetFiles != null) {
+            for (File file : datasetFiles) {
+                if (file.isDirectory()) {
+                    Path datasetPath = file.toPath()
+                                           .resolve("dataset.json");
+                    datasets.add(datasetPath.toFile());
+                }
+            }
+        }
+        return datasets;
     }
 
     private File getSourceDataFolder() {
         LOGGER.trace("Source Data Folder: {}", dataFolder);
-        File file = new File(dataFolder);
-        if (file.exists()) {
-            return file;
-        } else {
-            URL resource = getClass().getResource(dataFolder);
-            if (resource == null) {
-                throw new IllegalStateException("invalid data folder: " + dataFolder);
-            }
-            return new File(resource.getFile());
+        URL resource = getClass().getResource(dataFolder);
+        if (resource == null) {
+            throw new IllegalStateException("invalid data folder: " + dataFolder);
         }
+        return new File(resource.getFile());
     }
 
     private CkanDataset parseDatasetTestFile(File file) {
@@ -104,52 +106,22 @@ public class FileBasedCkanHarvester extends CkanHarvestingService {
         File folder = getSourceDataFolder();
         String id = resource.getId();
         String format = resource.getFormat();
-        String fileName = id + "." + format.toLowerCase();
-        List<File> files = findFilesWithName(folder, fileName);
-        if (files.isEmpty()) {
-            String name = resource.getName();
-            throw new IOException("no data file found for resource '" + name + "' and id '" + id + "'.");
-        }
-        return new DataFile(resource, format, files.get(0));
-    }
-
-    private List<File> findFilesWithName(File file, String name) {
-        Predicate< ? super Path> isDirectory = f -> {
-            File candidateFile = f.toFile();
-            return candidateFile.isDirectory();
-        };
-        Predicate< ? super Path> matchesFile = f -> {
-            File candidateFile = f.toFile();
-            String candidateName = candidateFile.getName();
-            return !candidateFile.isDirectory()
-                    && candidateName.equals(name)
-                    && candidateFile.exists();
-        };
-
-        try {
-            if (file.isDirectory()) {
-                List<File> found = new ArrayList<>();
-                Optional<Path> candidate = Files.list(file.toPath())
-                                                .filter(matchesFile)
-                                                .findFirst();
-                if (candidate.isPresent()) {
-                    Path path = candidate.get();
-                    found.add(path.toFile());
+        File[] dataFolders = folder.listFiles();
+        if (dataFolders != null) {
+            for (File file : dataFolders) {
+                if (file.isDirectory()) {
+                    String fileName = id + "." + format.toLowerCase();
+                    Path datapath = file.toPath()
+                                        .resolve(fileName);
+                    if (datapath.toFile()
+                                .exists()) {
+                        return new DataFile(resource, format, datapath.toFile());
+                    }
                 }
-
-                // check other subdirectories
-                Files.list(file.toPath())
-                     .filter(isDirectory)
-                     .forEach(d -> found.addAll(findFilesWithName(d.toFile(), name)));
-                return found;
             }
-            return matchesFile.test(file.toPath())
-                    ? Collections.singletonList(file)
-                    : Collections.emptyList();
-        } catch (IOException e) {
-            LOGGER.warn("Unable to find file '{}' in '{}'", file.getAbsolutePath(), e);
-            return Collections.emptyList();
         }
+        String name = resource.getName();
+        throw new IOException("no data file found for resource '" + name + "' and id '" + id + "'.");
     }
 
 }
