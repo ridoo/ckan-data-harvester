@@ -221,12 +221,13 @@ public class DataTable {
                     for (Map.Entry<ResourceField, String> toJoinValue : toJoinValues) {
                         ResourceMember member = other.getResourceMember();
                         ResourceField joinedField = cloneValueField(member, toJoinValue);
-                        if (table.containsRow(joinedField)) {
-                            // TODO add qualifier to field id when it already exists
-                            //     --> otherwise it will be overridden later anyway
-                        } else {
+                        if (!table.containsRow(joinedField)) {
                             outputTable.table.put(newKey, joinedField, toJoinValue.getValue());
                         }
+                        // else {
+                        // TODO add qualifier to field id when it already exists
+                        // --> otherwise it will be overridden later anyway
+                        // }
                     }
 
                     // add this instance's values
@@ -238,8 +239,8 @@ public class DataTable {
             }
         }
         return tasks;
-        
-        // XXX using lambdas will result in incorrect output size during join :/ 
+
+        // XXX using lambdas will result in incorrect output size during join :/
         //
         // return joinOn.stream()
         // .map(joinOnCell -> {

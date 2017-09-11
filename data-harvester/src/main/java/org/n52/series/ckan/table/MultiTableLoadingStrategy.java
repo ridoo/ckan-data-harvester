@@ -97,6 +97,10 @@ public class MultiTableLoadingStrategy extends TableLoadingStrategy {
                        joinedDataTables.add(dataTable.innerJoin(platforms, dataStoreManager.isInterrupted()));
                    });
         }
+
+        // XXX return iterable or stream, so that insert can start
+        // already, even if other tables are in queue to be read
+
         return joinedDataTables.isEmpty()
                 ? Collections.singleton(platformTable)
                 : joinedDataTables;
@@ -114,7 +118,7 @@ public class MultiTableLoadingStrategy extends TableLoadingStrategy {
             ResourceMember member = members.iterator().next();
             return readResource(dataCollection, member);
         }
-        
+
         for (ResourceMember member : members) {
             ResourceTable singleDatatable = readResource(dataCollection, member);
 

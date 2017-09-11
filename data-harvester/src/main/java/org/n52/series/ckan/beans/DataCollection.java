@@ -87,13 +87,14 @@ public class DataCollection implements Iterable<Map.Entry<ResourceMember, DataFi
 
     public Entry<ResourceMember, DataFile> getDataEntry(String resourceId) {
         Map<ResourceMember, DataFile> collection = getDataCollection();
-    for (Entry<ResourceMember, DataFile> entry : collection.entrySet()) {
-        if (entry.getKey().getId()
-                 .equals(resourceId)) {
-            return entry;
+        for (Entry<ResourceMember, DataFile> entry : collection.entrySet()) {
+            if (entry.getKey()
+                     .getId()
+                     .equals(resourceId)) {
+                return entry;
+            }
         }
-    }
-    return null;
+        return null;
     }
 
     public Entry<ResourceMember, DataFile> getDataEntry(ResourceMember resourceMember) {
