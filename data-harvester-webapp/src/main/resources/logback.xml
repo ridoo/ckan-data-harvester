@@ -7,11 +7,13 @@
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${logFile}.log</file>
 
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>${logFile}/%d{yyyy-MM-dd}-%i.log</fileNamePattern>
             <!-- keep 30 days' worth of history -->
             <maxHistory>30</maxHistory>
-            <maxFileSize>5MB</maxFileSize>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>5MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
         <encoder>
             <pattern>%date %level [%thread] [%file:%line] %msg%n</pattern>
@@ -26,9 +28,7 @@
         </encoder>
     </appender>
 
-    <logger name="org.n52" level="INFO" />
-    <logger name="org.n52.sos" level="INFO" />
-    <logger name="org.n52.series" level="DEBUG" />
+    <logger name="org.n52" level="DEBUG" />
 
     <logger name="org.springframework" level="WARN" />
     <logger name="org.springframework.web.servlet.mvc.method.annotation" level="WARN" />
@@ -44,7 +44,7 @@
 
     <root level="INFO">
         <appender-ref ref="FILE" />
-        <appender-ref ref="STDOUT" />
+<!--         <appender-ref ref="STDOUT" /> -->
     </root>
 
 </configuration>
