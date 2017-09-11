@@ -8,3 +8,4 @@ target/
 configuration.db
 datasource.properties
 nbactions.xml
+/data-harvester/src/test/resources/files/dwd-trimmed/dwd-kreise/.~lock.all-in-two.ods#
