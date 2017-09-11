@@ -238,22 +238,23 @@ public class DatabaseStorageTest extends HibernateTestCase {
     }
 
     @Test
-//    @Ignore("work in progress")
+    // @Ignore("work in progress")
     public void when_inserting_DWDKreise_dataset_then_getObservationNotEmpty() {
         String datasetId = "2518529a-fbf1-4940-8270-a1d4d0fa8c4d";
 
         insertDataset(datasetId);
+
         List<DataAvailability> dataAvailability = database.getDataAvailability();
-        MatcherAssert.assertThat("Wrong dataset count", dataAvailability.size(), is(3));
         assertThat(dataAvailability, containsDatasetWithPhenomenon("FROST"));
         assertThat(dataAvailability, containsDatasetWithPhenomenon("GLÄTTE"));
         assertThat(dataAvailability, containsDatasetWithPhenomenon("SCHNEEFALL"));
         assertThat(dataAvailability, containsDatasetWithPhenomenon("WINDBÖEN"));
         assertThat(dataAvailability, containsDatasetWithPhenomenon("LEICHTER SCHNEEFALL"));
 
-        GetFeatureOfInterestResponse allFeatures = database.getFeatures();
-        MatcherAssert.assertThat(allFeatures, FeatureOfInterestMatcher.contains("dwd-1048"));
-        MatcherAssert.assertThat(allFeatures, FeatureOfInterestMatcher.isSamplingPoint("dwd-1048"));
+        // GetFeatureOfInterestResponse allFeatures = database.getFeatures();
+        // MatcherAssert.assertThat(allFeatures, FeatureOfInterestMatcher.size("dwd-1048"));
+        // MatcherAssert.assertThat(allFeatures, FeatureOfInterestMatcher.contains("dwd-1048"));
+        // MatcherAssert.assertThat(allFeatures, FeatureOfInterestMatcher.isSamplingPoint("dwd-1048"));
 
         assertThat(database, hasObservationsAvailable());
     }
