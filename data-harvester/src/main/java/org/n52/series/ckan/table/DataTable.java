@@ -179,6 +179,7 @@ public class DataTable {
                     joinFields.stream()
                               .map(f -> createJoinTasks(f, other, outputTable, interruptedSupplier))
                               .collect(ArrayList::new, List::addAll, List::addAll);
+            // oracle JDK was not able to refer collection type when inlined
             ForkJoinTask.invokeAll(tasks);
         } catch (Throwable e) {
             LOGGER.info("Unable to complete join task", e);
@@ -220,7 +221,12 @@ public class DataTable {
                     for (Map.Entry<ResourceField, String> toJoinValue : toJoinValues) {
                         ResourceMember member = other.getResourceMember();
                         ResourceField joinedField = cloneValueField(member, toJoinValue);
-                        outputTable.table.put(newKey, joinedField, toJoinValue.getValue());
+                        if (table.containsRow(joinedField)) {
+                            // TODO add qualifier to field id when it already exists
+                            //     --> otherwise it will be overridden later anyway
+                        } else {
+                            outputTable.table.put(newKey, joinedField, toJoinValue.getValue());
+                        }
                     }
 
                     // add this instance's values
@@ -232,6 +238,9 @@ public class DataTable {
             }
         }
         return tasks;
+        
+        // XXX using lambdas will result in incorrect output size during join :/ 
+        //
         // return joinOn.stream()
         // .map(joinOnCell -> {
         // return FORK_JOIN_POOL.submit(() -> {
