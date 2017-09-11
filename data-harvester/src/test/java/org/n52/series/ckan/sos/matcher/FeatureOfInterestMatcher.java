@@ -80,8 +80,7 @@ public class FeatureOfInterestMatcher {
             if ( !isSamplingFeature(feature)) {
                 description.appendText("was").appendValue("not a sampling feature!");
             } else {
-                AbstractSamplingFeature sf = (AbstractSamplingFeature) feature;
-                description.appendText("was").appendValue(sf.getFeatureType());
+                description.appendText("was").appendValue(feature.getFeatureType());
             }
         }
         protected boolean isSamplingPoint(String featureId, GetFeatureOfInterestResponse response) {
