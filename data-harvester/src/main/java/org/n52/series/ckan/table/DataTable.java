@@ -45,7 +45,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import org.n52.series.ckan.beans.ResourceField;
 import org.n52.series.ckan.beans.ResourceMember;
@@ -176,9 +175,11 @@ public class DataTable {
         }, interval, interval, TimeUnit.SECONDS);
 
         try {
-            Stream<ResourceField> joinStream = joinFields.stream();
-            ForkJoinTask.invokeAll(joinStream.map(f -> createJoinTasks(f, other, outputTable, interruptedSupplier))
-                                             .collect(ArrayList::new, List::addAll, List::addAll));
+            Collection<ForkJoinTask< ? >> tasks =
+                    joinFields.stream()
+                              .map(f -> createJoinTasks(f, other, outputTable, interruptedSupplier))
+                              .collect(ArrayList::new, List::addAll, List::addAll);
+            ForkJoinTask.invokeAll(tasks);
         } catch (Throwable e) {
             LOGGER.info("Unable to complete join task", e);
         } finally {
