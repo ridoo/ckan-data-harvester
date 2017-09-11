@@ -63,8 +63,7 @@ public class JoinIndex {
             return false;
         }
         JoinIndex other = (JoinIndex) obj;
-        return Objects.equals(this, other)
-                && Objects.equals(field, other.field)
+        return Objects.equals(field, other.field)
                 && Objects.equals(value, other.value);
     }
 
