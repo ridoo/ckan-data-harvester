@@ -133,9 +133,12 @@
                                 <exclude>WEB-INF/classes/logback*.xml</exclude>
                                 <exclude>WEB-INF/classes/config-*.json</exclude>
                                 <exclude>WEB-INF/spring/*.xml</exclude>
-                                <!-- handle DAO SPI deps within this project -->
-                                <exclude>WEB-INF/lib/dao-alpha.2</exclude>
-                                <exclude>WEB-INF/lib/sos-integration-alpha.2</exclude>
+                                <!-- handle REST API/DAO SPI deps within this project -->
+                                <exclude>WEB-INF/lib/io-2.0.0-alpha.*</exclude>
+                                <exclude>WEB-INF/lib/spi-2.0.0-alpha.*</exclude>
+                                <exclude>WEB-INF/lib/rest-2.0.0-alpha.*</exclude>
+                                <exclude>WEB-INF/lib/dao-2.0.0-alpha.*</exclude>
+                                <exclude>WEB-INF/lib/sos-2.0.0-integration-alpha.*</exclude>
                                 <exclude>WEB-INF/classes/mapping/extension/readonly/**</exclude>
                                 <!-- exclude older versions -->
                                 <exclude>WEB-INF/lib/*slf4j-*</exclude>
